@@ -1,9 +1,9 @@
 import { atom } from "jotai";
-import { atomWithStorage } from "jotai/utils";
+import { atomWithStorage, createJSONStorage, unwrap } from "jotai/utils";
 import { Chat } from "~/types";
-import { createLens, createStorage, Storage } from "./common";
+import { createStore, Store } from "./common";
 import { appStyle, darkMode } from "~/style";
-
+import { focusAtom } from "jotai-optics";
 
 export const importsRegistry = atom<Record<string, Chat[]>>({});
 
@@ -16,12 +16,12 @@ export const selectedChat = atom<Array<string | number> | undefined>(undefined);
 
 export const expandedChatIds = atom<string[]>([]);
 
-const storage = atomWithStorage<Storage>("storage", createStorage());
+const store = atomWithStorage<Store>("store", createStore(), createJSONStorage(), { getOnInit: true });
 
-export const isDarkModeAtom = createLens(storage, "isDarkMode");
+export const isDarkModeAtom = focusAtom(store, (o) => o.prop("isDarkMode"));
 
-export const stylesAtom = atom(async (get) => {
-  const isDarkMode = await get(isDarkModeAtom);
+export const stylesAtom = atom((get) => {
+  const isDarkMode = get(isDarkModeAtom);
   if (isDarkMode) return [appStyle, darkMode];
   return [appStyle];
 });

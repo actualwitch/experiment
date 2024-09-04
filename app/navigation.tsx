@@ -1,9 +1,5 @@
-import styled from "@emotion/styled";
-import { NavLink, useLocation, useMatches } from "@remix-run/react";
-import { useEffect, useMemo, useState } from "react";
-import { Debugger } from "./dbg";
-import { bs, content, h4 } from "./style";
-import { css } from "@emotion/react";
+import { NavLink, useMatches } from "@remix-run/react";
+import { useEffect, useState } from "react";
 
 const NavContent = () => {
   const matches = useMatches();
@@ -22,14 +18,9 @@ const NavContent = () => {
   return content;
 };
 
-const NavSidebar = styled.nav`
-  display: grid;
-  grid-template-columns: 1fr;
-`;
-
 export const NavigationSidebar = () => {
   return (
-    <NavSidebar>
+    <nav>
       <h2>
         🔬 <NavLink to="/">Experiment</NavLink>
       </h2>
@@ -40,6 +31,6 @@ export const NavigationSidebar = () => {
         🔧 <NavLink to="/configure">Configure</NavLink>
       </h2>
       <NavContent />
-    </NavSidebar>
+    </nav>
   );
 };

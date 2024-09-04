@@ -1,13 +1,11 @@
 import { Global } from "@emotion/react";
 import { Links, Meta, Outlet, Scripts, ScrollRestoration } from "@remix-run/react";
-import { appStyle, Container, darkMode } from "./style";
-import { NavigationSidebar } from "./navigation";
 import { useAtom } from "jotai";
+import { NavigationSidebar } from "./navigation";
 import { stylesAtom } from "./state/client";
-import { Suspense, useMemo } from "react";
+import { Container } from "./style";
 
 export function Layout({ children }: { children: React.ReactNode }) {
-  const [styles] = useAtom(stylesAtom);
   return (
     <html lang="en">
       <head>
@@ -17,12 +15,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body>
-        <Container>
-          <NavigationSidebar />
-          {children}
-        </Container>
+        {children}
         <ScrollRestoration />
-        <Global styles={styles} />
         <Scripts />
       </body>
     </html>
@@ -30,9 +24,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
+  const [styles] = useAtom(stylesAtom);
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Container>
+      <NavigationSidebar />
       <Outlet />
-    </Suspense>
+      <Global styles={styles} />
+    </Container>
   );
 }

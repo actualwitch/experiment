@@ -1,44 +1,57 @@
-import { json, useLoaderData } from "@remix-run/react";
+import { ActionFunctionArgs, LoaderFunction } from "@remix-run/node";
+import { Form, json, useLoaderData, useSubmit } from "@remix-run/react";
 import { useAtom } from "jotai";
-import { useTransition } from "react";
+import { Debugger } from "~/dbg";
 import { isDarkModeAtom } from "~/state/client";
-import { store, tokensAtom } from "~/state/server";
-
-// export async function action({
-//   request,
-// }: ActionFunctionArgs) {
-//   const body = await request.formData();
+import * as serverState from "~/state/server";
 
 export const loader = async () => {
-  const value = await store.get(tokensAtom);
-  return json({ value });
+  const { store, isDarkModeAtom, tokenAtom } = serverState;
+  const isDarkMode = store.get(isDarkModeAtom);
+  const token = store.get(tokenAtom);
+  return json({ isDarkMode, token });
+};
+
+export const action = async ({ request }: ActionFunctionArgs) => {
+  const { store, isDarkModeAtom, tokenAtom } = serverState;
+
+  const body = await request.formData();
+  const { isDarkMode, token } = { isDarkMode: body.get("isDarkMode") === "on", token: body.get("token") };
+  store.set(isDarkModeAtom, isDarkMode);
+  store.set(tokenAtom, token as string);
+
+  return json({ result: "ok" });
 };
 
 export default function Configure() {
-  const data = useLoaderData<typeof loader>();
-
+  const submit = useSubmit();
+  const backend = useLoaderData<typeof loader>();
   const [darkMode, setDarkMode] = useAtom(isDarkModeAtom);
-  const [isPending, startTransition] = useTransition();
+
   return (
-    <div>
+    <Form
+      method="post"
+      onChange={(e) => {
+        submit(e.currentTarget);
+      }}>
       <h2>Configure</h2>
       <h3>Visual</h3>
       <p>
-        <input
-          type="checkbox"
-          checked={darkMode}
-          onChange={(e) => {
-            startTransition(() => {
-              setDarkMode(e.target.checked);
-            });
-          }}
-          id="darkMode"
-        />
-        <label htmlFor="darkMode">Enable dark mode</label>
+        <label>
+          <input type="checkbox" name="isDarkMode" defaultChecked={backend.isDarkMode} />
+          Enable dark mode
+        </label>
       </p>
+      <p></p>
       <h3>Inference</h3>
       <h4>Anthropic API token</h4>
-      <p></p>
-    </div>
+      <p>Token is resolved from 1password by the backend, get the reference by clicking on arrow on the field.</p>
+      <p>
+        <input type="text" name="token" defaultValue={backend.token} />
+      </p>
+      <Debugger>
+        {backend}
+      </Debugger>
+    </Form>
   );
 }

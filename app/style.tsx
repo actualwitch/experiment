@@ -49,6 +49,7 @@ export const Container = styled.div(
     display: grid;
     grid-template-columns: 320px 1fr 400px;
     gap: ${bs()};
+    height: 100lvh;
   `,
 );
 
