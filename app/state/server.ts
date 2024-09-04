@@ -1,63 +1,31 @@
-import { createStore } from "jotai";
-import { focusAtom } from "jotai-optics";
-import { atomWithStorage, createJSONStorage } from "jotai/utils";
-import { SyncStringStorage } from "jotai/vanilla/utils/atomWithStorage";
-import { readFileSync, writeFileSync } from "node:fs";
-import { Store, createStore as createSyncedStore } from "./common";
+import { atom, createStore } from "jotai";
+import { createJSONStorage } from "jotai/utils";
+import { Store, initAtoms } from "./common";
+import { spawn } from "child_process";
+import { createFileStorage } from "../utils";
 
 export const store = createStore();
+const stringStorage = createFileStorage("store");
+const jsonStorage = createJSONStorage<Store>(() => stringStorage);
 
-const readFile = (fileName: string) => {
-  try {
-    return readFileSync(fileName, {
-      encoding: "utf-8",
-      flag: "r+",
+export const { storeAtom, isDarkModeAtom, tokenAtom } = initAtoms(jsonStorage);
+
+export const resolvedTokenAtom = atom(async (get) => {
+  const reference = get(tokenAtom);
+  if (!reference) return null;
+  const handle = spawn("op", ["read", reference]);
+  return await new Promise((ok, ko) => {
+    handle.stdout.on("data", (data) => {
+      ok(data.toString());
     });
-  } catch {
-    return "";
-  }
-};
 
-function createFileStorage(key: string): SyncStringStorage {
-  const fileName = `./state/${key}.json`;
-  let contents = readFile(fileName);
-  let unsubscribe: NodeJS.Timeout | null = null;
-  const scheduleWrite = () => {
-    if (unsubscribe) {
-      clearTimeout(unsubscribe);
-    }
+    handle.on("close", (code) => {
+      ok(null);
+    });
+  });
+});
 
-    unsubscribe = setTimeout(() => {
-      writeFileSync(fileName, contents, {
-        encoding: "utf-8",
-        flag: "w",
-      });
-    }, 400);
-  };
-  const FileStorage: SyncStringStorage = {
-    getItem() {
-      return contents;
-    },
-    setItem(_, value) {
-      contents = value;
-      scheduleWrite();
-    },
-    removeItem() {
-      contents = "";
-      scheduleWrite();
-    },
-  };
-  return FileStorage;
-}
-
-function entangledAtom<T>(key: string, atom: T) {
-  const stringStorage = createFileStorage(key);
-  const jsonStorage = createJSONStorage<T>(() => stringStorage);
-  return atomWithStorage<T>(key, atom, jsonStorage, { getOnInit: true });
-}
-
-const storeAtom = entangledAtom<Store>("store", createSyncedStore());
-
-export const isDarkModeAtom = focusAtom(storeAtom, (o) => o.prop("isDarkMode"));
-
-export const tokenAtom = focusAtom(storeAtom, (o) => o.prop("tokens").optional().prop("anthropic"));
+export const hasResolvedTokenAtom = atom(async (get) => {
+  const token = await get(resolvedTokenAtom);
+  return !!token;
+});

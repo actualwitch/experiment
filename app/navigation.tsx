@@ -1,22 +1,16 @@
-import { NavLink, useMatches } from "@remix-run/react";
+import { NavLink } from "@remix-run/react";
 import { useEffect, useState } from "react";
 
-const NavContent = () => {
-  const matches = useMatches();
-  const id = matches[1]?.id;
-  const [content, setContent] = useState<React.ReactNode | null>(null);
+const elementId = "sidebar";
+
+export function useSidebar() {
+  const [sidebar, setSidebar] = useState<HTMLElement | null>(null);
   useEffect(() => {
-    (async () => {
-      if (!["routes/import"].includes(id)) {
-        setContent(null);
-        return;
-      }
-      const { Sidebar } = await import(`./${id}`);
-      setContent(<Sidebar />);
-    })();
-  }, [id]);
-  return content;
-};
+    setSidebar(document.getElementById(elementId));
+  }, []);
+
+  return sidebar;
+}
 
 export const NavigationSidebar = () => {
   return (
@@ -30,7 +24,7 @@ export const NavigationSidebar = () => {
       <h2>
         🔧 <NavLink to="/configure">Configure</NavLink>
       </h2>
-      <NavContent />
+      <div id={elementId} />
     </nav>
   );
 };

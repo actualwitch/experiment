@@ -1,9 +1,13 @@
 import { Global } from "@emotion/react";
-import { Links, Meta, Outlet, Scripts, ScrollRestoration } from "@remix-run/react";
+import { Links, Meta, Outlet, Scripts, ScrollRestoration, useLoaderData } from "@remix-run/react";
 import { useAtom } from "jotai";
 import { NavigationSidebar } from "./navigation";
-import { stylesAtom } from "./state/client";
+import * as clientAtoms from "./state/client";
+import * as serverAtoms from "./state/server";
 import { Container } from "./style";
+import { useHydrateAtoms } from "jotai/utils";
+import { Debugger } from "./dbg";
+import { ReactNode } from "react";
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
@@ -23,13 +27,34 @@ export function Layout({ children }: { children: React.ReactNode }) {
   );
 }
 
+export const loader = async () => {
+  const { store, storeAtom } = serverAtoms;
+  const resolvedStore = store.get(storeAtom);
+  return { store: resolvedStore };
+};
+
+const Hydration = ({ children }: { children: ReactNode }) => {
+  const { store } = useLoaderData<typeof loader>();
+  useHydrateAtoms([
+    [clientAtoms.storeAtom, store],
+    [clientAtoms.isDarkModeAtom, store.isDarkMode],
+  ]);
+  return <>{children}</>;
+};
+
+function Styles() {
+  const [styles] = useAtom(clientAtoms.stylesAtom);
+  return <Global styles={styles} />;
+}
+
 export default function App() {
-  const [styles] = useAtom(stylesAtom);
   return (
-    <Container>
-      <NavigationSidebar />
-      <Outlet />
-      <Global styles={styles} />
-    </Container>
+    <Hydration>
+      <Container>
+        <NavigationSidebar />
+        <Outlet />
+        <Styles />
+      </Container>
+    </Hydration>
   );
 }

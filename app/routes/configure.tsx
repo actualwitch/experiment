@@ -1,7 +1,7 @@
-import { ActionFunctionArgs, LoaderFunction } from "@remix-run/node";
+import { ActionFunctionArgs } from "@remix-run/node";
 import { Form, json, useLoaderData, useSubmit } from "@remix-run/react";
-import { useAtom } from "jotai";
-import { Debugger } from "~/dbg";
+import { useSetAtom } from "jotai";
+import { useEffect } from "react";
 import { isDarkModeAtom } from "~/state/client";
 import * as serverState from "~/state/server";
 
@@ -25,8 +25,12 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 
 export default function Configure() {
   const submit = useSubmit();
-  const backend = useLoaderData<typeof loader>();
-  const [darkMode, setDarkMode] = useAtom(isDarkModeAtom);
+  const { isDarkMode, token } = useLoaderData<typeof loader>();
+
+  const setDarkMode = useSetAtom(isDarkModeAtom);
+  useEffect(() => {
+    setDarkMode(isDarkMode);
+  }, [isDarkMode]);
 
   return (
     <Form
@@ -38,7 +42,7 @@ export default function Configure() {
       <h3>Visual</h3>
       <p>
         <label>
-          <input type="checkbox" name="isDarkMode" defaultChecked={backend.isDarkMode} />
+          <input type="checkbox" name="isDarkMode" defaultChecked={isDarkMode} />
           Enable dark mode
         </label>
       </p>
@@ -47,11 +51,8 @@ export default function Configure() {
       <h4>Anthropic API token</h4>
       <p>Token is resolved from 1password by the backend, get the reference by clicking on arrow on the field.</p>
       <p>
-        <input type="text" name="token" defaultValue={backend.token} />
+        <input type="text" name="token" defaultValue={token} />
       </p>
-      <Debugger>
-        {backend}
-      </Debugger>
     </Form>
   );
 }

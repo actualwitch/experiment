@@ -3,6 +3,8 @@ import DOMPurify from "dompurify";
 import { useAtom } from "jotai";
 import { parse } from "marked";
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
+import { useSidebar } from "~/navigation";
 
 import { expandedChatIds, filenames, importsRegistry, selectedChat } from "~/state/client";
 import { Main } from "~/style";
@@ -103,7 +105,7 @@ const ChildEntries = ({ filename }: { filename: string }) => {
   );
 };
 
-export default function Imports() {
+function Imports() {
   const [selected] = useAtom(selectedChat);
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -151,6 +153,16 @@ export default function Imports() {
         <h3>Actions</h3>
         <button>Add to staging</button>
       </div>
+    </>
+  );
+}
+
+export default function () {
+  const sidebar = useSidebar();
+  return (
+    <>
+      <Imports />
+      {sidebar && createPortal(<Sidebar />, sidebar)}
     </>
   );
 }
