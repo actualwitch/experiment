@@ -1,13 +1,15 @@
 import { css } from "@emotion/react";
 import styled from "@emotion/styled";
 import { tryShevy } from "~/shevy";
+import { SUPER_SECRET_PREFIX } from "../const";
+import { HTMLAttributes } from "react";
 
 export const { baseSpacing: bs, content, body, h1, h2, h3, h4, h5, h6 } = tryShevy();
 const shevyStyle = { body, h1, h2, h3, h4, h5, h6, ["p, ol, ul, pre"]: content };
 
 export const darkMode = css`
   body {
-    background-color: oklab(14.1% 0.014 0.045);
+    background-color: #000;
     color: white;
   }
 `;
@@ -34,6 +36,10 @@ export const appStyle = [
       }
     }
 
+    input {
+      font: inherit;
+    }
+
     @media (prefers-color-scheme: dark) {
       ${darkMode}
     }
@@ -47,8 +53,8 @@ export const Container = styled.div(
     padding: ${bs()};
     margin-bottom: ${bs(2)};
     display: grid;
-    grid-template-columns: 320px 1fr 400px;
-    gap: ${bs()};
+    grid-template-columns: 256px 1fr 400px;
+    gap: ${bs(2)};
     height: 100lvh;
   `,
 );

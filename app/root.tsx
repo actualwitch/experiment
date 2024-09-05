@@ -37,7 +37,6 @@ const Hydration = ({ children }: { children: ReactNode }) => {
   const { store } = useLoaderData<typeof loader>();
   useHydrateAtoms([
     [clientAtoms.storeAtom, store],
-    [clientAtoms.isDarkModeAtom, store.isDarkMode],
   ]);
   return <>{children}</>;
 };

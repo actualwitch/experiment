@@ -1,13 +1,10 @@
-import { json, MetaFunction, useLoaderData } from "@remix-run/react";
+import { json, useLoaderData } from "@remix-run/react";
+import { description } from "~/meta";
 import { hasResolvedTokenAtom, store } from "~/state/server";
 
 import { Paragraph } from "~/style";
 
-const description = "Experiment is a simple tool to facilitate prompt engineering.";
-
-export const meta: MetaFunction = () => {
-  return [{ title: "Experiment" }, { name: "description", content: description }];
-};
+export { defaultMeta as meta } from "~/meta";
 
 export const loader = async () => {
   const hasResolvedToken = await store.get(hasResolvedTokenAtom);

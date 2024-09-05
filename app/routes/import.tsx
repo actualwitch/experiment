@@ -1,17 +1,16 @@
-import type { MetaFunction } from "@remix-run/node";
+import { css, SerializedStyles } from "@emotion/react";
+import styled from "@emotion/styled";
 import DOMPurify from "dompurify";
-import { useAtom } from "jotai";
+import { useAtom, useSetAtom } from "jotai";
 import { parse } from "marked";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { useSidebar } from "~/navigation";
 
-import { expandedChatIds, filenames, importsRegistry, selectedChat } from "~/state/client";
+import { expandedChatIds, filenames, importsRegistry, processCsvAtom, selectedChat } from "~/state/client";
 import { Main } from "~/style";
 
-export const meta: MetaFunction = () => {
-  return [{ title: "New Remix App" }, { name: "description", content: "Welcome to Remix!" }];
-};
+export { defaultMeta as meta } from "~/meta";
 
 export const Sidebar = () => {
   const [chats] = useAtom(filenames);
@@ -49,38 +48,14 @@ export const Sidebar = () => {
 };
 
 const CsvInput = () => {
-  const [_, setRegistry] = useAtom(importsRegistry);
-  const [file, setFile] = useState<File | undefined>(undefined);
-  useEffect(() => {
-    if (!file || file.type !== "text/csv") return;
-    const fileName = file.name.slice(0, -4);
-    const reader = new FileReader();
-    reader.onload = async (e) => {
-      const file = e.target?.result;
-      if (!file) return;
-      const { default: csv } = await import("csvtojson");
-      const lines = await csv().fromString(file.toString());
-      const chats = lines.map(({ messages, choice }) => ({
-        messages: JSON.parse(messages),
-        response: JSON.parse(choice).message,
-      }));
-      setRegistry((prev) => ({
-        ...prev,
-        [fileName]: chats,
-      }));
-    };
-    reader.readAsText(file);
-  }, [file]);
+  const processFile = useSetAtom(processCsvAtom);
 
   return (
     <input
       type="file"
       accept=".csv"
       onChange={(e) => {
-        const file = e.target.files?.[0];
-        if (file) {
-          setFile(file);
-        }
+        processFile(e.target.files?.[0]);
       }}
     />
   );
@@ -105,6 +80,30 @@ const ChildEntries = ({ filename }: { filename: string }) => {
   );
 };
 
+const Message = styled.article<{ role: string }>(({ role }) => {
+  const styles: SerializedStyles[] = [
+    css`
+      border-left: 4px solid transparent;
+    `,
+  ];
+  if (role === "system") {
+    styles.push(css`
+      border-color: lightyellow;
+    `);
+  }
+  if (role === "user") {
+    styles.push(css`
+      border-color: rebeccapurple;
+    `);
+  }
+  if (role === "assistant") {
+    styles.push(css`
+      border-color: lightblue;
+    `);
+  }
+  return styles;
+});
+
 function Imports() {
   const [selected] = useAtom(selectedChat);
   useEffect(() => {
@@ -120,7 +119,7 @@ function Imports() {
     <>
       <Main>
         {chat.messages.map((message, idx) => (
-          <div key={idx}>
+          <Message key={idx} role={message.role}>
             <header>{message.role}</header>
             {message.content && (
               <p
@@ -129,7 +128,7 @@ function Imports() {
                 }}
               />
             )}
-          </div>
+          </Message>
         ))}
         <div>
           <header>{chat.response.role}</header>
