@@ -1,5 +1,7 @@
+import styled from "@emotion/styled";
 import { NavLink } from "@remix-run/react";
 import { useEffect, useState } from "react";
+import { bs } from "./style";
 
 const elementId = "sidebar";
 
@@ -12,9 +14,13 @@ export function useSidebar() {
   return sidebar;
 }
 
+const Navigation = styled.nav`
+      padding: ${bs()};
+`;
+
 export const NavigationSidebar = () => {
   return (
-    <nav>
+    <Navigation>
       <h2>
         🔬 <NavLink to="/">Experiment</NavLink>
       </h2>
@@ -25,6 +31,6 @@ export const NavigationSidebar = () => {
         🔧 <NavLink to="/configure">Configure</NavLink>
       </h2>
       <div id={elementId} />
-    </nav>
+    </Navigation>
   );
 };

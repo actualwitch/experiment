@@ -1,14 +1,10 @@
-import { css, SerializedStyles } from "@emotion/react";
-import styled from "@emotion/styled";
-import DOMPurify from "dompurify";
 import { useAtom, useSetAtom } from "jotai";
-import { parse } from "marked";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { createPortal } from "react-dom";
 import { useSidebar } from "~/navigation";
 
 import { expandedChatIds, filenames, importsRegistry, processCsvAtom, selectedChat } from "~/state/client";
-import { Main } from "~/style";
+import { Main, Message } from "~/style";
 
 export { defaultMeta as meta } from "~/meta";
 
@@ -80,30 +76,6 @@ const ChildEntries = ({ filename }: { filename: string }) => {
   );
 };
 
-const Message = styled.article<{ role: string }>(({ role }) => {
-  const styles: SerializedStyles[] = [
-    css`
-      border-left: 4px solid transparent;
-    `,
-  ];
-  if (role === "system") {
-    styles.push(css`
-      border-color: lightyellow;
-    `);
-  }
-  if (role === "user") {
-    styles.push(css`
-      border-color: rebeccapurple;
-    `);
-  }
-  if (role === "assistant") {
-    styles.push(css`
-      border-color: lightblue;
-    `);
-  }
-  return styles;
-});
-
 function Imports() {
   const [selected] = useAtom(selectedChat);
   useEffect(() => {
@@ -120,33 +92,22 @@ function Imports() {
       <Main>
         {chat.messages.map((message, idx) => (
           <Message key={idx} role={message.role}>
-            <header>{message.role}</header>
-            {message.content && (
-              <p
-                dangerouslySetInnerHTML={{
-                  __html: DOMPurify.sanitize(parse(message.content, { async: false })),
-                }}
-              />
-            )}
+            <code>{message.content}</code>
           </Message>
         ))}
-        <div>
-          <header>{chat.response.role}</header>
-
-          {chat.response.content && (
-            <p
-              dangerouslySetInnerHTML={{
-                __html: DOMPurify.sanitize(parse(chat.response.content, { async: false })),
-              }}
-            />
-          )}
-        </div>
-        {chat.response.tool_calls && (
-          <>
-            <header>Tool Calls</header>
-            <pre>{JSON.stringify(chat.response.tool_calls, null, 2)}</pre>
-          </>
+        {chat.response.content && (
+          <Message key="response" role={chat.response.role}>
+            <code>{chat.response.content}</code>
+          </Message>
         )}
+
+        {chat.response.tool_calls?.map((toolCall, idx) => {
+          return (
+            <Message key={"tool" + idx} role="assistant">
+              <code>{JSON.stringify(toolCall, null, 2)}</code>
+            </Message>
+          );
+        })}
       </Main>
       <div>
         <h3>Actions</h3>

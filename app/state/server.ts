@@ -16,10 +16,16 @@ export const resolvedTokenAtom = atom(async (get) => {
   const handle = spawn("op", ["read", reference]);
   return await new Promise((ok, ko) => {
     handle.stdout.on("data", (data) => {
-      ok(data.toString());
+      const token = data.toString();
+      ok(token);
+    });
+
+    handle.stderr.on("data", (data) => {
+      console.error(data.toString());
     });
 
     handle.on("close", (code) => {
+      console.error(code);
       ok(null);
     });
   });
@@ -27,5 +33,5 @@ export const resolvedTokenAtom = atom(async (get) => {
 
 export const hasResolvedTokenAtom = atom(async (get) => {
   const token = await get(resolvedTokenAtom);
-  return !!token;
+  return Boolean(token);
 });
