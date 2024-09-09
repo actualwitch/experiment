@@ -103,7 +103,7 @@ function Imports() {
 
         {chat.response.tool_calls?.map((toolCall, idx) => {
           return (
-            <Message key={"tool" + idx} role="assistant">
+            <Message key={"tool" + idx} role="tool">
               <code>{JSON.stringify(toolCall, null, 2)}</code>
             </Message>
           );

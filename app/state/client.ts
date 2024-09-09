@@ -2,8 +2,9 @@ import { atom } from "jotai";
 import { createJSONStorage } from "jotai/utils";
 import { appStyle, darkMode } from "~/style";
 import { Chat } from "~/types";
-import { initAtoms } from "./common";
+// import { initAtoms } from "./common";
 import { Editor } from "~/editor";
+import { isDarkModeAtom } from "./common";
 
 export const importsRegistry = atom<Record<string, Chat[]>>({});
 
@@ -16,7 +17,7 @@ export const selectedChat = atom<Array<string | number> | undefined>(undefined);
 
 export const expandedChatIds = atom<string[]>([]);
 
-export const { storeAtom, isDarkModeAtom, tokenAtom } = initAtoms(createJSONStorage(), false);
+// export const { storeAtom, isDarkModeAtom, tokenAtom, experimentIdsAtom } = initAtoms(createJSONStorage(), false);
 
 export const stylesAtom = atom((get) => {
   const isDarkMode = get(isDarkModeAtom);

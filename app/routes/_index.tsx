@@ -1,24 +1,28 @@
-import { json, useFetcher, useLoaderData } from "@remix-run/react";
-import { useEffect, useState } from "react";
+import { json, NavLink, useFetcher, useLoaderData } from "@remix-run/react";
 import { description } from "~/meta";
-import { hasResolvedTokenAtom, store } from "~/state/server";
 
 import { useEditor } from "./_editor";
 
+import { createPortal } from "react-dom";
+import { useSidebar } from "~/navigation";
+import {} from "~/state/client";
+import { experimentIdsAtom, store } from "~/state/common";
+import { hasResolvedTokenAtom } from "~/state/server";
 import { Paragraph } from "~/style";
-import { Debugger } from "~/dbg";
 
 export { defaultMeta as meta } from "~/meta";
 
 export const loader = async () => {
   const hasResolvedToken = await store.get(hasResolvedTokenAtom);
-  return json({ hasResolvedToken });
+  const experimentIds = await store.get(experimentIdsAtom);
+  return json({ hasResolvedToken, experimentIds });
 };
 
 export default function Index() {
-  const { hasResolvedToken } = useLoaderData<typeof loader>();
+  const { hasResolvedToken, experimentIds } = useLoaderData<typeof loader>();
   const Editor = useEditor();
-  const {Form, data} = useFetcher();
+  const sidebar = useSidebar();
+  const { Form, data } = useFetcher();
   if (!hasResolvedToken) {
     return (
       <div>
@@ -35,10 +39,23 @@ export default function Index() {
         <Form method="post" action="/inference">
           <button type="submit">Send it</button>
         </Form>
-        <Debugger>
-          {data}
-        </Debugger>
       </aside>
+      {sidebar &&
+        createPortal(
+          <>
+            <h3>Experiments</h3>
+            <ul>
+              {experimentIds.map(([id, subId]) => (
+                <li key={id}>
+                  <NavLink to={`/experiment/${id}/${subId}`}>
+                    Experiment #{id}/{subId}
+                  </NavLink>
+                </li>
+              ))}
+            </ul>
+          </>,
+          sidebar,
+        )}
     </>
   );
 }
