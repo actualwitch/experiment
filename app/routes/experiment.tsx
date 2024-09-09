@@ -5,13 +5,12 @@ import { useSidebar } from "~/navigation";
 import { experimentIdsAtom, store } from "~/state/common";
 
 export const loader = async () => {
-  const exp = store.get(experimentIdsAtom);
-  return { experimentIds: exp };
+  return { experimentIds: store.get(experimentIdsAtom) };
 };
 
 export default function Experiment() {
   const sidebar = useSidebar();
-//   const [experimentIds] = useAtom(experimentIdsAtom);
+  //   const [experimentIds] = useAtom(experimentIdsAtom);
   const { experimentIds } = useLoaderData<typeof loader>();
   return (
     <>

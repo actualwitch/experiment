@@ -7,22 +7,24 @@ import * as serverState from "~/state/server";
 import { bs } from "~/style";
 import { withFormStyling, type FormProps } from "~/style/form";
 import styled from "@emotion/styled";
-import { isDarkModeAtom, store, testAtom, tokenAtom } from "~/state/common";
+import { isDarkModeAtom, store, tokenAtom, entangledAtoms, getInitialStore } from "~/state/common";
 import { useWorker } from "~/state/entanglement";
 import { hasResolvedTokenAtom } from "~/state/server";
+import { Debugger } from "~/dbg";
 
 export { defaultMeta as meta } from "~/meta";
+
+const { testAtom } = entangledAtoms;
 
 export const loader = async () => {
   const isDarkMode = store.get(isDarkModeAtom);
   const token = store.get(tokenAtom);
   const hasResolvedToken = await store.get(hasResolvedTokenAtom);
-  return json({ isDarkMode, token, hasResolvedToken });
+  const test = store.get(testAtom);
+  return json({ isDarkMode, token, hasResolvedToken, test });
 };
 
 export const action = async ({ request }: ActionFunctionArgs) => {
-  // const { store, isDarkModeAtom, tokenAtom } = serverState;
-
   const body = await request.formData();
   const { isDarkMode, token } = { isDarkMode: body.get("isDarkMode") === "on", token: body.get("token") };
   store.set(isDarkModeAtom, isDarkMode);
@@ -52,17 +54,16 @@ const StyledForm = styled(Form)`
 
 export default function Configure() {
   const submit = useSubmit();
-  const { token, hasResolvedToken, isDarkMode } = useLoaderData<typeof loader>();
+  const { token, hasResolvedToken, isDarkMode, test } = useLoaderData<typeof loader>();
 
   // const setDarkMode = useSetAtom(isDarkModeAtom);
   // useEffect(() => {
   //   setDarkMode(isDarkMode);
   // }, [isDarkMode]);
-  const [val] = useAtom(testAtom);
-  const postMessage = useWorker();
-  useEffect(() => {
-    postMessage?.({ testAtom: val });
-  }, [val]);
+  // const postMessage = useWorker();
+  // useEffect(() => {
+  //   postMessage?.({ testAtom: val });
+  // }, [val]);
   return (
     <>
       <StyledForm
@@ -73,14 +74,14 @@ export default function Configure() {
         <h3>Visual</h3>
         <label>
           <input type="checkbox" name="isDarkMode" defaultChecked={isDarkMode} />
-          Enable dark mode {val}
+          Enable dark mode
         </label>
         <h3>Inference</h3>
         <h4>Anthropic API token</h4>
         <p>Token is resolved from 1password by the backend, get the reference by clicking on arrow on the field.</p>
         <label>
           <span>{hasResolvedToken ? "🔐" : "🔑"}</span>
-        <Input _type={hasResolvedToken ? "success" : undefined} type="text" name="token" defaultValue={token} />
+          <Input _type={hasResolvedToken ? "success" : undefined} type="text" name="token" defaultValue={token} />
         </label>
       </StyledForm>
     </>

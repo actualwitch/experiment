@@ -1,7 +1,7 @@
 import { useAtom } from "jotai";
 import * as monaco from "monaco-editor";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { isDarkModeAtom } from "./state/client";
+import { isDarkModeAtom } from "./state/common";
 
 export const Editor = ({
   children = ["function x() {", '\tconsole.log("Hello world!");', "}"].join("\n"),

@@ -1,3 +1,4 @@
+import { useSubmit } from "@remix-run/react";
 import { useAtom, useSetAtom } from "jotai";
 import { useEffect } from "react";
 import { createPortal } from "react-dom";
@@ -83,6 +84,8 @@ function Imports() {
   }, [selected]);
 
   const [registry] = useAtom(importsRegistry);
+  const submit = useSubmit();
+
   if (!selected) return <p>Nothing selected</p>;
   const [filename, idx] = selected;
   if (typeof idx !== "number") return <p>Invalid selection</p>;
@@ -109,10 +112,32 @@ function Imports() {
           );
         })}
       </Main>
-      <div>
+      <aside>
         <h3>Actions</h3>
-        <button>Add to staging</button>
-      </div>
+        <button
+          type="submit"
+          onClick={(e) => {
+            e.preventDefault();
+            const messages = [
+              chat.messages.map(({ role, content }) => ({ role, content })),
+              chat.response.content ? [{ role: "assistant", content: chat.response.content }] : [],
+              chat.response.tool_calls?.map((toolCall) => ({ role: "tool", content: toolCall })),
+            ].flat();
+            submit(
+              {
+                runExperiment: messages as any,
+              },
+              {
+                method: "post",
+                action: "/gateway",
+                encType: "application/json",
+                navigate: false,
+              },
+            );
+          }}>
+          Start experiment
+        </button>
+      </aside>
     </>
   );
 }

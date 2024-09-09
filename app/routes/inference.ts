@@ -1,7 +1,14 @@
 import { ActionFunctionArgs, json, LoaderFunctionArgs } from "@remix-run/node";
 import Client from "@anthropic-ai/sdk";
 
-import { experimentIdsAtom, getExperimentAsAnthropic, runExperiment, store } from "~/state/common";
+import {
+  appendToRun,
+  experimentIdsAtom,
+  getExperimentAsAnthropic,
+  Message,
+  runExperiment,
+  store,
+} from "~/state/common";
 import { resolvedTokenAtom } from "~/state/server";
 
 export async function loader({}: LoaderFunctionArgs) {
@@ -16,7 +23,6 @@ export async function action({ request }: ActionFunctionArgs) {
 
   if (resolvedToken) {
     const experimentAsAnthropic = store.get(getExperimentAsAnthropic(id, String(runId)));
-    console.log("experimentAsAnthropic", experimentAsAnthropic);
     if (!experimentAsAnthropic) return json({ result: "ko" });
     const anthropic = new Client({ apiKey: resolvedToken });
     const response = await anthropic.messages.create({
@@ -25,17 +31,16 @@ export async function action({ request }: ActionFunctionArgs) {
       messages: experimentAsAnthropic.messages as any,
       system: experimentAsAnthropic.system,
     });
-    await store.set(runExperiment, id, [
-      ...experiment,
-      ...response.content.map((contentBlock) => {
-        if (contentBlock.type === "text") {
-          return { role: "assistant", content: contentBlock.text };
-        }
-        if (contentBlock.type === "tool_use") {
-          return { role: "tool", content: contentBlock };
-        }
-      }),
-    ]);
+    const newMessages = response.content.reduce<Message[]>((acc, contentBlock) => {
+      if (contentBlock.type === "text") {
+        acc.push({ role: "assistant", content: contentBlock.text });
+      }
+      if (contentBlock.type === "tool_use") {
+        acc.push({ role: "tool", content: contentBlock as any });
+      }
+      return acc;
+    }, []);
+    await store.set(appendToRun, id, String(runId), newMessages);
   }
 
   return json({ result: "ok" });

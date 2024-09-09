@@ -1,6 +1,8 @@
 import { atom } from "jotai";
 import { spawn } from "child_process";
-import { tokenAtom } from "./common";
+import { bindToRealm, tokenAtom, entangledAtoms, getInitialStore, getRealm } from "./common";
+import { atomWithStorage, createJSONStorage } from "jotai/utils";
+import { createFileStorage } from "~/utils";
 
 export const resolvedTokenAtom = atom<Promise<string | null>>(async (get) => {
   const reference = get(tokenAtom);
@@ -26,4 +28,15 @@ export const resolvedTokenAtom = atom<Promise<string | null>>(async (get) => {
 export const hasResolvedTokenAtom = atom(async (get) => {
   const token = await get(resolvedTokenAtom);
   return Boolean(token);
+});
+
+bindToRealm({
+  storeAtom: atomWithStorage(
+    "store",
+    getInitialStore(),
+    createJSONStorage(() => createFileStorage("store")),
+    {
+      getOnInit: getRealm() === "server",
+    },
+  ),
 });
