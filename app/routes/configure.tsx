@@ -14,14 +14,11 @@ import { Debugger } from "~/dbg";
 
 export { defaultMeta as meta } from "~/meta";
 
-const { testAtom } = entangledAtoms;
-
 export const loader = async () => {
   const isDarkMode = store.get(isDarkModeAtom);
   const token = store.get(tokenAtom);
   const hasResolvedToken = await store.get(hasResolvedTokenAtom);
-  const test = store.get(testAtom);
-  return json({ isDarkMode, token, hasResolvedToken, test });
+  return json({ isDarkMode, token, hasResolvedToken });
 };
 
 export const action = async ({ request }: ActionFunctionArgs) => {
@@ -54,7 +51,7 @@ const StyledForm = styled(Form)`
 
 export default function Configure() {
   const submit = useSubmit();
-  const { token, hasResolvedToken, isDarkMode, test } = useLoaderData<typeof loader>();
+  const { token, hasResolvedToken, isDarkMode } = useLoaderData<typeof loader>();
 
   // const setDarkMode = useSetAtom(isDarkModeAtom);
   // useEffect(() => {

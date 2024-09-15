@@ -32,9 +32,9 @@
     "shevyjs": "^2.1.0"
   },
   "devDependencies": {
-    "@remix-run/dev": "^2.11.2",
-    "@types/react": "^18.2.20",
-    "@types/react-dom": "^18.2.7",
+    "@remix-run/dev": "^2.12.0",
+    "@types/react": "^18.3.5",
+    "@types/react-dom": "^18.3.0",
     "@typescript-eslint/eslint-plugin": "^6.7.4",
     "@typescript-eslint/parser": "^6.7.4",
     "eslint": "^8.38.0",
@@ -43,9 +43,9 @@
     "eslint-plugin-jsx-a11y": "^6.7.1",
     "eslint-plugin-react": "^7.33.2",
     "eslint-plugin-react-hooks": "^4.6.0",
-    "typescript": "^5.1.6",
-    "vite": "^5.1.0",
-    "vite-tsconfig-paths": "^4.2.1"
+    "typescript": "^5.6.2",
+    "vite": "^5.4.5",
+    "vite-tsconfig-paths": "^5.0.1"
   },
   "engines": {
     "node": ">=20.0.0"

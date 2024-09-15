@@ -41,8 +41,8 @@ export const loader = async () => {
 const Hydration = ({ children }: { children: ReactNode }) => {
   const { store, entangledAtoms: serverAtoms } = useLoaderData<typeof loader>();
   const items = [
-    [entangledAtoms.storeAtom, store],
-    ...(serverAtoms.map(([key, value]) => [entangledAtoms[key as any], value]) as any),
+    // @ts-ignore
+    ...(serverAtoms.map(([key, value]) => [entangledAtoms[key], value]) as any),
   ];
   useHydrateAtoms(items);
   return <>{children}</>;

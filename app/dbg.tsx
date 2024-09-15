@@ -1,3 +1,3 @@
 export function Debugger({ children }: { children: unknown }) {
-  return <pre>{JSON.stringify(children, null, 2)}</pre>;
+  return <code>{JSON.stringify(children, null, 2)}</code>;
 }

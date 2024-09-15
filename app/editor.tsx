@@ -3,11 +3,17 @@ import * as monaco from "monaco-editor";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { isDarkModeAtom } from "./state/common";
 
+export type EditorProps = {
+  children?: string | object;
+  minHeight?: string;
+  setValue?: (value: string) => void;
+};
+
 export const Editor = ({
   children = ["function x() {", '\tconsole.log("Hello world!");', "}"].join("\n"),
-}: {
-  children?: string;
-}) => {
+  minHeight = "100%",
+  setValue
+}: EditorProps) => {
   const monacoEl = useRef<HTMLDivElement | null>(null);
 
   const [editor, setEditor] = useState<monaco.editor.IStandaloneCodeEditor | null>(null);
@@ -17,8 +23,17 @@ export const Editor = ({
     setEditor((editor) => {
       if (editor) return editor;
 
+      let value = "";
+
+      if (typeof children === "object") {
+        value = JSON.stringify(children, null, 2);
+      }
+      if (typeof children === "string") {
+        value = children;
+      }
+
       const newEditor = monaco.editor.create(monacoEl.current!, {
-        value: children,
+        value,
         language: "markdown",
         // theme: isDarkMode ? "vs-dark" : "vs",
         automaticLayout: true,
@@ -30,6 +45,13 @@ export const Editor = ({
           enabled: false,
         },
         overviewRulerLanes: 0,
+      });
+
+      newEditor.onDidBlurEditorText(() => {
+        if (setValue) {
+          console.log("blur", newEditor.getValue());
+          setValue(newEditor.getValue());
+        }
       });
 
     //   let ignoreEvent = false;
@@ -54,5 +76,5 @@ export const Editor = ({
     return () => editor?.dispose();
   }, [monacoEl.current]);
 
-  return <div ref={monacoEl} style={{minHeight: "100%"}}></div>;
+  return <div ref={monacoEl} style={{minHeight}}></div>;
 };

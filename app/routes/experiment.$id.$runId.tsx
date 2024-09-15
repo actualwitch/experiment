@@ -1,4 +1,4 @@
-import { json, LoaderFunctionArgs } from "@remix-run/node";
+import { json, LoaderFunctionArgs, redirect } from "@remix-run/node";
 import { useLoaderData, useSubmit } from "@remix-run/react";
 import { Debugger } from "~/dbg";
 import { getExperimentAtom, Message, store } from "~/state/common";
@@ -6,11 +6,12 @@ import { Message as MessageComponent } from "~/style";
 
 export async function loader({ params: { id, runId } }: LoaderFunctionArgs) {
   if (id && runId) {
-    const experiment = store.get(getExperimentAtom(id, runId));
+    const experimentAtom = getExperimentAtom({id, runId});
+    const experiment = store.get(experimentAtom);
 
     return json({ id, runId, experiment });
   }
-  return json({ id, runId, experiment: [] as Message[], runs: [] as string[] });
+  return json({ id, runId, experiment: [] as Message[],});
 }
 
 const Msg = ({ message }: { message: Message }) => {
@@ -40,11 +41,10 @@ export default function Experiment() {
           type="submit"
           onClick={(e) => {
             e.preventDefault();
-            submit([id!, experiment?.filter((msg) => ["system", "user"].includes(msg!.role)) ?? [] as any], {
+            submit(experiment as any, {
               method: "post",
               action: "/inference",
               encType: "application/json",
-              navigate: false,
             });
           }}>
           Send it

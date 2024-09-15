@@ -1,8 +1,9 @@
-import { atom } from "jotai";
 import { spawn } from "child_process";
-import { bindToRealm, tokenAtom, entangledAtoms, getInitialStore, getRealm } from "./common";
+import { atom } from "jotai";
 import { atomWithStorage, createJSONStorage } from "jotai/utils";
 import { createFileStorage } from "~/utils";
+import { bindToRealm, getInitialStore, tokenAtom } from "./common";
+import { getRealm } from "./entanglement";
 
 export const resolvedTokenAtom = atom<Promise<string | null>>(async (get) => {
   const reference = get(tokenAtom);
