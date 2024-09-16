@@ -10,7 +10,7 @@ export type EditorProps = {
 };
 
 export const Editor = ({
-  children = ["function x() {", '\tconsole.log("Hello world!");', "}"].join("\n"),
+  children = "",
   minHeight = "100%",
   setValue
 }: EditorProps) => {
@@ -49,7 +49,6 @@ export const Editor = ({
 
       newEditor.onDidBlurEditorText(() => {
         if (setValue) {
-          console.log("blur", newEditor.getValue());
           setValue(newEditor.getValue());
         }
       });

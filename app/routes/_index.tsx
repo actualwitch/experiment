@@ -1,4 +1,4 @@
-import { json, NavLink, useFetcher, useLoaderData } from "@remix-run/react";
+import { json, NavLink, useFetcher, useLoaderData, useSubmit } from "@remix-run/react";
 import { description } from "~/meta";
 
 import { useEditor } from "./_editor";
@@ -154,8 +154,8 @@ function ChatPreview() {
 export default function Index() {
   const { hasResolvedToken, experimentIds } = useLoaderData<typeof loader>();
   const sidebar = useSidebar();
-  const [focus] = useAtom(lensAtom);
-  const { Form, data } = useFetcher();
+  const submit = useSubmit();
+  const [chat, setChat] = useAtom(newChatAtom);
   if (!hasResolvedToken) {
     return (
       <div>
@@ -169,10 +169,18 @@ export default function Index() {
       <ChatPreview />
       <aside>
         <h3>Actions</h3>
-        {/* <Form method="post" action="/inference">
-          <button type="submit">Send it</button>
-        </Form> */}
-        <Debugger>{focus}</Debugger>
+        <button
+          type="submit"
+          onClick={(e) => {
+            e.preventDefault();
+            submit(chat as any, {
+              method: "post",
+              action: "/inference",
+              encType: "application/json",
+            });
+          }}>
+          Send it
+        </button>
       </aside>
       {sidebar &&
         createPortal(

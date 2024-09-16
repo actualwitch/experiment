@@ -1,4 +1,4 @@
-import { atom, createStore, SetStateAction, WritableAtom } from "jotai";
+import { atom, createStore } from "jotai";
 import { focusAtom } from "jotai-optics";
 import { entangleAtoms, REALM, realmAtom } from "./entanglement";
 
@@ -22,9 +22,14 @@ export type Store = {
 };
 
 export const getInitialStore = () => ({ tokens: { anthropic: undefined }, experiments: {} });
+
+
+const timeAtom = atom<string | null>(null);
+
 export const { bindToRealm, entangledAtoms, createMessageHandler } = entangleAtoms({
   [REALM]: realmAtom,
   storeAtom: atom<Store>(getInitialStore()),
+  timeAtom,
 });
 
 const { storeAtom } = entangledAtoms;
@@ -77,13 +82,4 @@ export const createExperiment = atom(null, (get, set, messages: Message[], id?: 
 export const appendToRun = atom(null, (get, set, {id, runId}: ExperimentCursor, messages: Message[]) => {
   const focus = getExperimentAtom({id, runId});
   set(focus, (prev) => [...prev, ...messages]);
-});
-
-const awaitableTimeout = (ms: number) => new Promise((ok) => setTimeout(ok, ms));
-
-export const runExperiment = atom(null, async (get, set, {id, runId}: ExperimentCursor) => {
-  for (let i = 0; i < 10; i++) {
-    await awaitableTimeout(1000);
-    set(appendToRun, {id, runId}, [{ role: "assistant", content: `Message ${i}` }]);
-  }
 });

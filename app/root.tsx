@@ -2,13 +2,10 @@ import { Global } from "@emotion/react";
 import { Links, Meta, Outlet, Scripts, ScrollRestoration, useLoaderData } from "@remix-run/react";
 import { Provider, useAtom } from "jotai";
 import { NavigationSidebar } from "./navigation";
-// import * as clientAtoms from "./state/client";
-// import * as serverAtoms from "./state/server";
 import { Container } from "./style";
 import { useHydrateAtoms } from "jotai/utils";
-import { Debugger } from "./dbg";
 import { ReactNode } from "react";
-import { entangledAtoms, store, } from "./state/common";
+import { entangledAtoms, store } from "./state/common";
 import { stylesAtom } from "./state/client";
 
 export function Layout({ children }: { children: React.ReactNode }) {

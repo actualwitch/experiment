@@ -2,15 +2,14 @@ import { ActionFunctionArgs } from "@remix-run/node";
 import { Form, json, useLoaderData, useSubmit } from "@remix-run/react";
 import { useAtom, useSetAtom } from "jotai";
 import { useEffect } from "react";
-// import { isDarkModeAtom } from "~/state/client";
 import * as serverState from "~/state/server";
 import { bs } from "~/style";
 import { withFormStyling, type FormProps } from "~/style/form";
 import styled from "@emotion/styled";
 import { isDarkModeAtom, store, tokenAtom, entangledAtoms, getInitialStore } from "~/state/common";
-import { useWorker } from "~/state/entanglement";
 import { hasResolvedTokenAtom } from "~/state/server";
 import { Debugger } from "~/dbg";
+import { Counter } from "~/Counter";
 
 export { defaultMeta as meta } from "~/meta";
 
@@ -52,15 +51,6 @@ const StyledForm = styled(Form)`
 export default function Configure() {
   const submit = useSubmit();
   const { token, hasResolvedToken, isDarkMode } = useLoaderData<typeof loader>();
-
-  // const setDarkMode = useSetAtom(isDarkModeAtom);
-  // useEffect(() => {
-  //   setDarkMode(isDarkMode);
-  // }, [isDarkMode]);
-  // const postMessage = useWorker();
-  // useEffect(() => {
-  //   postMessage?.({ testAtom: val });
-  // }, [val]);
   return (
     <>
       <StyledForm
@@ -80,6 +70,7 @@ export default function Configure() {
           <span>{hasResolvedToken ? "🔐" : "🔑"}</span>
           <Input _type={hasResolvedToken ? "success" : undefined} type="text" name="token" defaultValue={token} />
         </label>
+        <Counter />
       </StyledForm>
     </>
   );

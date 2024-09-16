@@ -54,7 +54,7 @@ export function entangleAtoms<T extends object, EntangledAtomKey extends keyof T
       return [key, writableAtom];
     }),
   ) as unknown as {
-    [K in EntangledAtomKey]: T[K];
+    [K in Exclude<EntangledAtomKey, typeof REALM>]: T[K];
   };
 
   function bindToRealm<T>(config: T
@@ -96,7 +96,6 @@ export const useWorker = () => {
     const handle = new worker();
     ref.current = handle;
     handle.onerror = (event) => {
-      console.error(event);
     };
     handle.onmessage = createMessageHandler(store);
     return () => {

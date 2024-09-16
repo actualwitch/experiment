@@ -1,10 +1,7 @@
 import { atom } from "jotai";
-import { createJSONStorage } from "jotai/utils";
 import { appStyle, darkMode } from "~/style";
 import { Chat } from "~/types";
-// import { initAtoms } from "./common";
-import { Editor } from "~/editor";
-import { isDarkModeAtom, bindToRealm, REALM } from "./common";
+import { isDarkModeAtom } from "./common";
 
 export const importsRegistry = atom<Record<string, Chat[]>>({});
 
@@ -16,8 +13,6 @@ export const filenames = atom((get) => {
 export const selectedChat = atom<Array<string | number> | undefined>(undefined);
 
 export const expandedChatIds = atom<string[]>([]);
-
-// export const { storeAtom, isDarkModeAtom, tokenAtom, experimentIdsAtom } = initAtoms(createJSONStorage(), false);
 
 export const stylesAtom = atom((get) => {
   const isDarkMode = get(isDarkModeAtom);
@@ -45,7 +40,6 @@ export const processCsvAtom = atom(null, (get, set, file?: File) => {
   };
   reader.readAsText(file);
 });
-// export const currentExperimentAtom = atom<>
 
 // function Bob<State>(state = {} as State) {
 //   return {
