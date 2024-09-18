@@ -1,6 +1,7 @@
 import { atom, createStore } from "jotai";
 import { focusAtom } from "jotai-optics";
-import { entangleAtoms, REALM, realmAtom } from "./entanglement";
+import { entangleAtoms, getRealm, REALM, realmAtom } from "./entanglement";
+import { atomEffect } from "jotai-effect";
 
 export const store = createStore();
 
@@ -24,12 +25,20 @@ export type Store = {
 export const getInitialStore = () => ({ tokens: { anthropic: undefined }, experiments: {} });
 
 
-const timeAtom = atom<string | null>(null);
+
+const voidAtom = atom<void>(void 0);
 
 export const { bindToRealm, entangledAtoms, createMessageHandler } = entangleAtoms({
   [REALM]: realmAtom,
   storeAtom: atom<Store>(getInitialStore()),
-  timeAtom,
+  subscriptionAtom: voidAtom,
+});
+
+bindToRealm({
+  [REALM]: "server",
+  subscriptionAtom: atom((get) => {
+    console.log("server sub");
+  })
 });
 
 const { storeAtom } = entangledAtoms;

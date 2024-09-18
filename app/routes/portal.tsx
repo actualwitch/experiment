@@ -1,4 +1,6 @@
-import { LoaderFunctionArgs } from "@remix-run/node";
+import { json, LoaderFunctionArgs } from "@remix-run/node";
+import { useAtom } from "jotai";
+import { atomEffect } from "jotai-effect";
 import { entangledAtoms, store } from "~/state/common";
 interface SendFunctionArgs {
   /**
@@ -72,6 +74,9 @@ export function eventStream(signal: AbortSignal, init: InitFunction, options: Re
 }
 
 export async function loader({ request }: LoaderFunctionArgs) {
+  if (request.headers.get("accept") !== "text/event-stream") {
+    return json({});
+  }
   return eventStream(request.signal, function setup(send) {
     const unsubMap = new Map<string, () => void>();
     for (const [key, atom] of Object.entries(entangledAtoms)) {
@@ -88,4 +93,26 @@ export async function loader({ request }: LoaderFunctionArgs) {
       }
     };
   });
+}
+
+const sseSubscriptionEffect = atomEffect((get, set) => {
+  const source = new EventSource("/portal");
+  for (const keyVal of Object.entries(entangledAtoms)) {
+	const [key, atom] = keyVal;
+	source.addEventListener(key, (event) => {
+	  set(atom as any, JSON.parse(event.data));
+	});
+  }
+  return () => {
+	source.close();
+  }
+});
+
+export default function Portal() {
+  useAtom(sseSubscriptionEffect);
+  return (
+    <div>
+      <h1>Portal</h1>
+    </div>
+  );
 }

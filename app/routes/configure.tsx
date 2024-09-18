@@ -1,6 +1,6 @@
 import { ActionFunctionArgs } from "@remix-run/node";
 import { Form, json, useLoaderData, useSubmit } from "@remix-run/react";
-import { useAtom, useSetAtom } from "jotai";
+import { atom, useAtom, useSetAtom } from "jotai";
 import { useEffect } from "react";
 import * as serverState from "~/state/server";
 import { bs } from "~/style";
@@ -9,7 +9,8 @@ import styled from "@emotion/styled";
 import { isDarkModeAtom, store, tokenAtom, entangledAtoms, getInitialStore } from "~/state/common";
 import { hasResolvedTokenAtom } from "~/state/server";
 import { Debugger } from "~/dbg";
-import { Counter } from "~/Counter";
+import { atomEffect } from "jotai-effect";
+import { getRealm } from "~/state/entanglement";
 
 export { defaultMeta as meta } from "~/meta";
 
@@ -51,6 +52,7 @@ const StyledForm = styled(Form)`
 export default function Configure() {
   const submit = useSubmit();
   const { token, hasResolvedToken, isDarkMode } = useLoaderData<typeof loader>();
+  useAtom(entangledAtoms.subscriptionAtom);
   return (
     <>
       <StyledForm
@@ -70,7 +72,6 @@ export default function Configure() {
           <span>{hasResolvedToken ? "🔐" : "🔑"}</span>
           <Input _type={hasResolvedToken ? "success" : undefined} type="text" name="token" defaultValue={token} />
         </label>
-        <Counter />
       </StyledForm>
     </>
   );

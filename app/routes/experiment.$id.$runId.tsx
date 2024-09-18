@@ -1,17 +1,40 @@
-import { json, LoaderFunctionArgs, redirect } from "@remix-run/node";
-import { useLoaderData, useSubmit } from "@remix-run/react";
+import { ActionFunctionArgs, json, LoaderFunctionArgs, redirect } from "@remix-run/node";
+import { useLoaderData, useParams, useSubmit } from "@remix-run/react";
 import { Debugger } from "~/dbg";
-import { getExperimentAtom, Message, store } from "~/state/common";
+import { appendToRun, ExperimentCursor, getExperimentAtom, Message, store } from "~/state/common";
 import { Message as MessageComponent } from "~/style";
+import { eventStream } from "./portal";
+import { atomEffect } from "jotai-effect";
+import { useAtom } from "jotai";
 
-export async function loader({ params: { id, runId } }: LoaderFunctionArgs) {
+export async function loader({ params: { id, runId }, request }: LoaderFunctionArgs) {
+  if (!id || !runId) {
+    return redirect("/");
+  }
+
+  const experiment = store.get(getExperimentAtom({ id, runId }));
+  // if (request.headers.get("accept") === "text/event-stream") {
+  //   return eventStream(request.signal, function setup(send) {
+  //     const unsubMap = new Map<string, () => void>();
+  //     for (const [key, atom] of Object.entries({ experimentAtom })) {
+  //       const unsub = store.sub(atom, () => {
+  //         const data = store.get(atom as any);
+  //         send({ data: JSON.stringify(data), event: key });
+  //       });
+  //       unsubMap.set(key, unsub);
+  //     }
+
+  //     return () => {
+  //       for (const unsub of unsubMap.values()) {
+  //         unsub();
+  //       }
+  //     };
+  //   });
+  // }
   if (id && runId) {
-    const experimentAtom = getExperimentAtom({id, runId});
-    const experiment = store.get(experimentAtom);
-
     return json({ id, runId, experiment });
   }
-  return json({ id, runId, experiment: [] as Message[],});
+  return json({ id, runId, experiment: [] as Message[] });
 }
 
 const Msg = ({ message }: { message: Message }) => {
@@ -22,8 +45,28 @@ const Msg = ({ message }: { message: Message }) => {
   );
 };
 
+// const sseSubscriptionEffect = atomEffect((get, set) => {
+//   const source = new EventSource(window.location.href);
+//   for (const keyVal of Object.entries(entangledAtoms)) {
+// 	const [key, atom] = keyVal;
+// 	source.addEventListener(key, (event) => {
+// 	  set(atom as any, JSON.parse(event.data));
+// 	});
+//   }
+//   return () => {
+// 	source.close();
+//   }
+// });
+
+export const action = async ({ request, params: { id, runId } }: ActionFunctionArgs) => {
+  const body = await request.json();
+  store.set(appendToRun, { id: id!, runId: runId! }, [{ role: "assistant", content: "Are you still there?" }]);
+  return json({ result: "ok" });
+};
+
 export default function Experiment() {
-  const { id, runId, experiment } = useLoaderData<typeof loader>();
+  const { experiment } = useLoaderData<typeof loader>();
+  const { id, runId } = useParams();
   const submit = useSubmit();
   return (
     <>
@@ -41,9 +84,22 @@ export default function Experiment() {
           type="submit"
           onClick={(e) => {
             e.preventDefault();
+            submit(
+              { test: 13 },
+              {
+                method: "post",
+                encType: "application/json",
+              },
+            );
+          }}>
+          Send it
+        </button>
+        <button
+          type="submit"
+          onClick={(e) => {
+            e.preventDefault();
             submit(experiment as any, {
               method: "post",
-              action: "/inference",
               encType: "application/json",
             });
           }}>

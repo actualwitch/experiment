@@ -3,6 +3,7 @@ import { INTERNAL_PrdStore } from "jotai/vanilla/store";
 import { useEffect, useRef } from "react";
 import { createMessageHandler, store } from "./common";
 import worker from "./entanglement.worker?worker";
+import { focusAtom } from "jotai-optics";
 
 export const getRealm = () => {
   if (typeof window !== "undefined") {
@@ -32,37 +33,48 @@ export function entangleAtoms<T extends object, EntangledAtomKey extends keyof T
   },
 ) {
   const { [REALM]: realmAtom, ...restConfig } = config;
-  const overrides = atom<
+  const realmOverridesAtom = atom<
     Partial<{
-      [K in EntangledAtomKey]: Atom<T[K]>;
+      [K in Realm]: Partial<{
+        [K in EntangledAtomKey]: Atom<T[K]>;
+      }>;
     }>
   >({});
   const entangledAtoms = Object.fromEntries(
     Object.entries(restConfig).map(([key, defaultAtom]) => {
       const writableAtom = atom(
         (get) => {
+          const thisKey = key as EntangledAtomKey;
+          const thisDefaultAtom = defaultAtom as Atom<T[EntangledAtomKey]>;
           const realm = get(realmAtom);
-          const o: any = get(overrides);
-          return get(o[key] ?? defaultAtom);
+          const realmOverrides: Partial<{ [K in EntangledAtomKey]: Atom<T[K]>; }> = get(focusAtom(realmOverridesAtom, (o) => o.optional().prop(realm))) ?? {};
+          const thisAtom = realmOverrides[thisKey] ?? thisDefaultAtom;
+          return get(thisAtom);
         },
         (get: Getter, set: Setter, props: any[]) => {
-          const o: any = get(overrides);
-          const thisAtom = o[key] ?? defaultAtom;
-          set(thisAtom, props);
+          const thisKey = key as EntangledAtomKey;
+          const thisDefaultAtom = defaultAtom as Atom<T[EntangledAtomKey]>;
+          const realm = get(realmAtom);
+          const realmOverrides: Partial<{ [K in EntangledAtomKey]: Atom<T[K]>; }> = get(focusAtom(realmOverridesAtom, (o) => o.optional().prop(realm))) ?? {};
+          const thisAtom = realmOverrides[thisKey] ?? thisDefaultAtom;
+          try {
+            // @ts-ignore
+            set(thisAtom, props);
+          } finally {}
         },
       );
       return [key, writableAtom];
     }),
   ) as unknown as {
-    [K in Exclude<EntangledAtomKey, typeof REALM>]: T[K];
+    [K in EntangledAtomKey]: T[K];
   };
 
-  function bindToRealm<T>(config: T
-    
-  ) {
-    store.set(overrides, (prev) => ({
+  function bindToRealm<T>(config: T & { [REALM]: Realm }) {
+    const { [REALM]: realm, ...restConfig } = config;
+    const lens = focusAtom(realmOverridesAtom, (o) => o.optional().prop(realm));
+    store.set(lens, (prev = {}) => ({
       ...prev,
-      ...config,
+      ...restConfig,
     }));
 
     return entangledAtoms;
@@ -95,8 +107,7 @@ export const useWorker = () => {
   useEffect(() => {
     const handle = new worker();
     ref.current = handle;
-    handle.onerror = (event) => {
-    };
+    handle.onerror = (event) => {};
     handle.onmessage = createMessageHandler(store);
     return () => {
       handle.terminate();
