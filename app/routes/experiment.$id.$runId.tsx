@@ -1,11 +1,12 @@
 import { ActionFunctionArgs, json, LoaderFunctionArgs, redirect } from "@remix-run/node";
 import { useLoaderData, useParams, useSubmit } from "@remix-run/react";
 import { Debugger } from "~/dbg";
-import { appendToRun, ExperimentCursor, getExperimentAtom, Message, store } from "~/state/common";
+import { appendToRun, ExperimentCursor, getExperimentAtom, Message, store, voidAtom } from "~/state/common";
 import { Message as MessageComponent } from "~/style";
-import { eventStream } from "./portal";
+import { portalSubscription } from "./portal";
 import { atomEffect } from "jotai-effect";
 import { useAtom } from "jotai";
+import { useMemo } from "react";
 
 export async function loader({ params: { id, runId }, request }: LoaderFunctionArgs) {
   if (!id || !runId) {
@@ -58,11 +59,11 @@ const Msg = ({ message }: { message: Message }) => {
 //   }
 // });
 
-export const action = async ({ request, params: { id, runId } }: ActionFunctionArgs) => {
-  const body = await request.json();
-  store.set(appendToRun, { id: id!, runId: runId! }, [{ role: "assistant", content: "Are you still there?" }]);
-  return json({ result: "ok" });
-};
+// export const action = async ({ request, params: { id, runId } }: ActionFunctionArgs) => {
+//   const body = await request.json();
+//   store.set(appendToRun, { id: id!, runId: runId! }, [{ role: "assistant", content: "Are you still there?" }]);
+//   return json({ result: "ok" });
+// };
 
 export default function Experiment() {
   const { experiment } = useLoaderData<typeof loader>();
@@ -84,15 +85,14 @@ export default function Experiment() {
           type="submit"
           onClick={(e) => {
             e.preventDefault();
-            submit(
-              { test: 13 },
-              {
-                method: "post",
-                encType: "application/json",
-              },
-            );
+            submit({ laughingAtom: { id, runId } } as any, {
+              action: "/portal",
+              method: "post",
+              encType: "application/json",
+              navigate: false,
+            });
           }}>
-          Send it
+          :D
         </button>
         <button
           type="submit"

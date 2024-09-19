@@ -1,8 +1,9 @@
 import { Global } from "@emotion/react";
-import { Links, Meta, Outlet, Scripts, ScrollRestoration, useLoaderData } from "@remix-run/react";
+import { Links, Meta, Outlet, Scripts, ScrollRestoration } from "@remix-run/react";
 import { Provider, useAtom } from "jotai";
-import { useHydrateAtoms } from "jotai/utils";
+import { createLoader } from "./createLoader";
 import { NavigationSidebar } from "./navigation";
+import { portalSubscription } from "./routes/portal";
 import { stylesAtom } from "./state/client";
 import { entangledAtoms, store } from "./state/common";
 import { Container } from "./style";
@@ -25,13 +26,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
   );
 }
 
-export const loader = async () => {
-  const atoms = Object.entries(entangledAtoms).map(([key, atom]) => {
-    const value = store.get(atom as any);
-    return [key, value];
-  }).filter(([_, value]) => value !== undefined);
-  return atoms;
-};
+export const loader = createLoader(entangledAtoms);
 
 function Styles() {
   const [styles] = useAtom(stylesAtom);
@@ -39,10 +34,7 @@ function Styles() {
 }
 
 export default function App() {
-  const serverAtoms = useLoaderData<typeof loader>();
-  useHydrateAtoms(
-    serverAtoms.map(([key, value]) => [entangledAtoms[key as keyof typeof entangledAtoms], value]) as any,
-  );
+  useAtom(portalSubscription);
   return (
     <Provider store={store}>
       <Container>

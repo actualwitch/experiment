@@ -1,34 +1,19 @@
-import { ActionFunctionArgs } from "@remix-run/node";
-import { Form, json, useLoaderData, useSubmit } from "@remix-run/react";
-import { atom, useAtom, useSetAtom } from "jotai";
-import { useEffect } from "react";
-import * as serverState from "~/state/server";
+import styled from "@emotion/styled";
+import { Form } from "@remix-run/react";
+import { createController } from "~/createController";
+import { createAction, createLoader } from "~/createLoader";
+import { entangledAtoms, isDarkModeAtom, tokenAtom } from "~/state/common";
 import { bs } from "~/style";
 import { withFormStyling, type FormProps } from "~/style/form";
-import styled from "@emotion/styled";
-import { isDarkModeAtom, store, tokenAtom, entangledAtoms, getInitialStore } from "~/state/common";
-import { hasResolvedTokenAtom } from "~/state/server";
-import { Debugger } from "~/dbg";
-import { atomEffect } from "jotai-effect";
-import { getRealm } from "~/state/entanglement";
 
 export { defaultMeta as meta } from "~/meta";
 
-export const loader = async () => {
-  const isDarkMode = store.get(isDarkModeAtom);
-  const token = store.get(tokenAtom);
-  const hasResolvedToken = await store.get(hasResolvedTokenAtom);
-  return json({ isDarkMode, token, hasResolvedToken });
-};
+const atoms = { isDarkMode: isDarkModeAtom, token: tokenAtom, hasResolvedToken: entangledAtoms.hasResolvedTokenAtom };
+export const loader = createLoader(atoms);
 
-export const action = async ({ request }: ActionFunctionArgs) => {
-  const body = await request.formData();
-  const { isDarkMode, token } = { isDarkMode: body.get("isDarkMode") === "on", token: body.get("token") };
-  store.set(isDarkModeAtom, isDarkMode);
-  store.set(tokenAtom, token as string);
+export const action = createAction(atoms);
 
-  return json({ result: "ok" });
-};
+const useController = createController(atoms);
 
 const Input = styled.input<FormProps>(withFormStyling);
 
@@ -50,19 +35,24 @@ const StyledForm = styled(Form)`
 `;
 
 export default function Configure() {
-  const submit = useSubmit();
-  const { token, hasResolvedToken, isDarkMode } = useLoaderData<typeof loader>();
-  useAtom(entangledAtoms.subscriptionAtom);
+  const {
+    isDarkMode: [isDarkMode, setIsDarkMode],
+    token: [token, setToken],
+    hasResolvedToken: [hasResolvedToken],
+  } = useController();
   return (
     <>
-      <StyledForm
-        method="post"
-        onChange={(e) => {
-          submit(e.currentTarget);
-        }}>
+      <StyledForm method="post">
         <h3>Visual</h3>
         <label>
-          <input type="checkbox" name="isDarkMode" defaultChecked={isDarkMode} />
+          <input
+            type="checkbox"
+            name="isDarkMode"
+            checked={isDarkMode}
+            onChange={(e) => {
+              setIsDarkMode(e.target.checked);
+            }}
+          />
           Enable dark mode
         </label>
         <h3>Inference</h3>
@@ -70,7 +60,15 @@ export default function Configure() {
         <p>Token is resolved from 1password by the backend, get the reference by clicking on arrow on the field.</p>
         <label>
           <span>{hasResolvedToken ? "🔐" : "🔑"}</span>
-          <Input _type={hasResolvedToken ? "success" : undefined} type="text" name="token" defaultValue={token} />
+          <Input
+            _type={hasResolvedToken ? "success" : undefined}
+            type="text"
+            name="token"
+            value={token}
+            onChange={(e) => {
+              setToken(e.target.value);
+            }}
+          />
         </label>
       </StyledForm>
     </>

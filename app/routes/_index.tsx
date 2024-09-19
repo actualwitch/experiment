@@ -6,8 +6,7 @@ import { useEditor } from "./_editor";
 import { createPortal } from "react-dom";
 import { useSidebar } from "~/navigation";
 import {} from "~/state/client";
-import { experimentIdsAtom, Message, store } from "~/state/common";
-import { hasResolvedTokenAtom } from "~/state/server";
+import { entangledAtoms, experimentIdsAtom, Message, store } from "~/state/common";
 import { bs, Message as MessageComponent, Paragraph } from "~/style";
 import { atom, useAtom, useSetAtom } from "jotai";
 import { ReactNode } from "react";
@@ -78,7 +77,7 @@ const lensAtom = atom(
 const baseHeight = bs(6);
 
 export const loader = async () => {
-  const hasResolvedToken = await store.get(hasResolvedTokenAtom);
+  const hasResolvedToken = await store.get(entangledAtoms.hasResolvedTokenAtom);
   const experimentIds = await store.get(experimentIdsAtom);
   return json({ hasResolvedToken, experimentIds });
 };

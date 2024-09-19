@@ -26,21 +26,18 @@ export const getInitialStore = () => ({ tokens: { anthropic: undefined }, experi
 
 
 
-const voidAtom = atom<void>(void 0);
+export const voidAtom = atom<void>(void 0);
 
-export const { bindToRealm, entangledAtoms, createMessageHandler } = entangleAtoms({
+export const { bindToRealm, entangledAtoms, createMessageHandler, sseSubscriptionEffect } = entangleAtoms({
   [REALM]: realmAtom,
   storeAtom: atom<Store>(getInitialStore()),
-  subscriptionAtom: voidAtom,
+  testAtom: atom("test"),
+  hasResolvedTokenAtom: atom(false),
+  laughingAtom: atom(null, (get, set, cursor: ExperimentCursor) => {
+    const idx = set(appendToRun, cursor, [{role: "assistant", content: ""}]);
+    set(intervalAppend, cursor, idx);
+  }),
 });
-
-bindToRealm({
-  [REALM]: "server",
-  subscriptionAtom: atom((get) => {
-    console.log("server sub");
-  })
-});
-
 const { storeAtom } = entangledAtoms;
 
 export const experimentIdsAtom = atom((get) => {
@@ -73,7 +70,7 @@ export const isDarkModeAtom = focusAtom(storeAtom, (o) => o.prop("isDarkMode"));
 
 export type ExperimentCursor = { id: string; runId: string };
 
-export const createExperiment = atom(null, (get, set, messages: Message[], id?: string, runId?: string): ExperimentCursor => {
+export const createExperiment = atom(null, (get, set, messages?: Message[], id?: string, runId?: string): ExperimentCursor => {
   const exp = get(experimentsAtom) ?? {};
   id ??= String(Object.keys(exp).length + 1);
 
@@ -82,13 +79,36 @@ export const createExperiment = atom(null, (get, set, messages: Message[], id?: 
 
   set(experimentsAtom, (prev) => ({
     ...prev,
-    [id]: { ...thisExperiment, [runId]: messages },
+    [id]: { ...thisExperiment, [runId]: messages ?? [] },
   }));
 
   return {id, runId};
 });
 
-export const appendToRun = atom(null, (get, set, {id, runId}: ExperimentCursor, messages: Message[]) => {
+export const appendToRun = atom(null, (get, set, cursor: ExperimentCursor, messages: Message[]) => {
+  const {id, runId} = cursor || {};
   const focus = getExperimentAtom({id, runId});
-  set(focus, (prev) => [...prev, ...messages]);
+  const current = get(focus);
+  set(focus, (prev = []) => [...prev, ...messages]);
+  return current?.length ?? 0;
 });
+
+export const intervalAppend = atom(null, (get, set, _cursor: ExperimentCursor, messageIdx: number) => {
+  const {id, runId} = _cursor || {};
+  const text = `I thought what I'd do was, I'd pretend I was one of those deaf-mutes.  `;
+  let cursor = 0;
+  const focus = getExperimentAtom({id, runId});
+  const interval = setInterval(() => {
+    set(focus, (prev) => {
+      const next = [...prev];
+      next[messageIdx] = { role: "assistant", content: text.slice(0, cursor) };
+      cursor += 1;
+      if (cursor > text.length) {
+        cursor = 0;
+      }
+      return next;
+    });
+  }, 100);
+  return () => clearInterval(interval);
+});
+

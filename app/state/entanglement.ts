@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { createMessageHandler, store } from "./common";
 import worker from "./entanglement.worker?worker";
 import { focusAtom } from "jotai-optics";
+import { atomEffect } from "jotai-effect";
 
 export const getRealm = () => {
   if (typeof window !== "undefined") {
@@ -47,7 +48,8 @@ export function entangleAtoms<T extends object, EntangledAtomKey extends keyof T
           const thisKey = key as EntangledAtomKey;
           const thisDefaultAtom = defaultAtom as Atom<T[EntangledAtomKey]>;
           const realm = get(realmAtom);
-          const realmOverrides: Partial<{ [K in EntangledAtomKey]: Atom<T[K]>; }> = get(focusAtom(realmOverridesAtom, (o) => o.optional().prop(realm))) ?? {};
+          const realmOverrides: Partial<{ [K in EntangledAtomKey]: Atom<T[K]> }> =
+            get(focusAtom(realmOverridesAtom, (o) => o.optional().prop(realm))) ?? {};
           const thisAtom = realmOverrides[thisKey] ?? thisDefaultAtom;
           return get(thisAtom);
         },
@@ -55,12 +57,14 @@ export function entangleAtoms<T extends object, EntangledAtomKey extends keyof T
           const thisKey = key as EntangledAtomKey;
           const thisDefaultAtom = defaultAtom as Atom<T[EntangledAtomKey]>;
           const realm = get(realmAtom);
-          const realmOverrides: Partial<{ [K in EntangledAtomKey]: Atom<T[K]>; }> = get(focusAtom(realmOverridesAtom, (o) => o.optional().prop(realm))) ?? {};
+          const realmOverrides: Partial<{ [K in EntangledAtomKey]: Atom<T[K]> }> =
+            get(focusAtom(realmOverridesAtom, (o) => o.optional().prop(realm))) ?? {};
           const thisAtom = realmOverrides[thisKey] ?? thisDefaultAtom;
           try {
             // @ts-ignore
             set(thisAtom, props);
-          } finally {}
+          } finally {
+          }
         },
       );
       return [key, writableAtom];
@@ -79,14 +83,17 @@ export function entangleAtoms<T extends object, EntangledAtomKey extends keyof T
 
     return entangledAtoms;
   }
+  function isEntangledAtomKey(key: unknown): key is EntangledAtomKey {
+    return typeof key === "string" && key in entangledAtoms;
+  }
+
   const createMessageHandler = (store: INTERNAL_PrdStore) => {
     return (event: MessageEvent) => {
       Object.entries(event.data).forEach(async ([key, value]) => {
-        if (Reflect.has(entangledAtoms, key)) {
-          // @ts-ignore
+        if (isEntangledAtomKey(key)) {
           const atom = entangledAtoms[key];
           if (!atom) return;
-          const thisValue = await store.get(atom);
+          const thisValue = await store.get(atom as any);
           if (thisValue !== value) {
             globalThis.postMessage({ [key]: thisValue });
           }
@@ -95,10 +102,27 @@ export function entangleAtoms<T extends object, EntangledAtomKey extends keyof T
     };
   };
 
+  const sseSubscriptionEffect = atomEffect((get, set) => {
+    const source = new EventSource("/portal");
+    for (const keyVal of Object.entries(entangledAtoms)) {
+      const [key, atom] = keyVal;
+      source.addEventListener(key, (event) => {
+        set(atom as any, JSON.parse(event.data));
+      });
+    }
+    source.onerror = (event) => {
+      console.error(event);
+    }
+    return () => {
+      source.close();
+    };
+  });
+
   return {
     entangledAtoms,
     bindToRealm,
     createMessageHandler,
+    sseSubscriptionEffect,
   };
 }
 

@@ -36,12 +36,6 @@ export const resolvedTokenAtom = atom<Promise<string | null>>(async (get) => {
     });
   });
 });
-
-export const hasResolvedTokenAtom = atom(async (get) => {
-  const token = await get(resolvedTokenAtom);
-  return Boolean(token);
-});
-
 export const runExperiment = atom(null, async (get, set, { id, runId }: ExperimentCursor) => {
   const resolvedToken = await store.get(resolvedTokenAtom);
   const experiment = store.get(getExperimentAtom({ id, runId }));
@@ -79,4 +73,8 @@ bindToRealm({
       getOnInit: getRealm() === "server",
     },
   ),
+  hasResolvedTokenAtom: atom(async (get) => {
+    const token = await get(resolvedTokenAtom);
+    return Boolean(token);
+  }, () => {})
 });

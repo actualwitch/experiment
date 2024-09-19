@@ -17,7 +17,7 @@ export const expandedChatIds = atom<string[]>([]);
 export const stylesAtom = atom((get) => {
   const isDarkMode = get(isDarkModeAtom);
   if (isDarkMode) return [...appStyle, darkMode];
-  return appStyle;
+  return [...appStyle];
 });
 
 export const processCsvAtom = atom(null, (get, set, file?: File) => {
