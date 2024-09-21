@@ -15,7 +15,7 @@ export function useSidebar() {
 }
 
 const Navigation = styled.nav`
-      padding: ${bs()};
+  padding: ${bs()};
 `;
 
 export const NavigationSidebar = () => {
@@ -28,7 +28,7 @@ export const NavigationSidebar = () => {
         ⛴️ <NavLink to="/import">Import</NavLink>
       </h2>
       <h2>
-        🔧 <NavLink to="/configure">Configure</NavLink>
+        🔧 <NavLink to="/configure">Parameters</NavLink>
       </h2>
       <div id={elementId} />
     </Navigation>

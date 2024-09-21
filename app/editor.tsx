@@ -1,7 +1,7 @@
 import { useAtom } from "jotai";
 import * as monaco from "monaco-editor";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { isDarkModeAtom } from "./state/common";
+import { isDarkModeAtom, store } from "./state/common";
 
 export type EditorProps = {
   children?: string | object;
@@ -32,10 +32,13 @@ export const Editor = ({
         value = children;
       }
 
+      const isDarkMode = store.get(isDarkModeAtom);
+      console.log({isDarkMode})
+
       const newEditor = monaco.editor.create(monacoEl.current!, {
         value,
         language: "markdown",
-        // theme: isDarkMode ? "vs-dark" : "vs",
+        theme: isDarkMode ? "vs-dark" : "vs",
         automaticLayout: true,
         lineNumbers: "off",
         scrollBeyondLastLine: false,

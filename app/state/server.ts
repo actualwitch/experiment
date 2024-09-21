@@ -38,29 +38,34 @@ export const resolvedTokenAtom = atom<Promise<string | null>>(async (get) => {
 });
 export const runExperiment = atom(null, async (get, set, { id, runId }: ExperimentCursor) => {
   const resolvedToken = await store.get(resolvedTokenAtom);
-  const experiment = store.get(getExperimentAtom({ id, runId }));
+  const experimentAtom = getExperimentAtom({ id, runId });
+  const experiment = get(experimentAtom);
 
   if (!resolvedToken || !experiment) return;
 
-  const experimentAsAnthropic = experimentToAnthropic(experiment);
+  const { stream, ...experimentAsAnthropic } = experimentToAnthropic(experiment);
 
   const anthropic = new Client({ apiKey: resolvedToken });
-  const response = await anthropic.messages.create({
-    model: "claude-3-5-sonnet-20240620",
-    max_tokens: 128,
-    messages: experimentAsAnthropic.messages,
-    system: experimentAsAnthropic.system,
-  });
-  const newMessages = response.content.reduce<Message[]>((acc, contentBlock) => {
-    if (contentBlock.type === "text") {
-      acc.push({ role: "assistant", content: contentBlock.text });
+  if (stream) {
+    // const response
+    //   await anthropic.messages.stream({
+    //     messages: [{role: 'user', content: "Hello"}],
+    //     model: 'claude-3-5-sonnet-20240620',
+    //     max_tokens: 1024,
+    // }).on('text', (text) => {
+    //     console.log(text);
+    // })
+  } else {
+    const response = await anthropic.messages.create(experimentAsAnthropic);
+    for (const contentBlock of response.content) {
+      if (contentBlock.type === "text") {
+        set(experimentAtom, (prev) => [...prev, { role: "assistant", fromServer: true, content: contentBlock.text }]);
+      }
+      if (contentBlock.type === "tool_use") {
+        set(experimentAtom, (prev) => [...prev, { role: "tool", fromServer: true, content: contentBlock }]);
+      }
     }
-    if (contentBlock.type === "tool_use") {
-      acc.push({ role: "tool", content: contentBlock });
-    }
-    return acc;
-  }, []);
-  await store.set(appendToRun, { id, runId }, newMessages);
+  }
 });
 
 bindToRealm({
@@ -73,8 +78,11 @@ bindToRealm({
       getOnInit: getRealm() === "server",
     },
   ),
-  hasResolvedTokenAtom: atom(async (get) => {
-    const token = await get(resolvedTokenAtom);
-    return Boolean(token);
-  }, () => {})
+  hasResolvedTokenAtom: atom(
+    async (get) => {
+      const token = await get(resolvedTokenAtom);
+      return Boolean(token);
+    },
+    () => {},
+  ),
 });

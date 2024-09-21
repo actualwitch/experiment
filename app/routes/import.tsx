@@ -94,19 +94,19 @@ function Imports() {
     <>
       <Main>
         {chat.messages.map((message, idx) => (
-          <Message key={idx} role={message.role}>
+          <Message key={idx} role={message.role} isSelected={false} >
             <code>{message.content}</code>
           </Message>
         ))}
         {chat.response.content && (
-          <Message key="response" role={chat.response.role}>
+          <Message key="response" role={chat.response.role} isSelected={false} >
             <code>{chat.response.content}</code>
           </Message>
         )}
 
         {chat.response.tool_calls?.map((toolCall, idx) => {
           return (
-            <Message key={"tool" + idx} role="tool">
+            <Message key={"tool" + idx} role="tool" isSelected={false} >
               <code>{JSON.stringify(toolCall, null, 2)}</code>
             </Message>
           );
@@ -114,29 +114,39 @@ function Imports() {
       </Main>
       <aside>
         <h3>Actions</h3>
-        <button
-          type="submit"
-          onClick={(e) => {
-            e.preventDefault();
-            const messages = [
-              chat.messages.map(({ role, content }) => ({ role, content })),
-              chat.response.content ? [{ role: "assistant", content: chat.response.content }] : [],
-              chat.response.tool_calls?.map((toolCall) => ({ role: "tool", content: toolCall })),
-            ].flat();
-            submit(
-              {
-                runExperiment: messages as any,
-              },
-              {
-                method: "post",
-                action: "/gateway",
-                encType: "application/json",
-                navigate: false,
-              },
-            );
-          }}>
-          Start experiment
-        </button>
+        <div>
+          <button
+            type="submit"
+            onClick={(e) => {
+              e.preventDefault();
+              const messages = [
+                chat.messages.map(({ role, content }) => ({ role, content })),
+                chat.response.content ? [{ role: "assistant", content: chat.response.content }] : [],
+                chat.response.tool_calls?.map((toolCall) => ({ role: "tool", content: toolCall })),
+              ].flat();
+              submit(
+                {
+                  runExperiment: messages as any,
+                },
+                {
+                  method: "post",
+                  action: "/gateway",
+                  encType: "application/json",
+                  navigate: false,
+                },
+              );
+            }}>
+            Start experiment
+          </button>
+          <button
+            type="submit"
+            onClick={(e) => {
+              e.preventDefault();
+              navigator.clipboard.writeText(JSON.stringify(chat.messages));
+            }}>
+            Copy to clipboard
+          </button>
+        </div>
       </aside>
     </>
   );

@@ -1,81 +1,92 @@
-import { ActionFunctionArgs, json, LoaderFunctionArgs, redirect } from "@remix-run/node";
+import { ActionFunctionArgs, json, LoaderFunctionArgs } from "@remix-run/node";
 import { useLoaderData, useParams, useSubmit } from "@remix-run/react";
-import { Debugger } from "~/dbg";
-import { appendToRun, ExperimentCursor, getExperimentAtom, Message, store, voidAtom } from "~/state/common";
-import { Message as MessageComponent } from "~/style";
-import { portalSubscription } from "./portal";
+import { atom, useAtom } from "jotai";
 import { atomEffect } from "jotai-effect";
-import { useAtom } from "jotai";
-import { useMemo } from "react";
-
-export async function loader({ params: { id, runId }, request }: LoaderFunctionArgs) {
-  if (!id || !runId) {
-    return redirect("/");
-  }
-
-  const experiment = store.get(getExperimentAtom({ id, runId }));
-  // if (request.headers.get("accept") === "text/event-stream") {
-  //   return eventStream(request.signal, function setup(send) {
-  //     const unsubMap = new Map<string, () => void>();
-  //     for (const [key, atom] of Object.entries({ experimentAtom })) {
-  //       const unsub = store.sub(atom, () => {
-  //         const data = store.get(atom as any);
-  //         send({ data: JSON.stringify(data), event: key });
-  //       });
-  //       unsubMap.set(key, unsub);
-  //     }
-
-  //     return () => {
-  //       for (const unsub of unsubMap.values()) {
-  //         unsub();
-  //       }
-  //     };
-  //   });
-  // }
-  if (id && runId) {
-    return json({ id, runId, experiment });
-  }
-  return json({ id, runId, experiment: [] as Message[] });
-}
+import { useHydrateAtoms } from "jotai/utils";
+import { DEBUG } from "~/const";
+import { Debugger } from "~/dbg";
+import {
+  appendToRun,
+  ExperimentCursor,
+  getExperimentAtom,
+  intervalAppend,
+  Message,
+  store
+} from "~/state/common";
+import { Message as MessageComponent } from "~/style";
 
 const Msg = ({ message }: { message: Message }) => {
   return (
-    <MessageComponent role={message.role}>
+    <MessageComponent role={message.role} fromServer={message.fromServer} isSelected={false}>
       {typeof message.content === "string" ? <code>{message.content}</code> : <Debugger>{message.content}</Debugger>}
     </MessageComponent>
   );
 };
 
-// const sseSubscriptionEffect = atomEffect((get, set) => {
-//   const source = new EventSource(window.location.href);
-//   for (const keyVal of Object.entries(entangledAtoms)) {
-// 	const [key, atom] = keyVal;
-// 	source.addEventListener(key, (event) => {
-// 	  set(atom as any, JSON.parse(event.data));
-// 	});
-//   }
-//   return () => {
-// 	source.close();
-//   }
-// });
+const cursor = atom<ExperimentCursor | null>(null);
+const experimentAtom = atom<Message[]>([]);
+const atoms = {
+  cursor,
+  experiment: experimentAtom,
+  laughingAtom: atom(null, (get, set, cursor: ExperimentCursor) => {
+    const idx = set(appendToRun, cursor, [{ role: "assistant", content: "" }]);
+    set(intervalAppend, cursor, idx);
+  }),
+};
+export async function loader({ request, params: { id, runId } }: LoaderFunctionArgs) {
+  let values: Partial<Record<keyof typeof atoms, any>> = {};
+  if (id && runId) {
+    values["experiment"] = store.get(getExperimentAtom({ id, runId }));
+  }
+  if (DEBUG) {
+    console.log("server>batch", values);
+  }
+  return json(values);
+}
+const subscription = atomEffect((get, set) => {
+  const { id, runId } = get(cursor) ?? {};
+  const url = `/experiment/${id}/${runId}/sse`;
+  const source = new EventSource(url);
+  const atoms = {
+    experiment: experimentAtom,
+  };
+  for (const keyVal of Object.entries(atoms)) {
+    const [key, atom] = keyVal;
+    source.addEventListener(key, (event) => {
+      console.log(`${url}>client/sse`, { [key]: JSON.parse(event.data) });
+      
+      store.set(atom as any, JSON.parse(event.data));
+    });
+  }
+  source.onerror = (event) => {
+    console.error(event);
+  };
+  return () => {
+    source.close();
+  };
+});
 
-// export const action = async ({ request, params: { id, runId } }: ActionFunctionArgs) => {
-//   const body = await request.json();
-//   store.set(appendToRun, { id: id!, runId: runId! }, [{ role: "assistant", content: "Are you still there?" }]);
-//   return json({ result: "ok" });
-// };
+export const action = async ({ request, params: { id, runId } }: ActionFunctionArgs) => {
+  const body = await request.json();
+  store.set(appendToRun, { id: id!, runId: runId! }, [{ role: "assistant", content: "Are you still there?" }]);
+  return json({ result: "ok" });
+};
 
 export default function Experiment() {
-  const { experiment } = useLoaderData<typeof loader>();
-  const { id, runId } = useParams();
   const submit = useSubmit();
+  const { id, runId } = useParams();
+  const loaderData = useLoaderData<typeof loader>();
+  useHydrateAtoms([[cursor, { id, runId }] as any, [experimentAtom, loaderData.experiment] as any]);
+  const [experiment] = useAtom(experimentAtom);
+  console.log("experiment", experiment);
+  useAtom(subscription);
   return (
     <>
       <div>
         <h1>
           Experiment {id}.{runId}
         </h1>
-        {experiment?.map((message, idx) => (
+        {experiment?.map((message: Message, idx: number) => (
           <Msg key={idx} message={message} />
         ))}
       </div>
@@ -104,22 +115,6 @@ export default function Experiment() {
             });
           }}>
           Send it
-        </button>
-        <button
-          type="submit"
-          onClick={(e) => {
-            e.preventDefault();
-            submit(
-              { deleteExperiment: id! },
-              {
-                method: "post",
-                action: "/gateway",
-                encType: "application/json",
-                navigate: false,
-              },
-            );
-          }}>
-          Delete it
         </button>
       </aside>
     </>
