@@ -6,33 +6,25 @@ import { useEditor } from "./_editor";
 import { createPortal } from "react-dom";
 import { useSidebar } from "~/navigation";
 import {} from "~/state/client";
-import { entangledAtoms, experimentIdsAtom, Message, store, tokenAtom } from "~/state/common";
+import {
+  entangledAtoms,
+  experimentIdsAtom,
+  Message,
+  newChatAtom,
+  store,
+  templatesAtom,
+  tokenAtom,
+} from "~/state/common";
 import { bs, Message as MessageComponent, Paragraph } from "~/style";
 import { Atom, atom, useAtom, useAtomValue, useSetAtom, WritableAtom } from "jotai";
 import { ReactNode, useRef, useState } from "react";
-import { Debugger } from "~/dbg";
+import { ColorPicker, View } from "~/dbg";
 import styled from "@emotion/styled";
 import { focusAtom } from "jotai-optics";
+import { createAction } from "~/createLoader";
+import { ActionFunctionArgs } from "@remix-run/node";
 
 export { defaultMeta as meta } from "~/meta";
-
-const newChatAtom = atom<Message[]>([
-  // { role: "system", content: "You are a web server and you respond to incoming request with HTTP response" },
-  // { role: "user", content: "GET /index.html" },
-  ...([
-    {
-      role: "system",
-      content:
-        'You are an expert QA Engineer, a thorough API tester, and a code debugging assistant for web APIs that use Hono,\na typescript web framework similar to express. You have a generally hostile disposition.\n\nYou need to help craft requests to route handlers.\n\nYou will be provided the source code of a route handler for an API route, and you should generate\nquery parameters, a request body, and headers that will test the request.\n\nBe clever and creative with test data. Avoid just writing things like "test".\n\nFor example, if you get a route like `/users/:id`, you should return a filled-in "path" field,\nlike `/users/1234567890` and a "pathParams" field like:\n\n{ "path": "/users/1234567890", "pathParams": { "key": ":id", "value": "1234567890" } }\n\n*Remember to keep the colon in the pathParam key!*\n\nIf you get a route like `POST /users/:id` with a handler like:\n\n```ts\nasync (c) => {\nconst token = c.req.headers.get("authorization")?.split(" ")[1]\n\nconst auth = c.get("authService");\nconst isAuthorized = await auth.isAuthorized(token)\nif (!isAuthorized) {\nreturn c.json({ message: "Unauthorized" }, 401)\n}\n\nconst db = c.get("db");\n\nconst id = c.req.param(\'id\');\nconst { email } = await c.req.json()\n\nconst user = (await db.update(user).set({ email }).where(eq(user.id, +id)).returning())?.[0];\n\nif (!user) {\nreturn c.json({ message: \'User not found\' }, 404);\n}\n\nreturn c.json(user);\n}\n```\n\nYou should return a filled-in "path" field like `/users/1234567890` and a "pathParams" field like:\n\n{ "path": "/users/1234567890", "pathParams": { "key": ":id", "value": "1234567890" } }\n\nand a header like:\n\n{ "headers": { "key": "authorization", "value": "Bearer admin" } }\n\nand a body like:\n\n{ "body": { "email": "" } }\n\nYou should focus on trying to break things. You are a QA.\n\nYou are the enemy of bugs. To protect quality, you must find bugs.\n\nTry strategies like specifying invalid data, missing data, or invalid data types (e.g., using strings instead of numbers).\n\nTry to break the system. But do not break yourself!\nKeep your responses to a reasonable length. Including your random data.\n\nUse the tool "make_request". Always respond in valid JSON.\n***Don\'t make your responses too long, otherwise we cannot parse your JSON response.***',
-    },
-    {
-      role: "user",
-      content:
-        'I need to make a request to one of my Hono api handlers.\n\nHere are some recent requests and responses, which you can use as inspiration for future requests.\n\n<history>\n<request>\nHTTP/1.1 GET http://localhost:8787/api/geese/50?shouldHonk=true\n\n\n</request>\n<response>\nHTTP/1.1 200\naccess-control-allow-origin: *\ncache-control: no-cache\ncontent-encoding: gzip\ncontent-type: application/json; charset=UTF-8\ntransfer-encoding: chunked\nx-fpx-trace-id: lysorpel-ti6tb32sr8-yh9gmw1io5\n\n{"id":50,"name":"Legolas","description":"A person named Legolas who talks like a Goose","isFlockLeader":false,"programmingLanguage":"JavaScript","motivations":"Protect the Woodland Realm","location":"Mirkwood","bio":null,"imageUrl":null,"createdAt":"2024-07-19T12:37:51.171Z","updatedAt":"2024-07-19T12:37:51.171Z"}\n</response>\n<request>\nHTTP/1.1 GET http://localhost:8787/api/geese/:id?shouldHonk=true\n\n\n</request>\n<response>\nHTTP/1.1 500\naccess-control-allow-origin: *\ncache-control: no-cache\ncontent-encoding: gzip\ncontent-type: text/plain; charset=UTF-8\ntransfer-encoding: chunked\nx-fpx-trace-id: lysorfct-oh9f84k8isc-4dq5dw1f2mn\n\nInternal Server Error\n</response>\n<request>\nHTTP/1.1 POST http://localhost:8787/api/geese?shouldHonk=true\n\n[object Object]\n</request>\n<response>\nHTTP/1.1 200\naccess-control-allow-origin: *\ncache-control: no-cache\ncontent-encoding: gzip\ncontent-type: application/json; charset=UTF-8\ntransfer-encoding: chunked\nx-fpx-trace-id: lysoqzkk-he3wda0qu75-li4j68949ji\n\n{"id":50,"name":"Legolas","description":"A person named Legolas who talks like a Goose","isFlockLeader":false,"programmingLanguage":"JavaScript","motivations":"Protect the Woodland Realm","location":"Mirkwood"}\n</response>\n<request>\nHTTP/1.1 GET http://localhost:8787/?shouldHonk=true\n\n\n</request>\n<response>\nHTTP/1.1 200\naccess-control-allow-origin: *\ncontent-encoding: gzip\ncontent-type: text/plain; charset=UTF-8\ntransfer-encoding: chunked\nx-fpx-trace-id: lysoqltw-95awpl8bcl-xcf33kz7hap\n\nHello Goose Quotes! Honk honk!\n</response>\n<request>\nHTTP/1.1 GET http://localhost:8787/\n\n\n</request>\n<response>\nHTTP/1.1 200\naccess-control-allow-origin: *\ncontent-encoding: gzip\ncontent-type: text/plain; charset=UTF-8\ntransfer-encoding: chunked\nx-fpx-trace-id: lysoq0rn-7mslzu1d726-qinowhxizn\n\nHello Goose Quotes!\n</response>\n</history>\n\nThe request you make should be a GET request to route: /api/geese/:id\n\nHere is the code for the handler:\nasync (c) => {\n  const sql2 = zs(c.env.DATABASE_URL);\n  const db = drizzle(sql2);\n  const id = c.req.param("id");\n  const goose = (await db.select().from(geese).where(eq(geese.id, +id)))?.[0];\n  if (!goose) {\n    return c.json({ message: "Goose not found" }, 404);\n  }\n  return c.json(goose);\n}\n\nREMEMBER YOU ARE A QA. MISUSE THE API. BUT DO NOT MISUSE YOURSELF.\nKeep your responses short-ish. Including your random data.',
-    },
-  ] as const),
-  { role: "tool", content: "makeRequestTool" },
-]);
 
 type Path = [number] | [number, string];
 const selectionAtom = atom<Path | null>(null);
@@ -95,6 +87,16 @@ export const loader = async () => {
   return json({ hasResolvedToken: Boolean(token), experimentIds });
 };
 
+export const action = async ({ request }: ActionFunctionArgs) => {
+  const body = await request.json();
+  for (const [key, value] of Object.entries(body)) {
+    if (value) {
+      store.set(templatesAtom, (prev) => ({ ...prev, [key]: value }));
+    }
+  }
+  return json({ result: "ok" });
+};
+
 function comparePaths(a: Path, b: Path) {
   if (!b || a.length !== b.length) {
     return false;
@@ -108,7 +110,7 @@ function comparePaths(a: Path, b: Path) {
 }
 
 function MessageView({
-  message,
+  message: _message,
   selector,
   ...rest
 }: { message: Message; selector: Path } & React.HTMLAttributes<HTMLDivElement>) {
@@ -116,10 +118,21 @@ function MessageView({
   const Editor = useEditor();
   const setter = useSetAtom(lensAtom);
   const [index] = selector;
+  const templates = useAtomValue(templatesAtom);
+
+  const message = { ..._message };
+  for (const [name, template] of Object.entries(templates ?? {})) {
+    if (message.content === template.content && message.role === template.role) {
+      message.content = name;
+      message.template = true;
+    }
+  }
 
   const ref = useRef<null | HTMLElement>(null);
 
   let innerContent: ReactNode;
+
+  let contentType: string | undefined;
 
   if (selection && comparePaths(selector, selection) && Editor) {
     const [{ height }] = ref.current?.getClientRects() ?? [{ height: baseHeight }];
@@ -134,11 +147,16 @@ function MessageView({
       </Editor>
     );
   }
-  if (typeof message.content === "string" && message.content) {
-    innerContent ??= <code>{message.content}</code>;
-  }
-  if (typeof message.content === "object") {
-    innerContent ??= <Debugger>{message.content}</Debugger>;
+  if (["string", "object"].includes(typeof message.content)) {
+    contentType = message.template ? "template" : typeof message.content;
+    innerContent ??= (
+      <View
+        style={{
+          float: message.fromServer ? "right" : "left",
+        }}>
+        {message.content}
+      </View>
+    );
   }
   innerContent ??= <code>{"<Empty>"}</code>;
 
@@ -146,6 +164,7 @@ function MessageView({
     <MessageComponent
       ref={ref}
       role={message.role}
+      contentType={contentType}
       isSelected={index === selection?.[0]}
       onClick={() => {
         if (selection?.length === 2) return;
@@ -197,62 +216,12 @@ const Aside = styled.aside`
   }
 `;
 
-function ColorPicker() {
-  const [c1, setC1] = useState(0.372);
-  const [c2, setC2] = useState(0.903);
-  const [c3, setC3] = useState(0.775);
-  const [a, setA] = useState(1.0);
-  const color = `color(display-p3 ${c1} ${c2} ${c3} / ${a})`;
-  return (
-    <>
-      <div>
-        <button type="submit" style={{ backgroundColor: color }}>
-          system
-        </button>
-      </div>
-      <div>
-        <input
-          type="range"
-          value={c1}
-          onChange={(e) => setC1(parseFloat(e.target.value))}
-          min={0}
-          max={1}
-          step={0.01}
-        />
-      </div>
-      <div>
-        <input
-          type="range"
-          value={c2}
-          onChange={(e) => setC2(parseFloat(e.target.value))}
-          min={0}
-          max={1}
-          step={0.01}
-        />
-      </div>
-      <div>
-        <input
-          type="range"
-          value={c3}
-          onChange={(e) => setC3(parseFloat(e.target.value))}
-          min={0}
-          max={1}
-          step={0.01}
-        />
-      </div>
-      <div>
-        <input type="range" value={a} onChange={(e) => setA(parseFloat(e.target.value))} min={0} max={1} step={0.01} />
-      </div>
-    </>
-  );
-}
-
 export default function Index() {
   const { hasResolvedToken, experimentIds } = useLoaderData<typeof loader>();
   const sidebar = useSidebar();
   const submit = useSubmit();
   const [chat, setChat] = useAtom(newChatAtom);
-  const selection = useAtomValue(selectionAtom);
+  const [selection, setSelection] = useAtom(selectionAtom);
   const [fooAtom] = useAtom(fooAtomAtom);
   const [role, setRole] = useAtom(fooAtom);
   if (!hasResolvedToken) {
@@ -292,7 +261,49 @@ export default function Index() {
         </div>
         {selection !== null && (
           <>
-            <h4>Role</h4>
+            <h4>This message</h4>
+            <div>
+              <button
+                type="submit"
+                onClick={(e) => {
+                  e.preventDefault();
+                  const newExperiment = chat.filter((_, idx) => idx !== selection[0]);
+                  setChat(newExperiment);
+                  setSelection(null);
+                }}>
+                delete
+              </button>
+              <button
+                type="submit"
+                onClick={async (e) => {
+                  e.preventDefault();
+                  const text = await navigator.clipboard.readText();
+                  let value: string | object = text;
+                  try {
+                    if (role === "tool") {
+                      value = JSON.parse(text);
+                    }
+                  } catch {}
+                  // @ts-ignore
+                  setChat((chat) => chat.map((msg, idx) => (idx === selection[0] ? { ...msg, content: value } : msg)));
+                }}>
+                paste
+              </button>
+              <button
+                type="submit"
+                onClick={async (e) => {
+                  e.preventDefault();
+                  const name = prompt("Name of the template");
+                  if (!name) return;
+                  submit({ [name]: chat[selection[0]] } as any, {
+                    method: "post",
+                    encType: "application/json",
+                  });
+                }}>
+                template
+              </button>
+            </div>
+            <h5>Role</h5>
             <div>
               <button
                 type="submit"

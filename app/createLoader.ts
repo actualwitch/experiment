@@ -51,7 +51,7 @@ export function createAction<T extends object>(atoms: T) {
         if (DEBUG) {
           console.log("server>action", { [key]: body[key] });
         }
-        await store.set(atom as any, body[key]);
+        await store.set(atom as any, ...body[key]);
       }
     }
     return json({ result: "ok" });

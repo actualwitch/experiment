@@ -20,7 +20,7 @@ export function createController<Key extends string, T extends Record<Key, Atom<
       const [get, set] = useAtom(atom);
       hooks[key] = [
         get,
-        (value: any) => {
+        (...value: any) => {
           if (DEBUG) {
             console.log("client>submit", { [key]: value });
           }

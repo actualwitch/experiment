@@ -33,6 +33,7 @@ export const loader = createLoader(entangledAtoms);
 
 const useController = () => {
   const serverAtoms = useLoaderData<typeof loader>();
+  console.log({ serverAtoms });
   const hydration = useMemo(() => {
     return Object.entries(serverAtoms || {}).map(([key, value]: any) => [entangledAtoms[key as keyof typeof entangledAtoms], value]) as any;
   }, []);

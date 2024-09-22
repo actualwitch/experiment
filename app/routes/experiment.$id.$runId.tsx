@@ -1,24 +1,25 @@
 import { ActionFunctionArgs, json, LoaderFunctionArgs } from "@remix-run/node";
-import { useLoaderData, useParams, useSubmit } from "@remix-run/react";
+import { useLoaderData, useNavigate, useParams, useSubmit } from "@remix-run/react";
 import { atom, useAtom } from "jotai";
 import { atomEffect } from "jotai-effect";
 import { useHydrateAtoms } from "jotai/utils";
 import { DEBUG } from "~/const";
-import { Debugger } from "~/dbg";
+import { View } from "~/dbg";
 import {
   appendToRun,
   ExperimentCursor,
   getExperimentAtom,
   intervalAppend,
   Message,
+  newChatAtom,
   store
 } from "~/state/common";
 import { Message as MessageComponent } from "~/style";
 
 const Msg = ({ message }: { message: Message }) => {
   return (
-    <MessageComponent role={message.role} fromServer={message.fromServer} isSelected={false}>
-      {typeof message.content === "string" ? <code>{message.content}</code> : <Debugger>{message.content}</Debugger>}
+    <MessageComponent role={message.role} ioType={message.fromServer ? "output" : "input"} isSelected={false}>
+      {typeof message.content === "string" ? <code>{message.content}</code> : <View>{message.content}</View>}
     </MessageComponent>
   );
 };
@@ -76,9 +77,10 @@ export default function Experiment() {
   const submit = useSubmit();
   const { id, runId } = useParams();
   const loaderData = useLoaderData<typeof loader>();
+  const navigate = useNavigate();
   useHydrateAtoms([[cursor, { id, runId }] as any, [experimentAtom, loaderData.experiment] as any]);
   const [experiment] = useAtom(experimentAtom);
-  console.log("experiment", experiment);
+  
   useAtom(subscription);
   return (
     <>
@@ -96,14 +98,10 @@ export default function Experiment() {
           type="submit"
           onClick={(e) => {
             e.preventDefault();
-            submit({ laughingAtom: { id, runId } } as any, {
-              action: "/portal",
-              method: "post",
-              encType: "application/json",
-              navigate: false,
-            });
+            store.set(newChatAtom, experiment.filter((msg) => !msg.fromServer));
+            navigate("/");
           }}>
-          :D
+          Use in new experiment
         </button>
         <button
           type="submit"

@@ -7,7 +7,7 @@ import { focusAtom } from "jotai-optics";
 import { atomEffect } from "jotai-effect";
 
 export const getRealm = () => {
-  if (typeof window !== "undefined") {
+  if (typeof document !== "undefined") {
     return "client";
   }
   if (typeof process === "object") {
