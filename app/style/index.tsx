@@ -92,7 +92,8 @@ export const Message = styled.article<{
   ioType?: "input" | "output";
   isSelected: boolean;
 }>(({ role, ioType, contentType, isSelected }) => {
-  const align = ioType === "output" ? "right" : "left";
+  const fromServer = ioType === "output";
+  const align = fromServer ? "right" : "left";
   const isDarkMode = store.get(isDarkModeAtom);
   const styles: SerializedStyles[] = [
     css`
@@ -111,8 +112,16 @@ export const Message = styled.article<{
       &:before {
         content: "${contentType ? contentType + " ▴ " : ""}${role}";
         position: absolute;
-        transform-origin: top left;
-        transform: rotate(270deg) translate(calc(-100% - 12px), 4px);
+        ${
+          fromServer
+            ? css`
+                transform: rotate(270deg) translate(-50%, 100%);
+              `
+            : css`
+                transform-origin: top left;
+                transform: rotate(270deg) translate(calc(-100% - 12px), 4px);
+              `
+        }
         ${align}: 0;
       }
 

@@ -46,7 +46,7 @@ function asTreeNodes(input: unknown, title?: Primitive) {
     if (keys.length === 1) {
       const [key] = keys;
       const newPrefix = isNullish(title) ? key : `${title}.${key}`;
-      return asTreeNodes(input[key], newPrefix);
+      return asTreeNodes((input as Record<string, unknown>)[key], newPrefix);
     }
     const sorted = Object.entries(input).sort(([aKey, aValue], [bKey, bValue]) => {
       if (typeof aValue === "object" && typeof bValue !== "object") return 1;

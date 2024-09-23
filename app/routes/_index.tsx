@@ -3,70 +3,15 @@ import { description } from "~/meta";
 
 import styled from "@emotion/styled";
 import { ActionFunctionArgs } from "@remix-run/node";
-import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
+import { atom, useAtom, useAtomValue } from "jotai";
 import { focusAtom } from "jotai-optics";
-import { ReactNode, useRef } from "react";
-import { Editor } from "~/editor";
+import { ChatPreview, selectionAtom } from "~/chat";
 import { SidebarInput } from "~/navigation";
 import {} from "~/state/client";
-import { experimentIdsAtom, Message, newChatAtom, store, templatesAtom, tokenAtom } from "~/state/common";
-import { bs, Message as MessageComponent, Paragraph } from "~/style";
-import { View } from "~/view";
+import { experimentIdsAtom, newChatAtom, store, templatesAtom, tokenAtom } from "~/state/common";
+import { bs, Paragraph } from "~/style";
 
 export { defaultMeta as meta } from "~/meta";
-
-type Path = [number] | [number, string];
-const selectionAtom = atom<Path | null>(null);
-
-const lensAtom = atom(
-  (get) => {
-    const selection = get(selectionAtom);
-    if (selection === null) {
-      return get(newChatAtom);
-    }
-    const lens = focusAtom(newChatAtom, (o) => {
-      let foo;
-      for (const key of selection) {
-        if (typeof key === "number") {
-          foo = o.nth(key);
-        }
-        if (typeof key === "string") {
-          foo = o.prop(key);
-        }
-      }
-      if (foo) {
-        return foo;
-      }
-      throw new Error("foo is undefined");
-    });
-    return get(lens);
-  },
-  (get, set, update: unknown) => {
-    const selection = get(selectionAtom);
-    if (selection === null) {
-      set(newChatAtom, update as Message[]);
-      return;
-    }
-    const lens = focusAtom(newChatAtom, (o) => {
-      let foo: any = o;
-      for (const key of selection) {
-        if (typeof key === "number") {
-          foo = foo.nth(key);
-        }
-        if (typeof key === "string") {
-          foo = foo.prop(key);
-        }
-      }
-      if (foo) {
-        return foo;
-      }
-      throw new Error("foo is undefined");
-    });
-    set(lens, update);
-  },
-);
-
-const baseHeight = bs(6);
 
 export const loader = async () => {
   const token = await store.get(tokenAtom);
@@ -83,103 +28,6 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   }
   return json({ result: "ok" });
 };
-
-function comparePaths(a: Path, b: Path) {
-  if (!b || a.length !== b.length) {
-    return false;
-  }
-  for (let i = 0; i < a.length; i++) {
-    if (a[i] !== b[i]) {
-      return false;
-    }
-  }
-  return true;
-}
-
-function MessageView({
-  message: _message,
-  selector,
-  ...rest
-}: { message: Message; selector: Path } & React.HTMLAttributes<HTMLDivElement>) {
-  const [selection, setSelection] = useAtom(selectionAtom);
-  const setter = useSetAtom(lensAtom);
-  const [index] = selector;
-  const templates = useAtomValue(templatesAtom);
-
-  const message = { ..._message };
-  for (const [name, template] of Object.entries(templates ?? {})) {
-    if (message.content === template.content && message.role === template.role) {
-      message.content = name;
-      message.template = true;
-    }
-  }
-
-  const ref = useRef<null | HTMLElement>(null);
-
-  let innerContent: ReactNode;
-
-  let contentType: string | undefined;
-
-  if (selection && comparePaths(selector, selection)) {
-    const [{ height }] = ref.current?.getClientRects() ?? [{ height: baseHeight }];
-    innerContent ??= (
-      <Editor
-        minHeight={height}
-        setValue={(value) => {
-          setter(value);
-          setSelection(null);
-        }}>
-        {message.content}
-      </Editor>
-    );
-  }
-  if (["string", "object"].includes(typeof message.content)) {
-    contentType = message.template ? "template" : typeof message.content;
-    innerContent ??= (
-      <View
-        style={{
-          float: message.fromServer ? "right" : "left",
-        }}>
-        {message.content}
-      </View>
-    );
-  }
-  innerContent ??= <code>{"<Empty>"}</code>;
-
-  return (
-    <MessageComponent
-      ref={ref}
-      role={message.role}
-      contentType={contentType}
-      isSelected={index === selection?.[0]}
-      onClick={() => {
-        if (selection?.length === 2) return;
-        setSelection([selector[0]]);
-      }}
-      onDoubleClick={() => setSelection(selector)}
-      {...rest}>
-      {innerContent}
-    </MessageComponent>
-  );
-}
-
-const ChatContainer = styled.div`
-  & > * {
-    min-height: ${baseHeight}}
-  }
-`;
-
-function ChatPreview() {
-  const [chat, setChat] = useAtom(newChatAtom);
-
-  return (
-    <ChatContainer>
-      {chat?.map?.((message, index) => {
-        return <MessageView key={index} message={message} selector={[index, "content"]} />;
-      })}
-    </ChatContainer>
-  );
-}
 
 const fooAtomAtom = atom((get) => {
   const selection = get(selectionAtom);
@@ -207,7 +55,7 @@ export default function Index() {
   const submit = useSubmit();
   const [chat, setChat] = useAtom(newChatAtom);
   const [selection, setSelection] = useAtom(selectionAtom);
-  const [fooAtom] = useAtom(fooAtomAtom);
+  const fooAtom = useAtomValue(fooAtomAtom);
   const [role, setRole] = useAtom(fooAtom);
   if (!hasResolvedToken) {
     return (
@@ -219,7 +67,7 @@ export default function Index() {
   }
   return (
     <>
-      <ChatPreview />
+      <ChatPreview chatAtom={newChatAtom} />
       <Aside>
         <h3>Actions</h3>
         <div>

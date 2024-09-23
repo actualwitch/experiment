@@ -3,6 +3,8 @@ import { DEBUG } from "~/const";
 import { eventStream } from "~/eventStream";
 import { getExperimentAtom, store } from "~/state/common";
 
+export { defaultMeta as meta } from "~/meta";
+
 export async function loader({ request, params: { id, runId } }: LoaderFunctionArgs) {
   if (!id || !runId) {
     throw new Error("Invalid id or runId");

@@ -1,11 +1,11 @@
 import { useNavigate, useSubmit } from "@remix-run/react";
 import { useAtom, useSetAtom } from "jotai";
 import { useEffect } from "react";
+import { ChatContainer, ChatMessage } from "~/chat";
 import { SidebarInput } from "~/navigation";
 
 import { expandedChatIds, filenames, importsRegistry, processCsvAtom, selectedChat } from "~/state/client";
 import { newChatAtom, store } from "~/state/common";
-import { Main, Message } from "~/style";
 
 export { defaultMeta as meta } from "~/meta";
 
@@ -91,28 +91,18 @@ function Imports() {
   const [filename, idx] = selected;
   if (typeof idx !== "number") return <p>Invalid selection</p>;
   const chat = registry[filename][idx];
+  const experiment = [
+    ...chat.messages,
+    ...(chat.response.content ? [{ ...chat.response, role: "assistant", fromServer: true }] : []),
+    ...(chat.response.tool_calls || []).map((toolCall) => ({ content: toolCall, role: "tool", fromServer: true })),
+  ];
   return (
     <>
-      <Main>
-        {chat.messages.map((message, idx) => (
-          <Message key={idx} role={message.role} isSelected={false}>
-            <code>{message.content}</code>
-          </Message>
-        ))}
-        {chat.response.content && (
-          <Message key="response" role={chat.response.role} isSelected={false}>
-            <code>{chat.response.content}</code>
-          </Message>
-        )}
-
-        {chat.response.tool_calls?.map((toolCall, idx) => {
-          return (
-            <Message key={"tool" + idx} role="tool" isSelected={false}>
-              <code>{JSON.stringify(toolCall, null, 2)}</code>
-            </Message>
-          );
+      <ChatContainer>
+        {experiment?.map?.((message, index) => {
+          return <ChatMessage key={index} message={message} index={index} />;
         })}
-      </Main>
+      </ChatContainer>
       <aside>
         <h3>Actions</h3>
         <div>

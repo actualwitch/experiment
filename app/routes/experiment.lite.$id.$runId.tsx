@@ -1,7 +1,13 @@
 import { json, LoaderFunctionArgs } from "@remix-run/node";
 import { useLoaderData, useNavigate, useParams, useSubmit } from "@remix-run/react";
-import { getExperimentAtom, newChatAtom, store } from "~/state/common";
-import { renderMessage } from "./experiment";
+import { atom, useAtom } from "jotai";
+import { useEffect } from "react";
+import { ChatPreview } from "~/chat";
+import { getExperimentAtom, Message, newChatAtom, store } from "~/state/common";
+
+export { defaultMeta as meta } from "~/meta";
+
+const experimentAtom = atom<Message[]>([]);
 
 export async function loader({ request, params: { id, runId } }: LoaderFunctionArgs) {
   if (id && runId) {
@@ -14,6 +20,11 @@ export default function Experiment() {
   const submit = useSubmit();
   const { id, runId } = useParams();
   const { experiment } = useLoaderData<typeof loader>();
+  useEffect(() => {
+    if (experiment) {
+      store.set(experimentAtom, experiment);
+    }
+  }, [experiment]);
   const navigate = useNavigate();
   return (
     <>
@@ -21,7 +32,7 @@ export default function Experiment() {
         <h1>
           Experiment {id}.{runId}
         </h1>
-        {experiment?.map(renderMessage)}
+        <ChatPreview chatAtom={experimentAtom} />
       </div>
       <aside>
         <h3>Actions</h3>

@@ -20,6 +20,9 @@ function portalIO() {
     useEffect(() => {
       setElement(ref.current);
     }, [ref.current]);
+    useEffect(() => () => {
+      setElement(null);
+    }, []);
     return <div ref={ref} />;
   }
 

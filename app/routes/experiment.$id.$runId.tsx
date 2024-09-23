@@ -2,17 +2,12 @@ import { ActionFunctionArgs, json, LoaderFunctionArgs } from "@remix-run/node";
 import { useLoaderData, useNavigate, useParams, useSubmit } from "@remix-run/react";
 import { atom, useAtom } from "jotai";
 import { atomEffect } from "jotai-effect";
-import { useHydrateAtoms } from "jotai/utils";
+import { useEffect } from "react";
+import { ChatPreview } from "~/chat";
 import { DEBUG } from "~/const";
-import {
-  appendToRun,
-  ExperimentCursor,
-  getExperimentAtom,
-  Message,
-  newChatAtom,
-  store
-} from "~/state/common";
-import { renderMessage } from "./experiment";
+import { appendToRun, ExperimentCursor, getExperimentAtom, Message, newChatAtom, store } from "~/state/common";
+
+export { defaultMeta as meta } from "~/meta";
 
 const cursor = atom<ExperimentCursor | null>(null);
 const experimentAtom = atom<Message[]>([]);
@@ -41,7 +36,7 @@ const subscription = atomEffect((get, set) => {
     const [key, atom] = keyVal;
     source.addEventListener(key, (event) => {
       console.log(`${url}>client/sse`, { [key]: JSON.parse(event.data) });
-      
+
       store.set(atom as any, JSON.parse(event.data));
     });
   }
@@ -63,10 +58,13 @@ export default function Experiment() {
   const submit = useSubmit();
   const { id, runId } = useParams();
   const loaderData = useLoaderData<typeof loader>();
+  useEffect(() => {
+    if (loaderData.experiment) {
+      store.set(experimentAtom, loaderData.experiment);
+    }
+  }, []);
   const navigate = useNavigate();
-  useHydrateAtoms([[cursor, { id, runId }] as any, [experimentAtom, loaderData.experiment] as any]);
-  const [experiment] = useAtom(experimentAtom);
-  
+
   useAtom(subscription);
   return (
     <>
@@ -74,7 +72,7 @@ export default function Experiment() {
         <h1>
           Experiment {id}.{runId}
         </h1>
-        {experiment?.map(renderMessage)}
+        <ChatPreview chatAtom={experimentAtom} />
       </div>
       <aside>
         <h3>Actions</h3>
@@ -82,7 +80,11 @@ export default function Experiment() {
           type="submit"
           onClick={(e) => {
             e.preventDefault();
-            store.set(newChatAtom, experiment.filter((msg) => !msg.fromServer));
+            const experiment = store.get(experimentAtom);
+            store.set(
+              newChatAtom,
+              experiment.filter((msg) => !msg.fromServer),
+            );
             navigate("/");
           }}>
           Use in new experiment
@@ -91,6 +93,7 @@ export default function Experiment() {
           type="submit"
           onClick={(e) => {
             e.preventDefault();
+            const experiment = store.get(experimentAtom);
             submit(experiment as any, {
               method: "post",
               encType: "application/json",
