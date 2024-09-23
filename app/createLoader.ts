@@ -32,6 +32,8 @@ export function createStreamLoader<T extends object>(atoms: T) {
           send({ data: JSON.stringify(data), event: key });
         });
         unsubMap.set(key, unsub);
+        const data = store.get(atom as any);
+        send({ data: JSON.stringify(data), event: key });
       }
 
       return () => {

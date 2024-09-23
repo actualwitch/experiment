@@ -1,18 +1,35 @@
 import styled from "@emotion/styled";
 import { NavLink } from "@remix-run/react";
-import { useEffect, useState } from "react";
+import { ReactNode, useEffect, useRef, useState } from "react";
 import { bs } from "./style";
+import { atom, useAtom } from "jotai";
+import { store } from "./state/common";
+import { createPortal } from "react-dom";
 
 const elementId = "sidebar";
 
-export function useSidebar() {
-  const [sidebar, setSidebar] = useState<HTMLElement | null>(null);
-  useEffect(() => {
-    setSidebar(document.getElementById(elementId));
-  }, []);
+function portalIO() {
+  const elementAtom = atom<null | HTMLElement>(null);
 
-  return sidebar;
+  function Input({ children }: { children: ReactNode }) {
+    const [element, setElement] = useAtom(elementAtom);
+
+    return element ? createPortal(children, element) : null;
+  }
+
+  function Output() {
+    const [element, setElement] = useAtom(elementAtom);
+    const ref = useRef<HTMLDivElement | null>(null);
+    useEffect(() => {
+      setElement(ref.current);
+    }, [ref.current]);
+    return <div ref={ref} />;
+  }
+
+  return [Input, Output] as const;
 }
+
+export const [SidebarInput, SidebarOutput] = portalIO();
 
 const Navigation = styled.nav`
   padding: ${bs()};
@@ -33,7 +50,7 @@ export const NavigationSidebar = () => {
       <h2>
         🔧 <NavLink to="/configure">Parameters</NavLink>
       </h2>
-      <div id={elementId} />
+      <SidebarOutput />
     </Navigation>
   );
 };

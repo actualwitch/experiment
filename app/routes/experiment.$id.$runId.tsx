@@ -9,7 +9,6 @@ import {
   appendToRun,
   ExperimentCursor,
   getExperimentAtom,
-  intervalAppend,
   Message,
   newChatAtom,
   store
@@ -29,10 +28,6 @@ const experimentAtom = atom<Message[]>([]);
 const atoms = {
   cursor,
   experiment: experimentAtom,
-  laughingAtom: atom(null, (get, set, cursor: ExperimentCursor) => {
-    const idx = set(appendToRun, cursor, [{ role: "assistant", content: "" }]);
-    set(intervalAppend, cursor, idx);
-  }),
 };
 export async function loader({ request, params: { id, runId } }: LoaderFunctionArgs) {
   let values: Partial<Record<keyof typeof atoms, any>> = {};

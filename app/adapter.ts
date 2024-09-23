@@ -25,16 +25,13 @@ export const experimentToAnthropic = (experiment: Message[]): MessageCreateParam
     }
     if (role === "tool") {
       let thisTool = content;
-      if (content === "makeRequestTool") {
-        thisTool = makeRequestTool;
-      }
       
       if (typeof thisTool === "object") {
         const tool = thisTool as typeof makeRequestTool;
         tools.push({
           name: tool?.function?.name ?? "Unnamed tool",
           description: tool?.function?.description ?? "No description",
-          input_schema: tool?.function?.parameters ?? {},
+          input_schema: tool?.function?.parameters,
         });
       }
     }

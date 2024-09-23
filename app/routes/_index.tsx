@@ -1,28 +1,18 @@
-import { json, NavLink, useFetcher, useLoaderData, useSubmit } from "@remix-run/react";
+import { json, NavLink, useLoaderData, useSubmit } from "@remix-run/react";
 import { description } from "~/meta";
 
-import { useEditor } from "./_editor";
-
-import { createPortal } from "react-dom";
-import { useSidebar } from "~/navigation";
-import {} from "~/state/client";
-import {
-  entangledAtoms,
-  experimentIdsAtom,
-  Message,
-  newChatAtom,
-  store,
-  templatesAtom,
-  tokenAtom,
-} from "~/state/common";
-import { bs, Message as MessageComponent, Paragraph } from "~/style";
-import { Atom, atom, useAtom, useAtomValue, useSetAtom, WritableAtom } from "jotai";
-import { ReactNode, useRef, useState } from "react";
-import { ColorPicker, View } from "~/dbg";
 import styled from "@emotion/styled";
-import { focusAtom } from "jotai-optics";
-import { createAction } from "~/createLoader";
 import { ActionFunctionArgs } from "@remix-run/node";
+import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
+import { focusAtom } from "jotai-optics";
+import { ReactNode, useRef } from "react";
+import { createPortal } from "react-dom";
+import { View } from "~/dbg";
+import { Editor } from "~/editor";
+import { SidebarInput } from "~/navigation";
+import {} from "~/state/client";
+import { experimentIdsAtom, Message, newChatAtom, store, templatesAtom, tokenAtom } from "~/state/common";
+import { bs, Message as MessageComponent, Paragraph } from "~/style";
 
 export { defaultMeta as meta } from "~/meta";
 
@@ -35,7 +25,6 @@ const lensAtom = atom(
     if (selection === null) {
       return get(newChatAtom);
     }
-    // @ts-ignore
     const lens = focusAtom(newChatAtom, (o) => {
       let foo;
       for (const key of selection) {
@@ -43,7 +32,6 @@ const lensAtom = atom(
           foo = o.nth(key);
         }
         if (typeof key === "string") {
-          // @ts-ignore
           foo = o.prop(key);
         }
       }
@@ -115,7 +103,6 @@ function MessageView({
   ...rest
 }: { message: Message; selector: Path } & React.HTMLAttributes<HTMLDivElement>) {
   const [selection, setSelection] = useAtom(selectionAtom);
-  const Editor = useEditor();
   const setter = useSetAtom(lensAtom);
   const [index] = selector;
   const templates = useAtomValue(templatesAtom);
@@ -134,7 +121,7 @@ function MessageView({
 
   let contentType: string | undefined;
 
-  if (selection && comparePaths(selector, selection) && Editor) {
+  if (selection && comparePaths(selector, selection)) {
     const [{ height }] = ref.current?.getClientRects() ?? [{ height: baseHeight }];
     innerContent ??= (
       <Editor
@@ -158,7 +145,7 @@ function MessageView({
       </View>
     );
   }
-  innerContent ??= (<code>{"<Empty>"}</code>);
+  innerContent ??= <code>{"<Empty>"}</code>;
 
   return (
     <MessageComponent
@@ -218,7 +205,6 @@ const Aside = styled.aside`
 
 export default function Index() {
   const { hasResolvedToken, experimentIds } = useLoaderData<typeof loader>();
-  const sidebar = useSidebar();
   const submit = useSubmit();
   const [chat, setChat] = useAtom(newChatAtom);
   const [selection, setSelection] = useAtom(selectionAtom);
@@ -335,22 +321,18 @@ export default function Index() {
           </>
         )}
       </Aside>
-      {sidebar &&
-        createPortal(
-          <>
-            <h3>Experiments</h3>
-            <ul>
-              {experimentIds.map(([id, subId]) => (
-                <li key={id + subId}>
-                  <NavLink to={`/experiment/${id}/${subId}`}>
-                    Experiment #{id}/{subId}
-                  </NavLink>
-                </li>
-              ))}
-            </ul>
-          </>,
-          sidebar,
-        )}
+      <SidebarInput>
+        <h3>Experiments</h3>
+        <ul>
+          {experimentIds.map(([id, subId]) => (
+            <li key={id + subId}>
+              <NavLink to={`/experiment/${id}/${subId}`}>
+                Experiment #{id}/{subId}
+              </NavLink>
+            </li>
+          ))}
+        </ul>
+      </SidebarInput>
     </>
   );
 }

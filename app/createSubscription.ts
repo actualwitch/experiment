@@ -8,11 +8,9 @@ export function createSubscription<T extends object>(url: string, atoms: T) {
     for (const keyVal of Object.entries(atoms)) {
       const [key, atom] = keyVal;
       source.addEventListener(key, (event) => {
-        console.log(`${url}>client/sse`, {[key]: JSON.parse(event.data)});
-        setTimeout(() => {
+        console.log(`${url}>client/sse`, { [key]: JSON.parse(event.data) });
 
         set(atom as any, JSON.parse(event.data));
-        }, 100);
       });
     }
     source.onerror = (event) => {

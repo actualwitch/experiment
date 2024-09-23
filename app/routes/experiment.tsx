@@ -1,7 +1,7 @@
 import { NavLink, Outlet, useLoaderData } from "@remix-run/react";
 import { useAtom } from "jotai";
 import { createPortal } from "react-dom";
-import { useSidebar } from "~/navigation";
+import { SidebarInput } from "~/navigation";
 import { experimentIdsAtom, store } from "~/state/common";
 
 export const loader = async () => {
@@ -9,28 +9,23 @@ export const loader = async () => {
 };
 
 export default function Experiment() {
-  const sidebar = useSidebar();
   //   const [experimentIds] = useAtom(experimentIdsAtom);
   const { experimentIds } = useLoaderData<typeof loader>();
   return (
     <>
       <Outlet />
-      {sidebar &&
-        createPortal(
-          <>
-            <h3>Experiments</h3>
-            <ul>
-              {experimentIds.map(([id, subId]) => (
-                <li key={id}>
-                  <NavLink to={`/experiment/lite/${id}/${subId}`}>
-                    Experiment #{id}.{subId}
-                  </NavLink>
-                </li>
-              ))}
-            </ul>
-          </>,
-          sidebar,
-        )}
+      <SidebarInput>
+        <h3>Experiments</h3>
+        <ul>
+          {experimentIds.map(([id, subId]) => (
+            <li key={id}>
+              <NavLink to={`/experiment/lite/${id}/${subId}`}>
+                Experiment #{id}.{subId}
+              </NavLink>
+            </li>
+          ))}
+        </ul>
+      </SidebarInput>
     </>
   );
 }

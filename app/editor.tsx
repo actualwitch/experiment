@@ -1,7 +1,7 @@
 import { useAtom } from "jotai";
-import * as monaco from "monaco-editor";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { isDarkModeAtom, store } from "./state/common";
+import { atomEffect } from "jotai-effect";
+import { useMemo, useRef } from "react";
+import { isDarkModeAtom } from "./state/common";
 
 export type EditorProps = {
   children?: string | object;
@@ -9,20 +9,10 @@ export type EditorProps = {
   setValue?: (value: string) => void;
 };
 
-export const Editor = ({
-  children = "",
-  minHeight = "100%",
-  setValue
-}: EditorProps) => {
+export const Editor = ({ children = "", minHeight = "100%", setValue }: EditorProps) => {
   const monacoEl = useRef<HTMLDivElement | null>(null);
-
-  const [editor, setEditor] = useState<monaco.editor.IStandaloneCodeEditor | null>(null);
-
-  useEffect(() => {
-    if (!monacoEl.current) return;
-    setEditor((editor) => {
-      if (editor) return editor;
-
+  const mountEffect = useMemo(() => {
+    return atomEffect((get, set) => {
       let value = "";
 
       if (typeof children === "object") {
@@ -32,7 +22,10 @@ export const Editor = ({
         value = children;
       }
 
-      const isDarkMode = store.get(isDarkModeAtom);
+      const isDarkMode = get(isDarkModeAtom);
+      console.log("isDarkMode", isDarkMode);
+
+      const promise = import("monaco-editor").then((monaco) => {
 
       const newEditor = monaco.editor.create(monacoEl.current!, {
         value,
@@ -55,27 +48,28 @@ export const Editor = ({
         }
       });
 
-    //   let ignoreEvent = false;
-    //   const updateHeight = () => {
-    //     const contentHeight = Math.min(1000, newEditor.getContentHeight());
-    //     if (monacoEl.current) {
-    //       monacoEl.current.style.width = `${300}px`;
-    //       monacoEl.current.style.height = `${contentHeight}px`;
-    //     }
-    //     try {
-    //       ignoreEvent = true;
-    //       newEditor.layout({ width: 300, height: contentHeight });
-    //     } finally {
-    //       ignoreEvent = false;
-    //     }
-    //   };
-    //   newEditor.onDidContentSizeChange(updateHeight);
-    //   updateHeight();
+      //   let ignoreEvent = false;
+      //   const updateHeight = () => {
+      //     const contentHeight = Math.min(1000, newEditor.getContentHeight());
+      //     if (monacoEl.current) {
+      //       monacoEl.current.style.width = `${300}px`;
+      //       monacoEl.current.style.height = `${contentHeight}px`;
+      //     }
+      //     try {
+      //       ignoreEvent = true;
+      //       newEditor.layout({ width: 300, height: contentHeight });
+      //     } finally {
+      //       ignoreEvent = false;
+      //     }
+      //   };
+      //   newEditor.onDidContentSizeChange(updateHeight);
+      //   updateHeight();
       return newEditor;
     });
+      return () => promise.then(editor => editor.dispose());
+    });
+  }, []);
+  useAtom(mountEffect);
 
-    return () => editor?.dispose();
-  }, [monacoEl.current]);
-
-  return <div ref={monacoEl} style={{minHeight}}></div>;
+  return <div ref={monacoEl} style={{ minHeight }}></div>;
 };

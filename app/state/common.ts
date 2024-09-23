@@ -12,7 +12,7 @@ type _Message =
   | { role: "assistant"; content: string }
   | { role: "tool"; content: object | string };
 
-export type Message = _Message & {fromServer?: boolean} & {template?: boolean};
+export type Message = _Message & { fromServer?: boolean } & { template?: boolean };
 
 export type Experiment = {
   [runId: string]: Message[];
@@ -31,16 +31,12 @@ export const getInitialStore = () => ({ tokens: { anthropic: undefined }, experi
 
 export const voidAtom = atom<void>(void 0);
 
-export const { bindToRealm, entangledAtoms, createMessageHandler, sseSubscriptionEffect } = entangleAtoms({
-  [REALM]: realmAtom,
-  storeAtom: atom<Store>(getInitialStore()),
-  testAtom: atom("test"),
-  hasResolvedTokenAtom: atom(false),
-  laughingAtom: atom(null, (get, set, cursor: ExperimentCursor) => {
-    const idx = set(appendToRun, cursor, [{ role: "assistant", content: "" }]);
-    set(intervalAppend, cursor, idx);
-  }),
-});
+export const { bindToRealm, entangledAtoms, createMessageHandler } =
+  entangleAtoms({
+    [REALM]: realmAtom,
+    storeAtom: atom<Store>(getInitialStore()),
+    hasResolvedTokenAtom: atom(false),
+  });
 const { storeAtom } = entangledAtoms;
 
 export const experimentIdsAtom = atom((get) => {
@@ -99,29 +95,7 @@ export const appendToRun = atom(null, (get, set, cursor: ExperimentCursor, messa
   return current?.length ?? 0;
 });
 
-export const intervalAppend = atom(null, (get, set, _cursor: ExperimentCursor, messageIdx: number) => {
-  const { id, runId } = _cursor || {};
-  const text = `I thought what I'd do was, I'd pretend I was one of those deaf-mutes.  `;
-  let cursor = 0;
-  const focus = getExperimentAtom({ id, runId });
-  const interval = setInterval(() => {
-    set(focus, (prev) => {
-      const next = [...prev];
-      next[messageIdx] = { role: "assistant", content: text.slice(0, cursor) };
-      cursor += 1;
-      if (cursor > text.length) {
-        cursor = 0;
-      }
-      return next;
-    });
-  }, 100);
-  return () => clearInterval(interval);
-});
-
-
 export const newChatAtom = atom<Message[]>([
-  // { role: "system", content: "You are a web server and you respond to incoming request with HTTP response" },
-  // { role: "user", content: "GET /index.html" },
   ...([
     {
       role: "system",
@@ -137,4 +111,4 @@ export const newChatAtom = atom<Message[]>([
   { role: "tool", content: makeRequestTool },
 ]);
 
-export const templatesAtom = focusAtom(storeAtom, (o) => o.prop("templates"));
+export const templatesAtom = focusAtom(storeAtom, (o) => o.optional().prop("templates"));

@@ -5,6 +5,8 @@ import { createMessageHandler, store } from "./common";
 import worker from "./entanglement.worker?worker";
 import { focusAtom } from "jotai-optics";
 import { atomEffect } from "jotai-effect";
+import { createSubscription } from "~/createSubscription";
+import { useHydrateAtoms } from "jotai/utils";
 
 export const getRealm = () => {
   if (typeof document !== "undefined") {
@@ -13,7 +15,6 @@ export const getRealm = () => {
   if (typeof process === "object") {
     return "server";
   }
-  // @ts-ignore
   if (typeof importScripts === "function") {
     return "worker";
   }
@@ -33,7 +34,8 @@ export function entangleAtoms<T extends object, EntangledAtomKey extends keyof T
     [K in EntangledAtomKey]: T[K];
   },
 ) {
-  const { [REALM]: realmAtom, ...restConfig } = config;
+  const { [REALM]: realmAtom, ..._restConfig } = config;
+  const restConfig = _restConfig as unknown as { [K in EntangledAtomKey]: T[K] };
   const realmOverridesAtom = atom<
     Partial<{
       [K in Realm]: Partial<{
@@ -50,8 +52,14 @@ export function entangleAtoms<T extends object, EntangledAtomKey extends keyof T
           const realm = get(realmAtom);
           const realmOverrides: Partial<{ [K in EntangledAtomKey]: Atom<T[K]> }> =
             get(focusAtom(realmOverridesAtom, (o) => o.optional().prop(realm))) ?? {};
-          const thisAtom = realmOverrides[thisKey] ?? thisDefaultAtom;
-          return get(thisAtom);
+            const thisOverride = realmOverrides[thisKey];
+            if (thisOverride) {
+              console.log("getting override", thisKey);
+              return get(thisOverride);
+            }
+            const value = get(thisDefaultAtom);
+            console.log("getting default", thisKey, value);
+            return value;
         },
         (get: Getter, set: Setter, props: any[]) => {
           const thisKey = key as EntangledAtomKey;
@@ -59,19 +67,19 @@ export function entangleAtoms<T extends object, EntangledAtomKey extends keyof T
           const realm = get(realmAtom);
           const realmOverrides: Partial<{ [K in EntangledAtomKey]: Atom<T[K]> }> =
             get(focusAtom(realmOverridesAtom, (o) => o.optional().prop(realm))) ?? {};
-          const thisAtom = realmOverrides[thisKey] ?? thisDefaultAtom;
-          try {
-            // @ts-ignore
-            set(thisAtom, props);
-          } finally {
+          const thisOverride = realmOverrides[thisKey];
+          if (thisOverride) {
+            console.log("setting override", thisKey, props);
+            set(thisOverride, props);
+            return;
           }
+          console.log("setting default", thisKey, props);
+          set(thisDefaultAtom, props);
         },
       );
       return [key, writableAtom];
     }),
-  ) as unknown as {
-    [K in EntangledAtomKey]: T[K];
-  };
+  ) as typeof restConfig;
 
   function bindToRealm<T>(config: T & { [REALM]: Realm }) {
     const { [REALM]: realm, ...restConfig } = config;
@@ -102,27 +110,10 @@ export function entangleAtoms<T extends object, EntangledAtomKey extends keyof T
     };
   };
 
-  const sseSubscriptionEffect = atomEffect((get, set) => {
-    const source = new EventSource("/portal");
-    for (const keyVal of Object.entries(entangledAtoms)) {
-      const [key, atom] = keyVal;
-      source.addEventListener(key, (event) => {
-        set(atom as any, JSON.parse(event.data));
-      });
-    }
-    source.onerror = (event) => {
-      console.error(event);
-    }
-    return () => {
-      source.close();
-    };
-  });
-
   return {
     entangledAtoms,
     bindToRealm,
     createMessageHandler,
-    sseSubscriptionEffect,
   };
 }
 

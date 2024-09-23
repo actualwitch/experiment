@@ -2,7 +2,7 @@ import { useNavigate, useSubmit } from "@remix-run/react";
 import { useAtom, useSetAtom } from "jotai";
 import { useEffect } from "react";
 import { createPortal } from "react-dom";
-import { useSidebar } from "~/navigation";
+import { SidebarInput } from "~/navigation";
 
 import { expandedChatIds, filenames, importsRegistry, processCsvAtom, selectedChat } from "~/state/client";
 import { newChatAtom, store } from "~/state/common";
@@ -96,19 +96,19 @@ function Imports() {
     <>
       <Main>
         {chat.messages.map((message, idx) => (
-          <Message key={idx} role={message.role} isSelected={false} >
+          <Message key={idx} role={message.role} isSelected={false}>
             <code>{message.content}</code>
           </Message>
         ))}
         {chat.response.content && (
-          <Message key="response" role={chat.response.role} isSelected={false} >
+          <Message key="response" role={chat.response.role} isSelected={false}>
             <code>{chat.response.content}</code>
           </Message>
         )}
 
         {chat.response.tool_calls?.map((toolCall, idx) => {
           return (
-            <Message key={"tool" + idx} role="tool" isSelected={false} >
+            <Message key={"tool" + idx} role="tool" isSelected={false}>
               <code>{JSON.stringify(toolCall, null, 2)}</code>
             </Message>
           );
@@ -141,11 +141,12 @@ function Imports() {
 }
 
 export default function () {
-  const sidebar = useSidebar();
   return (
     <>
       <Imports />
-      {sidebar && createPortal(<Sidebar />, sidebar)}
+      <SidebarInput>
+        <Sidebar />
+      </SidebarInput>
     </>
   );
 }
