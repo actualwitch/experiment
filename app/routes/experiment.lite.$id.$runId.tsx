@@ -1,13 +1,7 @@
 import { json, LoaderFunctionArgs } from "@remix-run/node";
 import { useLoaderData, useNavigate, useParams, useSubmit } from "@remix-run/react";
-import { View } from "~/dbg";
-import {
-  getExperimentAtom,
-  Message,
-  newChatAtom,
-  store
-} from "~/state/common";
-import { Message as MessageComponent } from "~/style";
+import { getExperimentAtom, newChatAtom, store } from "~/state/common";
+import { renderMessage } from "./experiment";
 
 export async function loader({ request, params: { id, runId } }: LoaderFunctionArgs) {
   if (id && runId) {
@@ -27,15 +21,7 @@ export default function Experiment() {
         <h1>
           Experiment {id}.{runId}
         </h1>
-        {experiment?.map((message: Message, idx: number) => (
-          <MessageComponent
-            key={idx}
-            role={message.role}
-            ioType={message.fromServer ? "output" : "input"}
-            isSelected={false}>
-            {typeof message.content === "string" ? <code>{message.content}</code> : <View>{message.content}</View>}
-          </MessageComponent>
-        ))}
+        {experiment?.map(renderMessage)}
       </div>
       <aside>
         <h3>Actions</h3>

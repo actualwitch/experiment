@@ -1,24 +1,21 @@
 import styled from "@emotion/styled";
 import { NavLink } from "@remix-run/react";
-import { ReactNode, useEffect, useRef, useState } from "react";
-import { bs } from "./style";
-import { atom, useAtom } from "jotai";
-import { store } from "./state/common";
+import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
+import { ReactNode, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
-
-const elementId = "sidebar";
+import { bs } from "./style";
 
 function portalIO() {
   const elementAtom = atom<null | HTMLElement>(null);
 
   function Input({ children }: { children: ReactNode }) {
-    const [element, setElement] = useAtom(elementAtom);
+    const element = useAtomValue(elementAtom);
 
     return element ? createPortal(children, element) : null;
   }
 
   function Output() {
-    const [element, setElement] = useAtom(elementAtom);
+    const setElement = useSetAtom(elementAtom);
     const ref = useRef<HTMLDivElement | null>(null);
     useEffect(() => {
       setElement(ref.current);

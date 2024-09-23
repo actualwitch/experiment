@@ -6,13 +6,12 @@ import { ActionFunctionArgs } from "@remix-run/node";
 import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
 import { focusAtom } from "jotai-optics";
 import { ReactNode, useRef } from "react";
-import { createPortal } from "react-dom";
-import { View } from "~/dbg";
 import { Editor } from "~/editor";
 import { SidebarInput } from "~/navigation";
 import {} from "~/state/client";
 import { experimentIdsAtom, Message, newChatAtom, store, templatesAtom, tokenAtom } from "~/state/common";
 import { bs, Message as MessageComponent, Paragraph } from "~/style";
+import { View } from "~/view";
 
 export { defaultMeta as meta } from "~/meta";
 

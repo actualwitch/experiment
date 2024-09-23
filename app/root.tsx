@@ -1,14 +1,13 @@
 import { Global } from "@emotion/react";
-import { Links, Meta, Outlet, Scripts, ScrollRestoration, useLoaderData, useSubmit } from "@remix-run/react";
+import { Links, Meta, Outlet, Scripts, ScrollRestoration, useLoaderData } from "@remix-run/react";
 import { Provider, useAtom } from "jotai";
+import { useHydrateAtoms } from "jotai/utils";
 import { createLoader } from "./createLoader";
 import { NavigationSidebar } from "./navigation";
+import { portalSubscription } from "./routes/portal";
 import { stylesAtom } from "./state/client";
 import { entangledAtoms, store } from "./state/common";
 import { Container } from "./style";
-import { useHydrateAtoms } from "jotai/utils";
-import { useEffect } from "react";
-import { portalSubscription } from "./routes/portal";
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
@@ -16,7 +15,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔬</text></svg>"></link>
+        <link
+          rel="icon"
+          href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔬</text></svg>"></link>
         <Meta />
         <Links />
       </head>
@@ -41,7 +42,12 @@ const useController = () => {
   // }, []);
 
   // console.log("hydrating", serverAtoms);
-  useHydrateAtoms(Object.entries(serverAtoms || {}).map(([key, value]: any) => [entangledAtoms[key as keyof typeof entangledAtoms], value]));
+  useHydrateAtoms(
+    Object.entries(serverAtoms || {}).map(([key, value]: any) => [
+      entangledAtoms[key as keyof typeof entangledAtoms],
+      value,
+    ]),
+  );
 };
 
 function Styles() {

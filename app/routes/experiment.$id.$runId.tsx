@@ -4,7 +4,6 @@ import { atom, useAtom } from "jotai";
 import { atomEffect } from "jotai-effect";
 import { useHydrateAtoms } from "jotai/utils";
 import { DEBUG } from "~/const";
-import { View } from "~/dbg";
 import {
   appendToRun,
   ExperimentCursor,
@@ -13,15 +12,7 @@ import {
   newChatAtom,
   store
 } from "~/state/common";
-import { Message as MessageComponent } from "~/style";
-
-const Msg = ({ message }: { message: Message }) => {
-  return (
-    <MessageComponent role={message.role} ioType={message.fromServer ? "output" : "input"} isSelected={false}>
-      {typeof message.content === "string" ? <code>{message.content}</code> : <View>{message.content}</View>}
-    </MessageComponent>
-  );
-};
+import { renderMessage } from "./experiment";
 
 const cursor = atom<ExperimentCursor | null>(null);
 const experimentAtom = atom<Message[]>([]);
@@ -83,9 +74,7 @@ export default function Experiment() {
         <h1>
           Experiment {id}.{runId}
         </h1>
-        {experiment?.map((message: Message, idx: number) => (
-          <Msg key={idx} message={message} />
-        ))}
+        {experiment?.map(renderMessage)}
       </div>
       <aside>
         <h3>Actions</h3>

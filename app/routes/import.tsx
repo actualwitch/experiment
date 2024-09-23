@@ -1,7 +1,6 @@
 import { useNavigate, useSubmit } from "@remix-run/react";
 import { useAtom, useSetAtom } from "jotai";
 import { useEffect } from "react";
-import { createPortal } from "react-dom";
 import { SidebarInput } from "~/navigation";
 
 import { expandedChatIds, filenames, importsRegistry, processCsvAtom, selectedChat } from "~/state/client";
