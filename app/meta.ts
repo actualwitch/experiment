@@ -6,7 +6,11 @@ const description = "Experiment is a simple tool to facilitate prompt engineerin
 function getMeta(title: string, description: string): MetaFunction {
   ////💥
   return () => {
-    return [{ title }, { name: "description", content: description }];
+    return [
+      { title },
+      { name: "description", content: description },
+      { name: "link", rel: "icon", href: "/favicon.svg" },
+    ];
   };
 }
 

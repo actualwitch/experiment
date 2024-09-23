@@ -12,9 +12,6 @@ const Emphasis = styled.em`
 
 function asTreeNodes(input: unknown, title?: Primitive) {
   const prefix = isNullish(title) ? "" : <Emphasis>{title}</Emphasis>;
-  if (input === null || input === undefined) {
-    return `${prefix}${String(input)}`;
-  }
   if (typeof input === "string") {
     return (
       <>
@@ -55,7 +52,14 @@ function asTreeNodes(input: unknown, title?: Primitive) {
       </>
     );
   }
-  return String(input);
+  return (
+    <>
+      {prefix}
+      <ol>
+        <li>{String(input)}</li>
+      </ol>
+    </>
+  );
 }
 
 function asTextTreeNodes(input: string) {

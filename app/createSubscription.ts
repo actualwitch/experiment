@@ -11,7 +11,7 @@ export function createSubscription<T extends object>(url: string, atoms: T) {
         console.log(`${url}>client/sse`, {[key]: JSON.parse(event.data)});
         setTimeout(() => {
 
-        store.set(atom as any, JSON.parse(event.data));
+        set(atom as any, JSON.parse(event.data));
         }, 100);
       });
     }

@@ -22,7 +22,7 @@ export default function Experiment() {
             <ul>
               {experimentIds.map(([id, subId]) => (
                 <li key={id}>
-                  <NavLink to={`/experiment/${id}/${subId}`}>
+                  <NavLink to={`/experiment/lite/${id}/${subId}`}>
                     Experiment #{id}.{subId}
                   </NavLink>
                 </li>

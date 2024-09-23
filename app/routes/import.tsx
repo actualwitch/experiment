@@ -1,10 +1,11 @@
-import { useSubmit } from "@remix-run/react";
+import { useNavigate, useSubmit } from "@remix-run/react";
 import { useAtom, useSetAtom } from "jotai";
 import { useEffect } from "react";
 import { createPortal } from "react-dom";
 import { useSidebar } from "~/navigation";
 
 import { expandedChatIds, filenames, importsRegistry, processCsvAtom, selectedChat } from "~/state/client";
+import { newChatAtom, store } from "~/state/common";
 import { Main, Message } from "~/style";
 
 export { defaultMeta as meta } from "~/meta";
@@ -85,6 +86,7 @@ function Imports() {
 
   const [registry] = useAtom(importsRegistry);
   const submit = useSubmit();
+  const navigate = useNavigate();
 
   if (!selected) return <p>Nothing selected</p>;
   const [filename, idx] = selected;
@@ -119,22 +121,8 @@ function Imports() {
             type="submit"
             onClick={(e) => {
               e.preventDefault();
-              const messages = [
-                chat.messages.map(({ role, content }) => ({ role, content })),
-                chat.response.content ? [{ role: "assistant", content: chat.response.content }] : [],
-                chat.response.tool_calls?.map((toolCall) => ({ role: "tool", content: toolCall })),
-              ].flat();
-              submit(
-                {
-                  runExperiment: messages as any,
-                },
-                {
-                  method: "post",
-                  action: "/gateway",
-                  encType: "application/json",
-                  navigate: false,
-                },
-              );
+              store.set(newChatAtom, chat.messages);
+              navigate("/");
             }}>
             Start experiment
           </button>

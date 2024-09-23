@@ -158,7 +158,7 @@ function MessageView({
       </View>
     );
   }
-  innerContent ??= <code>{"<Empty>"}</code>;
+  innerContent ??= (<code>{"<Empty>"}</code>);
 
   return (
     <MessageComponent
@@ -284,7 +284,6 @@ export default function Index() {
                       value = JSON.parse(text);
                     }
                   } catch {}
-                  // @ts-ignore
                   setChat((chat) => chat.map((msg, idx) => (idx === selection[0] ? { ...msg, content: value } : msg)));
                 }}>
                 paste

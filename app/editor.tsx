@@ -33,7 +33,6 @@ export const Editor = ({
       }
 
       const isDarkMode = store.get(isDarkModeAtom);
-      console.log({isDarkMode})
 
       const newEditor = monaco.editor.create(monacoEl.current!, {
         value,
