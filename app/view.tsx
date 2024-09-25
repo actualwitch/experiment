@@ -33,15 +33,19 @@ function asTreeNodes(
       return asTreeNodes(Object.fromEntries(input.map(({ key, value }) => [key, value])), title, {
         separator,
         onClick,
-        path,
+        path: [...path, "key"],
       });
     }
     const keys = Object.keys(input);
     // inline objects with a single key
     if (keys.length === 1) {
       const [key] = keys;
-      const newTitle = isNullish(title) ? key : `${title}${separator}${key}`;
-      return asTreeNodes(input[key as keyof typeof input], newTitle, { separator, onClick, path: [...path, key] });
+      const newTitle = isNullish(title) ? [key] : [title, key];
+      return asTreeNodes(input[key as keyof typeof input], newTitle.join(separator), {
+        separator,
+        onClick,
+        path: [...path, ...newTitle.map((key) => key.toString())],
+      });
     }
     let entries = Object.entries(input);
     // sort objects by key, with nested objects at the end
@@ -54,7 +58,18 @@ function asTreeNodes(
       });
     }
     inner = entries.map(([key, value]) => (
-      <li onClick={() => onClick?.(value, key, path)}>{asTreeNodes(value, key, { separator, onClick, path })}</li>
+      <li
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          onClick?.(value, key, path);
+        }}>
+        {asTreeNodes(value, key, {
+          separator,
+          onClick,
+          path: [...path, key],
+        })}
+      </li>
     ));
   } else {
     inner = String(input);

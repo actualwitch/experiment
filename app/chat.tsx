@@ -104,6 +104,7 @@ export const MessageComponent = styled.article<{
 
 type Path = [number] | [number, "content"];
 export const selectionAtom = atom<Path | null>(null);
+const collapsedAtom = atom<string[]>([]);
 
 const lensAtom = atom(
   (get) => {
@@ -189,6 +190,10 @@ export const ChatMessage = ({ message: _message, index }: { message: Message; in
     contentType = typeof message.content;
     innerContent ??= (
       <View
+      // onClick={(value, key, path) => {
+      //   const fullPath = [...selector,...path, key];
+      //   console.log(fullPath);
+      // }}
         style={{
           float: message.fromServer ? "right" : "left",
         }}>
@@ -218,6 +223,8 @@ export const ChatMessage = ({ message: _message, index }: { message: Message; in
 
 export function ChatPreview({ chatAtom }: { chatAtom: typeof newChatAtom }) {
   const [chat, setChat] = useAtom(chatAtom);
+
+  // const [] = useState<string[]>([]);
 
   return (
     <ChatContainer>
