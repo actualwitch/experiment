@@ -1,7 +1,6 @@
-import { css, SerializedStyles } from "@emotion/react";
+import { css } from "@emotion/react";
 import styled from "@emotion/styled";
 import { tryShevy } from "~/shevy";
-import { isDarkModeAtom, store } from "~/state/common";
 
 export const fontFamily = 'Charter, "Bitstream Charter", "Sitka Text", Cambria, serif';
 
@@ -86,98 +85,6 @@ export const Paragraph = styled.p(
   `,
 );
 
-export const Message = styled.article<{
-  role: "system" | "user" | "assistant" | "tool";
-  contentType?: string;
-  ioType?: "input" | "output";
-  isSelected: boolean;
-}>(({ role, ioType, contentType, isSelected }) => {
-  const fromServer = ioType === "output";
-  const align = fromServer ? "right" : "left";
-  const isDarkMode = store.get(isDarkModeAtom);
-  const styles: SerializedStyles[] = [
-    css`
-      border-${align}: 4px solid transparent;
-      position: relative;
-      overflow: hidden;
-      text-align: ${align};
-
-      & > code, & > div {
-        display: block;
-        padding: ${bs(1 / 2)};
-        padding-${align}: ${bs(1.5)};
-        word-wrap: break-word;
-      }
-
-      &:before {
-        content: "${contentType ? contentType + " ▴ " : ""}${role}";
-        position: absolute;
-        ${
-          fromServer
-            ? css`
-                transform: rotate(270deg) translate(-50%, 100%);
-              `
-            : css`
-                transform-origin: top left;
-                transform: rotate(270deg) translate(calc(-100% - 12px), 4px);
-              `
-        }
-        ${align}: 0;
-      }
-
-      ul,
-      ol {
-        list-style: none;
-        margin-bottom: 0;
-      }
-      li ul,
-      li ol {
-        padding-${align}: ${bs(1)};
-      }
-
-      hr {
-        opacity: 0.2;
-        color: ${isDarkMode ? "#fff" : "#000"};
-        margin-top: ${bs(0.15)};
-        margin-bottom: ${bs(0.05)};
-      }
-    `,
-  ];
-  if (role === "system") {
-    styles.push(css`
-      border-color: #fff433;
-    `);
-  }
-  if (role === "user") {
-    styles.push(css`
-      border-color: #9b59d0;
-    `);
-  }
-  if (role === "assistant") {
-    styles.push(css`
-      border-color: color(display-p3 0.9 0.66 0.81);
-    `);
-  }
-  if (role === "tool") {
-    styles.push(css`
-      border-color: lightgreen;
-    `);
-  }
-  if (isSelected) {
-    if (isDarkMode) {
-      styles.push(css`
-        background-color: #ffffff30;
-      `);
-    } else {
-      styles.push(css`
-        background-color: #7d7d7d42;
-      `);
-    }
-  }
-
-  return styles;
-});
-
 export const darkMode = css`
   :root {
     background-color: #000;
@@ -191,6 +98,12 @@ export const appStyle = [
     :root {
       font-family: ${fontFamily};
       font-weight: normal;
+
+      ul,
+      ol {
+        list-style: none;
+        margin-bottom: 0;
+      }
     }
     * {
       margin: 0;

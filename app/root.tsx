@@ -32,39 +32,28 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
 export const loader = createLoader(entangledAtoms);
 
-const useController = () => {
+const AppShell = () => {
   const serverAtoms = useLoaderData<typeof loader>();
-  // useEffect(() => {
-
-  //   for (const [key, value] of Object.entries(serverAtoms || {})) {
-  //     store.set(entangledAtoms[key as keyof typeof entangledAtoms], value);
-  //   }
-  // }, []);
-
-  // console.log("hydrating", serverAtoms);
   useHydrateAtoms(
     Object.entries(serverAtoms || {}).map(([key, value]: any) => [
       entangledAtoms[key as keyof typeof entangledAtoms],
       value,
     ]),
   );
-};
-
-function Styles() {
+  useAtom(portalSubscription);
   const [styles] = useAtom(stylesAtom);
-  return <Global styles={styles} />;
+  return (
+    <Container>
+      <NavigationSidebar />
+      <Outlet />
+      <Global styles={styles} />
+    </Container>);
 }
 
 export default function App() {
-  useController();
-  useAtom(portalSubscription);
   return (
     <Provider store={store}>
-      <Container>
-        <NavigationSidebar />
-        <Outlet />
-        <Styles />
-      </Container>
+      <AppShell />
     </Provider>
   );
 }

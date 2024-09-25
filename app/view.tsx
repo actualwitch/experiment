@@ -9,65 +9,61 @@ const Emphasis = styled.em`
   opacity: 0.7;
 `;
 
-function asTreeNodes(input: unknown, title?: Primitive, separator = ".") {
+function asTreeNodes(
+  input: unknown,
+  title?: Primitive,
+  { separator = ".", onClick, path = [] }: { onClick?: Callback; separator?: string; path?: string[] } = {},
+) {
   // unwrap JSON strings
   if (typeof input === "string" && input[0] === "{" && input[input.length - 1] === "}") {
     try {
       input = JSON.parse(input);
-      return asTreeNodes(input, title);
+      return asTreeNodes(input, title, { separator, onClick, path });
     } catch {}
   }
   const prefix = isNullish(title) || (Array.isArray(input) && input.length === 0) ? "" : <Emphasis>{title}</Emphasis>;
-  if (input && typeof input === "object") {
+  let inner = null;
+  if (typeof input === "string") {
+    inner = `"${input}"`;
+  } else if (input && typeof input === "object") {
     const keysArr = Array.isArray(input) ? Object.keys(input[0]) : undefined;
     // represent key-value arrays as objects
     if (keysArr?.length === 2 && keysArr.includes("key") && keysArr.includes("value")) {
       // @ts-ignore
-      return asTreeNodes(Object.fromEntries(input.map(({ key, value }) => [key, value])), title);
+      return asTreeNodes(Object.fromEntries(input.map(({ key, value }) => [key, value])), title, {
+        separator,
+        onClick,
+        path,
+      });
     }
     const keys = Object.keys(input);
     // inline objects with a single key
     if (keys.length === 1) {
       const [key] = keys;
-      return asTreeNodes(input[key as keyof typeof input], `${title}${separator}${key}`);
+      const newTitle = isNullish(title) ? key : `${title}${separator}${key}`;
+      return asTreeNodes(input[key as keyof typeof input], newTitle, { separator, onClick, path: [...path, key] });
     }
-    if (Array.isArray(input)) {
-      return (
-        <>
-          {prefix}
-          <ol>
-            {input.map((item, idx) => (
-              <li>{asTreeNodes(item, idx)}</li>
-            ))}
-          </ol>
-        </>
-      );
-    } else {
-      // sort objects by key, with nested objects at the end
-      const sorted = Object.entries(input).sort(([aKey, aValue], [bKey, bValue]) => {
+    let entries = Object.entries(input);
+    // sort objects by key, with nested objects at the end
+    if (!Array.isArray(input)) {
+      entries = entries.sort(([aKey, aValue], [bKey, bValue]) => {
         if (typeof aValue === "object" && typeof bValue !== "object") return 1;
         if (typeof aValue !== "object" && typeof bValue === "object") return -1;
+        if (typeof aValue === "number" && typeof bValue === "number") return aValue - bValue;
         return aKey.localeCompare(bKey);
       });
-      return (
-        <>
-          {prefix}
-          <ol>
-            {sorted.map(([key, value]) => (
-              <li>{asTreeNodes(value, key)}</li>
-            ))}
-          </ol>
-        </>
-      );
     }
+    inner = entries.map(([key, value]) => (
+      <li onClick={() => onClick?.(value, key, path)}>{asTreeNodes(value, key, { separator, onClick, path })}</li>
+    ));
+  } else {
+    inner = String(input);
   }
   return (
     <>
       {prefix}
-      <ol>
-        <li>{typeof input === "string" ? `"${input}"` : String(input)}</li>
-      </ol>
-      <hr />
+      <ol>{inner}</ol>
+      {typeof input !== "object" && <hr />}
     </>
   );
 }
@@ -83,7 +79,18 @@ const ViewContainer = styled.div`
   }
 `;
 
-export function View({ children, style }: { children: unknown; style?: React.CSSProperties }) {
-  const content = typeof children === "string" ? asTextTreeNodes(children) : asTreeNodes(children);
+type Callback = (value: unknown, key: string | undefined, path: string[]) => void;
+
+export function View({
+  children,
+  style,
+  onClick,
+}: {
+  children: unknown;
+  style?: React.CSSProperties;
+  onClick?: Callback;
+}) {
+  const content =
+    typeof children === "string" ? asTextTreeNodes(children) : asTreeNodes(children, undefined, { onClick });
   return <ViewContainer style={style}>{content}</ViewContainer>;
 }

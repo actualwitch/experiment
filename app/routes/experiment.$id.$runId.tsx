@@ -48,14 +48,7 @@ const subscription = atomEffect((get, set) => {
   };
 });
 
-export const action = async ({ request, params: { id, runId } }: ActionFunctionArgs) => {
-  const body = await request.json();
-  store.set(appendToRun, { id: id!, runId: runId! }, [{ role: "assistant", content: "Are you still there?" }]);
-  return json({ result: "ok" });
-};
-
 export default function Experiment() {
-  const submit = useSubmit();
   const { id, runId } = useParams();
   const loaderData = useLoaderData<typeof loader>();
   useEffect(() => {
@@ -88,18 +81,6 @@ export default function Experiment() {
             navigate("/");
           }}>
           Use in new experiment
-        </button>
-        <button
-          type="submit"
-          onClick={(e) => {
-            e.preventDefault();
-            const experiment = store.get(experimentAtom);
-            submit(experiment as any, {
-              method: "post",
-              encType: "application/json",
-            });
-          }}>
-          Send it
         </button>
       </aside>
     </>

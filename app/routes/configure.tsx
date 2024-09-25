@@ -39,8 +39,8 @@ export default function Configure() {
   const {
     isDarkMode: [isDarkMode, setIsDarkMode],
     token: [token, setToken],
+    hasResolvedToken: [hasResolvedToken],
   } = useController();
-  const [hasResolvedToken] = useAtom(entangledAtoms.hasResolvedTokenAtom);
   return (
     <>
       <StyledForm method="post">

@@ -12,7 +12,7 @@ type _Message =
   | { role: "assistant"; content: string }
   | { role: "tool"; content: object | string };
 
-export type Message = _Message & { fromServer?: boolean } & { template?: boolean };
+export type Message = _Message & { fromServer?: boolean } & { template?: string };
 
 export type Experiment = {
   [runId: string]: Message[];
@@ -31,12 +31,11 @@ export const getInitialStore = () => ({ tokens: { anthropic: undefined }, experi
 
 export const voidAtom = atom<void>(void 0);
 
-export const { bindToRealm, entangledAtoms, createMessageHandler } =
-  entangleAtoms({
-    [REALM]: realmAtom,
-    storeAtom: atom<Store>(getInitialStore()),
-    hasResolvedTokenAtom: atom(false),
-  });
+export const { bindToRealm, entangledAtoms, createMessageHandler } = entangleAtoms({
+  [REALM]: realmAtom,
+  storeAtom: atom<Store>(getInitialStore()),
+  hasResolvedTokenAtom: atom(false),
+});
 const { storeAtom } = entangledAtoms;
 
 export const experimentIdsAtom = atom((get) => {
@@ -111,4 +110,4 @@ export const newChatAtom = atom<Message[]>([
   { role: "tool", content: makeRequestTool },
 ]);
 
-export const templatesAtom = focusAtom(storeAtom, (o) => o.optional().prop("templates"));
+export const templatesAtom = focusAtom(storeAtom, (o) => o.prop("templates"));

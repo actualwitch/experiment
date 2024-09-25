@@ -45,7 +45,7 @@ export const NavigationSidebar = () => {
         ⛴️ <NavLink to="/import">Import</NavLink>
       </h2>
       <h2>
-        📝 <NavLink to="/dataset">Dataset</NavLink>
+        📝 <NavLink to="/templates">Templates</NavLink>
       </h2>
       <h2>
         🔧 <NavLink to="/configure">Parameters</NavLink>

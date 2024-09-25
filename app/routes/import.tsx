@@ -6,36 +6,48 @@ import { SidebarInput } from "~/navigation";
 
 import { expandedChatIds, filenames, importsRegistry, processCsvAtom, selectedChat } from "~/state/client";
 import { newChatAtom, store } from "~/state/common";
+import { View } from "~/view";
 
 export { defaultMeta as meta } from "~/meta";
 
 export const Sidebar = () => {
   const [chats] = useAtom(filenames);
+  const [registry] = useAtom(importsRegistry);
   const [expandedChats, setExpandedChatIds] = useAtom(expandedChatIds);
+  const [_, setSelectedChat] = useAtom(selectedChat);
+  const entries = chats.reduce((acc, chatId) => {
+    acc[chatId] = registry[chatId].map((chat, idx) => `Chat ${idx}`);
+    return acc;
+  }, {} as any);
+
   return (
     <>
       {chats.length > 0 ? (
-        chats.map((chatId) => {
-          const isExpanded = expandedChats.includes(chatId);
-          return (
-            <section key={chatId}>
-              <h3
-                onClick={() => {
-                  setExpandedChatIds((prev) =>
-                    prev.includes(chatId) ? prev.filter((id) => id !== chatId) : [...prev, chatId],
-                  );
-                }}>
-                <span>{isExpanded ? "-" : "+"} </span>
-                {chatId}
-              </h3>
-              {isExpanded && (
-                <ul>
-                  <ChildEntries filename={chatId} />
-                </ul>
-              )}
-            </section>
-          );
-        })
+        // chats.map((chatId) => {
+        //   const isExpanded = expandedChats.includes(chatId);
+        //   return (
+        //     <section key={chatId}>
+        //       <h3
+        //         onClick={() => {
+        //           setExpandedChatIds((prev) =>
+        //             prev.includes(chatId) ? prev.filter((id) => id !== chatId) : [...prev, chatId],
+        //           );
+        //         }}>
+        //         <span>{isExpanded ? "-" : "+"} </span>
+        //         {chatId}
+        //       </h3>
+        //       {isExpanded && (
+        //         <ul>
+        //           <ChildEntries filename={chatId} />
+        //         </ul>
+        //       )}
+        //     </section>
+        //   );
+        // })
+        <View onClick={(value, key, path) => {
+          const [parent] = path;
+          setSelectedChat([parent, key!]);
+        }}>{entries}</View>
       ) : (
         <p>Import csv</p>
       )}
@@ -58,24 +70,23 @@ const CsvInput = () => {
   );
 };
 
-const ChildEntries = ({ filename }: { filename: string }) => {
-  const [registry] = useAtom(importsRegistry);
-  const chats = registry[filename];
-  const [_, setSelectedChat] = useAtom(selectedChat);
-  return (
-    <div>
-      {chats.map((chat, idx) => (
-        <div
-          key={idx}
-          onClick={() => {
-            setSelectedChat([filename, idx]);
-          }}>
-          Chat {idx + 1}
-        </div>
-      ))}
-    </div>
-  );
-};
+// const ChildEntries = ({ filename }: { filename: string }) => {
+//   const [registry] = useAtom(importsRegistry);
+//   const chats = registry[filename];
+//   return (
+//     <div>
+//       {chats.map((chat, idx) => (
+//         <div
+//           key={idx}
+//           onClick={() => {
+//             setSelectedChat([filename, idx]);
+//           }}>
+//           Chat {idx + 1}
+//         </div>
+//       ))}
+//     </div>
+//   );
+// };
 
 function Imports() {
   const [selected] = useAtom(selectedChat);
@@ -89,7 +100,6 @@ function Imports() {
 
   if (!selected) return <p>Nothing selected</p>;
   const [filename, idx] = selected;
-  if (typeof idx !== "number") return <p>Invalid selection</p>;
   const chat = registry[filename][idx];
   const experiment = [
     ...chat.messages,
