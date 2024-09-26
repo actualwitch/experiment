@@ -1,12 +1,9 @@
 import { Atom, atom, Getter, Setter } from "jotai";
+import { focusAtom } from "jotai-optics";
 import { INTERNAL_PrdStore } from "jotai/vanilla/store";
 import { useEffect, useRef } from "react";
 import { createMessageHandler, store } from "./common";
 import worker from "./entanglement.worker?worker";
-import { focusAtom } from "jotai-optics";
-import { atomEffect } from "jotai-effect";
-import { createSubscription } from "~/createSubscription";
-import { useHydrateAtoms } from "jotai/utils";
 
 export const getRealm = () => {
   if (typeof document !== "undefined") {
@@ -52,14 +49,12 @@ export function entangleAtoms<T extends object, EntangledAtomKey extends keyof T
           const realm = get(realmAtom);
           const realmOverrides: Partial<{ [K in EntangledAtomKey]: Atom<T[K]> }> =
             get(focusAtom(realmOverridesAtom, (o) => o.optional().prop(realm))) ?? {};
-            const thisOverride = realmOverrides[thisKey];
-            if (thisOverride) {
-              console.log("getting override", thisKey);
-              return get(thisOverride);
-            }
-            const value = get(thisDefaultAtom);
-            console.log("getting default", thisKey, value);
-            return value;
+          const thisOverride = realmOverrides[thisKey];
+          if (thisOverride) {
+            return get(thisOverride);
+          }
+          const value = get(thisDefaultAtom);
+          return value;
         },
         (get: Getter, set: Setter, props: any[]) => {
           const thisKey = key as EntangledAtomKey;
@@ -69,11 +64,9 @@ export function entangleAtoms<T extends object, EntangledAtomKey extends keyof T
             get(focusAtom(realmOverridesAtom, (o) => o.optional().prop(realm))) ?? {};
           const thisOverride = realmOverrides[thisKey];
           if (thisOverride) {
-            console.log("setting override", thisKey, props);
             set(thisOverride, props);
             return;
           }
-          console.log("setting default", thisKey, props);
           set(thisDefaultAtom, props);
         },
       );

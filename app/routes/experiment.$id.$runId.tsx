@@ -80,7 +80,7 @@ export default function Experiment() {
             );
             navigate("/");
           }}>
-          Use in new experiment
+          Start experiment
         </button>
       </aside>
     </>

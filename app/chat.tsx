@@ -6,7 +6,7 @@ import { ReactNode, useRef } from "react";
 import { Editor } from "~/editor";
 import { isDarkModeAtom, Message, newChatAtom, store, templatesAtom } from "~/state/common";
 import { bs } from "~/style";
-import { View } from "~/view";
+import { collapsedAtom, View } from "~/view";
 
 const baseHeight = bs(6);
 export const ChatContainer = styled.div`
@@ -64,6 +64,8 @@ export const MessageComponent = styled.article<{
         color: ${isDarkMode ? "#fff" : "#000"};
         margin-top: ${bs(0.15)};
         margin-bottom: ${bs(0.05)};
+        border: 0;
+        border-bottom: 1px solid currentColor;
       }
     `,
   ];
@@ -104,7 +106,6 @@ export const MessageComponent = styled.article<{
 
 type Path = [number] | [number, "content"];
 export const selectionAtom = atom<Path | null>(null);
-const collapsedAtom = atom<string[]>([]);
 
 const lensAtom = atom(
   (get) => {
@@ -149,11 +150,14 @@ function deepEqual(a: any, b: any): boolean {
 }
 
 export const ChatMessage = ({ message: _message, index }: { message: Message; index: number }) => {
+  const ref = useRef<null | HTMLElement>(null);
+  const selector: Path = [index, "content"];
   const [selection, setSelection] = useAtom(selectionAtom);
+  const isSelected = index === selection?.[0];
+  const [collapsed, setCollapsed] = useAtom(collapsedAtom);
   const setter = useSetAtom(lensAtom);
   const templates = useAtomValue(templatesAtom);
 
-  const selector: Path = [index, "content"];
   const message = { ..._message };
   for (const [name, template] of Object.entries(templates ?? {})) {
     if (message.role === template.role && deepEqual(message.content, template.content)) {
@@ -162,18 +166,11 @@ export const ChatMessage = ({ message: _message, index }: { message: Message; in
     }
   }
 
-  const isSelected = index === selection?.[0];
-
-  const ref = useRef<null | HTMLElement>(null);
-
   let innerContent: ReactNode;
-
   let contentType: string | undefined;
 
   if (message.template) {
-    innerContent = (
-      <div>λ {message.template}</div>
-    );
+    innerContent ??= <div>λ {message.template}</div>;
   } else if (isSelected && selection?.[1] === "content") {
     const [{ height }] = ref.current?.getClientRects() ?? [{ height: baseHeight }];
     innerContent ??= (
@@ -186,22 +183,32 @@ export const ChatMessage = ({ message: _message, index }: { message: Message; in
         {message.content}
       </Editor>
     );
+  } else if (!message.content) {
+    innerContent ??= <code>{"<Empty>"}</code>;
   } else if (["string", "object"].includes(typeof message.content)) {
     contentType = typeof message.content;
     innerContent ??= (
       <View
-      // onClick={(value, key, path) => {
-      //   const fullPath = [...selector,...path, key];
-      //   console.log(fullPath);
-      // }}
+        onClick={(value, key, path) => {
+          const fullPath = [...selector, ...path, key];
+        }}
+        onTitleClick={(value, key, path) => {
+          setCollapsed((prev) => {
+            const fullPath = path.join(".");
+            const isCollapsed = collapsed.includes(fullPath);
+            if (isCollapsed) {
+              return prev.filter((path) => path !== fullPath);
+            }
+            return [...prev, fullPath];
+          });
+        }}
+        shouldBeCollapsed={(path) => collapsed.includes(path.join("."))}
         style={{
           float: message.fromServer ? "right" : "left",
         }}>
         {message.content}
       </View>
     );
-  } else {
-    innerContent ??= <code>{"<Empty>"}</code>;
   }
 
   return (
@@ -214,7 +221,10 @@ export const ChatMessage = ({ message: _message, index }: { message: Message; in
         if (selection?.length === 2) return;
         setSelection([selector[0]]);
       }}
-      onDoubleClick={() => setSelection(selector)}
+      onDoubleClick={() => {
+        setSelection(selector);
+        console.log(selector);
+      }}
       ioType={message.fromServer ? "output" : "input"}>
       {innerContent}
     </MessageComponent>
@@ -223,8 +233,6 @@ export const ChatMessage = ({ message: _message, index }: { message: Message; in
 
 export function ChatPreview({ chatAtom }: { chatAtom: typeof newChatAtom }) {
   const [chat, setChat] = useAtom(chatAtom);
-
-  // const [] = useState<string[]>([]);
 
   return (
     <ChatContainer>
