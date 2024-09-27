@@ -41,20 +41,36 @@ export const runExperiment = atom(null, async (get, set, { id, runId }: Experime
   const experimentAtom = getExperimentAtom({ id, runId });
   const experiment = get(experimentAtom);
 
-  if (!resolvedToken || !experiment) return;
+  if (!resolvedToken || !experiment || true) return;
 
   const { stream, ...experimentAsAnthropic } = experimentToAnthropic(experiment);
 
   const anthropic = new Client({ apiKey: resolvedToken });
   if (stream) {
-    // const response
-    //   await anthropic.messages.stream({
-    //     messages: [{role: 'user', content: "Hello"}],
-    //     model: 'claude-3-5-sonnet-20240620',
-    //     max_tokens: 1024,
-    // }).on('text', (text) => {
-    //     console.log(text);
-    // })
+    await anthropic.messages
+      .stream(experimentAsAnthropic)
+      .on("text", (text) => {
+        set(experimentAtom, (prev) => [...prev, { role: "assistant", fromServer: true, content: text }]);
+      })
+      .on("inputJson", (tool) => {
+        set(experimentAtom, (prev) => [...prev, { role: "tool", fromServer: true, content: tool }]);
+      });
+    // const stream = await anthropic.messages.create({
+    //   ...experimentAsAnthropic,
+    //   stream: true,
+    // });
+    // const contentBlocks: Message[] = [];
+    // for await (const messageStreamEvent of stream) {
+    //   if (messageStreamEvent.type === "content_block_start") {
+    //     contentBlocks.push({role: "assistant", fromServer: true, content: ""});
+    //   }
+    //   if (messageStreamEvent.type ==="content_block_delta") {
+    //     const block = contentBlocks[messageStreamEvent.index];
+    //     block.content += messageStreamEvent.delta.text;
+    //   }
+
+    //   set(experimentAtom, (prev) => [...prev, { role: "assistant", fromServer: true, content: messageStreamEvent }]);
+    // }
   } else {
     const response = await anthropic.messages.create(experimentAsAnthropic);
     for (const contentBlock of response.content) {

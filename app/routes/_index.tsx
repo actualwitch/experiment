@@ -7,7 +7,6 @@ import { atom, useAtom, useAtomValue } from "jotai";
 import { focusAtom } from "jotai-optics";
 import { ChatPreview, selectionAtom } from "~/chat";
 import { SidebarInput } from "~/navigation";
-import {} from "~/state/client";
 import { experimentIdsAtom, newChatAtom, store, templatesAtom, tokenAtom } from "~/state/common";
 import { bs, Paragraph } from "~/style";
 

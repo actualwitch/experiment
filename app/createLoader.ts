@@ -16,6 +16,7 @@ export function createLoader<T extends object>(atoms: T) {
   };
 }
 
+
 export function createStreamLoader<T extends object>(atoms: T) {
   return async function loader({ request }: LoaderFunctionArgs) {
     if (request.headers.get("accept") !== "text/event-stream") {

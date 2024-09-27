@@ -1,13 +1,11 @@
 import { Global } from "@emotion/react";
-import { Links, Meta, Outlet, Scripts, ScrollRestoration, useLoaderData } from "@remix-run/react";
+import { Links, Meta, Outlet, Scripts, ScrollRestoration } from "@remix-run/react";
 import { Provider, useAtom } from "jotai";
-import { useHydrateAtoms } from "jotai/utils";
-import { createLoader } from "./createLoader";
+import { createEntanglement, entangledResponse } from "./again";
+import { sourceEffectAtom } from "./again";
 import { NavigationSidebar } from "./navigation";
-import { portalSubscription } from "./routes/portal";
-import { stylesAtom } from "./state/client";
-import { entangledAtoms, store } from "./state/common";
-import { Container } from "./style";
+import { isDarkModeAtom, store } from "./state/common";
+import { appStyle, Container, darkMode } from "./style";
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
@@ -30,25 +28,23 @@ export function Layout({ children }: { children: React.ReactNode }) {
   );
 }
 
-export const loader = createLoader(entangledAtoms);
+const atoms = { isDarkModeAtom };
+export const loader = () => entangledResponse(atoms);
+const useEntanglement = createEntanglement(atoms);
 
 const AppShell = () => {
-  const serverAtoms = useLoaderData<typeof loader>();
-  useHydrateAtoms(
-    Object.entries(serverAtoms || {}).map(([key, value]: any) => [
-      entangledAtoms[key as keyof typeof entangledAtoms],
-      value,
-    ]),
-  );
-  useAtom(portalSubscription);
-  const [styles] = useAtom(stylesAtom);
+  useAtom(sourceEffectAtom);
+  useEntanglement();
+  const isDarkMode = useAtom(isDarkModeAtom);
+  const styles = isDarkMode ? [...appStyle, darkMode] : appStyle;
   return (
     <Container>
       <NavigationSidebar />
       <Outlet />
       <Global styles={styles} />
-    </Container>);
-}
+    </Container>
+  );
+};
 
 export default function App() {
   return (

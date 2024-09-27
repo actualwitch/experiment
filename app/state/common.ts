@@ -9,7 +9,7 @@ export const store = createStore();
 type _Message =
   | { role: "system"; content: string }
   | { role: "user"; content: string }
-  | { role: "assistant"; content: string }
+  | { role: "assistant"; content: object | string }
   | { role: "tool"; content: object | string };
 
 export type Message = _Message & { fromServer?: boolean } & { template?: string };

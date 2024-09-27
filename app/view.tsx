@@ -78,9 +78,9 @@ function asTreeNodes(
   if (typeof input === "string") {
     inner = `"${input}"`;
   } else if (input && typeof input === "object") {
-    const keysArr = Array.isArray(input) ? Object.keys(input[0]) : undefined;
+    const keysArr = Array.isArray(input) ? Object.keys(input[0] ?? {}) : undefined;
     // represent key-value arrays as objects
-    if (keysArr?.length === 2 && keysArr.includes("key") && keysArr.includes("value")) {
+    if (keysArr?.length === 2 && keysArr?.includes("key") && keysArr?.includes("value")) {
       // @ts-ignore
       return asTreeNodes(Object.fromEntries(input.map(({ key, value }) => [key, value])), title, {
         separator,
@@ -150,6 +150,7 @@ function asTreeNodes(
 }
 
 function* asTextTreeNodes(input: string) {
+  const stack = []
   let buffer = "";
   let currentBlock = "p";
   let level = 0;
