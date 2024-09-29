@@ -1,20 +1,19 @@
 import styled from "@emotion/styled";
 import { Form } from "@remix-run/react";
 import { useAtom } from "jotai";
+import { createEntanglement, entangledResponse } from "~/again";
 import { createController } from "~/createController";
 import { createAction, createLoader } from "~/createLoader";
-import { entangledAtoms, isDarkModeAtom, tokenAtom } from "~/state/common";
+import { isDarkModeAtom, tokenAtom } from "~/state/common";
 import { bs } from "~/style";
 import { withFormStyling, type FormProps } from "~/style/form";
 
 export { defaultMeta as meta } from "~/meta";
 
-const atoms = { isDarkMode: isDarkModeAtom, token: tokenAtom, hasResolvedToken: entangledAtoms.hasResolvedTokenAtom };
-export const loader = createLoader(atoms);
-
+const atoms = { isDarkModeAtom };
+export const loader = () => entangledResponse(atoms);
 export const action = createAction(atoms);
-
-const useController = createController(atoms);
+const {useEntangledAtoms} = createEntanglement(atoms);
 
 const Input = styled.input<FormProps>(withFormStyling);
 
@@ -36,11 +35,8 @@ const StyledForm = styled(Form)`
 `;
 
 export default function Configure() {
-  const {
-    isDarkMode: [isDarkMode, setIsDarkMode],
-    token: [token, setToken],
-    hasResolvedToken: [hasResolvedToken],
-  } = useController();
+  useEntangledAtoms();
+  const [isDarkMode, setIsDarkMode] = useAtom(isDarkModeAtom);
   return (
     <>
       <StyledForm method="post">
@@ -59,7 +55,7 @@ export default function Configure() {
         <h3>Inference</h3>
         <h4>Anthropic API token</h4>
         <p>Token is resolved from 1password by the backend, get the reference by clicking on arrow on the field.</p>
-        <label>
+        {/* <label>
           <span>{hasResolvedToken ? "🔐" : "🔑"}</span>
           <Input
             _type={hasResolvedToken ? "success" : undefined}
@@ -70,7 +66,7 @@ export default function Configure() {
               setToken(e.target.value);
             }}
           />
-        </label>
+        </label> */}
       </StyledForm>
     </>
   );

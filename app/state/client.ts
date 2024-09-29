@@ -1,7 +1,6 @@
 import { atom } from "jotai";
-import { appStyle, darkMode } from "~/style";
 import { Chat } from "~/types";
-import { isDarkModeAtom } from "./common";
+import { REALM } from "./entanglement";
 
 export const importsRegistry = atom<Record<string, Chat[]>>({});
 
@@ -13,12 +12,6 @@ export const filenames = atom((get) => {
 export const selectedChat = atom<Array<string | number> | undefined>(undefined);
 
 export const expandedChatIds = atom<string[]>([]);
-
-export const stylesAtom = atom((get) => {
-  const isDarkMode = get(isDarkModeAtom);
-  if (isDarkMode) return [...appStyle, darkMode];
-  return [...appStyle];
-});
 
 export const processCsvAtom = atom(null, (get, set, file?: File) => {
   if (!file || file.type !== "text/csv") return;

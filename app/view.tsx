@@ -55,7 +55,7 @@ function asTreeNodes(
   if (typeof input === "string" && input[0] === "{" && input[input.length - 1] === "}") {
     try {
       input = JSON.parse(input);
-      return asTreeNodes(input, title, { separator, onClick, path });
+      return asTreeNodes(input, title, { separator, onClick, onTitleClick, shouldBeCollapsed, path });
     } catch {}
   }
   const prefix = isNullish(title) || (Array.isArray(input) && input.length === 0) ? "" : title;
@@ -85,6 +85,8 @@ function asTreeNodes(
       return asTreeNodes(Object.fromEntries(input.map(({ key, value }) => [key, value])), title, {
         separator,
         onClick,
+        onTitleClick,
+        shouldBeCollapsed,
         path: [...path, "key"],
       });
     }
@@ -96,14 +98,15 @@ function asTreeNodes(
       return asTreeNodes(input[key as keyof typeof input], newTitle.join(separator), {
         separator,
         onClick,
+        onTitleClick,
         shouldBeCollapsed,
         path: [...path, ...newTitle.map((key) => key.toString())],
       });
     }
-    let entries = Object.entries(input);
+    const entries = Object.entries(input);
     // sort objects by key, with nested objects at the end
     if (!Array.isArray(input)) {
-      entries = entries.sort(([aKey, aValue], [bKey, bValue]) => {
+      entries.sort(([aKey, aValue], [bKey, bValue]) => {
         if (typeof aValue === "object" && typeof bValue !== "object") return 1;
         if (typeof aValue !== "object" && typeof bValue === "object") return -1;
         if (typeof aValue === "number" && typeof bValue === "number") return aValue - bValue;
@@ -150,7 +153,7 @@ function asTreeNodes(
 }
 
 function* asTextTreeNodes(input: string) {
-  const stack = []
+  const stack = [];
   let buffer = "";
   let currentBlock = "p";
   let level = 0;

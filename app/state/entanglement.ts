@@ -2,9 +2,9 @@ import { Atom, atom, Getter, Setter } from "jotai";
 import { focusAtom } from "jotai-optics";
 import { INTERNAL_PrdStore } from "jotai/vanilla/store";
 import { useEffect, useRef } from "react";
-import { createMessageHandler, store } from "./common";
+import {  store } from "./common";
 import worker from "./entanglement.worker?worker";
-
+import { atomEffect } from "jotai-effect";
 export const getRealm = () => {
   if (typeof document !== "undefined") {
     return "client";
@@ -42,35 +42,64 @@ export function entangleAtoms<T extends object, EntangledAtomKey extends keyof T
   >({});
   const entangledAtoms = Object.fromEntries(
     Object.entries(restConfig).map(([key, defaultAtom]) => {
-      const writableAtom = atom(
+      // const writableAtom = atom(
+      //   (get) => {
+      //     const thisKey = key as EntangledAtomKey;
+      //     const thisDefaultAtom = defaultAtom as Atom<T[EntangledAtomKey]>;
+      //     const realm = get(realmAtom);
+      //     const realmOverrides: Partial<{ [K in EntangledAtomKey]: Atom<T[K]> }> =
+      //       get(focusAtom(realmOverridesAtom, (o) => o.optional().prop(realm))) ?? {};
+      //     const thisOverride = realmOverrides[thisKey];
+      //     if (thisOverride) {
+      //       return get(thisOverride);
+      //     }
+      //     const value = get(thisDefaultAtom);
+      //     return value;
+      //   },
+      //   (get: Getter, set: Setter, props: any[]) => {
+      //     const thisKey = key as EntangledAtomKey;
+      //     const thisDefaultAtom = defaultAtom as Atom<T[EntangledAtomKey]>;
+      //     const realm = get(realmAtom);
+      //     const realmOverrides: Partial<{ [K in EntangledAtomKey]: Atom<T[K]> }> =
+      //       get(focusAtom(realmOverridesAtom, (o) => o.optional().prop(realm))) ?? {};
+      //     const thisOverride = realmOverrides[thisKey];
+      //     if (thisOverride) {
+      //       set(thisOverride, props);
+      //       return;
+      //     }
+      //     set(thisDefaultAtom, props);
+      //   },
+      // );
+      // const effectAtom = atomEffect((get, set) => {
+      //   const source = get(sourceAtom);
+      //   if (source) {
+      //     console.log("entanglement sub effect", key);
+      //     const listener = (event: MessageEvent) => {
+      //       console.log("entanglement sub effect update", key, event.data);
+      //       const [eKey, value] = event.data;
+      //       // if (eKey === key) {
+      //       //   set(defaultAtom, value);
+      //       // }
+      //     };
+      //     source.addEventListener(key, listener);
+      //     source.addEventListener("message", (event) => {
+      //       console.log(`[broadcast -> ${getRealm()}`, event.data);
+      //     });
+      //     return () => {
+      //       source.removeEventListener(key, listener);
+      //     };
+      //   }
+      // });
+      const compoundAtom = atom(
         (get) => {
-          const thisKey = key as EntangledAtomKey;
-          const thisDefaultAtom = defaultAtom as Atom<T[EntangledAtomKey]>;
-          const realm = get(realmAtom);
-          const realmOverrides: Partial<{ [K in EntangledAtomKey]: Atom<T[K]> }> =
-            get(focusAtom(realmOverridesAtom, (o) => o.optional().prop(realm))) ?? {};
-          const thisOverride = realmOverrides[thisKey];
-          if (thisOverride) {
-            return get(thisOverride);
-          }
-          const value = get(thisDefaultAtom);
+          const value = get(defaultAtom);
           return value;
         },
-        (get: Getter, set: Setter, props: any[]) => {
-          const thisKey = key as EntangledAtomKey;
-          const thisDefaultAtom = defaultAtom as Atom<T[EntangledAtomKey]>;
-          const realm = get(realmAtom);
-          const realmOverrides: Partial<{ [K in EntangledAtomKey]: Atom<T[K]> }> =
-            get(focusAtom(realmOverridesAtom, (o) => o.optional().prop(realm))) ?? {};
-          const thisOverride = realmOverrides[thisKey];
-          if (thisOverride) {
-            set(thisOverride, props);
-            return;
-          }
-          set(thisDefaultAtom, props);
+        (get, set, update: any) => {
+          set(defaultAtom, update);
         },
       );
-      return [key, writableAtom];
+      return [key, compoundAtom];
     }),
   ) as typeof restConfig;
 
@@ -116,7 +145,7 @@ export const useWorker = () => {
     const handle = new worker();
     ref.current = handle;
     handle.onerror = (event) => {};
-    handle.onmessage = createMessageHandler(store);
+    // handle.onmessage = createMessageHandler(store);
     return () => {
       handle.terminate();
     };

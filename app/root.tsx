@@ -1,11 +1,11 @@
 import { Global } from "@emotion/react";
 import { Links, Meta, Outlet, Scripts, ScrollRestoration } from "@remix-run/react";
-import { Provider, useAtom } from "jotai";
-import { createEntanglement, entangledResponse } from "./again";
-import { sourceEffectAtom } from "./again";
+import { Provider, useAtom, useAtomValue } from "jotai";
+import { createEntanglement, entangledResponse} from "./again";
 import { NavigationSidebar } from "./navigation";
 import { isDarkModeAtom, store } from "./state/common";
 import { appStyle, Container, darkMode } from "./style";
+import { useEffect } from "react";
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
@@ -30,11 +30,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
 const atoms = { isDarkModeAtom };
 export const loader = () => entangledResponse(atoms);
-const useEntanglement = createEntanglement(atoms);
+const {useEntangledAtoms} = createEntanglement(atoms);
 
 const AppShell = () => {
-  useAtom(sourceEffectAtom);
-  useEntanglement();
+  // useAtom(sourceEffectAtom);
+  useEntangledAtoms();
   const isDarkMode = useAtom(isDarkModeAtom);
   const styles = isDarkMode ? [...appStyle, darkMode] : appStyle;
   return (

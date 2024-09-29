@@ -1,15 +1,25 @@
 import { NavLink, Outlet, useLoaderData } from "@remix-run/react";
+import { atom, useAtom } from "jotai";
+import { createEntanglement, entangledResponse } from "~/again";
 import { SidebarInput } from "~/navigation";
 import { experimentIdsAtom, store } from "~/state/common";
 
 export { defaultMeta as meta } from "~/meta";
 
-export const loader = async () => {
-  return { experimentIds: store.get(experimentIdsAtom) };
-};
+
+const idsAtom = atom<[string, string][]>([]);
+const atoms = { idsAtom };
+
+export async function loader() {
+  store.set(idsAtom, store.get(experimentIdsAtom));
+  return entangledResponse(atoms);
+}
+
+const {useEntangledAtoms} = createEntanglement(atoms);
 
 export default function Experiment() {
-  const { experimentIds } = useLoaderData<typeof loader>();
+  useEntangledAtoms();
+  const [experimentIds] = useAtom(idsAtom);
   return (
     <>
       <Outlet />

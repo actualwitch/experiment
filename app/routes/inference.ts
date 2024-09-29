@@ -1,6 +1,6 @@
 import { ActionFunctionArgs, json, LoaderFunctionArgs, redirect } from "@remix-run/node";
 import { createExperiment, experimentIdsAtom, store } from "~/state/common";
-import { runExperiment } from "~/state/server";
+import { testStreaming } from "~/state/server";
 
 export async function loader({}: LoaderFunctionArgs) {
   store.get(experimentIdsAtom);
@@ -10,7 +10,7 @@ export async function loader({}: LoaderFunctionArgs) {
 export async function action({ request }: ActionFunctionArgs) {
   const experiment = await request.json();
   const { id, runId } = await store.set(createExperiment, experiment);
-  store.set(runExperiment, { id, runId });
+  store.set(testStreaming, { id, runId });
 
   return redirect(`/experiment/${id}/${runId}`);
 }

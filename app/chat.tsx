@@ -1,6 +1,6 @@
 import { SerializedStyles, css } from "@emotion/react";
 import styled from "@emotion/styled";
-import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
+import { Atom, atom, useAtom, useAtomValue, useSetAtom, WritableAtom } from "jotai";
 import { focusAtom } from "jotai-optics";
 import { ReactNode, useRef } from "react";
 import { Editor } from "~/editor";
@@ -148,7 +148,6 @@ function deepEqual(a: any, b: any): boolean {
   }
   return true;
 }
-
 export const ChatMessage = ({ message: _message, index }: { message: Message; index: number }) => {
   const ref = useRef<null | HTMLElement>(null);
   const selector: Path = [index, "content"];

@@ -56,14 +56,14 @@ export default function Index() {
   const [selection, setSelection] = useAtom(selectionAtom);
   const fooAtom = useAtomValue(fooAtomAtom);
   const [role, setRole] = useAtom(fooAtom);
-  if (!hasResolvedToken) {
-    return (
-      <div>
-        <h2>Begin</h2>
-        <Paragraph>{description} Start by importing a CSV or adding API keys.</Paragraph>
-      </div>
-    );
-  }
+  // if (!hasResolvedToken) {
+  //   return (
+  //     <div>
+  //       <h2>Begin</h2>
+  //       <Paragraph>{description} Start by importing a CSV or adding API keys.</Paragraph>
+  //     </div>
+  //   );
+  // }
   return (
     <>
       <ChatPreview chatAtom={newChatAtom} />

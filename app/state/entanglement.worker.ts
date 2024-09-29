@@ -1,6 +1,6 @@
 import { createStore } from "jotai";
-import { createMessageHandler, entangledAtoms } from "./common";
+// import { createMessageHandler, entangledAtoms } from "./common";
 
 const store = createStore();
 
-globalThis.onmessage = createMessageHandler(store);
+// globalThis.onmessage = createMessageHandler(store);

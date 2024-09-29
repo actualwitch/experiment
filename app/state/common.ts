@@ -1,8 +1,10 @@
-import { atom, createStore } from "jotai";
+import { Atom, atom, createStore, WritableAtom } from "jotai";
 import { focusAtom } from "jotai-optics";
 import { entangleAtoms, getRealm, REALM, realmAtom } from "./entanglement";
 import { atomEffect } from "jotai-effect";
 import { makeRequestTool } from "./inference";
+import { atomWithStorage, createJSONStorage } from "jotai/utils";
+import { createFileStorage } from "~/utils";
 
 export const store = createStore();
 
@@ -27,16 +29,38 @@ export type Store = {
   };
 };
 
+function divergentAtom<V, A extends unknown[], R extends any>(
+  inputAtom: WritableAtom<V, A, R>,
+): WritableAtom<V, A, R> & { override: (newAtom: WritableAtom<V, A, R>) => void } {
+  let override: WritableAtom<V, A, R> | undefined;
+  const thisAtom: WritableAtom<V, A, R> & { override?: (newAtom: WritableAtom<V, A, R>) => void } = atom(
+    (get) => get(override ?? inputAtom),
+    (get, set, ...update) => {
+      const target = override ?? inputAtom;
+      if (target.write) {
+        target.write(get, set, ...update);
+      }
+    },
+  );
+  thisAtom.override = (newAtom: WritableAtom<V, A, R>) => {
+    override = newAtom;
+  };
+  // @ts-ignore
+  return thisAtom;
+}
+
 export const getInitialStore = () => ({ tokens: { anthropic: undefined }, experiments: {} });
+export const storeAtom = divergentAtom(atom<Store>(getInitialStore()));
 
 export const voidAtom = atom<void>(void 0);
 
-export const { bindToRealm, entangledAtoms, createMessageHandler } = entangleAtoms({
-  [REALM]: realmAtom,
-  storeAtom: atom<Store>(getInitialStore()),
-  hasResolvedTokenAtom: atom(false),
-});
-const { storeAtom } = entangledAtoms;
+export const hasResolvedTokenAtom = divergentAtom(atom(false));
+export const experimentAtom = atom<Message[]>([]);
+
+// export const { bindToRealm, entangledAtoms, createMessageHandler } = entangleAtoms({
+//   [REALM]: realmAtom,
+//   experimentAtom,
+// });
 
 export const experimentIdsAtom = atom((get) => {
   const store = get(storeAtom);
