@@ -1,56 +1,28 @@
 {
   "name": "experiment",
-  "private": true,
-  "sideEffects": false,
+  "module": "src/entry/server.tsx",
   "type": "module",
-  "scripts": {
-    "build": "remix vite:build",
-    "dev": "remix vite:dev",
-    "lint": "eslint --ignore-path .gitignore --cache --cache-location ./node_modules/.cache/eslint .",
-    "start": "remix-serve ./build/server/index.js",
-    "typecheck": "tsc"
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.6.3"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.27.3",
-    "@emotion/react": "^11.13.3",
-    "@emotion/styled": "^11.13.0",
-    "@remix-run/node": "^2.12.1",
-    "@remix-run/react": "^2.12.1",
-    "@remix-run/serve": "^2.12.1",
-    "@types/dompurify": "^3.0.5",
-    "csvtojson": "^2.0.10",
-    "dompurify": "^3.1.6",
-    "isbot": "^4.1.0",
-    "jotai": "^2.10.0",
-    "jotai-effect": "^1.0.3",
-    "jotai-optics": "^0.4.0",
-    "marked": "^14.1.2",
-    "monaco-editor": "^0.52.0",
-    "nanoid": "^5.0.7",
-    "optics-ts": "^2.4.1",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "remix-utils": "^7.7.0",
-    "runtypes": "^6.7.0",
-    "shevyjs": "^2.1.0"
-  },
-  "devDependencies": {
-    "@remix-run/dev": "^2.12.1",
-    "@types/react": "^18.3.8",
-    "@types/react-dom": "^18.3.0",
-    "@typescript-eslint/eslint-plugin": "^6.7.4",
-    "@typescript-eslint/parser": "^6.7.4",
-    "eslint": "^8.38.0",
-    "eslint-import-resolver-typescript": "^3.6.1",
-    "eslint-plugin-import": "^2.28.1",
-    "eslint-plugin-jsx-a11y": "^6.7.1",
-    "eslint-plugin-react": "^7.33.2",
-    "eslint-plugin-react-hooks": "^4.6.0",
-    "typescript": "^5.6.2",
-    "vite": "^5.4.7",
-    "vite-tsconfig-paths": "^5.0.1"
-  },
-  "engines": {
-    "node": ">=20.0.0"
+    "@anthropic-ai/sdk": "latest",
+    "@emotion/react": "latest",
+    "@emotion/styled": "latest",
+    "@types/react": "latest",
+    "@types/react-dom": "latest",
+    "jotai": "latest",
+    "jotai-effect": "latest",
+    "jotai-optics": "latest",
+    "nanoid": "latest",
+    "openai": "latest",
+    "react": "canary",
+    "react-dom": "canary",
+    "react-router-dom": "latest",
+    "runtypes": "latest",
+    "shevyjs": "latest"
   }
 }
