@@ -7,9 +7,7 @@ import { appStyle, Container, darkMode } from "./style";
 import { Global } from "@emotion/react";
 import { isDarkModeAtom } from "./state/common";
 import { NavigationSidebar } from "./navigation";
-import { createChannel } from "./state/æther";
-
-const [sendChannel, listenChannel] = createChannel();
+import { publish } from "./state/æther";
 
 const Context = ({ children }: PropsWithChildren) => {
   return <Provider store={store}>{children}</Provider>;
@@ -31,7 +29,7 @@ export const Shell = ({ bootstrap }: { bootstrap?: true }) => {
   useEffect(() => {
     const source = new EventSource("/");
     source.addEventListener("message", (event) => {
-      sendChannel.postMessage(JSON.parse(event.data));
+      publish(JSON.parse(event.data));
     });
     return () => {
       source.close();

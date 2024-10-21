@@ -2,10 +2,8 @@ import { renderToReadableStream } from "react-dom/server";
 import { StaticRouter } from "react-router-dom/server";
 import { Shell } from "../root";
 import { eventStream } from "../utils/eventStream";
-import { createChannel } from "../state/æther";
+import { publish, subscribe, type Update } from "../state/æther";
 
-const [sendChannel, listenChannel] = createChannel();
-const [serverIn, serverOut] = createChannel("server");
 
 
 const {
@@ -64,7 +62,7 @@ const doPOST = async (request: Request) => {
     return null;
   }
   const body = await request.json();
-  sendChannel.postMessage(body);
+  publish(body);
   return new Response("OK");
 };
 
@@ -73,15 +71,13 @@ const doSSE = async (request: Request) => {
     return null;
   }
   return eventStream(request.signal, (send) => {
-    const listener = (event: MessageEvent) => {
-      console.log("sending sse", event.data);
-      send({ data: JSON.stringify(event.data) });
+    const listener = (data: Update) => {
+      console.log("sending sse", data);
+      send({ data: JSON.stringify(data) });
     };
-    listenChannel.addEventListener("message", listener);
-    serverOut.addEventListener("message", listener);
+    const unsub = subscribe(listener);
     return () => {
-      listenChannel.removeEventListener("message", listener);
-      serverOut.removeEventListener("message", listener);
+      unsub();
     };
   });
 };

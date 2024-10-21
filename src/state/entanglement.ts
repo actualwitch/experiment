@@ -1,12 +1,9 @@
 import { atom, type Atom, type WritableAtom } from "jotai";
 import { deepEqual, getRealm } from "../utils";
-import { createChannel } from "./æther";
 import { store } from "./common";
 import { hydrationMap } from "../utils/hydration";
 import type { PrimitiveAtom } from "jotai";
-
-const [sendChannel, listenChannel] = createChannel();
-const [serverIn, serverOut] = createChannel("server");
+import { publish, subscribe } from "./æther";
 
 const thisRealm = getRealm();
 const isServer = thisRealm === "server";
@@ -48,13 +45,13 @@ export function entangledAtom<V extends unknown, A extends AtomWithWrite<V>, Aw 
       hydrationMap[id] = value;
 
       if (channelValue === undefined || (channelValue && !deepEqual(channelValue, value))) {
-        sendChannel.postMessage({ id, value });
+        publish({ id, value });
       }
     };
     updater();
     store.sub(writableAtom, updater);
 
-    listenChannel.addEventListener("message", ({ data }) => {
+    subscribe((data) => {
       if (data.id === id) {
         channelValue = data.value;
         store.set(writableAtom, data.value);
@@ -64,15 +61,6 @@ export function entangledAtom<V extends unknown, A extends AtomWithWrite<V>, Aw 
     const cacheValue = hydrationMap[id];
     if (cacheValue) {
       store.set(writableAtom, cacheValue as V);
-    }
-
-    listenChannel.addEventListener("message", ({ data }) => {
-      if (data.id === id) {
-        store.set(writableAtom, data.value);
-      }
-    });
-    if (mode === "readOnly") {
-      return atom((get) => get(writableAtom));
     }
     if (mode === "server") {
       return atom(
@@ -84,6 +72,15 @@ export function entangledAtom<V extends unknown, A extends AtomWithWrite<V>, Aw 
           });
         },
       );
+    }
+
+    subscribe((data) => {
+      if (data.id === id) {
+        store.set(writableAtom, data.value);
+      }
+    });
+    if (mode === "readOnly") {
+      return atom((get) => get(writableAtom));
     }
 
     store.sub(writableAtom, () => {
@@ -108,16 +105,18 @@ export function serverAtom<V extends unknown, A extends unknown[], R extends unk
   uniqueIds.add(id);
 
   if (isServer) {
-    listenChannel.addEventListener("message", async ({ data }) => {
+    subscribe(async (data) => {
       if (data.id === id) {
-        console.log("serverAtom", data);
-        const value = await store.set(thisAtom, data.value);
-        serverIn.postMessage({ id, value });
+        if (data.id === id) {
+          console.log("serverAtom", data);
+          const value = await store.set(thisAtom, data.value);
+        }
       }
     });
   } else {
     const writableAtom = atom<R | null>(null);
-    listenChannel.addEventListener("message", ({ data }) => {
+    subscribe((data) => {
+
       if (data.id === id && data.value !== null) {
         store.set(writableAtom, data.value);
       }
