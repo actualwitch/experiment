@@ -3,8 +3,7 @@ import { StaticRouter } from "react-router-dom/server";
 import { Shell } from "../root";
 import { eventStream } from "../utils/eventStream";
 import { publish, subscribe, type Update } from "../state/æther";
-
-
+import { DEBUG } from "../const";
 
 const {
   outputs: [js],
@@ -20,21 +19,26 @@ if (!success) {
 
 const doStatic = async (request: Request) => {
   const url = new URL(request.url);
+  let response: Response | null = null;
   if (url.pathname === "/favicon.ico") {
-    return new Response("KO", { status: 404 });
+    response = new Response("KO", { status: 404 });
   }
   if (url.pathname === "/script.js") {
-    return new Response(await js.text(), {
+    response = new Response(await js.text(), {
       headers: {
         "Content-Type": "application/javascript",
       },
     });
   }
-  return null;
+  if (response) {
+    console.log("Static", request.url);
+  }
+  return response;
 };
 
 const doStreamingSSR = async (request: Request) => {
   const url = new URL(request.url);
+  console.log("SSR", request.url);
   const stream = await renderToReadableStream(
     <StaticRouter location={url.pathname}>
       <Shell />
@@ -62,6 +66,7 @@ const doPOST = async (request: Request) => {
     return null;
   }
   const body = await request.json();
+  console.log(request.method, request.url, body);
   publish(body);
   return new Response("OK");
 };
@@ -70,21 +75,22 @@ const doSSE = async (request: Request) => {
   if (request.headers.get("accept") !== "text/event-stream") {
     return null;
   }
+  console.log("SSE", request.url)
   return eventStream(request.signal, (send) => {
     const listener = (data: Update) => {
-      console.log("sending sse", data);
+      console.log("SSE >>>", data);
       send({ data: JSON.stringify(data) });
     };
     const unsub = subscribe(listener);
     return () => {
+      console.log("SSE closed")
       unsub();
     };
   });
 };
 
 async function appFetch(request: Request) {
-  console.log(request.method, request.url);
-  for (const handler of [doStatic, doSSE, doPOST, doStreamingSSR]) {
+  for (const handler of [doSSE, doPOST, doStatic, doStreamingSSR]) {
     const response = await handler(request);
     if (response) {
       return response;
@@ -95,6 +101,6 @@ async function appFetch(request: Request) {
 
 console.log("Listening on http://localhost:3000");
 Bun.serve({
-  development: true,
+  development: DEBUG,
   fetch: appFetch,
 });

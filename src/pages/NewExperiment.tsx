@@ -1,12 +1,13 @@
-import { atom, useAtom, useSetAtom } from "jotai";
-import { entangledAtom } from "../state/entanglement";
-import { ChatContainer, ChatPreview, MessageComponent } from "../components/chat";
-import { experimentAtom, experimentIdsAtom, newChatAtom, testStreaming, type Message, type Role } from "../state/common";
 import styled from "@emotion/styled";
+import { useAtom } from "jotai";
 import { useEffect, useState } from "react";
-import { SidebarInput } from "../navigation";
-import { NavLink, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { ChatContainer, ChatPreview } from "../components/chat";
 import { ExperimentsSidebar } from "../sidebars/experiments";
+import { experimentAtom, type Role } from "../state/common";
+import inference from "../state/inference";
+
+const { runExperimentAsOpenAi } = inference;
 
 const Column = styled.div`
   display: flex;
@@ -27,38 +28,14 @@ const ActionRow = styled.div`
 
 export default function NewExperiment() {
   const navigate = useNavigate();
-  const [experiment, setExperiment] = useAtom(newChatAtom);
+  const [experiment, setExperiment] = useAtom(experimentAtom);
   const [message, setMessage] = useState("");
   const [role, setRole] = useState<Role>("user");
   const submit = () => {
     setMessage("");
     setExperiment([...experiment, { role, content: message }]);
   };
-  const [isMetaPressed, setIsMetaPressed] = useState(false);
-  const [result, runExperiment] = useAtom(testStreaming);
-  useEffect(() => {
-    if (result) {
-      navigate(`/experiment/${result.id}/${result.runId}`);
-    }
-  }, [result]);
-  useEffect(() => {
-    const listenerDown = (e: KeyboardEvent) => {
-      if (e.key === "Meta") {
-        setIsMetaPressed(true);
-      }
-    };
-    const listenerUp = (e: KeyboardEvent) => {
-      if (e.key === "Meta") {
-        setIsMetaPressed(false);
-      }
-    };
-    document.addEventListener("keydown", listenerDown);
-    document.addEventListener("keyup", listenerUp);
-    return () => {
-      document.removeEventListener("keydown", listenerDown);
-      document.removeEventListener("keyup", listenerUp);
-    };
-  }, []);
+  const [_, runExperiment] = useAtom(runExperimentAsOpenAi);
   return (
     <>
       <Column>
@@ -73,7 +50,7 @@ export default function NewExperiment() {
               <option>assistant</option>
               <option>tool</option>
             </select>
-            <button onClick={() => submit()}>{isMetaPressed ? "send" : "add"}</button>
+            <button onClick={() => submit()}>add</button>
           </ActionRow>
 
           <textarea
@@ -95,7 +72,7 @@ export default function NewExperiment() {
           type="submit"
           onClick={(e) => {
             e.preventDefault();
-            runExperiment()
+            runExperiment();
           }}>
           new experiment
         </button>

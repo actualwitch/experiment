@@ -1,8 +1,9 @@
 import styled from "@emotion/styled";
 import { useAtom } from "jotai";
-import { hasResolvedTokenAtom, isDarkModeAtom, tokensAtom } from "../state/common";
+import { isDarkModeAtom, tokensAtom } from "../state/common";
 import { bs } from "../style";
 import { withFormStyling, type FormProps } from "../style/form";
+import { hasResolvedTokenAtom } from "../state/inference";
 
 
 const Input = styled.input<FormProps>(withFormStyling);
@@ -27,7 +28,6 @@ const StyledForm = styled.form`
 export default function Configure() {
   const [isDarkMode, setIsDarkMode] = useAtom(isDarkModeAtom);
   const [hasResolvedToken] = useAtom(hasResolvedTokenAtom);
-  console.log(hasResolvedToken);
   const [tokens, setTokens] = useAtom(tokensAtom);
   return (
     <>

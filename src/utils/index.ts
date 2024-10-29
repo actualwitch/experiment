@@ -56,7 +56,6 @@ export function createFileStorage(...keys: string[]): SyncStringStorage {
   return FileStorage;
 }
 
-
 export const getRealm = () => {
   if (typeof document !== "undefined") {
     return "client";
@@ -79,4 +78,11 @@ export function deepEqual(a: any, b: any): boolean {
     if (!deepEqual(value, b[key])) return false;
   }
   return true;
+}
+
+export function maybeImport(path: string) {
+  if (getRealm() === "server") {
+    return import(path);
+  }
+  return Promise.resolve({});
 }

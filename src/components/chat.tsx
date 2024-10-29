@@ -13,7 +13,7 @@ import { type ReactNode, useRef } from "react";
 import { store } from "../state/common";
 import {
   isDarkModeAtom,
-  newChatAtom,
+  experimentAtom,
   templatesAtom,
   type Message,
 } from "../state/common";
@@ -127,10 +127,10 @@ const lensAtom = atom(
   (get) => {
     const selection = get(selectionAtom);
     if (selection === null) {
-      return get(newChatAtom);
+      return get(experimentAtom);
     }
     const [idx, key] = selection;
-    const lens = focusAtom(newChatAtom, (o) => {
+    const lens = focusAtom(experimentAtom, (o) => {
       if (key === "content") {
         return o.nth(idx).prop("content");
       }
@@ -145,10 +145,10 @@ const lensAtom = atom(
   ) => {
     const selection = get(selectionAtom);
     if (selection === null) {
-      set(newChatAtom, update as Message[]);
+      set(experimentAtom, update as Message[]);
       return;
     }
-    const lens = focusAtom(newChatAtom, (o) => {
+    const lens = focusAtom(experimentAtom, (o) => {
       const [idx, key] = selection;
       if (key === "content") {
         return o.nth(idx).prop("content");
