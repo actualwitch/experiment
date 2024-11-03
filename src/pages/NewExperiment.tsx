@@ -136,7 +136,7 @@ export default function NewExperiment() {
             e.preventDefault();
             runExperiment();
           }}>
-          new experiment
+          start inference
         </Button>
       </aside>
       <ExperimentsSidebar />

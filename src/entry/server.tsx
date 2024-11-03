@@ -4,6 +4,7 @@ import { Shell } from "../root";
 import { eventStream } from "../utils/eventStream";
 import { publish, subscribe, type Update } from "../state/æther";
 import { DEBUG } from "../const";
+import type { Server } from "bun";
 
 const {
   outputs: [js],
@@ -71,11 +72,12 @@ const doPOST = async (request: Request) => {
   return new Response("OK");
 };
 
-const doSSE = async (request: Request) => {
+const doSSE = async (request: Request, server: Server) => {
   if (request.headers.get("accept") !== "text/event-stream") {
     return null;
   }
   console.log("SSE", request.url)
+  server.timeout(request, 1000 * 60 * 60);
   return eventStream(request.signal, (send) => {
     const listener = (data: Update) => {
       console.log("SSE >>>", data);
@@ -89,9 +91,9 @@ const doSSE = async (request: Request) => {
   });
 };
 
-async function appFetch(request: Request) {
+async function appFetch(request: Request, server: Server) {
   for (const handler of [doSSE, doPOST, doStatic, doStreamingSSR]) {
-    const response = await handler(request);
+    const response = await handler(request, server);
     if (response) {
       return response;
     }
