@@ -1,32 +1,21 @@
 import { type SerializedStyles, css } from "@emotion/react";
 import styled from "@emotion/styled";
-import {
-  type Atom,
-  atom,
-  useAtom,
-  useAtomValue,
-  useSetAtom,
-  type WritableAtom,
-} from "jotai";
+import { type Atom, atom, useAtom, useAtomValue, useSetAtom, type WritableAtom } from "jotai";
 import { focusAtom } from "jotai-optics";
 import { type ReactNode, useRef } from "react";
 import { store } from "../state/common";
-import {
-  isDarkModeAtom,
-  experimentAtom,
-  templatesAtom,
-  type Message,
-} from "../state/common";
+import { isDarkModeAtom, experimentAtom, templatesAtom, type Message } from "../state/common";
 import { bs } from "../style";
 import { collapsedAtom, View } from "./view";
 import { deepEqual } from "../utils";
+import { useScrollToTop } from "../utils/scroll";
 
 const baseHeight = bs(6);
 export const ChatContainer = styled.div`
   flex: 1;
   display: flex;
   flex-direction: column-reverse;
-  & > * {
+  & > article {
     min-height: ${baseHeight}}
   }
 `;
@@ -36,10 +25,10 @@ export const MessageComponent = styled.article<{
   contentType?: string;
   ioType?: "input" | "output";
   isSelected?: boolean;
-}>(({ role, ioType, contentType, isSelected }) => {
+  isDarkMode?: boolean;
+}>(({ role, ioType, contentType, isSelected, isDarkMode }) => {
   const fromServer = ioType === "output";
   const align = fromServer ? "right" : "left";
-  const isDarkMode = store.get(isDarkModeAtom);
   const styles: SerializedStyles[] = [
     css`
       border-${align}: 4px solid transparent;
@@ -138,11 +127,7 @@ const lensAtom = atom(
     });
     return get(lens);
   },
-  (
-    get,
-    set,
-    update: string | Message[] | ((prev: string | Message) => string | Message)
-  ) => {
+  (get, set, update: string | Message[] | ((prev: string | Message) => string | Message)) => {
     const selection = get(selectionAtom);
     if (selection === null) {
       set(experimentAtom, update as Message[]);
@@ -156,16 +141,10 @@ const lensAtom = atom(
       return o.nth(idx);
     });
     set(lens, update);
-  }
+  },
 );
 
-export const ChatMessage = ({
-  message: _message,
-  index,
-}: {
-  message: Message;
-  index: number;
-}) => {
+export const ChatMessage = ({ message: _message, index }: { message: Message; index: number }) => {
   const ref = useRef<null | HTMLElement>(null);
   const selector: Path = [index, "content"];
   const [selection, setSelection] = useAtom(selectionAtom);
@@ -173,13 +152,11 @@ export const ChatMessage = ({
   const [collapsed, setCollapsed] = useAtom(collapsedAtom);
   const setter = useSetAtom(lensAtom);
   const templates = useAtomValue(templatesAtom);
+  const isDarkMode = useAtomValue(isDarkModeAtom);
 
   const message = { ..._message };
   for (const [name, template] of Object.entries(templates ?? {})) {
-    if (
-      message.role === template.role &&
-      deepEqual(message.content, template.content)
-    ) {
+    if (message.role === template.role && deepEqual(message.content, template.content)) {
       message.template = name;
       break;
     }
@@ -212,8 +189,7 @@ export const ChatMessage = ({
         shouldBeCollapsed={(path) => collapsed.includes(path.join("."))}
         style={{
           float: message.fromServer ? "right" : "left",
-        }}
-      >
+        }}>
         {message.content}
       </View>
     );
@@ -222,20 +198,23 @@ export const ChatMessage = ({
   return (
     <MessageComponent
       contentEditable={isSelected && selection?.[1] === "content"}
+      onBlur={(e) => {
+        console.log(e.currentTarget.textContent);
+        setSelection([index]);
+      }}
       ref={ref}
       role={message.role}
       contentType={contentType}
       isSelected={isSelected}
+      isDarkMode={isDarkMode}
       onClick={() => {
         if (selection?.length === 2) return;
         setSelection([selector[0]]);
       }}
       onDoubleClick={() => {
         setSelection(selector);
-        console.log(selector);
       }}
-      ioType={message.fromServer ? "output" : "input"}
-    >
+      ioType={message.fromServer ? "output" : "input"}>
       {innerContent}
     </MessageComponent>
   );
@@ -245,15 +224,18 @@ const Banner = styled.div`
   display: grid;
   place-items: center;
   height: 100%;
-  `;
+`;
 
 export function ChatPreview({ history }: { history: Message[] }) {
+  const Anchor = useScrollToTop("top", [history.length]);
+
   if (history.length === 0) {
     return <Banner>∅</Banner>;
   }
 
   return (
     <ChatContainer>
+      <Anchor />
       {[...history].reverse().map?.((message, index) => {
         return <ChatMessage key={index} message={message} index={index} />;
       })}

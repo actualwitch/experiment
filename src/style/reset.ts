@@ -29,6 +29,7 @@ export const reset = css`
   textarea,
   select {
     font: inherit;
+    color: inherit;
   }
 
   /* 7. Avoid text overflows */

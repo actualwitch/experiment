@@ -1,30 +1,67 @@
 import { css } from "@emotion/react";
 import styled from "@emotion/styled";
+import { useAtom } from "jotai";
+import type { HTMLProps } from "react";
 import Shevy from "shevyjs";
+import { isDarkModeAtom } from "../state/common";
+import { Palette } from "./palette";
+import { reset } from "./reset";
 
 const config: {
   fontScale: "majorSecond" | "minorThird" | "majorThird" | "perfectFourth" | "augmentedFourth";
 } = {
-  fontScale: "minorThird"
-}
-
+  fontScale: "minorThird",
+};
 
 export const fontFamily = 'Charter, "Bitstream Charter", "Sitka Text", Cambria, serif';
 
 export const { baseSpacing: bs, content, body, h1, h2, h3, h4, h5, h6 } = Shevy(config);
 const shevyStyle = css({ body, h1, h2, h3, h4, h5, h6, ["p, ol, ul, pre"]: content });
 
-const button = css`
-  button:not(:disabled) {
-    background-color: #ddd;
+const internalDarkModeButton = css`
+  &:not(:disabled) {
+    box-shadow: 2px 2px 8px #ececec21;
+    :hover {
+      box-shadow: 0px 1px 14px 4px #ececec52;
+    }
+  }
+`;
+
+const InternalButton = styled.button<{ isDarkMode: boolean }>`
+  &:not(:disabled) {
     box-shadow: 2px 2px 8px #00000020;
     text-shadow: 1px 0px 1px #00000024, -1px 0px 1px #ffffffb8;
     :hover {
-      background-color: color(display-p3 0 0 0 / 0.19);
       box-shadow: 0px 1px 8px 2px #1a1a1a24;
     }
     :active {
       transform: translate(0px, 1px);
+    }
+  }
+  ${(p) =>
+    p.isDarkMode
+      ? internalDarkModeButton
+      : css`
+          @media (prefers-color-scheme: dark) {
+            ${internalDarkModeButton}
+          }
+        `}
+`;
+
+export const Button = ({ children, ...props }: HTMLProps<HTMLButtonElement>) => {
+  const [isDarkMode] = useAtom(isDarkModeAtom);
+  return (
+    <InternalButton isDarkMode={isDarkMode} {...props}>
+      {children}
+    </InternalButton>
+  );
+};
+
+const button = css`
+  button:not(:disabled) {
+    background-color: ${Palette.actionableBackground};
+    :hover {
+      background-color: color(display-p3 0 0 0 / 0.19);
     }
   }
   button {
@@ -53,10 +90,8 @@ const button = css`
 
 const buttonDarkMode = css`
   button:not(:disabled) {
-    box-shadow: 2px 2px 8px #ececec21;
     :hover {
       background-color: #fff;
-      box-shadow: 0px 1px 14px 4px #ececec52;
     }
   }
   button[disabled] {
@@ -103,11 +138,13 @@ export const darkMode = css`
   :root {
     background-color: #000;
     color: white;
-    ${buttonDarkMode}
   }
+  ${buttonDarkMode}
 `;
 
 export const appStyle = [
+  reset,
+  shevyStyle,
   css`
     :root {
       font-family: ${fontFamily};
@@ -119,9 +156,8 @@ export const appStyle = [
         margin-bottom: 0;
       }
     }
-    * {
-      margin: 0;
-      padding: 0;
+    ::selection {
+      background-color: ${Palette.accent};
     }
     a {
       color: inherit;
@@ -149,5 +185,4 @@ export const appStyle = [
       ${darkMode}
     }
   `,
-  shevyStyle,
 ];

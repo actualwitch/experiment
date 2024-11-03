@@ -7,7 +7,7 @@ export function ExperimentsSidebar() {
   const [experimentIds] = useAtom(experimentIdsAtom);
   return (
     <SidebarInput>
-      <h3>Experiments</h3>
+      <h3>Inference history</h3>
       <ul>
         {experimentIds.map(([id, subId]) => (
           <li key={id + subId}>
