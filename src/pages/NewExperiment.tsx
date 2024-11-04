@@ -14,10 +14,7 @@ const { runExperimentAsOpenAi, testStreaming } = inference;
 const Column = styled.div`
   display: flex;
   flex-direction: column;
-
-  ${ChatContainer} {
-    flex: 1;
-  }
+  overflow-x: hidden;
 `;
 
 const Block = styled.div<{ isDarkMode: boolean }>`
@@ -80,7 +77,6 @@ const ActionRow = styled.div`
 `;
 
 export default function NewExperiment() {
-  const navigate = useNavigate();
   const [isDarkMode] = useAtom(isDarkModeAtom);
   const [experiment, setExperiment] = useAtom(experimentAtom);
   const [message, setMessage] = useState("");
@@ -118,7 +114,7 @@ export default function NewExperiment() {
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             onKeyDown={(e) => {
-              if (e.key === "Enter" && !e.shiftKey) {
+              if (e.key === "Enter") {
                 e.preventDefault();
                 submit();
               }
@@ -136,7 +132,7 @@ export default function NewExperiment() {
             e.preventDefault();
             runExperiment();
           }}>
-          start inference
+          run inference
         </Button>
       </aside>
       <ExperimentsSidebar />

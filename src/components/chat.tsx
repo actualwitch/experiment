@@ -15,6 +15,7 @@ export const ChatContainer = styled.div`
   flex: 1;
   display: flex;
   flex-direction: column-reverse;
+
   & > article {
     min-height: ${baseHeight}}
   }
@@ -28,7 +29,7 @@ export const MessageComponent = styled.article<{
   isDarkMode?: boolean;
 }>(({ role, ioType, contentType, isSelected, isDarkMode }) => {
   const fromServer = ioType === "output";
-  const align = fromServer ? "right" : "left";
+  const align = fromServer ? "left" : "right";
   const styles: SerializedStyles[] = [
     css`
       border-${align}: 4px solid transparent;
@@ -49,7 +50,7 @@ export const MessageComponent = styled.article<{
         ${align}: 0;
         transform-origin: ${align};
         ${
-          fromServer
+          !fromServer
             ? css`
                 transform: rotate(-90deg) translate(0, -20px);
               `
@@ -188,7 +189,7 @@ export const ChatMessage = ({ message: _message, index }: { message: Message; in
         }}
         shouldBeCollapsed={(path) => collapsed.includes(path.join("."))}
         style={{
-          float: message.fromServer ? "right" : "left",
+          float: message.fromServer ? "left" : "right",
         }}>
         {message.content}
       </View>

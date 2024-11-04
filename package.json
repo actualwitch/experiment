@@ -3,7 +3,10 @@
   "module": "src/entry/server.tsx",
   "type": "module",
   "devDependencies": {
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "@types/react": "latest",
+    "@types/react-dom": "latest",
+    "ink": "latest"
   },
   "peerDependencies": {
     "typescript": "^5.6.3"
@@ -12,8 +15,6 @@
     "@anthropic-ai/sdk": "latest",
     "@emotion/react": "latest",
     "@emotion/styled": "latest",
-    "@types/react": "latest",
-    "@types/react-dom": "latest",
     "jotai": "latest",
     "jotai-effect": "latest",
     "jotai-optics": "latest",

@@ -63,4 +63,8 @@ export const reset = css`
   #__next {
     isolation: isolate;
   }
+
+  select {
+    appearance: none;
+  }
 `;

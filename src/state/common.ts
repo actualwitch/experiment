@@ -4,7 +4,7 @@ import { focusAtom } from "jotai-optics";
 import type { Atom } from "jotai";
 import { atomWithStorage, createJSONStorage } from "jotai/utils";
 
-import { entangledAtom } from "./entanglement";
+import { divergentAtom, entangledAtom } from "./entanglement";
 import { createFileStorage, getRealm } from "../utils";
 import { experimentToAnthropic } from "../adapters/anthropic";
 
@@ -35,18 +35,6 @@ export type Store = {
     openai?: string;
   };
 };
-
-function divergentAtom<T extends Atom<unknown> | WritableAtom<unknown, unknown[], unknown>>(
-  ...cases: Array<() => T | undefined>
-) {
-  let result: T | undefined;
-  for (const c of cases) {
-    result = c();
-    if (result) break;
-  }
-  if (!result) throw new Error("No atom was created");
-  return result;
-}
 
 export const getInitialStore = (): Store => ({
   tokens: { anthropic: undefined },
