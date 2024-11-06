@@ -1,4 +1,4 @@
-import { getRealm } from "../utils";
+import { log } from "../logger";
 
 export const æther = "æther";
 
@@ -15,7 +15,7 @@ export const subscribe = (listener: (update: Update) => void) => {
 };
 
 export const publish = (update: { id: string; value: unknown }) => {
-  console.log(`${getRealm()} is publishing ${update.id} update`);
+  log(`publishing ${update.id} update`);
   for (const listener of listeners) {
     listener(update);
   }

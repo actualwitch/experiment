@@ -9,6 +9,7 @@ import { isDarkModeAtom } from "./state/common";
 import { NavigationSidebar } from "./navigation";
 import { publish } from "./state/æther";
 import { atomEffect } from "jotai-effect";
+import { log } from "./logger";
 
 const Context = ({ children }: PropsWithChildren) => {
   return <Provider store={store}>{children}</Provider>;
@@ -29,7 +30,7 @@ const App = () => {
 const isFocusedAtom = atom(false);
 const trackVisibleAtom = atomEffect((get, set) => {
   const listener = () => {
-    console.log("visibility change", document.visibilityState);
+    log("visibility change", document.visibilityState);
     set(isFocusedAtom, document.visibilityState === "visible");
   };
   listener();

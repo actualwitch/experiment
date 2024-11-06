@@ -1,7 +1,11 @@
 {
   "name": "experiment",
+  "version": "0.1.0",
   "module": "src/entry/server.tsx",
   "type": "module",
+  "scripts": {
+    "build": "bun build --compile ./src/entry/server.tsx --outfile experiment"
+  },
   "devDependencies": {
     "@types/bun": "latest",
     "@types/react": "latest",

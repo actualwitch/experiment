@@ -130,7 +130,6 @@ const runExperimentAsOpenAi = atom(null, async (get, set) => {
             contentChunks.push({ role: "assistant", fromServer: true, content: "" });
         }
         contentChunks[choice.index].content += choice.delta.content ?? "";
-        console.log(contentChunks[choice.index].content);
         set(experimentAtom, [...experiment, ...contentChunks]);
     }
   }

@@ -4,6 +4,7 @@ import { type ReactNode, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { bs } from "./style";
 import { NavLink } from "react-router-dom";
+import { VERSION } from "./const";
 
 function portalIO() {
   const elementAtom = atom<null | HTMLElement>(null);
@@ -20,9 +21,12 @@ function portalIO() {
     useEffect(() => {
       setElement(ref.current);
     }, [ref.current]);
-    useEffect(() => () => {
-      setElement(null);
-    }, []);
+    useEffect(
+      () => () => {
+        setElement(null);
+      },
+      [],
+    );
     return <div ref={ref} />;
   }
 
@@ -38,19 +42,22 @@ const Navigation = styled.nav`
 export const NavigationSidebar = () => {
   return (
     <Navigation>
-      <h2>
-        🔬 <NavLink to="/">Experiment</NavLink>
-      </h2>
-      <h2>
-        ⛴️ <NavLink to="/import">Import</NavLink>
-      </h2>
-      <h2>
-        📝 <NavLink to="/templates">Templates</NavLink>
-      </h2>
-      <h2>
-        🔧 <NavLink to="/parameters">Parameters</NavLink>
-      </h2>
+      <header>
+        <h2>
+          🔬 <NavLink to="/">Experiment</NavLink>
+        </h2>
+        <h2>
+          ⛴️ <NavLink to="/import">Import</NavLink>
+        </h2>
+        <h2>
+          📝 <NavLink to="/templates">Templates</NavLink>
+        </h2>
+        <h2>
+          🔧 <NavLink to="/parameters">Parameters</NavLink>
+        </h2>
+      </header>
       <SidebarOutput />
+      <footer>{VERSION}</footer>
     </Navigation>
   );
 };

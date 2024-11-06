@@ -1,2 +1,2 @@
 bun install
-bun --watch run src/entry/server.tsx
+DEBUG=true bun --watch run src/entry/server.tsx
