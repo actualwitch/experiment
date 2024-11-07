@@ -10,7 +10,7 @@ import { tracingAtom } from "../utils/dbg";
 
 const cursorAtom = entangledAtom({ name: "cursor" }, atom<ExperimentCursor | null>(null));
 
-export const experimentAtom = entangledAtom(
+export const selectedExperimentAtom = entangledAtom(
   {
     name: "selected-experiment",
   },
@@ -23,7 +23,7 @@ const actionAtom = entangledAtom(
     if (getRealm() === "server") {
       const cursor = get(cursorAtom);
       if (cursor) {
-        store.set(experimentAtom, get(getExperimentAtom(cursor)));
+        store.set(selectedExperimentAtom, get(getExperimentAtom(cursor)));
       }
     }
   }),
@@ -33,7 +33,7 @@ export default function Experiment() {
   const navigate = useNavigate();
   const { id, runId } = useParams();
   const [cursor] = useAtom(cursorAtom);
-  const [experiment] = useAtom(experimentAtom);
+  const [experiment] = useAtom(selectedExperimentAtom);
   useAtom(actionAtom);
 
   if (!cursor && id && runId) {
@@ -62,11 +62,11 @@ export default function Experiment() {
             e.preventDefault();
             store.set(
               experimentAtom,
-              experiment!.filter((msg) => !msg.fromServer),
+              experiment,
             );
             navigate("/");
           }}>
-          new experiment
+          use in new experiment
         </button>
       </aside>
       <ExperimentsSidebar />

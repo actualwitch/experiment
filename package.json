@@ -4,7 +4,7 @@
   "module": "src/entry/server.tsx",
   "type": "module",
   "scripts": {
-    "build": "bun build --compile ./src/entry/server.tsx --outfile experiment"
+    "build": "bun build --compile ./src/entry/server.tsx --outfile ./build/experiment"
   },
   "devDependencies": {
     "@types/bun": "latest",

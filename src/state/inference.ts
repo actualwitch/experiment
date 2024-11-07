@@ -3,7 +3,15 @@ import { atom } from "jotai";
 import Anthropic from "@anthropic-ai/sdk";
 import { experimentToAnthropic } from "../adapters/anthropic";
 import { maybeImport } from "../utils";
-import { experimentAtom, getExperimentAtom, store, tokensAtom, type ExperimentCursor, type Message } from "./common";
+import {
+  createExperiment,
+  experimentAtom,
+  getExperimentAtom,
+  store,
+  tokensAtom,
+  type ExperimentCursor,
+  type Message,
+} from "./common";
 import { entangledAtom } from "./entanglement";
 import makeRequestTool from "./makeRequestTool.json";
 import OpenAI from "openai";
@@ -122,18 +130,27 @@ const runExperimentAsOpenAi = atom(null, async (get, set) => {
     const stream = await client.chat.completions.create({ ...experimentAsOpenai, stream: true });
     const contentChunks: Message[] = [];
     for await (const chunk of stream) {
-        if (chunk.choices.length === 0) {
-          continue;
-        }
-        const choice = chunk.choices[0];
-        if (choice.index !== contentChunks.length - 1) {
-            contentChunks.push({ role: "assistant", fromServer: true, content: "" });
-        }
-        contentChunks[choice.index].content += choice.delta.content ?? "";
-        set(experimentAtom, [...experiment, ...contentChunks]);
+      if (chunk.choices.length === 0) {
+        continue;
+      }
+      const choice = chunk.choices[0];
+      if (choice.index !== contentChunks.length - 1) {
+        contentChunks.push({ role: "assistant", fromServer: true, content: "" });
+      }
+      contentChunks[choice.index].content += choice.delta.content ?? "";
+      set(experimentAtom, [...experiment, ...contentChunks]);
     }
   }
 });
+
+const saveExperimentAtom = entangledAtom(
+  { name: "save-experiment" },
+  atom(null, async (get, set) => {
+    const experiment: Message[] = get(experimentAtom);
+    if (!experiment.length) return;
+    set(createExperiment, experiment);
+  }),
+);
 
 const testStreaming = atom(null, async (get, set) => {
   const experiment = get(experimentAtom);
@@ -143,6 +160,7 @@ const testStreaming = atom(null, async (get, set) => {
   const int = setInterval(() => {
     if (index >= pasta.length) {
       clearInterval(int);
+      set(saveExperimentAtom, null);
       return;
     }
     set(experimentAtom, [

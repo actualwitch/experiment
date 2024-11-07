@@ -19,10 +19,16 @@ export function divergentAtom<T extends Atom<unknown> | WritableAtom<unknown, un
   if (!result) throw new Error("No atom was created");
   return result;
 }
-
 export function entangledAtom<
   _V extends any,
-  V extends _V | Promise<_V>,
+  V extends _V,
+  A extends [_V],
+  R extends unknown,
+  T extends WritableAtom<V, A, R>,
+>(c: string | Config, thisAtom: T): WritableAtom<V, A, R>;
+export function entangledAtom<
+  _V extends any,
+  V extends Promise<_V>,
   A extends [_V],
   R extends unknown,
   T extends WritableAtom<V, A, R>,
@@ -81,6 +87,12 @@ export function entangledAtom<
         });
       }
 
+      const requestUpdate = (update: unknown) =>
+        fetch("/", {
+          method: "POST",
+          body: JSON.stringify({ id, value: update }),
+        });
+
       let writableAtom: WritableAtom<V, A, R>;
       const cacheValue = hydrationMap[id] as unknown as V;
       if (cacheValue) {
@@ -102,12 +114,19 @@ export function entangledAtom<
       return atom(
         async (get) => get(writableAtom),
         (get, set, update) => {
-          fetch("/", {
-            method: "POST",
-            body: JSON.stringify({ id, value: update }),
-          });
+          requestUpdate(update);
         },
       );
     },
   );
 }
+
+
+/// test cases
+
+// const test1 = entangledAtom("test1", atom(1));
+// const test2 = entangledAtom("test2", atom(get => get(test1)));
+// const test3 = entangledAtom("test3", atom(get => get(test1), (get, set, update) => set(test1, update)));
+// const test4 = entangledAtom("test4", null, (get, set, update) => set(test1, update));
+// const test5 = entangledAtom("test5", atom(async get => get(test1)));
+// const test6 = entangledAtom("test6", atom(null, async (get, set, update) => set(test1, update)));

@@ -1,7 +1,9 @@
 import { useAtom } from "jotai";
-import { experimentIdsAtom } from "../state/common";
+import state from "../state/common";
 import { SidebarInput } from "../navigation";
 import { NavLink } from "react-router-dom";
+
+const {experimentIdsAtom} = state;
 
 export function ExperimentsSidebar() {
   const [experimentIds] = useAtom(experimentIdsAtom);

@@ -2,30 +2,19 @@ import React, {useState} from "react";
 import { Box, render, Text, useApp, useInput } from "../../../ink/build";
 import process from "node:process";
 
-const Counter = () => {
-    console.error("Counter");
-  const [counter, setCounter] = useState(0);
-//   const { exit } = useApp();
+// it seems ink needs to be upgraded to support react 19 and as it uses a custom reconciler that is not trivial
 
-//   React.useEffect(() => {
-//     const timer = setInterval(() => {
-//       setCounter((prevCounter) => prevCounter + 1);
-//     }, 100);
+const Terminal = () => {
+  const { exit } = useApp();
 
-//     return () => {
-//       clearInterval(timer);
-//     };
-//   });
-
-
-  return <Text color={"green"}> tests passed</Text>;
+  return <Text color={"green"}>Success</Text>;
 };
 
-// const enterAltScreenCommand = "\x1b[?1049h";
-// const leaveAltScreenCommand = "\x1b[?1049l";
-// process.stdout.write(enterAltScreenCommand);
-// process.on("exit", () => {
-//   process.stdout.write(leaveAltScreenCommand);
-// });
+const enterAltScreenCommand = "\x1b[?1049h";
+const leaveAltScreenCommand = "\x1b[?1049l";
+process.stdout.write(enterAltScreenCommand);
+process.on("exit", () => {
+  process.stdout.write(leaveAltScreenCommand);
+});
 
-render(<Counter />);
+render(<Terminal />);

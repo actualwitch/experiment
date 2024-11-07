@@ -110,7 +110,7 @@ export default function NewExperiment() {
           </ActionRow>
 
           <textarea
-            placeholder="Type a message to start experiment..."
+            placeholder="Type a message and press Enter to append..."
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             onKeyDown={(e) => {
@@ -132,7 +132,7 @@ export default function NewExperiment() {
             e.preventDefault();
             runExperiment();
           }}>
-          run inference
+          start experiment
         </Button>
       </aside>
       <ExperimentsSidebar />
