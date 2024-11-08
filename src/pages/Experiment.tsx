@@ -1,12 +1,12 @@
 import { atom, useAtom } from "jotai";
+import { useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ChatPreview } from "../components/chat";
-import { getExperimentAtom, experimentAtom, store, type ExperimentCursor, type Message } from "../state/common";
-import { useEffect, useMemo } from "react";
-import { getRealm } from "../utils";
-import { entangledAtom } from "../state/entanglement";
 import { ExperimentsSidebar } from "../sidebars/experiments";
-import { tracingAtom } from "../utils/dbg";
+import { experimentAtom, getExperimentAtom, type ExperimentCursor, type Message } from "../state/common";
+import { entangledAtom } from "../state/entanglement";
+import { store } from "../state/store";
+import { getRealm } from "../utils";
 
 const cursorAtom = entangledAtom({ name: "cursor" }, atom<ExperimentCursor | null>(null));
 
@@ -23,7 +23,8 @@ const actionAtom = entangledAtom(
     if (getRealm() === "server") {
       const cursor = get(cursorAtom);
       if (cursor) {
-        store.set(selectedExperimentAtom, get(getExperimentAtom(cursor)));
+        const experiment = get(getExperimentAtom(cursor));
+        store.set(selectedExperimentAtom, experiment ?? []);
       }
     }
   }),
@@ -60,10 +61,7 @@ export default function Experiment() {
           type="submit"
           onClick={(e) => {
             e.preventDefault();
-            store.set(
-              experimentAtom,
-              experiment,
-            );
+            store.set(experimentAtom, experiment);
             navigate("/");
           }}>
           use in new experiment

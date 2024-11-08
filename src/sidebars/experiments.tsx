@@ -9,12 +9,12 @@ export function ExperimentsSidebar() {
   const [experimentIds] = useAtom(experimentIdsAtom);
   return (
     <SidebarInput>
-      <h3>Inference history</h3>
+      <h3>History</h3>
       <ul>
-        {experimentIds.map(([id, subId]) => (
+        {[...experimentIds].reverse().map(([id, subId]) => (
           <li key={id + subId}>
             <NavLink to={`/experiment/${id}/${subId}`}>
-              Experiment #{id}/{subId}
+              Experiment {id}.{subId}
             </NavLink>
           </li>
         ))}

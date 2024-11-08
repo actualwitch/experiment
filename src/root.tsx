@@ -2,7 +2,7 @@ import { atom, Provider, useAtom } from "jotai";
 import { Suspense, useEffect, type PropsWithChildren } from "react";
 import { Hydration } from "./utils/hydration";
 import { Router } from "./pages/_router";
-import { store } from "./state/common";
+import { store } from "./state/store";
 import { appStyle, Container, darkMode } from "./style";
 import { Global } from "@emotion/react";
 import { isDarkModeAtom } from "./state/common";

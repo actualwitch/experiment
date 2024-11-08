@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import { bs } from "./style";
 import { NavLink } from "react-router-dom";
 import { VERSION } from "./const";
+import { nonInteractive } from "./style/mixins";
 
 function portalIO() {
   const elementAtom = atom<null | HTMLElement>(null);
@@ -37,6 +38,18 @@ export const [SidebarInput, SidebarOutput] = portalIO();
 
 const Navigation = styled.nav`
   padding: ${bs()};
+  display: flex;
+  flex-direction: column;
+`;
+
+const GrowBox = styled.div`
+  flex-grow: 1;
+`;
+
+const Footer = styled.footer`
+  text-align: center;
+  opacity: 0.25;
+  ${nonInteractive}
 `;
 
 export const NavigationSidebar = () => {
@@ -56,8 +69,11 @@ export const NavigationSidebar = () => {
           🔧 <NavLink to="/parameters">Parameters</NavLink>
         </h2>
       </header>
-      <SidebarOutput />
-      <footer>{VERSION}</footer>
+      <GrowBox>
+        <SidebarOutput />
+      </GrowBox>
+
+      <Footer>© ∞ ▴ {VERSION}</Footer>
     </Navigation>
   );
 };

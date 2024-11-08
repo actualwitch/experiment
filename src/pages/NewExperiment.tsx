@@ -17,7 +17,7 @@ const Column = styled.div`
   overflow-x: hidden;
 `;
 
-const Block = styled.div<{ isDarkMode: boolean }>`
+const Block = styled.div<{ isDarkMode?: boolean }>`
   display: flex;
   flex-direction: column;
 
@@ -85,7 +85,7 @@ export default function NewExperiment() {
     setMessage("");
     setExperiment([...experiment, { role, content: message }]);
   };
-  const [_, runExperiment] = useAtom(testStreaming);
+  const [_, runExperiment] = useAtom(runExperimentAsOpenAi);
 
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   useLayoutEffect(() => {

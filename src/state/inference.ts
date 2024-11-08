@@ -1,22 +1,14 @@
 import { atom } from "jotai";
 
 import Anthropic from "@anthropic-ai/sdk";
+import OpenAI from "openai";
 import { experimentToAnthropic } from "../adapters/anthropic";
+import { experimentToOpenai } from "../adapters/openai";
 import { maybeImport } from "../utils";
-import {
-  createExperiment,
-  experimentAtom,
-  getExperimentAtom,
-  store,
-  tokensAtom,
-  type ExperimentCursor,
-  type Message,
-} from "./common";
+import { createExperiment, experimentAtom, tokensAtom, type ExperimentCursor, type Message } from "./common";
 import { entangledAtom } from "./entanglement";
 import makeRequestTool from "./makeRequestTool.json";
-import OpenAI from "openai";
-import { experimentToOpenai } from "../adapters/openai";
-import type { ChatCompletionChunk } from "openai/resources/index.mjs";
+import { store } from "./store";
 
 export { makeRequestTool };
 
@@ -76,7 +68,7 @@ const runExperimentAsAnthropic = atom(null, async (get, set, { id, runId }: Expe
 
   const { stream, ...experimentAsAnthropic } = experimentToAnthropic(experiment);
 
-  const anthropic = new Anthropic({ apiKey: resolvedToken.anthropic });
+  const anthropic = new Anthropic({ apiKey: resolvedTokens.anthropic });
   if (stream) {
     const stream = await anthropic.messages.create({
       ...experimentAsAnthropic,

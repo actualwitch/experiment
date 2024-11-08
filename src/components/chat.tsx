@@ -3,7 +3,6 @@ import styled from "@emotion/styled";
 import { type Atom, atom, useAtom, useAtomValue, useSetAtom, type WritableAtom } from "jotai";
 import { focusAtom } from "jotai-optics";
 import { type ReactNode, useRef } from "react";
-import { store } from "../state/common";
 import { isDarkModeAtom, experimentAtom, templatesAtom, type Message } from "../state/common";
 import { bs } from "../style";
 import { collapsedAtom, View } from "./view";

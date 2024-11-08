@@ -1,14 +1,9 @@
-import Anthropic from "@anthropic-ai/sdk";
-import { atom, createStore, type WritableAtom } from "jotai";
+import { atom } from "jotai";
 import { focusAtom } from "jotai-optics";
-import type { Atom } from "jotai";
 import { atomWithStorage, createJSONStorage } from "jotai/utils";
 
-import { divergentAtom, entangledAtom } from "./entanglement";
 import { createFileStorage, getRealm } from "../utils";
-import { experimentToAnthropic } from "../adapters/anthropic";
-
-export const store = createStore();
+import { divergentAtom, entangledAtom } from "./entanglement";
 
 type _Message =
   | { role: "system"; content: string }
