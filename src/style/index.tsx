@@ -1,9 +1,10 @@
 import { css } from "@emotion/react";
 import styled from "@emotion/styled";
-import { useAtom } from "jotai";
+import { atom, useAtom } from "jotai";
 import type { HTMLProps } from "react";
 import Shevy from "shevyjs";
 import { isDarkModeAtom } from "../state/common";
+import { withDarkMode } from "./darkMode";
 import { Palette } from "./palette";
 import { reset } from "./reset";
 
@@ -38,14 +39,7 @@ const InternalButton = styled.button<{ isDarkMode: boolean }>`
       transform: translate(0px, 1px);
     }
   }
-  ${(p) =>
-    p.isDarkMode
-      ? internalDarkModeButton
-      : css`
-          @media (prefers-color-scheme: dark) {
-            ${internalDarkModeButton}
-          }
-        `}
+  ${(p) => withDarkMode(p.isDarkMode, internalDarkModeButton)}
 `;
 
 export const Button = ({ children, ...props }: HTMLProps<HTMLButtonElement>) => {
@@ -180,9 +174,19 @@ export const appStyle = [
     ${button}
 
     ${input}
-
-    @media (prefers-color-scheme: dark) {
-      ${darkMode}
-    }
   `,
 ];
+
+const systemDarkMode = css`
+  @media (prefers-color-scheme: dark) {
+    ${darkMode}
+  }
+`;
+
+export const stylesAtom = atom((get) => {
+  const isDarkMode = get(isDarkModeAtom);
+  if (isDarkMode === undefined) {
+    return [...appStyle, systemDarkMode];
+  }
+  return isDarkMode ? [...appStyle, darkMode] : appStyle;
+});

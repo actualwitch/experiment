@@ -1,6 +1,6 @@
 {
   "name": "Experiment",
-  "description": "Experiment is a simple tool to facilitate prompt engineering.",
+  "description": "🔬 Experiment is a simple tool to facilitate prompt engineering.",
   "keywords": ["inference", "experiment-tracking", "llm"],
   "repository": "github:actualwitch/experiment",
   "version": "0.1.0",

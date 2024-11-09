@@ -88,7 +88,7 @@ const TextArea = (props: React.TextareaHTMLAttributes<HTMLTextAreaElement>) => {
 export default function NewExperiment() {
   const [isDarkMode] = useAtom(isDarkModeAtom);
   const [experiment, setExperiment] = useAtom(experimentAtom);
-  const [selection] = useAtom(selectionAtom);
+  const [selection, setSelection] = useAtom(selectionAtom);
   const [message, setMessage] = useState("");
   const [role, setRole] = useState<Role>("user");
 
@@ -104,6 +104,7 @@ export default function NewExperiment() {
       if (selection && selection.length === 1) {
         const newExperiment = experiment.filter((_, i) => i !== selection[0]);
         setExperiment(newExperiment);
+        setSelection(null);
       }
     },
   });

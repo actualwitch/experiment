@@ -4,7 +4,7 @@ import { isDarkModeAtom, tokensAtom } from "../state/common";
 import { bs } from "../style";
 import { withFormStyling, type FormProps } from "../style/form";
 import { hasResolvedTokenAtom } from "../state/inference";
-
+import { Switch } from "../components/switch";
 
 const Input = styled.input<FormProps>(withFormStyling);
 
@@ -33,17 +33,15 @@ export default function Configure() {
     <>
       <StyledForm method="post">
         <h3>Visual</h3>
-        <label>
-          <input
-            type="checkbox"
-            name="isDarkMode"
-            checked={isDarkMode}
-            onChange={(e) => {
-              setIsDarkMode(e.target.checked);
-            }}
-          />
-          Enable dark mode
-        </label>
+        <div>
+          <Switch value={isDarkMode} onChange={setIsDarkMode}>
+            {[
+              { value: undefined, label: "System" },
+              { value: false, label: "Light" },
+              { value: true, label: "Dark" },
+            ]}
+          </Switch>
+        </div>
         <h3>Inference</h3>
         <p>For each provider, paste the secret reference from 1Password, it will be securely fetched just-in-time.</p>
         <h5>Anthropic</h5>

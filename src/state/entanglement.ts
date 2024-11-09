@@ -89,7 +89,7 @@ export function entangledAtom<
 
       let writableAtom: WritableAtom<V, A, R>;
       const cacheValue = hydrationMap[id] as unknown as V;
-      if (cacheValue) {
+      if (cacheValue !== undefined) {
         writableAtom = atom(cacheValue);
       } else {
         writableAtom = atom(
@@ -106,7 +106,7 @@ export function entangledAtom<
         }
       });
       return atom(
-        async (get) => get(writableAtom),
+        (get) => get(writableAtom),
         (get, set, update) => {
           requestUpdate(update);
         },

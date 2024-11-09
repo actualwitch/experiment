@@ -6,10 +6,9 @@ import { log } from "./logger";
 import { description, title } from "./meta";
 import { NavigationSidebar } from "./navigation";
 import { Router } from "./pages/_router";
-import { isDarkModeAtom } from "./state/common";
 import { store } from "./state/store";
 import { publish } from "./state/æther";
-import { appStyle, Container, darkMode } from "./style";
+import { Container, stylesAtom } from "./style";
 import { Hydration } from "./utils/hydration";
 
 const Context = ({ children }: PropsWithChildren) => {
@@ -17,8 +16,7 @@ const Context = ({ children }: PropsWithChildren) => {
 };
 
 const App = () => {
-  const [isDarkMode] = useAtom(isDarkModeAtom);
-  const styles = isDarkMode ? [...appStyle, darkMode] : appStyle;
+  const [styles] = useAtom(stylesAtom);
   return (
     <Container>
       <NavigationSidebar />
