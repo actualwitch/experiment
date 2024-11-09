@@ -1,14 +1,11 @@
-import { useNavigate, useSubmit } from "@remix-run/react";
 import { useAtom, useSetAtom } from "jotai";
 import { useEffect } from "react";
-import { ChatContainer, ChatMessage } from "~/chat";
-import { SidebarInput } from "~/navigation";
-
-import { filenames, importsRegistry, processCsvAtom, selectedChat } from "~/state/client";
-import { newChatAtom, store } from "~/state/common";
-import { View } from "~/view";
-
-export { defaultMeta as meta } from "~/meta";
+import { useNavigate } from "react-router-dom";
+import { ChatContainer, ChatMessage } from "../components/chat";
+import { View } from "../components/view";
+import { SidebarInput } from "../navigation";
+import { filenames, importsRegistry, processCsvAtom, selectedChat } from "../state/client";
+import { store } from "../state/store";
 
 export const Sidebar = () => {
   const [chats] = useAtom(filenames);
@@ -22,10 +19,13 @@ export const Sidebar = () => {
   return (
     <>
       {chats.length > 0 ? (
-        <View onClick={(value, key, path) => {
-          const [parent] = path;
-          setSelectedChat([parent, key!]);
-        }}>{entries}</View>
+        <View
+          onClick={(value, key, path) => {
+            const [parent] = path;
+            setSelectedChat([parent, key!]);
+          }}>
+          {entries}
+        </View>
       ) : (
         <p>Import csv</p>
       )}
@@ -55,7 +55,6 @@ function Imports() {
   }, [selected]);
 
   const [registry] = useAtom(importsRegistry);
-  const submit = useSubmit();
   const navigate = useNavigate();
 
   if (!selected) return <p>Nothing selected</p>;

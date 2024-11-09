@@ -1,6 +1,7 @@
 import { atom } from "jotai";
-import { Chat } from "~/types";
-import { REALM } from "./entanglement";
+
+export type Message = { message?: string; tool_calls?: object[]; role: string; content?: string };
+export type Chat = {messages: Message[]; response: Message};
 
 export const importsRegistry = atom<Record<string, Chat[]>>({});
 
