@@ -1,3 +1,3 @@
-
-export const title = "Experiment";
-export const description = "Experiment is a simple tool to facilitate prompt engineering.";
+import project from "../package.json";
+export const title = project.name;
+export const description = project.description;

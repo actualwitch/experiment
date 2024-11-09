@@ -54,7 +54,7 @@ export const voidAtom = atom<void>(void 0);
 
 export const experimentAtom = entangledAtom("experiment", atom<Message[]>([]));
 
-const experimentIdsAtom = atom((get) => {
+export const experimentIdsAtom = entangledAtom("experimentIds", atom((get) => {
   const store = get(storeAtom);
   const ids: Array<[id: string, subId: string]> = [];
   for (const id in store.experiments) {
@@ -63,7 +63,7 @@ const experimentIdsAtom = atom((get) => {
     }
   }
   return ids;
-});
+}));
 
 export const experimentsAtom = focusAtom(storeAtom, (o) => o.prop("experiments"));
 
@@ -117,7 +117,3 @@ export const appendToRun = atom(null, (get, set, cursor: ExperimentCursor, messa
 });
 
 export const templatesAtom = focusAtom(storeAtom, (o) => o.prop("templates"));
-
-export default {
-  experimentIdsAtom: entangledAtom("experimentIds", experimentIdsAtom),
-};

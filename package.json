@@ -1,6 +1,16 @@
 {
-  "name": "experiment",
+  "name": "Experiment",
+  "description": "Experiment is a simple tool to facilitate prompt engineering.",
+  "keywords": [
+    "inference",
+    "experiment-tracking",
+    "llm"
+  ],
+  "repository": "github:actualwitch/experiment",
   "version": "0.1.0",
+  "author": "Ade あで Fisher",
+  "license": "MIT",
+  "private": true,
   "module": "src/entry/server.tsx",
   "type": "module",
   "scripts": {

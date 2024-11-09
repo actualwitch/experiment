@@ -118,9 +118,9 @@ export function entangledAtom<
 
 /// test cases
 
-const test1 = entangledAtom("test1", atom(1));
-const test2 = entangledAtom("test2", atom(get => get(test1)));
-const test3 = entangledAtom("test3", atom(get => get(test1), (get, set, update) => set(test1, update)));
-const test4 = entangledAtom("test4", atom(null, (get, set, update) => set(test1, update)));
-const test5 = entangledAtom("test5", atom(async get => get(test1)));
-const test6 = entangledAtom("test6", atom(null, async (get, set, update) => set(test1, update)));
+// const test1 = entangledAtom("test1", atom(1));
+// const test2 = entangledAtom("test2", atom(get => get(test1)));
+// const test3 = entangledAtom("test3", atom(get => get(test1), (get, set, update) => set(test1, update)));
+// const test4 = entangledAtom("test4", atom(null, (get, set, update) => set(test1, update)));
+// const test5 = entangledAtom("test5", atom(async get => get(test1)));
+// const test6 = entangledAtom("test6", atom(null, async (get, set, update) => set(test1, update)));

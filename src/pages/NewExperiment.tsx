@@ -1,13 +1,12 @@
 import styled from "@emotion/styled";
 import { useAtom } from "jotai";
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { ChatContainer, ChatPreview } from "../components/chat";
+import { useEffect, useRef, useState } from "react";
+import { ChatPreview, selectionAtom } from "../components/chat";
 import { ExperimentsSidebar } from "../sidebars/experiments";
 import { experimentAtom, isDarkModeAtom, type Role } from "../state/common";
 import inference from "../state/inference";
 import { bs, Button } from "../style";
-import { Palette } from "../style/palette";
+import { useHandlers } from "../utils/keyboard";
 
 const { runExperimentAsOpenAi, testStreaming } = inference;
 
@@ -29,7 +28,7 @@ const Block = styled.div<{ isDarkMode?: boolean }>`
   width: auto;
 
   backdrop-filter: blur(10px) brightness(${(p) => (p.isDarkMode ? 1.5 : 0.9)}) saturate(2);
-  box-shadow: 0px 0px 2px 0px inset #ffffff78, 0px 2px 8px 1px #FFFFFF3F;
+  box-shadow: 0px 0px 2px 0px inset #ffffff78, 0px 2px 8px 1px #ffffff3f;
 
   & * {
     border-radius: 0;
@@ -76,29 +75,43 @@ const ActionRow = styled.div`
   }
 `;
 
+const TextArea = (props: React.TextareaHTMLAttributes<HTMLTextAreaElement>) => {
+  const ref = useRef<HTMLTextAreaElement | null>(null);
+  useEffect(() => {
+    if (!ref.current) return;
+    ref.current.style.height = "inherit";
+    ref.current.style.height = `${Math.min(Math.max(ref.current.scrollHeight, 0), 192)}px`;
+  }, [props.value]);
+  return <textarea {...props} ref={ref} />;
+};
+
 export default function NewExperiment() {
   const [isDarkMode] = useAtom(isDarkModeAtom);
   const [experiment, setExperiment] = useAtom(experimentAtom);
+  const [selection] = useAtom(selectionAtom);
   const [message, setMessage] = useState("");
   const [role, setRole] = useState<Role>("user");
+
+  const [_, runExperiment] = useAtom(runExperimentAsOpenAi);
   const submit = () => {
+    if (!message) return;
     setMessage("");
     setExperiment([...experiment, { role, content: message }]);
   };
-  const [_, runExperiment] = useAtom(runExperimentAsOpenAi);
 
-  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
-  useLayoutEffect(() => {
-    if (!textareaRef.current) return;
-    textareaRef.current.style.height = "inherit";
-    // Set height
-    textareaRef.current.style.height = `${Math.min(Math.max(textareaRef.current.scrollHeight, 0), 192)}px`;
-  }, [message]);
+  useHandlers({
+    Backspace: () => {
+      if (selection && selection.length === 1) {
+        const newExperiment = experiment.filter((_, i) => i !== selection[0]);
+        setExperiment(newExperiment);
+      }
+    },
+  });
+
   return (
     <>
       <Column>
         <ChatPreview history={experiment} />
-
         <Block isDarkMode={isDarkMode}>
           <ActionRow>
             <select value={role} onChange={(e) => setRole(e.target.value as Role)} style={{ flex: 1 }}>
@@ -108,8 +121,7 @@ export default function NewExperiment() {
             </select>
             <button onClick={() => submit()}>add</button>
           </ActionRow>
-
-          <textarea
+          <TextArea
             placeholder="Type a message and press Enter to append..."
             value={message}
             onChange={(e) => setMessage(e.target.value)}
@@ -120,7 +132,6 @@ export default function NewExperiment() {
               }
             }}
             autoFocus
-            ref={textareaRef}
           />
         </Block>
       </Column>

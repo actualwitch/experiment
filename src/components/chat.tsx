@@ -2,7 +2,7 @@ import { type SerializedStyles, css } from "@emotion/react";
 import styled from "@emotion/styled";
 import { type Atom, atom, useAtom, useAtomValue, useSetAtom, type WritableAtom } from "jotai";
 import { focusAtom } from "jotai-optics";
-import { type ReactNode, useRef } from "react";
+import { type ReactNode, useMemo, useRef } from "react";
 import { isDarkModeAtom, experimentAtom, templatesAtom, type Message } from "../state/common";
 import { bs } from "../style";
 import { collapsedAtom, View } from "./view";
@@ -224,20 +224,25 @@ const Banner = styled.div`
   display: grid;
   place-items: center;
   height: 100%;
+  font-size: ${bs(2)};
 `;
 
 export function ChatPreview({ history }: { history: Message[] }) {
   const Anchor = useScrollToTop("top", [history.length]);
 
-  if (history.length === 0) {
+  const keyedHistory = useMemo(() => {
+    const keyed = history.map((message, index) => ({...message, key: index}));
+    return [...keyed].reverse();
+  }, [history]);
+
+  if (keyedHistory.length === 0) {
     return <Banner>∅</Banner>;
   }
-
   return (
     <ChatContainer>
       <Anchor />
-      {[...history].reverse().map?.((message, index) => {
-        return <ChatMessage key={index} message={message} index={index} />;
+      {keyedHistory.map?.(({key, ...message}) => {
+        return <ChatMessage key={key} message={message} index={key} />;
       })}
     </ChatContainer>
   );

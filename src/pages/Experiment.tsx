@@ -53,7 +53,7 @@ export default function Experiment() {
         <h1>
           Experiment {id}.{runId}
         </h1>
-        <ChatPreview history={experiment || []} />
+        <ChatPreview history={experiment} />
       </div>
       <aside>
         <h3>Actions</h3>
@@ -64,7 +64,7 @@ export default function Experiment() {
             store.set(experimentAtom, experiment);
             navigate("/");
           }}>
-          use in new experiment
+          begin anew
         </button>
       </aside>
       <ExperimentsSidebar />

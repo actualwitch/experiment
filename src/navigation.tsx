@@ -1,38 +1,9 @@
 import styled from "@emotion/styled";
-import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
-import { type ReactNode, useEffect, useRef } from "react";
-import { createPortal } from "react-dom";
-import { bs } from "./style";
 import { NavLink } from "react-router-dom";
 import { VERSION } from "./const";
+import { bs } from "./style";
 import { nonInteractive } from "./style/mixins";
-
-function portalIO() {
-  const elementAtom = atom<null | HTMLElement>(null);
-
-  function Input({ children }: { children: ReactNode }) {
-    const element = useAtomValue(elementAtom);
-
-    return element ? createPortal(children, element) : null;
-  }
-
-  function Output() {
-    const setElement = useSetAtom(elementAtom);
-    const ref = useRef<HTMLDivElement | null>(null);
-    useEffect(() => {
-      setElement(ref.current);
-    }, [ref.current]);
-    useEffect(
-      () => () => {
-        setElement(null);
-      },
-      [],
-    );
-    return <div ref={ref} />;
-  }
-
-  return [Input, Output] as const;
-}
+import { portalIO } from "./utils/portal";
 
 export const [SidebarInput, SidebarOutput] = portalIO();
 
@@ -72,7 +43,6 @@ export const NavigationSidebar = () => {
       <GrowBox>
         <SidebarOutput />
       </GrowBox>
-
       <Footer>© ∞ ▴ {VERSION}</Footer>
     </Navigation>
   );
