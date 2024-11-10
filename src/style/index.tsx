@@ -28,7 +28,7 @@ const internalDarkModeButton = css`
   }
 `;
 
-const InternalButton = styled.button<{ isDarkMode: boolean }>`
+const InternalButton = styled.button<{ isDarkMode: boolean | undefined }>`
   &:not(:disabled) {
     box-shadow: 2px 2px 8px #00000020;
     text-shadow: 1px 0px 1px #00000024, -1px 0px 1px #ffffffb8;
@@ -177,16 +177,8 @@ export const appStyle = [
   `,
 ];
 
-const systemDarkMode = css`
-  @media (prefers-color-scheme: dark) {
-    ${darkMode}
-  }
-`;
-
 export const stylesAtom = atom((get) => {
   const isDarkMode = get(isDarkModeAtom);
-  if (isDarkMode === undefined) {
-    return [...appStyle, systemDarkMode];
-  }
-  return isDarkMode ? [...appStyle, darkMode] : appStyle;
+  const darkModeStyle = withDarkMode(isDarkMode, darkMode);
+  return [...appStyle, darkModeStyle];
 });

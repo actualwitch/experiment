@@ -1,4 +1,5 @@
 import styled from "@emotion/styled";
+import { Button } from "../style";
 
 export type SwitchValue = boolean | undefined;
 
@@ -32,9 +33,9 @@ export const Switch = ({
   return (
     <Container>
       {children.map(({ value: v, label }) => (
-        <button key={label} type="button"  onClick={() => onChange(v)} disabled={v === value}>
+        <Button key={label} type="button"  onClick={() => onChange(v)} disabled={v === value}>
           {label}
-        </button>
+        </Button>
       ))}
     </Container>
   );

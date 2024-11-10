@@ -1,6 +1,6 @@
 ![Experiment screenshot](https://raw.githubusercontent.com/actualwitch/experiment/main/.github/Screenshot.png)
 
-## Let's start the experiment
+## 🔬 Let's start the experiment
 
 **Experiment** is a simple tool to facilitate prompt engineering. You can use it to make chat completion requests, debug function calling and explore completions saved as CSV.
 
@@ -10,8 +10,8 @@ This project uses custom architecture I refer to as "entangled atoms" which exte
 
 There is no Next.js, Remix, Vite, Webpack or Babel here; my aim is simplicity and minimalism in terms of requirements and general architecture. Currently, boilerplate implements full streaming Server-Side Rendering(SSR) with transparent bundling, hydration and Server-Sent Events(SSE) for state sync.
 
-Shall you want to run this repo locally, you can do so by running bootstrap script from your favorite shell, or Bun directly:
+Shall you want to run this repo locally, you can do so by running `dev` script from Bun, dependencies will be installed automagically:
 
 ```sh
-bun ./bootstrap.sh
+bun dev
 ```
