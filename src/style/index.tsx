@@ -21,19 +21,19 @@ const shevyStyle = css({ body, h1, h2, h3, h4, h5, h6, ["p, ol, ul, pre"]: conte
 
 const internalDarkModeButton = css`
   &:not(:disabled) {
-    box-shadow: 2px 2px 8px #ececec21;
+    box-shadow: 2px 2px 8px ${Palette.buttonShadowDark}21;
     :hover {
-      box-shadow: 0px 1px 14px 4px #ececec52;
+      box-shadow: 0px 1px 14px 4px ${Palette.buttonShadowDark}52;
     }
   }
 `;
 
 const InternalButton = styled.button<{ isDarkMode: boolean | undefined }>`
   &:not(:disabled) {
-    box-shadow: 2px 2px 8px #00000020;
-    text-shadow: 1px 0px 1px #00000024, -1px 0px 1px #ffffffb8;
+    box-shadow: 2px 2px 8px ${Palette.black}20;
+    text-shadow: 1px 0px 1px ${Palette.black}24, -1px 0px 1px ${Palette.white}b8;
     :hover {
-      box-shadow: 0px 1px 8px 2px #1a1a1a24;
+      box-shadow: 0px 1px 8px 2px ${Palette.buttonHoverDark}24;
     }
     :active {
       transform: translate(0px, 1px);
@@ -55,7 +55,7 @@ const button = css`
   button:not(:disabled) {
     background-color: ${Palette.actionableBackground};
     :hover {
-      background-color: color(display-p3 0 0 0 / 0.19);
+      background-color: ${Palette.buttonHoverBackground};
     }
   }
   button {
@@ -71,10 +71,10 @@ const button = css`
     cursor: pointer;
     transform: translate(0px, 0px);
     &[disabled] {
-      background-color: #b5b5b50f;
-      color: #e6e6e6;
+      background-color: ${Palette.buttonDisabledBackground};
+      color: ${Palette.buttonDisabledForeground};
       cursor: not-allowed;
-      border-color: #8888880f;
+      border-color: ${Palette.buttonDisabledBorder};
     }
   }
   button + button {
@@ -85,20 +85,20 @@ const button = css`
 const buttonDarkMode = css`
   button:not(:disabled) {
     :hover {
-      background-color: #fff;
+      background-color: ${Palette.white};
     }
   }
   button[disabled] {
     background-color: transparent;
     box-shadow: none;
-    border-color: #ffffff54;
-    color: #ffffff54;
+    border-color: ${Palette.white}54;
+    color: ${Palette.white}54;
   }
 `;
 
 const input = css`
-  input {
-    background-color: #eee;
+  input:not([type="file"]) {
+    background-color: ${Palette.inputBackground};
   }
 `;
 
@@ -130,8 +130,8 @@ export const Paragraph = styled.p(
 
 export const darkMode = css`
   :root {
-    background-color: #000;
-    color: white;
+    background-color: ${Palette.black};
+    color: ${Palette.white};
   }
   ${buttonDarkMode}
 `;
@@ -161,7 +161,7 @@ export const appStyle = [
         text-decoration: underline;
       }
       &:hover {
-        color: LinkText;
+        color: ${Palette.link};
       }
     }
 

@@ -1,6 +1,7 @@
 import { css } from "@emotion/react";
 import { type HTMLAttributes } from "react";
 import { bs } from ".";
+import { Palette } from "./palette";
 
 type FormProps = { _type?: "success" };
 
@@ -10,7 +11,7 @@ const shared = css`
   border-radius: 4px;
 `;
 const success = css`
-  background-color: color(display-p3 0.372 0.903 0.775 / 1);
+  background-color: ${Palette.successGreen};
 `;
 
 const withFormStyling = ({ _type }: FormProps & HTMLAttributes<HTMLInputElement>) => {

@@ -1,13 +1,14 @@
-import { type SerializedStyles, css } from "@emotion/react";
+import { css, type SerializedStyles } from "@emotion/react";
 import styled from "@emotion/styled";
-import { type Atom, atom, useAtom, useAtomValue, useSetAtom, type WritableAtom } from "jotai";
+import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
 import { focusAtom } from "jotai-optics";
 import { type ReactNode, useMemo, useRef } from "react";
-import { isDarkModeAtom, experimentAtom, templatesAtom, type Message } from "../state/common";
+import { experimentAtom, isDarkModeAtom, type Message, templatesAtom } from "../state/common";
 import { bs } from "../style";
-import { collapsedAtom, View } from "./view";
 import { deepEqual } from "../utils";
 import { useScrollToTop } from "../utils/scroll";
+import { collapsedAtom, View } from "./view";
+import { Palette } from "../style/palette";
 
 const baseHeight = bs(6);
 export const ChatContainer = styled.div`
@@ -67,7 +68,7 @@ export const MessageComponent = styled.article<{
 
       hr {
         opacity: 0.2;
-        color: ${isDarkMode ? "#fff" : "#000"};
+        color: ${isDarkMode ? Palette.white : Palette.black};
         margin-top: ${bs(0.15)};
         margin-bottom: ${bs(0.05)};
         border: 0;
@@ -77,28 +78,28 @@ export const MessageComponent = styled.article<{
   ];
   if (role === "system") {
     styles.push(css`
-      border-color: #fff433;
+      border-color: ${Palette.yellow};
     `);
   }
   if (role === "user") {
     styles.push(css`
-      border-color: #9b59d0;
+      border-color: ${Palette.purple};
     `);
   }
   if (role === "assistant") {
     styles.push(css`
-      border-color: color(display-p3 0.9 0.66 0.81);
+      border-color: ${Palette.pink};
     `);
   }
   if (role === "tool") {
     styles.push(css`
-      border-color: lightgreen;
+      border-color: ${Palette.green};
     `);
   }
   if (isSelected) {
     if (isDarkMode) {
       styles.push(css`
-        background-color: #ffffff30;
+        background-color: ${Palette.white}30;
       `);
     } else {
       styles.push(css`
@@ -200,7 +201,6 @@ export const ChatMessage = ({ message: _message, index }: { message: Message; in
     <MessageComponent
       contentEditable={isSelected && selection?.[1] === "content"}
       onBlur={(e) => {
-        console.log(e.currentTarget.textContent);
         setSelection([index]);
       }}
       ref={ref}
@@ -228,11 +228,11 @@ const Banner = styled.div`
   font-size: ${bs(2)};
 `;
 
-export function ChatPreview({ history }: { history: Message[] }) {
+export function ChatPreview({ history, autoScroll }: { history: Message[], autoScroll?: boolean }) {
   const Anchor = useScrollToTop("top", [history.length]);
 
   const keyedHistory = useMemo(() => {
-    const keyed = history.map((message, index) => ({...message, key: index}));
+    const keyed = history.map((message, index) => ({ ...message, key: index }));
     return [...keyed].reverse();
   }, [history]);
 
@@ -241,8 +241,8 @@ export function ChatPreview({ history }: { history: Message[] }) {
   }
   return (
     <ChatContainer>
-      <Anchor />
-      {keyedHistory.map?.(({key, ...message}) => {
+      {autoScroll && <Anchor />}
+      {keyedHistory.map?.(({ key, ...message }) => {
         return <ChatMessage key={key} message={message} index={key} />;
       })}
     </ChatContainer>

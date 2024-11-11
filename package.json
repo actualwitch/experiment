@@ -26,6 +26,7 @@
     "@anthropic-ai/sdk": "latest",
     "@emotion/react": "latest",
     "@emotion/styled": "latest",
+    "@mistralai/mistralai": "latest",
     "csvtojson": "latest",
     "jotai": "latest",
     "jotai-effect": "latest",

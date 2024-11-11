@@ -1,7 +1,7 @@
 import { type Server } from "bun";
 import { renderToReadableStream, renderToString } from "react-dom/server";
 import { StaticRouter } from "react-router-dom/server";
-import { log } from "../logger";
+import { log } from "../utils/logger";
 import { Shell } from "../root";
 import { publish, subscribe, type Update } from "../state/æther";
 import { eventStream } from "../utils/eventStream";
@@ -29,7 +29,7 @@ export const doStatic = async (request: Request) => {
 export const doSSR = async (request: Request) => {
   const url = new URL(request.url);
   log("SSR", request.url);
-  const html = await renderToString(
+  const html = renderToString(
     <StaticRouter location={url.pathname}>
       <Shell bootstrap />
     </StaticRouter>,

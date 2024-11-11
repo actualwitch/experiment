@@ -2,7 +2,6 @@ import { Global } from "@emotion/react";
 import { atom, Provider, useAtom } from "jotai";
 import { atomEffect } from "jotai-effect";
 import { type PropsWithChildren } from "react";
-import { log } from "./logger";
 import { description, title } from "./meta";
 import { NavigationSidebar } from "./navigation";
 import { Router } from "./pages/_router";
@@ -10,6 +9,7 @@ import { store } from "./state/store";
 import { publish } from "./state/æther";
 import { Container, stylesAtom } from "./style";
 import { Hydration } from "./utils/hydration";
+import { log } from "./utils/logger";
 
 const Context = ({ children }: PropsWithChildren) => {
   return <Provider store={store}>{children}</Provider>;
