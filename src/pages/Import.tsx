@@ -1,10 +1,11 @@
 import { useAtom, useSetAtom } from "jotai";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ChatContainer, ChatMessage } from "../components/chat";
+import { ChatPreview } from "../components/chat";
 import { View } from "../components/view";
 import { SidebarInput } from "../navigation";
 import { filenames, importsRegistry, processCsvAtom, selectedChat } from "../state/client";
+import { experimentAtom } from "../state/common";
 import { store } from "../state/store";
 
 export const Sidebar = () => {
@@ -67,11 +68,7 @@ function Imports() {
   ];
   return (
     <>
-      <ChatContainer>
-        {experiment?.map?.((message, index) => {
-          return <ChatMessage key={index} message={message} index={index} />;
-        })}
-      </ChatContainer>
+      <ChatPreview history={experiment} />
       <aside>
         <h3>Actions</h3>
         <div>
@@ -79,7 +76,7 @@ function Imports() {
             type="submit"
             onClick={(e) => {
               e.preventDefault();
-              store.set(newChatAtom, chat.messages);
+              store.set(experimentAtom, chat.messages);
               navigate("/");
             }}>
             Start experiment

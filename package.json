@@ -10,7 +10,7 @@
   "module": "src/entry/server.tsx",
   "type": "module",
   "scripts": {
-    "build": "bun build --compile ./src/entry/server.tsx --outfile ./build/experiment",
+    "build": "bun scripts/build.ts",
     "dev": "bun install && DEBUG=true bun --watch run src/entry/server.tsx"
   },
   "devDependencies": {

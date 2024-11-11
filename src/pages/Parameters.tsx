@@ -57,9 +57,7 @@ export default function Configure() {
               if (value.startsWith('"') && value.endsWith('"')) {
                 value = value.slice(1, -1);
               }
-              if (value.startsWith("op://")) {
-                setTokens({ ...tokens, anthropic: value });
-              }
+              setTokens({ ...tokens, anthropic: value });
             }}
           />
         </label>
@@ -76,9 +74,7 @@ export default function Configure() {
               if (value.startsWith('"') && value.endsWith('"')) {
                 value = value.slice(1, -1);
               }
-              if (value.startsWith("op://")) {
-                setTokens({ ...tokens, openai: value });
-              }
+              setTokens({ ...tokens, openai: value });
             }}
           />
         </label>

@@ -16,7 +16,8 @@ export const ChatContainer = styled.div`
   flex-direction: column-reverse;
 
   & > article {
-    min-height: ${baseHeight}}
+    min-height: ${baseHeight};
+    flex-shrink: 0;
   }
 `;
 
