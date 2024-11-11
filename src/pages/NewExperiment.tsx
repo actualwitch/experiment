@@ -8,7 +8,15 @@ import inference from "../state/inference";
 import { bs, Button } from "../style";
 import { useHandlers } from "../utils/keyboard";
 
-const { runExperimentAsOpenAi, testStreaming } = inference;
+const { runExperimentAsAnthropic, runExperimentAsOpenAi, testStreaming } = inference;
+
+type Provider = "anthropic" | "openai" | "test";
+
+const actionMap = {
+  anthropic: runExperimentAsAnthropic,
+  openai: runExperimentAsOpenAi,
+  test: testStreaming,
+} as const;
 
 const Column = styled.div`
   display: flex;
@@ -75,6 +83,12 @@ const ActionRow = styled.div`
   }
 `;
 
+const Sidebar = styled.aside`
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+`;
+
 const TextArea = (props: React.TextareaHTMLAttributes<HTMLTextAreaElement>) => {
   const ref = useRef<HTMLTextAreaElement | null>(null);
   useEffect(() => {
@@ -91,8 +105,9 @@ export default function NewExperiment() {
   const [selection, setSelection] = useAtom(selectionAtom);
   const [message, setMessage] = useState("");
   const [role, setRole] = useState<Role>("user");
+  const [provider, setProvider] = useState<Provider>("anthropic");
 
-  const [_, runExperiment] = useAtom(runExperimentAsOpenAi);
+  const [_, runExperiment] = useAtom(actionMap[provider]);
   const submit = () => {
     if (!message) return;
     setMessage("");
@@ -136,8 +151,13 @@ export default function NewExperiment() {
           />
         </Block>
       </Column>
-      <aside>
+      <Sidebar>
         <h3>Actions</h3>
+        <select value={provider} onChange={(e) => setProvider(e.target.value as any)}>
+          <option>anthropic</option>
+          <option>openai</option>
+          {/* <option>test</option> */}
+        </select>
         <Button
           type="submit"
           onClick={(e) => {
@@ -146,7 +166,7 @@ export default function NewExperiment() {
           }}>
           start experiment
         </Button>
-      </aside>
+      </Sidebar>
       <ExperimentsSidebar />
     </>
   );

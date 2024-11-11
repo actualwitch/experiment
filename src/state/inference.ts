@@ -59,7 +59,7 @@ export const hasResolvedTokenAtom = entangledAtom(
   }),
 );
 
-const runExperimentAsAnthropic = atom(null, async (get, set, { id, runId }: ExperimentCursor) => {
+const runExperimentAsAnthropic = atom(null, async (get, set) => {
   const resolvedTokens = await store.get(resolvedTokensAtom);
   const experiment = get(experimentAtom);
 
