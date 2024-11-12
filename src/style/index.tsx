@@ -17,7 +17,16 @@ const config: {
 export const fontFamily = 'Charter, "Bitstream Charter", "Sitka Text", Cambria, serif';
 
 export const { baseSpacing: bs, content, body, h1, h2, h3, h4, h5, h6 } = Shevy(config);
-const shevyStyle = css({ body, h1, h2, h3, h4, h5, h6, ["p, ol, ul, pre"]: content });
+const shevyStyle = css({
+  body,
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  ["p, ol, ul, pre"]: content,
+});
 
 const internalDarkModeButton = css`
   &:not(:disabled) {
@@ -31,7 +40,9 @@ const internalDarkModeButton = css`
 const InternalButton = styled.button<{ isDarkMode: boolean | undefined }>`
   &:not(:disabled) {
     box-shadow: 2px 2px 8px ${Palette.black}20;
-    text-shadow: 1px 0px 1px ${Palette.black}24, -1px 0px 1px ${Palette.white}b8;
+    text-shadow:
+      1px 0px 1px ${Palette.black}24,
+      -1px 0px 1px ${Palette.white}b8;
     :hover {
       box-shadow: 0px 1px 8px 2px ${Palette.buttonHoverDark}24;
     }
@@ -63,7 +74,9 @@ const button = css`
     text-transform: capitalize;
     padding: 4px 13px;
     margin: 0;
-    transition: background-color 0.1s ease-out, box-shadow 0.1s ease-out,
+    transition:
+      background-color 0.1s ease-out,
+      box-shadow 0.1s ease-out,
       transform 0.1s cubic-bezier(0.18, 0.89, 0.32, 1.28);
     border: 1px solid transparent;
     color: black;
@@ -116,22 +129,24 @@ export const Container = styled.div(
   `,
 );
 
-export const Main = styled.main(
-  css`
-    overflow-x: scroll;
-  `,
-);
+export const Main = styled.main(css`
+  overflow-x: scroll;
+`);
 
-export const Paragraph = styled.p(
-  css`
-    font-size: ${bs()};
-  `,
-);
+export const Paragraph = styled.p(css`
+  font-size: ${bs()};
+`);
 
 export const darkMode = css`
   :root {
     background-color: ${Palette.black};
     color: ${Palette.white};
+    th {
+      border-bottom: 1px solid ${Palette.white};
+    }
+    pre {
+      background-color: ${Palette.white}30;
+    }
   }
   ${buttonDarkMode}
 `;
@@ -146,8 +161,31 @@ export const appStyle = [
 
       ul,
       ol {
-        list-style: none;
-        margin-bottom: 0;
+        margin-bottom: ${bs(1 / 6)};
+        padding-left: ${bs(3 / 2)};
+      }
+
+      table {
+        border-collapse: collapse;
+      }
+
+      th {
+        border-bottom: 1px solid ${Palette.black};
+      }
+
+      th, td {
+        padding: 0 ${bs(1 / 4)} ${bs(1 / 10)};
+      }
+
+      pre {
+        code {
+          background: none;
+        }
+        font-size: 0.75em;
+        background-color: ${Palette.black}10;
+        padding: ${bs(1 / 3)} ${bs(1 / 2)};
+        border-radius: ${bs(1 / 3)};
+        overflow-x: scroll;
       }
     }
     ::selection {

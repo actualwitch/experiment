@@ -44,7 +44,12 @@ export const experimentToOpenai = (experiment: Message[]): ChatCompletionCreateP
   if (tools.length) {
     result.tools = tools;
     result.tool_choice =
-      tools.length === 1 ? { type: "function" as const, function: { name: tools[0].function.name } } : undefined;
+      tools.length === 1
+        ? {
+            type: "function" as const,
+            function: { name: tools[0].function.name },
+          }
+        : undefined;
   }
   return result;
 };

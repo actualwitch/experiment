@@ -1,8 +1,9 @@
 import { css } from "@emotion/react";
 import styled from "@emotion/styled";
-import DOMPurify from "dompurify";
+import DOMPurify from "isomorphic-dompurify";
 import { atom } from "jotai";
 import { marked } from "marked";
+import { bs } from "../style";
 
 type Primitive = string | number | boolean | null | undefined;
 
@@ -57,7 +58,13 @@ function asTreeNodes(
   if (typeof input === "string" && input[0] === "{" && input[input.length - 1] === "}") {
     try {
       input = JSON.parse(input);
-      return asTreeNodes(input, title, { separator, onClick, onTitleClick, shouldBeCollapsed, path });
+      return asTreeNodes(input, title, {
+        separator,
+        onClick,
+        onTitleClick,
+        shouldBeCollapsed,
+        path,
+      });
     } catch {}
   }
   const prefix = isNullish(title) || (Array.isArray(input) && input.length === 0) ? "" : title;
@@ -154,14 +161,23 @@ function asTreeNodes(
 
 const ViewContainer = styled.div`
   & > p {
-    margin: 0;
+    margin: ${bs(1 / 2)} 0;
     word-wrap: anywhere;
+  }
+  ${new Array(6)
+    .fill(0)
+    .map((_, i) => `& > h${i + 1}`)
+    .join(", ")} {
+    margin-bottom: ${bs(1 / 4)};
   }
 `;
 
 const Markdown = ({ children, style }: { children: string; style?: React.CSSProperties }) => {
+  const input = children.replaceAll(/(\\n)+/g, "\n\n");
   // images are common attack vectors
-  const html = DOMPurify.sanitize(marked.parse(children, { async: false }), { FORBID_TAGS: ["img"] });
+  const html = DOMPurify.sanitize(marked.parse(input, { async: false }), {
+    FORBID_TAGS: ["img"],
+  });
   return <ViewContainer style={style} dangerouslySetInnerHTML={{ __html: html }} />;
 };
 
@@ -179,6 +195,10 @@ export function View({
     return <Markdown style={style}>{children}</Markdown>;
   }
 
-  const content = asTreeNodes(children, undefined, { onClick, onTitleClick, shouldBeCollapsed });
+  const content = asTreeNodes(children, undefined, {
+    onClick,
+    onTitleClick,
+    shouldBeCollapsed,
+  });
   return <ViewContainer style={style}>{content}</ViewContainer>;
 }

@@ -115,7 +115,6 @@ export function entangledAtom<
   );
 }
 
-
 /// test cases
 
 // const test1 = entangledAtom("test1", atom(1));

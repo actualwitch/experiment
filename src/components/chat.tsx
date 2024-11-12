@@ -9,12 +9,28 @@ import { deepEqual } from "../utils";
 import { useScrollToTop } from "../utils/scroll";
 import { collapsedAtom, View } from "./view";
 import { Palette } from "../style/palette";
+import { useHandlers } from "../utils/keyboard";
+import type { WithDarkMode } from "../style/darkMode";
 
 const baseHeight = bs(6);
-export const ChatContainer = styled.div`
+export const ChatContainer = styled.div<WithDarkMode>`
   flex: 1;
   display: flex;
   flex-direction: column-reverse;
+
+  code {
+    padding: 0 ${bs(1 / 10)};
+    background-color: ${(p) => (p.isDarkMode ? Palette.white + "50" : Palette.black + "20")};
+    border-radius: ${bs(1 / 8)};
+  }
+
+  a {
+    color: ${(p) => (p.isDarkMode ? Palette.pink : Palette.pink)};
+    text-decoration: underline;
+    :hover {
+      color: ${(p) => (p.isDarkMode ? Palette.purple : Palette.purple)};
+    }
+  }
 
   & > article {
     min-height: ${baseHeight};
@@ -43,6 +59,7 @@ export const MessageComponent = styled.article<{
         padding: ${bs(1 / 2)};
         padding-${align}: ${bs(1.5)};
         word-wrap: break-word;
+        width: -moz-available;
       }
 
       &:before {
@@ -191,7 +208,8 @@ export const ChatMessage = ({ message: _message, index }: { message: Message; in
         shouldBeCollapsed={(path) => collapsed.includes(path.join("."))}
         style={{
           float: message.fromServer ? "left" : "right",
-        }}>
+        }}
+      >
         {message.content}
       </View>
     );
@@ -215,7 +233,8 @@ export const ChatMessage = ({ message: _message, index }: { message: Message; in
       onDoubleClick={() => {
         setSelection(selector);
       }}
-      ioType={message.fromServer ? "output" : "input"}>
+      ioType={message.fromServer ? "output" : "input"}
+    >
       {innerContent}
     </MessageComponent>
   );
@@ -228,9 +247,24 @@ const Banner = styled.div`
   font-size: ${bs(2)};
 `;
 
-export function ChatPreview({ history, autoScroll }: { history: Message[]; autoScroll?: boolean }) {
-  const Anchor = useScrollToTop("top", [history.length]);
-  const setSelection = useSetAtom(selectionAtom);
+export function ChatPreview({
+  history,
+  autoScroll,
+  autoScrollAnchor = "first",
+}: {
+  history: Message[];
+  autoScroll?: boolean;
+  autoScrollAnchor?: "first" | "last";
+}) {
+  const Anchor = useScrollToTop("top", [history.length, autoScroll, autoScrollAnchor]);
+  const [selection, setSelection] = useAtom(selectionAtom);
+  const [isDarkMode] = useAtom(isDarkModeAtom);
+
+  useHandlers({
+    Escape: () => {
+      setSelection(null);
+    },
+  });
 
   useEffect(() => {
     return () => void setSelection(null);
@@ -245,11 +279,12 @@ export function ChatPreview({ history, autoScroll }: { history: Message[]; autoS
     return <Banner>∅</Banner>;
   }
   return (
-    <ChatContainer>
-      {autoScroll && <Anchor />}
+    <ChatContainer isDarkMode={isDarkMode}>
+      {autoScroll && autoScrollAnchor === "first" && <Anchor />}
       {keyedHistory.map?.(({ key, ...message }) => {
         return <ChatMessage key={key} message={message} index={key} />;
       })}
+      {autoScroll && autoScrollAnchor === "last" && <Anchor />}
     </ChatContainer>
   );
 }

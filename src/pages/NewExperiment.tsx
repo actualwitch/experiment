@@ -36,7 +36,9 @@ const Block = styled.div<{ isDarkMode?: boolean }>`
   width: auto;
 
   backdrop-filter: blur(10px) brightness(${(p) => (p.isDarkMode ? 1.5 : 0.9)}) saturate(2);
-  box-shadow: 0px 0px 2px 0px inset #ffffff78, 0px 2px 8px 1px #ffffff3f;
+  box-shadow:
+    0px 0px 2px 0px inset #ffffff78,
+    0px 2px 8px 1px #ffffff3f;
 
   & * {
     border-radius: 0;
@@ -163,7 +165,8 @@ export default function NewExperiment() {
           onClick={(e) => {
             e.preventDefault();
             runExperiment();
-          }}>
+          }}
+        >
           start experiment
         </Button>
       </Sidebar>

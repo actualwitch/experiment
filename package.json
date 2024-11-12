@@ -11,13 +11,17 @@
   "type": "module",
   "scripts": {
     "build": "bun scripts/build.ts",
-    "dev": "bun i && DEBUG=true bun --watch run src/entry/server.tsx"
+    "dev": "bun i && DEBUG=true bun --watch run src/entry/server.tsx",
+    "format": "bunx biome format --write ./src/*",
+    "format:prettier": "prettier ./src/* --write"
   },
   "devDependencies": {
+    "@biomejs/biome": "latest",
     "@types/bun": "latest",
     "@types/react": "latest",
     "@types/react-dom": "latest",
-    "ink": "latest"
+    "ink": "latest",
+    "prettier": "latest"
   },
   "peerDependencies": {
     "typescript": "latest"
@@ -28,10 +32,10 @@
     "@emotion/styled": "latest",
     "@mistralai/mistralai": "latest",
     "csvtojson": "latest",
-    "dompurify": "latest",
     "jotai": "latest",
     "jotai-effect": "latest",
     "jotai-optics": "latest",
+    "isomorphic-dompurify": "latest",
     "marked": "latest",
     "nanoid": "latest",
     "openai": "latest",

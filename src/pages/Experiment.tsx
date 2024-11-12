@@ -63,7 +63,8 @@ export default function Experiment() {
             e.preventDefault();
             store.set(experimentAtom, experiment);
             navigate("/");
-          }}>
+          }}
+        >
           begin anew
         </button>
       </aside>

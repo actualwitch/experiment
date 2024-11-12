@@ -24,7 +24,8 @@ export const Sidebar = () => {
           onClick={(value, key, path) => {
             const [parent] = path;
             setSelectedChat([parent, key!]);
-          }}>
+          }}
+        >
           {entries}
         </View>
       ) : (
@@ -64,7 +65,11 @@ function Imports() {
   const experiment = [
     ...chat.messages,
     ...(chat.response.content ? [{ ...chat.response, role: "assistant", fromServer: true }] : []),
-    ...(chat.response.tool_calls || []).map((toolCall) => ({ content: toolCall, role: "tool", fromServer: true })),
+    ...(chat.response.tool_calls || []).map((toolCall) => ({
+      content: toolCall,
+      role: "tool",
+      fromServer: true,
+    })),
   ];
   return (
     <>
@@ -78,7 +83,8 @@ function Imports() {
               e.preventDefault();
               store.set(experimentAtom, chat.messages);
               navigate("/");
-            }}>
+            }}
+          >
             Start experiment
           </button>
           <button
@@ -86,7 +92,8 @@ function Imports() {
             onClick={(e) => {
               e.preventDefault();
               navigator.clipboard.writeText(JSON.stringify(chat.messages));
-            }}>
+            }}
+          >
             Copy to clipboard
           </button>
         </div>

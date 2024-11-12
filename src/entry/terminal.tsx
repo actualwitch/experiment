@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, { useState } from "react";
 import { Box, render, Text, useApp, useInput } from "../../../ink/build";
 import process from "node:process";
 

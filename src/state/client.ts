@@ -1,7 +1,12 @@
 import { atom } from "jotai";
 
-export type Message = { message?: string; tool_calls?: object[]; role: string; content?: string };
-export type Chat = {messages: Message[]; response: Message};
+export type Message = {
+  message?: string;
+  tool_calls?: object[];
+  role: string;
+  content?: string;
+};
+export type Chat = { messages: Message[]; response: Message };
 
 export const importsRegistry = atom<Record<string, Chat[]>>({});
 

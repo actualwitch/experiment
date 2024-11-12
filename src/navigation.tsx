@@ -11,6 +11,10 @@ const Navigation = styled.nav`
   padding: ${bs()};
   display: flex;
   flex-direction: column;
+  ul {
+    list-style: none;
+    padding: 0;
+  }
 `;
 
 const GrowBox = styled.div`
