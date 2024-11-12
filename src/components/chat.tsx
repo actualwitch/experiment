@@ -2,7 +2,7 @@ import { css, type SerializedStyles } from "@emotion/react";
 import styled from "@emotion/styled";
 import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
 import { focusAtom } from "jotai-optics";
-import { type ReactNode, useMemo, useRef } from "react";
+import { type ReactNode, useEffect, useMemo, useRef } from "react";
 import { experimentAtom, isDarkModeAtom, type Message, templatesAtom } from "../state/common";
 import { bs } from "../style";
 import { deepEqual } from "../utils";
@@ -228,8 +228,13 @@ const Banner = styled.div`
   font-size: ${bs(2)};
 `;
 
-export function ChatPreview({ history, autoScroll }: { history: Message[], autoScroll?: boolean }) {
+export function ChatPreview({ history, autoScroll }: { history: Message[]; autoScroll?: boolean }) {
   const Anchor = useScrollToTop("top", [history.length]);
+  const setSelection = useSetAtom(selectionAtom);
+
+  useEffect(() => {
+    return () => void setSelection(null);
+  }, []);
 
   const keyedHistory = useMemo(() => {
     const keyed = history.map((message, index) => ({ ...message, key: index }));

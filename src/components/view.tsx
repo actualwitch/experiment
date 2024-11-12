@@ -1,12 +1,14 @@
 import { css } from "@emotion/react";
 import styled from "@emotion/styled";
-import { atom, useAtom } from "jotai";
-import { createElement } from "react";
+import DOMPurify from "dompurify";
+import { atom } from "jotai";
+import { marked } from "marked";
 
 type Primitive = string | number | boolean | null | undefined;
 
 const isNullish = (input: unknown): input is null | undefined => input === null || input === undefined;
 
+type Callback = (value: unknown, key: string | undefined, path: string[]) => void;
 type TreeOptions = {
   onClick?: Callback;
   onTitleClick?: Callback;
@@ -50,7 +52,7 @@ function asTreeNodes(
   input: unknown,
   title?: Primitive,
   { separator = ".", onClick, onTitleClick, path = [], shouldBeCollapsed }: TreeOptions = {},
-) {
+): JSX.Element | null {
   // unwrap JSON strings
   if (typeof input === "string" && input[0] === "{" && input[input.length - 1] === "}") {
     try {
@@ -60,19 +62,17 @@ function asTreeNodes(
   }
   const prefix = isNullish(title) || (Array.isArray(input) && input.length === 0) ? "" : title;
   if (shouldBeCollapsed?.(path)) {
-    return (
-      prefix && (
-        <Emphasis
-          isCollapsed
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            onTitleClick?.(prefix, undefined, path);
-          }}>
-          {prefix}
-        </Emphasis>
-      )
-    );
+    return prefix ? (
+      <Emphasis
+        isCollapsed
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          onTitleClick?.(prefix, undefined, path);
+        }}>
+        {prefix}
+      </Emphasis>
+    ) : null;
   }
   let inner = null;
   if (typeof input === "string") {
@@ -152,31 +152,6 @@ function asTreeNodes(
   );
 }
 
-function* asTextTreeNodes(input: string) {
-  const stack = [];
-  let buffer = "";
-  let currentBlock = "p";
-  let level = 0;
-  let index = 0;
-  for (const char of input) {
-    if (char === "\n" && buffer) {
-      try {
-        const obj = JSON.parse(buffer);
-        yield asTreeNodes(obj);
-        buffer = "";
-        continue;
-      } catch {}
-      yield createElement(currentBlock, { key: index++ }, buffer);
-      buffer = "";
-      continue;
-    }
-    buffer += char;
-  }
-  if (buffer) {
-    yield <p key={index++}>{buffer}</p>;
-  }
-}
-
 const ViewContainer = styled.div`
   & > p {
     margin: 0;
@@ -184,7 +159,11 @@ const ViewContainer = styled.div`
   }
 `;
 
-type Callback = (value: unknown, key: string | undefined, path: string[]) => void;
+const Markdown = ({ children, style }: { children: string; style?: React.CSSProperties }) => {
+  // images are common attack vectors
+  const html = DOMPurify.sanitize(marked.parse(children, { async: false }), { FORBID_TAGS: ["img"] });
+  return <ViewContainer style={style} dangerouslySetInnerHTML={{ __html: html }} />;
+};
 
 export function View({
   children,
@@ -196,9 +175,10 @@ export function View({
   children: unknown;
   style?: React.CSSProperties;
 } & Pick<TreeOptions, "onClick" | "onTitleClick" | "shouldBeCollapsed">) {
-  const content =
-    typeof children === "string"
-      ? [...asTextTreeNodes(children)]
-      : asTreeNodes(children, undefined, { onClick, onTitleClick, shouldBeCollapsed });
+  if (typeof children === "string") {
+    return <Markdown style={style}>{children}</Markdown>;
+  }
+
+  const content = asTreeNodes(children, undefined, { onClick, onTitleClick, shouldBeCollapsed });
   return <ViewContainer style={style}>{content}</ViewContainer>;
 }

@@ -3,9 +3,9 @@ export function* SampleComponent() {
   yield <div>A generator component!</div>;
 }
 
-export const createGeneratorComponent = (generator: () => Generator<JSX.Element, void, unknown>) => {
-  return function GeneratorComponent() {
-    const values = [...generator()].map((value, index) => ({ ...value, key: index }));
+export function createGeneratorComponent<P extends {children: string}, G extends (props: P) => Generator<JSX.Element | null, void, unknown>>(generator: G){
+  return function GeneratorComponent(props: P) {
+    const values = [...generator(props)].map((value, index) => ({ ...value, key: index }));
 
     return <>{values}</>;
   };

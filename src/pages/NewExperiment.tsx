@@ -156,7 +156,7 @@ export default function NewExperiment() {
         <select value={provider} onChange={(e) => setProvider(e.target.value as any)}>
           <option>anthropic</option>
           <option>openai</option>
-          {/* <option>test</option> */}
+          <option>test</option>
         </select>
         <Button
           type="submit"

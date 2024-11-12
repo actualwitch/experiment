@@ -1,13 +1,15 @@
+import { startTransition, StrictMode } from "react";
 import { hydrateRoot } from "react-dom/client";
-import { Shell } from "../root";
 import { BrowserRouter } from "react-router-dom";
-import { startTransition } from "react";
+import { Shell } from "../root";
 
 startTransition(() => {
   hydrateRoot(
     document,
-    <BrowserRouter>
-      <Shell />
-    </BrowserRouter>
+    <StrictMode>
+      <BrowserRouter>
+        <Shell />
+      </BrowserRouter>
+    </StrictMode>,
   );
 });

@@ -11,7 +11,7 @@
   "type": "module",
   "scripts": {
     "build": "bun scripts/build.ts",
-    "dev": "bun install && DEBUG=true bun --watch run src/entry/server.tsx"
+    "dev": "bun i && DEBUG=true bun --watch run src/entry/server.tsx"
   },
   "devDependencies": {
     "@types/bun": "latest",
@@ -28,9 +28,11 @@
     "@emotion/styled": "latest",
     "@mistralai/mistralai": "latest",
     "csvtojson": "latest",
+    "dompurify": "latest",
     "jotai": "latest",
     "jotai-effect": "latest",
     "jotai-optics": "latest",
+    "marked": "latest",
     "nanoid": "latest",
     "openai": "latest",
     "react": "canary",
