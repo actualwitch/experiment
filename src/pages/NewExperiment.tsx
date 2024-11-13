@@ -191,7 +191,8 @@ export default function NewExperiment() {
           onClick={(e) => {
             e.preventDefault();
             runExperiment();
-          }}>
+          }}
+        >
           start experiment
         </Button>
         {selection !== null && (
@@ -203,7 +204,8 @@ export default function NewExperiment() {
                 onClick={(e) => {
                   e.preventDefault();
                   deleteSelection();
-                }}>
+                }}
+              >
                 delete
               </button>
               <button
@@ -213,7 +215,8 @@ export default function NewExperiment() {
                   const name = prompt("Name of the template");
                   if (!name) return;
                   setTemplates({ ...templates, [name]: experiment[selection[0]] });
-                }}>
+                }}
+              >
                 template
               </button>
             </div>

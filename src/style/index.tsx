@@ -179,7 +179,8 @@ export const appStyle = [
         border-bottom: 1px solid ${Palette.black};
       }
 
-      th, td {
+      th,
+      td {
         padding: 0 ${bs(1 / 4)} ${bs(1 / 10)};
       }
 

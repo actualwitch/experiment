@@ -19,7 +19,8 @@ export default function Templates() {
             onClick={() => {
               setTemplates(Object.fromEntries(Object.entries(templates).filter(([name]) => name !== selectedTemplate)));
               setSelectedTemplate(null);
-            }}>
+            }}
+          >
             Delete
           </button>
         )}

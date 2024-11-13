@@ -3,7 +3,14 @@ import styled from "@emotion/styled";
 import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
 import { focusAtom } from "jotai-optics";
 import { type ReactNode, useEffect, useMemo, useRef } from "react";
-import { experimentAtom, experimentLayoutAtom, isDarkModeAtom, type Message, type Store, templatesAtom } from "../state/common";
+import {
+  experimentAtom,
+  experimentLayoutAtom,
+  isDarkModeAtom,
+  type Message,
+  type Store,
+  templatesAtom,
+} from "../state/common";
 import { bs } from "../style";
 import { deepEqual } from "../utils";
 import { useScrollToTop } from "../utils/scroll";
@@ -231,7 +238,8 @@ export const ChatMessage = ({ message: _message, index }: { message: Message; in
         style={{
           float: getAlign(message.fromServer ?? false, experimentLayout),
           width: "initial",
-        }}>
+        }}
+      >
         {message.content}
       </View>
     );
@@ -254,7 +262,8 @@ export const ChatMessage = ({ message: _message, index }: { message: Message; in
         if (isSelected) return;
         setSelection([selector[0]]);
       }}
-      ioType={message.fromServer ? "output" : "input"}>
+      ioType={message.fromServer ? "output" : "input"}
+    >
       {innerContent}
     </MessageComponent>
   );

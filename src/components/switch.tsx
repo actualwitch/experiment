@@ -32,10 +32,15 @@ export function Switch<T>({
   return (
     <Container>
       {children.map(({ value: v, label, isDefault }) => (
-        <Button key={label} type="button" onClick={() => onChange(v)} disabled={value !== undefined ? v === value : isDefault}>
+        <Button
+          key={label}
+          type="button"
+          onClick={() => onChange(v)}
+          disabled={value !== undefined ? v === value : isDefault}
+        >
           {label}
         </Button>
       ))}
     </Container>
   );
-};
+}
