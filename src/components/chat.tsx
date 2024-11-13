@@ -11,6 +11,7 @@ import { collapsedAtom, View } from "./view";
 import { Palette } from "../style/palette";
 import { useHandlers } from "../utils/keyboard";
 import type { WithDarkMode } from "../style/darkMode";
+import { widthAwailable } from "../style/mixins";
 
 const baseHeight = bs(6);
 export const ChatContainer = styled.div<WithDarkMode>`
@@ -22,6 +23,10 @@ export const ChatContainer = styled.div<WithDarkMode>`
     padding: 0 ${bs(1 / 10)};
     background-color: ${(p) => (p.isDarkMode ? Palette.white + "50" : Palette.black + "20")};
     border-radius: ${bs(1 / 8)};
+  }
+
+  pre {
+    text-align: left;
   }
 
   a {
@@ -59,7 +64,7 @@ export const MessageComponent = styled.article<{
         padding: ${bs(1 / 2)};
         padding-${align}: ${bs(1.5)};
         word-wrap: break-word;
-        width: -moz-available;
+        ${widthAwailable}
       }
 
       &:before {
@@ -187,7 +192,11 @@ export const ChatMessage = ({ message: _message, index }: { message: Message; in
   if (message.template) {
     innerContent ??= <div>λ {message.template}</div>;
   } else if (!message.content) {
-    innerContent ??= <code>{"<Empty>"}</code>;
+    innerContent ??= (
+      <div>
+        <em>{"<Empty>"}</em>
+      </div>
+    );
   } else if (["string", "object"].includes(typeof message.content)) {
     contentType = typeof message.content;
     innerContent ??= (

@@ -76,7 +76,8 @@ function asTreeNodes(
           e.preventDefault();
           e.stopPropagation();
           onTitleClick?.(prefix, undefined, path);
-        }}>
+        }}
+      >
         {prefix}
       </Emphasis>
     ) : null;
@@ -127,7 +128,8 @@ function asTreeNodes(
           e.preventDefault();
           e.stopPropagation();
           onClick?.(value, key, path);
-        }}>
+        }}
+      >
         {asTreeNodes(value, key, {
           separator,
           onClick,
@@ -149,7 +151,8 @@ function asTreeNodes(
             e.preventDefault();
             e.stopPropagation();
             onTitleClick?.(prefix, undefined, path);
-          }}>
+          }}
+        >
           {prefix}
         </Emphasis>
       )}
@@ -159,11 +162,20 @@ function asTreeNodes(
   );
 }
 
-const ViewContainer = styled.div`
+const ViewContainer = styled.div<{ markdownMode?: true }>`
   & > p {
     margin: ${bs(1 / 2)} 0;
     word-wrap: anywhere;
   }
+  ${(p) =>
+    !p.markdownMode &&
+    css`
+      ul,
+      ol {
+        list-style-type: none;
+        padding-left: 0;
+      }
+    `}
   ${new Array(6)
     .fill(0)
     .map((_, i) => `& > h${i + 1}`)
@@ -172,13 +184,15 @@ const ViewContainer = styled.div`
   }
 `;
 
+const nodeRendererMixin = css``;
+
 const Markdown = ({ children, style }: { children: string; style?: React.CSSProperties }) => {
   const input = children.replaceAll(/(\\n)+/g, "\n\n");
   // images are common attack vectors
   const html = DOMPurify.sanitize(marked.parse(input, { async: false }), {
     FORBID_TAGS: ["img"],
   });
-  return <ViewContainer style={style} dangerouslySetInnerHTML={{ __html: html }} />;
+  return <ViewContainer markdownMode style={style} dangerouslySetInnerHTML={{ __html: html }} />;
 };
 
 export function View({

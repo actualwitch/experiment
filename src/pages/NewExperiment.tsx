@@ -116,14 +116,16 @@ export default function NewExperiment() {
     setExperiment([...experiment, { role, content: message }]);
   };
 
+  const deleteSelection =() => {
+    if (selection && selection.length === 1) {
+      const newExperiment = experiment.filter((_, i) => i !== selection[0]);
+      setExperiment(newExperiment);
+      setSelection(null);
+    }
+  };
+
   useHandlers({
-    Backspace: () => {
-      if (selection && selection.length === 1) {
-        const newExperiment = experiment.filter((_, i) => i !== selection[0]);
-        setExperiment(newExperiment);
-        setSelection(null);
-      }
-    },
+    Backspace: deleteSelection,
   });
 
   return (
@@ -169,6 +171,50 @@ export default function NewExperiment() {
         >
           start experiment
         </Button>
+        {selection !== null && (
+          <>
+            <h4>This message</h4>
+            <div>
+              <button
+                type="submit"
+                onClick={(e) => {
+                  e.preventDefault();
+                  deleteSelection();
+                }}>
+                delete
+              </button>
+              <button
+                type="submit"
+                onClick={async (e) => {
+                  e.preventDefault();
+                  const text = await navigator.clipboard.readText();
+                  let value: string | object = text;
+                  try {
+                    if (role === "tool") {
+                      value = JSON.parse(text);
+                    }
+                  } catch {}
+                  const newExperiment = experiment.map((msg, idx) => (idx === selection[0] ? { ...msg, content: value } : msg));
+                  setExperiment(newExperiment);
+                }}>
+                paste
+              </button>
+              {/* <button
+                type="submit"
+                onClick={async (e) => {
+                  e.preventDefault();
+                  const name = prompt("Name of the template");
+                  if (!name) return;
+                  submit({ [name]: chat[selection[0]] } as any, {
+                    method: "post",
+                    encType: "application/json",
+                  });
+                }}>
+                template
+              </button> */}
+            </div>
+          </>
+        )}
       </Sidebar>
       <ExperimentsSidebar />
     </>

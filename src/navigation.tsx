@@ -2,7 +2,7 @@ import styled from "@emotion/styled";
 import { NavLink } from "react-router-dom";
 import { VERSION } from "./const";
 import { bs } from "./style";
-import { nonInteractive } from "./style/mixins";
+import { nonInteractive, widthAwailable } from "./style/mixins";
 import { portalIO } from "./utils/portal";
 
 export const [SidebarInput, SidebarOutput] = portalIO();
@@ -14,6 +14,9 @@ const Navigation = styled.nav`
   ul {
     list-style: none;
     padding: 0;
+  }
+  input {
+    ${widthAwailable}
   }
 `;
 

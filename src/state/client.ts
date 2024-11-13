@@ -28,6 +28,7 @@ export const processCsvAtom = atom(null, (get, set, file?: File) => {
     if (!file) return;
     const { default: csv } = await import("csvtojson");
     const lines = await csv().fromString(file.toString());
+    console.log(lines[0]);
     const chats = lines.map(({ messages, choice }) => ({
       messages: JSON.parse(messages),
       response: JSON.parse(choice).message,
