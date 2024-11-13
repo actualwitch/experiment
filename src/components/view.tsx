@@ -69,18 +69,18 @@ function asTreeNodes(
   }
   const prefix = isNullish(title) || (Array.isArray(input) && input.length === 0) ? "" : title;
   if (shouldBeCollapsed?.(path)) {
-    return prefix ? (
-      <Emphasis
-        isCollapsed
-        onClick={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          onTitleClick?.(prefix, undefined, path);
-        }}
-      >
-        {prefix}
-      </Emphasis>
-    ) : null;
+    return prefix ?
+        <Emphasis
+          isCollapsed
+          onClick={e => {
+            e.preventDefault();
+            e.stopPropagation();
+            onTitleClick?.(prefix, undefined, path);
+          }}
+        >
+          {prefix}
+        </Emphasis>
+      : null;
   }
   let inner = null;
   if (typeof input === "string") {
@@ -108,7 +108,7 @@ function asTreeNodes(
         onClick,
         onTitleClick,
         shouldBeCollapsed,
-        path: [...path, ...newTitle.map((key) => key.toString())],
+        path: [...path, ...newTitle.map(key => key.toString())],
       });
     }
     const entries = Object.entries(input);
@@ -124,7 +124,7 @@ function asTreeNodes(
     inner = entries.map(([key, value]) => (
       <li
         key={key}
-        onClick={(e) => {
+        onClick={e => {
           e.preventDefault();
           e.stopPropagation();
           onClick?.(value, key, path);
@@ -147,7 +147,7 @@ function asTreeNodes(
       {prefix && (
         <Emphasis
           isCollapsed={false}
-          onClick={(e) => {
+          onClick={e => {
             e.preventDefault();
             e.stopPropagation();
             onTitleClick?.(prefix, undefined, path);
@@ -167,14 +167,14 @@ const ViewContainer = styled.div<{ markdownMode?: true }>`
     margin-bottom: ${bs(1 / 2)};
     word-wrap: anywhere;
   }
-  ${(p) =>
+  ${p =>
     !p.markdownMode &&
     css`
       ul,
       ol {
         list-style-type: none;
       }
-      ${["ul", "ol"].map((tag) => `:not(li) > ${tag}`).join(", ")} {
+      ${["ul", "ol"].map(tag => `:not(li) > ${tag}`).join(", ")} {
         padding-left: 0;
       }
     `}
@@ -186,12 +186,10 @@ const ViewContainer = styled.div<{ markdownMode?: true }>`
   }
 `;
 
-const nodeRendererMixin = css``;
-
 const Markdown = ({ children, style }: { children: string; style?: React.CSSProperties }) => {
-  const input = children.replaceAll(/(\\n)+/g, "\n\n");
+  // const input = children.replaceAll(/(\\n)+/g, "\n\n");
   // images are common attack vectors
-  const html = DOMPurify.sanitize(marked.parse(input, { async: false }), {
+  const html = DOMPurify.sanitize(marked.parse(children, { async: false }), {
     FORBID_TAGS: ["img"],
   });
   return <ViewContainer markdownMode style={style} dangerouslySetInnerHTML={{ __html: html }} />;
@@ -208,7 +206,7 @@ export function View({
   style?: React.CSSProperties;
 } & Pick<TreeOptions, "onClick" | "onTitleClick" | "shouldBeCollapsed">) {
   if (typeof children === "string") {
-    return <Markdown style={style}>{children}</Markdown>;
+    return <Markdown style={{ ...style, width: undefined }}>{children}</Markdown>;
   }
 
   const content = asTreeNodes(children, undefined, {

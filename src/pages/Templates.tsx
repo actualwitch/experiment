@@ -10,7 +10,13 @@ export default function Templates() {
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
   return (
     <>
-      <View>{selectedTemplate && templates ? templates[selectedTemplate] : []}</View>
+      <View>
+        {templates ?
+          selectedTemplate ?
+            templates[selectedTemplate]
+          : undefined
+        : undefined}
+      </View>
       <Sidebar>
         <h2>Actions</h2>
         {selectedTemplate && (
@@ -28,7 +34,7 @@ export default function Templates() {
       <SidebarInput>
         <ul>
           {templates &&
-            Object.keys(templates).map((name) => (
+            Object.keys(templates).map(name => (
               <li key={name}>
                 <a onClick={() => void setSelectedTemplate(name)}>{name}</a>
               </li>

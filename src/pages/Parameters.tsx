@@ -48,7 +48,7 @@ export default function Configure() {
           <header>Theme</header>
           <Switch value={isDarkMode} onChange={setIsDarkMode}>
             {[
-              { value: undefined, label: "System" },
+              { value: undefined, label: "System", isDefault: true },
               { value: false, label: "Light" },
               { value: true, label: "Dark" },
             ]}

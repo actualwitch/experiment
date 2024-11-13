@@ -210,7 +210,30 @@ export const ChatMessage = ({ message: _message, index }: { message: Message; in
   let contentType: string | undefined;
 
   if (message.template) {
-    innerContent ??= <div>λ {message.template}</div>;
+    contentType = "tmpl";
+    innerContent ??= (
+      <View
+        onClick={(value, key, path) => {
+          const fullPath = [...selector, ...path, key];
+        }}
+        onTitleClick={(value, key, path) => {
+          setCollapsed((prev) => {
+            const fullPath = path.join(".");
+            const isCollapsed = collapsed.includes(fullPath);
+            if (isCollapsed) {
+              return prev.filter((path) => path !== fullPath);
+            }
+            return [...prev, fullPath];
+          });
+        }}
+        shouldBeCollapsed={(path) => collapsed.includes(path.join("."))}
+        style={{
+          float: getAlign(message.fromServer ?? false, experimentLayout),
+          width: "initial",
+        }}
+      >
+        {{name: message.template}}
+      </View>);
   } else if (!message.content) {
     innerContent ??= (
       <div>
