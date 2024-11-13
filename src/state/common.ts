@@ -119,4 +119,4 @@ export const appendToRun = atom(null, (get, set, cursor: ExperimentCursor, messa
   return current?.length ?? 0;
 });
 
-export const templatesAtom = focusAtom(storeAtom, (o) => o.prop("templates"));
+export const templatesAtom = entangledAtom("templates", focusAtom(storeAtom, (o) => o.prop("templates")));

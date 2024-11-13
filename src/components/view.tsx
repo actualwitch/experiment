@@ -76,8 +76,7 @@ function asTreeNodes(
           e.preventDefault();
           e.stopPropagation();
           onTitleClick?.(prefix, undefined, path);
-        }}
-      >
+        }}>
         {prefix}
       </Emphasis>
     ) : null;
@@ -128,8 +127,7 @@ function asTreeNodes(
           e.preventDefault();
           e.stopPropagation();
           onClick?.(value, key, path);
-        }}
-      >
+        }}>
         {asTreeNodes(value, key, {
           separator,
           onClick,
@@ -151,8 +149,7 @@ function asTreeNodes(
             e.preventDefault();
             e.stopPropagation();
             onTitleClick?.(prefix, undefined, path);
-          }}
-        >
+          }}>
           {prefix}
         </Emphasis>
       )}
@@ -173,6 +170,8 @@ const ViewContainer = styled.div<{ markdownMode?: true }>`
       ul,
       ol {
         list-style-type: none;
+      }
+      ${["ul", "ol"].map((tag) => `:not(li) > ${tag}`).join(", ")} {
         padding-left: 0;
       }
     `}

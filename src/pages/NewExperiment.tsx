@@ -1,9 +1,9 @@
 import styled from "@emotion/styled";
 import { useAtom } from "jotai";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ChatPreview, selectionAtom } from "../components/chat";
 import { ExperimentsSidebar } from "../sidebars/experiments";
-import { experimentAtom, isDarkModeAtom, type Role } from "../state/common";
+import { experimentAtom, isDarkModeAtom, templatesAtom, type Role } from "../state/common";
 import inference from "../state/inference";
 import { bs, Button } from "../style";
 import { useHandlers } from "../utils/keyboard";
@@ -108,12 +108,28 @@ export default function NewExperiment() {
   const [message, setMessage] = useState("");
   const [role, setRole] = useState<Role>("user");
   const [provider, setProvider] = useState<Provider>("anthropic");
+  const [templates, setTemplates] = useAtom(templatesAtom);
+
+  const [object, setObject] = useState<null | object>(null);
+  useEffect(() => {
+    const id = setTimeout(() => {
+      try {
+        const object = JSON.parse(message);
+        if (object.type !== "function") throw new Error("Not a function");
+        setObject(object);
+        setRole("tool");
+      } catch {
+        setObject(null);
+      }
+    }, 100);
+    return () => clearTimeout(id);
+  }, [message])
 
   const [_, runExperiment] = useAtom(actionMap[provider]);
   const submit = () => {
     if (!message) return;
     setMessage("");
-    setExperiment([...experiment, { role, content: message }]);
+    setExperiment([...experiment, { role, content: object || message }]);
   };
 
   const deleteSelection =() => {
@@ -128,6 +144,8 @@ export default function NewExperiment() {
     Backspace: deleteSelection,
   });
 
+  const isDisabled = role === "tool" && !object;
+
   return (
     <>
       <Column>
@@ -139,17 +157,27 @@ export default function NewExperiment() {
               <option>user</option>
               <option>tool</option>
             </select>
-            <button onClick={() => submit()}>add</button>
+            <button type="button" disabled={isDisabled} onClick={() => submit()}>add</button>
           </ActionRow>
           <TextArea
-            placeholder="Type a message and press Enter to append..."
+            placeholder={`${role === "tool" ? "Paste JSONSchema" : "Type a message and press Enter to append"}…`}
             value={message}
+            spellCheck={object === null}
             onChange={(e) => setMessage(e.target.value)}
             onKeyDown={(e) => {
-              if (e.key === "Enter") {
+              if (!isDisabled && e.key === "Enter" && !e.shiftKey) {
                 e.preventDefault();
                 submit();
               }
+            }}
+            onPaste={(e) => {
+              const text = e.clipboardData.getData("text");
+              try {
+                const object = JSON.parse(text);
+                if (object.type !== "function") return;
+                setRole("tool");
+                setMessage(text);
+              } catch {}
             }}
             autoFocus
           />
@@ -160,7 +188,7 @@ export default function NewExperiment() {
         <select value={provider} onChange={(e) => setProvider(e.target.value as any)}>
           <option>anthropic</option>
           <option>openai</option>
-          <option>test</option>
+          {/* <option>test</option> */}
         </select>
         <Button
           type="submit"
@@ -187,31 +215,12 @@ export default function NewExperiment() {
                 type="submit"
                 onClick={async (e) => {
                   e.preventDefault();
-                  const text = await navigator.clipboard.readText();
-                  let value: string | object = text;
-                  try {
-                    if (role === "tool") {
-                      value = JSON.parse(text);
-                    }
-                  } catch {}
-                  const newExperiment = experiment.map((msg, idx) => (idx === selection[0] ? { ...msg, content: value } : msg));
-                  setExperiment(newExperiment);
-                }}>
-                paste
-              </button>
-              {/* <button
-                type="submit"
-                onClick={async (e) => {
-                  e.preventDefault();
                   const name = prompt("Name of the template");
                   if (!name) return;
-                  submit({ [name]: chat[selection[0]] } as any, {
-                    method: "post",
-                    encType: "application/json",
-                  });
+                  setTemplates({ ...templates, [name]: experiment[selection[0]] });
                 }}>
                 template
-              </button> */}
+              </button>
             </div>
           </>
         )}

@@ -217,6 +217,7 @@ export const ChatMessage = ({ message: _message, index }: { message: Message; in
         shouldBeCollapsed={(path) => collapsed.includes(path.join("."))}
         style={{
           float: message.fromServer ? "left" : "right",
+          width: "initial",
         }}
       >
         {message.content}
@@ -227,9 +228,9 @@ export const ChatMessage = ({ message: _message, index }: { message: Message; in
   return (
     <MessageComponent
       contentEditable={isSelected && selection?.[1] === "content"}
-      onBlur={(e) => {
-        setSelection([index]);
-      }}
+      // onBlur={(e) => {
+      //   setSelection([index]);
+      // }}
       ref={ref}
       role={message.role}
       contentType={contentType}
@@ -237,10 +238,8 @@ export const ChatMessage = ({ message: _message, index }: { message: Message; in
       isDarkMode={isDarkMode}
       onClick={() => {
         if (selection?.length === 2) return;
+        if (isSelected) return;
         setSelection([selector[0]]);
-      }}
-      onDoubleClick={() => {
-        setSelection(selector);
       }}
       ioType={message.fromServer ? "output" : "input"}
     >
