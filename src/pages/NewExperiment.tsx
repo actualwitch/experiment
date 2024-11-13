@@ -1,11 +1,11 @@
 import styled from "@emotion/styled";
 import { useAtom } from "jotai";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ChatPreview, selectionAtom } from "../components/chat";
 import { ExperimentsSidebar } from "../sidebars/experiments";
 import { experimentAtom, isDarkModeAtom, templatesAtom, type Role } from "../state/common";
 import inference from "../state/inference";
-import { bs, Button } from "../style";
+import { bs, Button, Sidebar } from "../style";
 import { useHandlers } from "../utils/keyboard";
 
 const { runExperimentAsAnthropic, runExperimentAsOpenAi, testStreaming } = inference;
@@ -85,12 +85,6 @@ const ActionRow = styled.div`
   }
 `;
 
-const Sidebar = styled.aside`
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-`;
-
 const TextArea = (props: React.TextareaHTMLAttributes<HTMLTextAreaElement>) => {
   const ref = useRef<HTMLTextAreaElement | null>(null);
   useEffect(() => {
@@ -123,7 +117,7 @@ export default function NewExperiment() {
       }
     }, 100);
     return () => clearTimeout(id);
-  }, [message])
+  }, [message]);
 
   const [_, runExperiment] = useAtom(actionMap[provider]);
   const submit = () => {
@@ -132,7 +126,7 @@ export default function NewExperiment() {
     setExperiment([...experiment, { role, content: object || message }]);
   };
 
-  const deleteSelection =() => {
+  const deleteSelection = () => {
     if (selection && selection.length === 1) {
       const newExperiment = experiment.filter((_, i) => i !== selection[0]);
       setExperiment(newExperiment);
@@ -157,7 +151,9 @@ export default function NewExperiment() {
               <option>user</option>
               <option>tool</option>
             </select>
-            <button type="button" disabled={isDisabled} onClick={() => submit()}>add</button>
+            <button type="button" disabled={isDisabled} onClick={() => submit()}>
+              add
+            </button>
           </ActionRow>
           <TextArea
             placeholder={`${role === "tool" ? "Paste JSONSchema" : "Type a message and press Enter to append"}…`}
@@ -195,8 +191,7 @@ export default function NewExperiment() {
           onClick={(e) => {
             e.preventDefault();
             runExperiment();
-          }}
-        >
+          }}>
           start experiment
         </Button>
         {selection !== null && (

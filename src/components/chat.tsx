@@ -3,7 +3,7 @@ import styled from "@emotion/styled";
 import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
 import { focusAtom } from "jotai-optics";
 import { type ReactNode, useEffect, useMemo, useRef } from "react";
-import { experimentAtom, isDarkModeAtom, type Message, templatesAtom } from "../state/common";
+import { experimentAtom, experimentLayoutAtom, isDarkModeAtom, type Message, type Store, templatesAtom } from "../state/common";
 import { bs } from "../style";
 import { deepEqual } from "../utils";
 import { useScrollToTop } from "../utils/scroll";
@@ -43,15 +43,27 @@ export const ChatContainer = styled.div<WithDarkMode>`
   }
 `;
 
+const getAlign = (fromServer: boolean, experimentLayout: Store["experimentLayout"]) => {
+  switch (experimentLayout) {
+    case "left":
+      return "left";
+    case "chat-reverse":
+      return fromServer ? "right" : "left";
+    default:
+      return fromServer ? "left" : "right";
+  }
+};
+
 export const MessageComponent = styled.article<{
   role: "system" | "user" | "assistant" | "tool";
   contentType?: string;
   ioType?: "input" | "output";
   isSelected?: boolean;
   isDarkMode?: boolean;
-}>(({ role, ioType, contentType, isSelected, isDarkMode }) => {
+  experimentLayout: Store["experimentLayout"];
+}>(({ role, ioType, contentType, isSelected, isDarkMode, experimentLayout }) => {
   const fromServer = ioType === "output";
-  const align = fromServer ? "left" : "right";
+  const align = getAlign(fromServer, experimentLayout);
   const styles: SerializedStyles[] = [
     css`
       border-${align}: 4px solid transparent;
@@ -73,7 +85,7 @@ export const MessageComponent = styled.article<{
         ${align}: 0;
         transform-origin: ${align};
         ${
-          !fromServer
+          align === "right"
             ? css`
                 transform: rotate(-90deg) translate(0, -20px);
               `
@@ -177,6 +189,7 @@ export const ChatMessage = ({ message: _message, index }: { message: Message; in
   const setter = useSetAtom(lensAtom);
   const templates = useAtomValue(templatesAtom);
   const isDarkMode = useAtomValue(isDarkModeAtom);
+  const experimentLayout = useAtomValue(experimentLayoutAtom);
 
   const message = { ..._message };
   for (const [name, template] of Object.entries(templates ?? {})) {
@@ -216,10 +229,9 @@ export const ChatMessage = ({ message: _message, index }: { message: Message; in
         }}
         shouldBeCollapsed={(path) => collapsed.includes(path.join("."))}
         style={{
-          float: message.fromServer ? "left" : "right",
+          float: getAlign(message.fromServer ?? false, experimentLayout),
           width: "initial",
-        }}
-      >
+        }}>
         {message.content}
       </View>
     );
@@ -236,13 +248,13 @@ export const ChatMessage = ({ message: _message, index }: { message: Message; in
       contentType={contentType}
       isSelected={isSelected}
       isDarkMode={isDarkMode}
+      experimentLayout={experimentLayout}
       onClick={() => {
         if (selection?.length === 2) return;
         if (isSelected) return;
         setSelection([selector[0]]);
       }}
-      ioType={message.fromServer ? "output" : "input"}
-    >
+      ioType={message.fromServer ? "output" : "input"}>
       {innerContent}
     </MessageComponent>
   );

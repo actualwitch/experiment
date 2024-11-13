@@ -23,6 +23,7 @@ export type Experiment = {
 
 export type Store = {
   isDarkMode?: boolean;
+  experimentLayout?: "left" | "chat" | "chat-reverse";
   experiments?: Record<string, Experiment>;
   templates?: Record<string, _Message>;
   tokens: {
@@ -119,4 +120,12 @@ export const appendToRun = atom(null, (get, set, cursor: ExperimentCursor, messa
   return current?.length ?? 0;
 });
 
-export const templatesAtom = entangledAtom("templates", focusAtom(storeAtom, (o) => o.prop("templates")));
+export const templatesAtom = entangledAtom(
+  "templates",
+  focusAtom(storeAtom, (o) => o.prop("templates")),
+);
+
+export const experimentLayoutAtom = entangledAtom(
+  "experimentLayout",
+  focusAtom(storeAtom, (o) => o.prop("experimentLayout")),
+);

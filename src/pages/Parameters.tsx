@@ -1,6 +1,6 @@
 import styled from "@emotion/styled";
 import { useAtom } from "jotai";
-import { isDarkModeAtom, tokensAtom } from "../state/common";
+import { experimentLayoutAtom, isDarkModeAtom, tokensAtom } from "../state/common";
 import { bs } from "../style";
 import { withFormStyling, type FormProps } from "../style/form";
 import { hasResolvedTokenAtom } from "../state/inference";
@@ -25,15 +25,27 @@ const StyledForm = styled.form`
   }
 `;
 
+const Row = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: ${bs()};
+  & > header {
+    font-size: 1.25em;
+  }
+`;
+
 export default function Configure() {
   const [isDarkMode, setIsDarkMode] = useAtom(isDarkModeAtom);
+  const [experimentLayout, setExperimentLayout] = useAtom(experimentLayoutAtom);
   const [hasResolvedToken] = useAtom(hasResolvedTokenAtom);
   const [tokens, setTokens] = useAtom(tokensAtom);
   return (
     <>
       <StyledForm method="post">
         <h3>Visual</h3>
-        <div>
+        <Row>
+          <header>Theme</header>
           <Switch value={isDarkMode} onChange={setIsDarkMode}>
             {[
               { value: undefined, label: "System" },
@@ -41,7 +53,17 @@ export default function Configure() {
               { value: true, label: "Dark" },
             ]}
           </Switch>
-        </div>
+        </Row>
+        <Row>
+          <header>Layout</header>
+          <Switch value={experimentLayout} onChange={setExperimentLayout}>
+            {[
+              { value: "left", label: "Left" },
+              { value: "chat", label: "Chat", isDefault: true },
+              { value: "chat-reverse", label: "Chat (rev)" },
+            ]}
+          </Switch>
+        </Row>
         <h3>Inference</h3>
         <p>For each provider, paste the secret reference from 1Password, it will be securely fetched just-in-time.</p>
         <h5>Anthropic</h5>

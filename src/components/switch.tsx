@@ -20,19 +20,19 @@ const Container = styled.div`
   }
 `;
 
-export const Switch = ({
+export function Switch<T>({
   value,
   onChange,
   children,
 }: {
-  value: SwitchValue;
-  onChange: (value: SwitchValue) => void;
-  children: Array<{ value: SwitchValue; label: string }>;
-}) => {
+  value: T;
+  onChange: (value: T) => void;
+  children: Array<{ value: T; label: string; isDefault?: true }>;
+}) {
   return (
     <Container>
-      {children.map(({ value: v, label }) => (
-        <Button key={label} type="button" onClick={() => onChange(v)} disabled={v === value}>
+      {children.map(({ value: v, label, isDefault }) => (
+        <Button key={label} type="button" onClick={() => onChange(v)} disabled={value !== undefined ? v === value : isDefault}>
           {label}
         </Button>
       ))}

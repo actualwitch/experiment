@@ -129,6 +129,12 @@ export const Container = styled.div(
   `,
 );
 
+export const Sidebar = styled.aside`
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+`;
+
 export const Main = styled.main(css`
   overflow-x: scroll;
 `);

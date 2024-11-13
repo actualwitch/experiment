@@ -161,7 +161,7 @@ function asTreeNodes(
 
 const ViewContainer = styled.div<{ markdownMode?: true }>`
   & > p {
-    margin: ${bs(1 / 2)} 0;
+    margin-bottom: ${bs(1 / 2)};
     word-wrap: anywhere;
   }
   ${(p) =>
