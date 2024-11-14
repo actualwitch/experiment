@@ -16,27 +16,27 @@ export const toolsAtom = atom([makeRequestTool]);
 export type InferenceProvider = "anthropic" | "openai";
 export type OpenAiModel = "gpt-4o" | "gpt-4o-mini";
 
-export const resolvedTokensAtom = atom<Promise<{ anthropic?: string; openai?: string }>>(async (get) => {
+export const resolvedTokensAtom = atom<Promise<{ anthropic?: string; openai?: string }>>(async get => {
   const references = get(tokensAtom);
   let result: { anthropic?: string; openai?: string } = {};
   if (!references) return result;
   const [anthropic, openai] = await Promise.all(
-    [references.anthropic, references.openai].map(async (ref) => {
+    [references.anthropic, references.openai].map(async ref => {
       if (!ref) return null;
       const { spawn } = await maybeImport("child_process");
       if (!spawn) return null;
       const handle = spawn("op", ["read", ref]);
       return await new Promise<string | null>((ok, ko) => {
-        handle.stdout.on("data", (data) => {
+        handle.stdout.on("data", data => {
           const token = data.toString();
           ok(token.trim());
         });
 
-        handle.stderr.on("data", (data) => {
+        handle.stderr.on("data", data => {
           console.error(data.toString());
         });
 
-        handle.on("close", (code) => {
+        handle.on("close", code => {
           console.error(code);
           ok(null);
         });
@@ -50,7 +50,7 @@ export const resolvedTokensAtom = atom<Promise<{ anthropic?: string; openai?: st
 
 export const hasResolvedTokenAtom = entangledAtom(
   "has resolved tokens",
-  atom(async (get) => {
+  atom(async get => {
     const { anthropic, openai } = await get(resolvedTokensAtom);
     return {
       anthropic: !!anthropic,
@@ -58,6 +58,39 @@ export const hasResolvedTokenAtom = entangledAtom(
     };
   }),
 );
+
+const saveExperimentAtom = entangledAtom(
+  { name: "save-experiment" },
+  atom(null, async (get, set) => {
+    const experiment: Message[] = get(experimentAtom);
+    if (!experiment.length) return;
+    set(createExperiment, experiment);
+  }),
+);
+const markdownTest =
+  "## Header\n\nThis is a small showcase of common elements in markdown for testing purposes. Here's a `span`, and *italics*  and **bold** text. Here's a [link](https://www.kaggle.com). Here's a list:\n\n- item 1\n- item 2\n- item 3\n\nHere's a numbered list:\n\n1. item 1\n2. item 2\n3. item 3\n\nHere's a table:\n\n| Header 1 | Header 2 |\n|----------|----------|\n| cell 1   | cell 2   |\n| cell 3   | cell 4   |\n\nHere's a code block:\n\n```typescript\nconst interactive = css`\n  cursor: pointer;\n  user-select: none;\n  :hover {\n    opacity: 1;\n  }\n`;\n\nconst Emphasis = styled.em<{ isCollapsed?: boolean }>(const Emphasis = styled.em<{ isCollapsed?: boolean }>(const Emphasis = styled.em<{ isCollapsed?: boolean }>(const Emphasis = styled.em<{ isCollapsed?: boolean }>(const Emphasis = styled.em<{ isCollapsed?: boolean }>(const Emphasis = styled.em<{ isCollapsed?: boolean }>(const Emphasis = styled.em<{ isCollapsed?: boolean }>(const Emphasis = styled.em<{ isCollapsed?: boolean }>(const Emphasis = styled.em<{ isCollapsed?: boolean }>(const Emphasis = styled.em<{ isCollapsed?: boolean }>(const Emphasis = styled.em<{ isCollapsed?: boolean }>(const Emphasis = styled.em<{ isCollapsed?: boolean }>(const Emphasis = styled.em<{ isCollapsed?: boolean }>(const Emphasis = styled.em<{ isCollapsed?: boolean }>(const Emphasis = styled.em<{ isCollapsed?: boolean }>(const Emphasis = styled.em<{ isCollapsed?: boolean }>(const Emphasis = styled.em<{ isCollapsed?: boolean }>(const Emphasis = styled.em<{ isCollapsed?: boolean }>(const Emphasis = styled.em<{ isCollapsed?: boolean }>(const Emphasis = styled.em<{ isCollapsed?: boolean }>(const Emphasis = styled.em<{ isCollapsed?: boolean }>(const Emphasis = styled.em<{ isCollapsed?: boolean }>(const Emphasis = styled.em<{ isCollapsed?: boolean }>(const Emphasis = styled.em<{ isCollapsed?: boolean }>(const Emphasis = styled.em<{ isCollapsed?: boolean }>(const Emphasis = styled.em<{ isCollapsed?: boolean }>(const Emphasis = styled.em<{ isCollapsed?: boolean }>(\n  css`\n    font-weight: italic;\n    opacity: 0.7;\n  `,\n  ({ isCollapsed }) => {\n    if (!isCollapsed) return;\n    return css`\n      :before {\n        content: \"( \";\n        opacity: 0.3;\n      }\n      :after {\n        content: \" )\";\n        opacity: 0.3;\n      }\n    `;\n  },\n  interactive,\n);\n\n```\n\nHere's an image:\n\n![image](https://www.kaggle.com/static/images/site-logo.png)\n\nHere's a blockquote:\n\n> This is a blockquote.\n\nHere's a horizontal rule:\n\n---\n\n";
+const testStreaming = atom(null, async (get, set) => {
+  const experiment = get(experimentAtom);
+
+  let index = 0;
+  const int = setInterval(() => {
+    if (index >= markdownTest.length) {
+      clearInterval(int);
+      set(saveExperimentAtom);
+      return;
+    }
+    const advanceBy = 1;
+    index += advanceBy;
+    set(experimentAtom, [
+      ...experiment,
+      {
+        role: "assistant",
+        fromServer: true,
+        content: markdownTest.slice(0, index),
+      },
+    ]);
+  }, 10);
+});
 
 const runExperimentAsAnthropic = atom(null, async (get, set) => {
   const resolvedTokens = await store.get(resolvedTokensAtom);
@@ -94,14 +127,15 @@ const runExperimentAsAnthropic = atom(null, async (get, set) => {
 
       set(experimentAtom, [...experiment, ...contentBlocks]);
     }
+    set(saveExperimentAtom);
   } else {
     const response = await anthropic.messages.create(experimentAsAnthropic);
     for (const contentBlock of response.content) {
       if (contentBlock.type === "text") {
-        set(experimentAtom, (prev) => [...prev, { role: "assistant", fromServer: true, content: contentBlock.text }]);
+        set(experimentAtom, prev => [...prev, { role: "assistant", fromServer: true, content: contentBlock.text }]);
       }
       if (contentBlock.type === "tool_use") {
-        set(experimentAtom, (prev) => [...prev, { role: "tool", fromServer: true, content: contentBlock }]);
+        set(experimentAtom, prev => [...prev, { role: "tool", fromServer: true, content: contentBlock }]);
       }
     }
   }
@@ -138,41 +172,8 @@ const runExperimentAsOpenAi = atom(null, async (get, set) => {
       contentChunks[choice.index].content += choice.delta.content ?? "";
       set(experimentAtom, [...experiment, ...contentChunks]);
     }
+    set(saveExperimentAtom);
   }
-});
-
-const saveExperimentAtom = entangledAtom(
-  { name: "save-experiment" },
-  atom(null, async (get, set) => {
-    const experiment: Message[] = get(experimentAtom);
-    if (!experiment.length) return;
-    set(createExperiment, experiment);
-  }),
-);
-("");
-const markdownTest =
-  "## Header\n\nThis is a small showcase of common elements in markdown for testing purposes. Here's a `span`, and *italics*  and **bold** text. Here's a [link](https://www.kaggle.com). Here's a list:\n\n- item 1\n- item 2\n- item 3\n\nHere's a numbered list:\n\n1. item 1\n2. item 2\n3. item 3\n\nHere's a table:\n\n| Header 1 | Header 2 |\n|----------|----------|\n| cell 1   | cell 2   |\n| cell 3   | cell 4   |\n\nHere's a code block:\n\n```typescript\nconst interactive = css`\n  cursor: pointer;\n  user-select: none;\n  :hover {\n    opacity: 1;\n  }\n`;\n\nconst Emphasis = styled.em<{ isCollapsed?: boolean }>(const Emphasis = styled.em<{ isCollapsed?: boolean }>(const Emphasis = styled.em<{ isCollapsed?: boolean }>(const Emphasis = styled.em<{ isCollapsed?: boolean }>(const Emphasis = styled.em<{ isCollapsed?: boolean }>(const Emphasis = styled.em<{ isCollapsed?: boolean }>(const Emphasis = styled.em<{ isCollapsed?: boolean }>(const Emphasis = styled.em<{ isCollapsed?: boolean }>(const Emphasis = styled.em<{ isCollapsed?: boolean }>(const Emphasis = styled.em<{ isCollapsed?: boolean }>(const Emphasis = styled.em<{ isCollapsed?: boolean }>(const Emphasis = styled.em<{ isCollapsed?: boolean }>(const Emphasis = styled.em<{ isCollapsed?: boolean }>(const Emphasis = styled.em<{ isCollapsed?: boolean }>(const Emphasis = styled.em<{ isCollapsed?: boolean }>(const Emphasis = styled.em<{ isCollapsed?: boolean }>(const Emphasis = styled.em<{ isCollapsed?: boolean }>(const Emphasis = styled.em<{ isCollapsed?: boolean }>(const Emphasis = styled.em<{ isCollapsed?: boolean }>(const Emphasis = styled.em<{ isCollapsed?: boolean }>(const Emphasis = styled.em<{ isCollapsed?: boolean }>(const Emphasis = styled.em<{ isCollapsed?: boolean }>(const Emphasis = styled.em<{ isCollapsed?: boolean }>(const Emphasis = styled.em<{ isCollapsed?: boolean }>(const Emphasis = styled.em<{ isCollapsed?: boolean }>(const Emphasis = styled.em<{ isCollapsed?: boolean }>(const Emphasis = styled.em<{ isCollapsed?: boolean }>(\n  css`\n    font-weight: italic;\n    opacity: 0.7;\n  `,\n  ({ isCollapsed }) => {\n    if (!isCollapsed) return;\n    return css`\n      :before {\n        content: \"( \";\n        opacity: 0.3;\n      }\n      :after {\n        content: \" )\";\n        opacity: 0.3;\n      }\n    `;\n  },\n  interactive,\n);\n\n```\n\nHere's an image:\n\n![image](https://www.kaggle.com/static/images/site-logo.png)\n\nHere's a blockquote:\n\n> This is a blockquote.\n\nHere's a horizontal rule:\n\n---\n\n";
-const testStreaming = atom(null, async (get, set) => {
-  const experiment = get(experimentAtom);
-
-  let index = 0;
-  const int = setInterval(() => {
-    if (index >= markdownTest.length) {
-      clearInterval(int);
-      set(saveExperimentAtom);
-      return;
-    }
-    const advanceBy = 1;
-    index += advanceBy;
-    set(experimentAtom, [
-      ...experiment,
-      {
-        role: "assistant",
-        fromServer: true,
-        content: markdownTest.slice(0, index),
-      },
-    ]);
-  }, 10);
 });
 
 export default {

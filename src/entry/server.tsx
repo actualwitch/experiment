@@ -4,7 +4,6 @@ import { createFetch } from "../utils/handler";
 import { doPOST, doSSE, doStatic, doStreamingSSR } from "./_handlers";
 
 const url = "http://localhost:3000";
-console.log("Listening on " + url);
 await $`open "${url}"`.quiet();
 
 export default {

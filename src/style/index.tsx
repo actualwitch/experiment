@@ -25,7 +25,7 @@ const shevyStyle = css({
   h4,
   h5,
   h6,
-  ["p, ol, ul, pre"]: content,
+  "p, ol, ul, pre": content,
 });
 
 const internalDarkModeButton = css`

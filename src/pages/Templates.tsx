@@ -19,7 +19,7 @@ export default function Templates() {
       </View>
       <Sidebar>
         <h2>Actions</h2>
-        {selectedTemplate && (
+        {templates && selectedTemplate && (
           <button
             type="button"
             onClick={() => {
