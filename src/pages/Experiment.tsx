@@ -4,9 +4,9 @@ import { useNavigate, useParams } from "react-router-dom";
 import { ChatPreview } from "../components/chat";
 import { ExperimentsSidebar } from "../sidebars/experiments";
 import { experimentAtom, getExperimentAtom, type ExperimentCursor, type Message } from "../state/common";
-import { entangledAtom } from "../state/entanglement";
+import { entangledAtom } from "../utils/entanglement";
 import { store } from "../state/store";
-import { getRealm } from "../utils";
+import { getRealm } from "../utils/realm";
 
 const cursorAtom = entangledAtom({ name: "cursor" }, atom<ExperimentCursor | null>(null));
 

@@ -2,7 +2,8 @@ import { atom } from "jotai";
 import { atomEffect } from "jotai-effect";
 import { log } from "../utils/logger";
 import { publish } from "./æther";
-
+import { divergentAtom } from "../utils/entanglement";
+import { getRealm } from "../utils/realm";
 
 export const isFocusedAtom = atom(false);
 export const trackVisibleAtom = atomEffect((get, set) => {
@@ -16,16 +17,26 @@ export const trackVisibleAtom = atomEffect((get, set) => {
     document.removeEventListener("visibilitychange", listener);
   };
 });
-export const subscriptionAtom = atomEffect((get, set) => {
-  const isVisible = get(isFocusedAtom);
-  if (!isVisible) {
-    return;
-  }
-  const source = new EventSource("/");
-  source.addEventListener("message", (event) => {
-    publish(JSON.parse(event.data));
-  });
-  return () => {
-    source.close();
-  };
-});
+export const subscriptionAtom = divergentAtom(
+  () => {
+    if (!["client", "spa"].includes(getRealm())) {
+      return undefined;
+    }
+    return atomEffect((get, set) => {
+      const isVisible = get(isFocusedAtom);
+      if (!isVisible) {
+        return;
+      }
+      const source = new EventSource("/");
+      source.addEventListener("message", event => {
+        publish(JSON.parse(event.data));
+      });
+      return () => {
+        source.close();
+      };
+    });
+  },
+  () => {
+    return atom();
+  },
+);

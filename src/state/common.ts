@@ -2,8 +2,9 @@ import { atom } from "jotai";
 import { focusAtom } from "jotai-optics";
 import { atomWithStorage, createJSONStorage } from "jotai/utils";
 
-import { createFileStorage, getRealm } from "../utils";
-import { divergentAtom, entangledAtom } from "./entanglement";
+import { createFileStorage } from "../utils";
+import { divergentAtom, entangledAtom } from "../utils/entanglement";
+import { getRealm } from "../utils/realm";
 
 type _Message =
   | { role: "system"; content: string }

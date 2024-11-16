@@ -1,7 +1,8 @@
 .DS_Store
-build
-*.bun-build
 node_modules
+build
+spa
+*.bun-build
 
 # playwright
 playwright-report

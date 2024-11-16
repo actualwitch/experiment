@@ -7,7 +7,6 @@ const url = "http://localhost:3000";
 
 if (process.env.OPEN_ON_START) {
   await $`open "${url}"`.quiet();
-  console.log(process.env)
 }
 
 export default {

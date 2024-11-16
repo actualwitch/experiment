@@ -6,7 +6,7 @@ on:
     branches: [ main ]
 jobs:
   test:
-    timeout-minutes: 60
+    timeout-minutes: 2
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
@@ -23,5 +23,5 @@ jobs:
         name: playwright-report
         path: |
           playwright-report/
-          screenshots/
+          playwright-screenshots/
         retention-days: 30

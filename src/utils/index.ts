@@ -1,8 +1,6 @@
-import { atom, useAtomValue, useSetAtom, type WritableAtom } from "jotai";
-import { type ReactNode, useRef, useEffect } from "react";
-import { createPortal } from "react-dom";
-import { type SyncStringStorage } from "jotai/vanilla/utils/atomWithStorage";
+import type { SyncStringStorage } from "jotai/vanilla/utils/atomWithStorage";
 import { readFileSync, writeFileSync } from "node:fs";
+import { getRealm } from "./realm";
 
 const readFile = (fileName: string) => {
   try {
@@ -55,26 +53,6 @@ export function createFileStorage(...keys: string[]): SyncStringStorage {
   };
   return FileStorage;
 }
-
-export const getRealm = () => {
-  if (typeof document !== "undefined") {
-    if (window?.[Symbol.for("REALM")] === "TESTING") {
-      return "testing";
-    }
-    if (window?.[Symbol.for("REALM")] === "SPA") {
-      return "spa";
-    }
-    return "client";
-  }
-  if (typeof process === "object") {
-    return "server";
-  }
-  // @ts-ignore
-  if (typeof importScripts === "function") {
-    return "worker";
-  }
-  throw new Error("Unknown realm");
-};
 
 export function deepEqual(a: any, b: any): boolean {
   if (a === b) return true;

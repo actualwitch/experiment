@@ -1,8 +1,8 @@
 import { atom, type Atom, type WritableAtom } from "jotai";
-import { getRealm } from "../utils";
-import { hydrationMap } from "../utils/hydration";
-import { store } from "./store";
-import { publish, subscribe } from "./æther";
+import { hydrationMap } from "./hydration";
+import { store } from "../state/store";
+import { publish, subscribe } from "../state/æther";
+import { getRealm } from "./realm";
 
 type Config = {
   name: string;

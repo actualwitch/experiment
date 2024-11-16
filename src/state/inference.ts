@@ -5,7 +5,7 @@ import { experimentToAnthropic } from "../adapters/anthropic";
 import { experimentToOpenai } from "../adapters/openai";
 import { maybeImport } from "../utils";
 import { createExperiment, experimentAtom, tokensAtom, type ExperimentCursor, type Message } from "./common";
-import { entangledAtom } from "./entanglement";
+import { entangledAtom } from "../utils/entanglement";
 import makeRequestTool from "./makeRequestTool.json";
 import { store } from "./store";
 
