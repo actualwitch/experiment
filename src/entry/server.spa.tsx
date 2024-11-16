@@ -5,20 +5,28 @@ import type { Message } from "../state/common";
 
 const markdownTest = `
 ## Header
+
 This is a small showcase of common elements in markdown for testing purposes. Here's a \`span\`, and *italics*  and **bold** text. Here's a [link](https://www.kaggle.com). Here's a list:
+
 - item 1
 - item 2
 - item 3
+
 Here's a numbered list:
+
 1. item 1
 2. item 2
 3. item 3
+
 Here's a table:
+
 | Header 1 | Header 2 |
 |----------|----------|
 | cell 1   | cell 2   |
 | cell 3   | cell 4   |
+
 Here's a code block:
+
 \`\`\`typescript
 const interactive = css\`
   cursor: pointer;
@@ -48,11 +56,17 @@ const Emphasis = styled.em<{ isCollapsed?: boolean }>(
   interactive,
 );
 \`\`\`
+
 Here's an image:
+
 ![image](https://www.kaggle.com/static/images/site-logo.png)
+
 Here's a blockquote:
+
 > This is a blockquote.
+
 Here's a horizontal rule:
+
 ---
 `;
 
@@ -66,6 +80,10 @@ const FIXTURES = {
   sample: { isDarkMode: true, experimentLayout: "left", experiments: {"0": {"0": sampleChat}}, experiment: sampleChat },
 } as const;
 
+function isFixture(value: unknown): value is keyof typeof FIXTURES {
+  return value ? typeof value === "string" && Object.keys(FIXTURES).includes(value) : false;
+}
+
 export default {
   fetch: async req => {
     const url = new URL(req.url);
@@ -77,7 +95,7 @@ export default {
     }
     let html = await Bun.file("./spa/index.html").text();
     const fixture = url.searchParams.get("fixture");
-    if (fixture && Object.keys(FIXTURES).includes(fixture)) {
+    if (isFixture(fixture)) {
       html = html.replace(
         "<body>",
         () =>
