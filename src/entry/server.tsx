@@ -4,7 +4,11 @@ import { createFetch } from "../utils/handler";
 import { doPOST, doSSE, doStatic, doStreamingSSR } from "./_handlers";
 
 const url = "http://localhost:3000";
-await $`open "${url}"`.quiet();
+
+if (process.env.OPEN_ON_START) {
+  await $`open "${url}"`.quiet();
+  console.log(process.env)
+}
 
 export default {
   development: DEBUG,

@@ -2,3 +2,9 @@
 build
 *.bun-build
 node_modules
+
+# playwright
+playwright-report
+playwright-screenshots
+playwright-traces
+test-results

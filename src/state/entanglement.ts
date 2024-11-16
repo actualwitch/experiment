@@ -30,6 +30,22 @@ export function entangledAtom<
   const id = typeof c === "string" ? c : c.name;
   return divergentAtom(
     () => {
+      if (getRealm() !== "testing") {
+        return undefined;
+      }
+      const cacheValue = hydrationMap[id] as unknown as V;
+      if (cacheValue !== undefined) {
+        return atom(cacheValue);
+      }
+      return thisAtom;
+    },
+    () => {
+      if (getRealm() !== "spa") {
+        return undefined;
+      }
+      return thisAtom;
+    },
+    () => {
       if (getRealm() !== "server") {
         return undefined;
       }

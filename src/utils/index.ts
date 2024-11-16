@@ -58,6 +58,12 @@ export function createFileStorage(...keys: string[]): SyncStringStorage {
 
 export const getRealm = () => {
   if (typeof document !== "undefined") {
+    if (window?.[Symbol.for("REALM")] === "TESTING") {
+      return "testing";
+    }
+    if (window?.[Symbol.for("REALM")] === "SPA") {
+      return "spa";
+    }
     return "client";
   }
   if (typeof process === "object") {

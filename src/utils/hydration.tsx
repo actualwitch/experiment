@@ -7,7 +7,13 @@ type HydrationMap = Record<string, unknown>;
 const id = "hydration";
 export const HYDRATION: unique symbol = Symbol.for(id);
 export const hydrationMap: HydrationMap =
-  (getRealm() === "client" && (window as typeof window & { [HYDRATION]?: HydrationMap })[HYDRATION]) || {};
+  (["client", "spa", "testing"].includes(getRealm()) &&
+    (window as typeof window & { [HYDRATION]?: HydrationMap })[HYDRATION]) ||
+  {};
+
+export const createHydrationScript = (map: HydrationMap) => {
+  return `window[Symbol.for("${id}")] = JSON.parse(${htmlEscape(JSON.stringify(JSON.stringify(map)))});`;
+};
 
 export const Hydration = () => {
   const [hasLoaded, setHasLoaded] = useState(false);
@@ -21,9 +27,7 @@ export const Hydration = () => {
     <script
       suppressHydrationWarning
       dangerouslySetInnerHTML={{
-        __html: `window[Symbol.for("${id}")] = JSON.parse(${htmlEscape(
-          JSON.stringify(JSON.stringify(hydrationMap)),
-        )});`,
+        __html: createHydrationScript(hydrationMap),
       }}
     />
   );

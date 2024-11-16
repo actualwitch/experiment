@@ -18,7 +18,7 @@ export type OpenAiModel = "gpt-4o" | "gpt-4o-mini";
 
 export const resolvedTokensAtom = atom<Promise<{ anthropic?: string; openai?: string }>>(async get => {
   const references = get(tokensAtom);
-  let result: { anthropic?: string; openai?: string } = {};
+  const result: { anthropic?: string; openai?: string } = {};
   if (!references) return result;
   const [anthropic, openai] = await Promise.all(
     [references.anthropic, references.openai].map(async ref => {
@@ -27,17 +27,15 @@ export const resolvedTokensAtom = atom<Promise<{ anthropic?: string; openai?: st
       if (!spawn) return null;
       const handle = spawn("op", ["read", ref]);
       return await new Promise<string | null>((ok, ko) => {
-        handle.stdout.on("data", data => {
-          const token = data.toString();
-          ok(token.trim());
+        handle.stdout.on("data", (data: unknown) => {
+          ok(String(data).trim());
         });
 
-        handle.stderr.on("data", data => {
-          console.error(data.toString());
+        handle.stderr.on("data", (data: unknown) => {
+          console.error(String(data));
         });
 
-        handle.on("close", code => {
-          console.error(code);
+        handle.on("close", () => {
           ok(null);
         });
       });

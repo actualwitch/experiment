@@ -1,10 +1,10 @@
-export const getClientAsString = async () => {
+export const getClientAsString = async (entry = "src/entry/client.tsx") => {
   const {
     outputs: [js],
     success,
     logs,
   } = await Bun.build({
-    entrypoints: ["src/entry/client.tsx"],
+    entrypoints: [entry],
   });
   if (!success) {
     throw new Error(logs.join("\n"));

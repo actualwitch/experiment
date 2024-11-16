@@ -1,7 +1,7 @@
 import { css } from "@emotion/react";
 import styled from "@emotion/styled";
 import { atom, useAtom } from "jotai";
-import type { HTMLProps } from "react";
+import { Component, type HTMLProps } from "react";
 import Shevy from "shevyjs";
 import { isDarkModeAtom } from "../state/common";
 import { withDarkMode } from "./darkMode";
@@ -53,6 +53,15 @@ const InternalButton = styled.button<{ isDarkMode: boolean | undefined }>`
   ${(p) => withDarkMode(p.isDarkMode, internalDarkModeButton)}
 `;
 
+// function injectAtoms<T extends Record<string, unknown>, P extends {}>(atoms: T) {
+//   const newProps = {} as Record<string, unknown>;
+//   for (const key in atoms) {
+//     const [value] = useAtom(atoms[key] as any);
+//     newProps[key] = value;
+//   }
+//   return (Component: React.ComponentType<P>) => ((props: T & P) => <Component {...props} {...newProps} />);
+// }
+
 export const Button = ({ children, ...props }: HTMLProps<HTMLButtonElement>) => {
   const [isDarkMode] = useAtom(isDarkModeAtom);
   return (
@@ -61,6 +70,8 @@ export const Button = ({ children, ...props }: HTMLProps<HTMLButtonElement>) => 
     </InternalButton>
   );
 };
+
+// export const Button = injectAtoms({ isDarkMode: isDarkModeAtom })(InternalButton);
 
 const button = css`
   button:not(:disabled) {
@@ -147,6 +158,7 @@ export const darkMode = css`
   :root {
     background-color: ${Palette.black};
     color: ${Palette.white};
+    hyphens: auto;
     th {
       border-bottom: 1px solid ${Palette.white};
     }

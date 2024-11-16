@@ -27,6 +27,7 @@ const StyledForm = styled.form`
 
 const Row = styled.div`
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
   margin-bottom: ${bs()};

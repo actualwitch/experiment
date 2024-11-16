@@ -11,16 +11,22 @@
   "type": "module",
   "scripts": {
     "build": "bun scripts/build.ts",
-    "dev": "bun i && DEBUG=true bun --watch run src/entry/server.tsx",
+    "build:spa": "bun build ./src/entry/client.spa.tsx --outdir ./spa",
+    "dev": "bun i && DEBUG=true OPEN_ON_START=true bun --watch run src/entry/server.tsx",
+    "dev:spa": "bun --watch run src/entry/server.spa.tsx",
     "format": "bunx biome format --write ./src/*",
-    "format:prettier": "prettier ./src/* --write"
+    "format:prettier": "prettier ./src/* --write",
+    "test": "bunx playwright test",
+    "playwright:update": "bunx playwright install"
   },
   "devDependencies": {
     "@biomejs/biome": "latest",
+    "@playwright/test": "latest",
     "@types/bun": "latest",
     "@types/react": "latest",
     "@types/react-dom": "latest",
     "ink": "latest",
+    "playwright": "latest",
     "prettier": "latest"
   },
   "peerDependencies": {
