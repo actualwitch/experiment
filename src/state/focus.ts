@@ -28,7 +28,7 @@ export const subscriptionAtom = divergentAtom(
         return;
       }
       const source = new EventSource("/");
-      source.addEventListener("message", event => {
+      source.addEventListener("message", (event) => {
         publish(JSON.parse(event.data));
       });
       return () => {

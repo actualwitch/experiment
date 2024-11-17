@@ -92,13 +92,13 @@ export const MessageComponent = styled.article<{
         ${align}: 0;
         transform-origin: ${align};
         ${
-          align === "right"
-            ? css`
-                transform: rotate(-90deg) translate(0, -20px);
-              `
-            : css`
-                transform: rotate(270deg) translate(-100%, 16px);
-              `
+          align === "right" ?
+            css`
+              transform: rotate(-90deg) translate(0, -20px);
+            `
+          : css`
+              transform: rotate(270deg) translate(-100%, 16px);
+            `
         }
       }
 
@@ -232,8 +232,9 @@ export const ChatMessage = ({ message: _message, index }: { message: Message; in
           width: "initial",
         }}
       >
-        {{name: message.template}}
-      </View>);
+        {{ name: message.template }}
+      </View>
+    );
   } else if (!message.content) {
     innerContent ??= (
       <div>

@@ -3,12 +3,10 @@ import { useAtom } from "jotai";
 import { useEffect, useRef, useState } from "react";
 import { ChatPreview, selectionAtom } from "../components/chat";
 import { ExperimentsSidebar } from "../sidebars/experiments";
-import { experimentAtom, isDarkModeAtom, templatesAtom, type Role } from "../state/common";
-import inference from "../state/inference";
-import { bs, Button, Sidebar } from "../style";
+import { type Role, experimentAtom, isDarkModeAtom, templatesAtom } from "../state/common";
+import { runExperimentAsAnthropic, runExperimentAsOpenAi, testStreaming } from "../state/inference";
+import { Button, Sidebar, bs } from "../style";
 import { useHandlers } from "../utils/keyboard";
-
-const { runExperimentAsAnthropic, runExperimentAsOpenAi, testStreaming } = inference;
 
 type Provider = "anthropic" | "openai" | "test";
 
@@ -184,7 +182,7 @@ export default function NewExperiment() {
         <select value={provider} onChange={(e) => setProvider(e.target.value as any)}>
           <option>anthropic</option>
           <option>openai</option>
-          {/* <option>test</option> */}
+          <option>test</option>
         </select>
         <Button
           type="submit"

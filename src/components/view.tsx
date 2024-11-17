@@ -72,7 +72,7 @@ function asTreeNodes(
     return prefix ?
         <Emphasis
           isCollapsed
-          onClick={e => {
+          onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
             onTitleClick?.(prefix, undefined, path);
@@ -108,7 +108,7 @@ function asTreeNodes(
         onClick,
         onTitleClick,
         shouldBeCollapsed,
-        path: [...path, ...newTitle.map(key => key.toString())],
+        path: [...path, ...newTitle.map((key) => key.toString())],
       });
     }
     const entries = Object.entries(input);
@@ -124,7 +124,7 @@ function asTreeNodes(
     inner = entries.map(([key, value]) => (
       <li
         key={key}
-        onClick={e => {
+        onClick={(e) => {
           e.preventDefault();
           e.stopPropagation();
           onClick?.(value, key, path);
@@ -147,7 +147,7 @@ function asTreeNodes(
       {prefix && (
         <Emphasis
           isCollapsed={false}
-          onClick={e => {
+          onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
             onTitleClick?.(prefix, undefined, path);
@@ -163,18 +163,18 @@ function asTreeNodes(
 }
 
 const ViewContainer = styled.div<{ markdownMode?: true }>`
-  & > p {
-    margin-bottom: ${bs(1 / 2)};
+  & > * {
+    margin-bottom: ${bs(1 / 3)};
     word-wrap: anywhere;
   }
-  ${p =>
+  ${(p) =>
     !p.markdownMode &&
     css`
       ul,
       ol {
         list-style-type: none;
       }
-      ${["ul", "ol"].map(tag => `:not(li) > ${tag}`).join(", ")} {
+      ${["ul", "ol"].map((tag) => `:not(li) > ${tag}`).join(", ")} {
         padding-left: 0;
       }
     `}

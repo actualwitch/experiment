@@ -11,7 +11,7 @@
   "type": "module",
   "scripts": {
     "build": "bun scripts/build.ts",
-    "build:spa": "bun build ./src/entry/client.spa.tsx --outdir ./spa",
+    "build:spa": "bun scripts/build.spa.ts",
     "dev": "bun i && DEBUG=true OPEN_ON_START=true bun --watch run src/entry/server.tsx",
     "dev:spa": "REALM=spa bun --watch run src/entry/server.spa.tsx",
     "format": "bunx biome format --write ./src/*",

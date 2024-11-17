@@ -20,7 +20,7 @@ export const Sidebar = () => {
   return (
     <>
       <CsvInput />
-      {chats.length > 0 ? (
+      {chats.length > 0 ?
         <View
           onClick={(value, key, path) => {
             const [parent] = path;
@@ -29,9 +29,7 @@ export const Sidebar = () => {
         >
           {entries}
         </View>
-      ) : (
-        <p>Import csv</p>
-      )}
+      : <p>Import csv</p>}
     </>
   );
 };

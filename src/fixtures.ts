@@ -1,6 +1,6 @@
 import type { Message } from "./state/common";
 
-const markdownTest = `
+export const markdownTest = `
 ## Header
 
 This is a small showcase of common elements in markdown for testing purposes. Here's a \`span\`, and *italics*  and **bold** text. Here's a [link](https://www.kaggle.com). Here's a list:

@@ -29,7 +29,7 @@ jobs:
       - name: Setup Pages
         id: pages
         uses: actions/configure-pages@v5
-      - run: bun run build:spa
+      - run: BASE_URL="/experiment" bun run build:spa
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:

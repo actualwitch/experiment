@@ -34,7 +34,7 @@ export default function Templates() {
       <SidebarInput>
         <ul>
           {templates &&
-            Object.keys(templates).map(name => (
+            Object.keys(templates).map((name) => (
               <li key={name}>
                 <a onClick={() => void setSelectedTemplate(name)}>{name}</a>
               </li>

@@ -1,5 +1,3 @@
-
-
 export const getRealm = () => {
   if (typeof document !== "undefined") {
     if (window?.[Symbol.for("REALM")] === "TESTING") {

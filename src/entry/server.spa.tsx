@@ -3,18 +3,18 @@ import { FIXTURES, isFixture } from "../fixtures";
 import { assignToWindow, createHydrationScript } from "../utils/hydration";
 import { getClientAsString } from "./_macro" with { type: "macro" };
 
-function getHtml(base?: string) {
+export function getHtml(path: string) {
   return `<!DOCTYPE html>
 <html lang="en">
 <body>
-  <script type="module" src="${base ? base : ""}"></script>
+  <script type="module" src="${path}"></script>
 </body>`;
 }
 
 const clientFile = "/client.js";
 
 export default {
-  fetch: async req => {
+  fetch: async (req) => {
     const url = new URL(req.url);
     console.log(req.url, req.headers);
     if (url.pathname === clientFile) {
@@ -27,14 +27,11 @@ export default {
     if (isFixture(fixture)) {
       html = html.replace(
         "<body>",
-        () => `<body><script>${createHydrationScript(FIXTURES[fixture])}${assignToWindow("REALM", `"TESTING"`)}</script>`,
+        () =>
+          `<body><script>${createHydrationScript(FIXTURES[fixture])}${assignToWindow("REALM", `"TESTING"`)}</script>`,
       );
     } else {
-
-      html = html.replace(
-        "<body>",
-        () => `<body><script>${assignToWindow("REALM", `"TESTING"`)}</script>`,
-      );
+      html = html.replace("<body>", () => `<body><script>${assignToWindow("REALM", `"TESTING"`)}</script>`);
     }
     return new Response(html, {
       headers: { "Content-Type": "text/html" },
