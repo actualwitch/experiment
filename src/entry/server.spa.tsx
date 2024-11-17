@@ -3,10 +3,14 @@ import { FIXTURES, isFixture } from "../fixtures";
 import { assignToWindow, createHydrationScript } from "../utils/hydration";
 import { getClientAsString } from "./_macro" with { type: "macro" };
 
-export function getHtml(path: string) {
+export function getHtml(path: string, additionalScripts: string[] = []) {
   return `<!DOCTYPE html>
 <html lang="en">
 <body>
+  ${additionalScripts
+    .filter(Boolean)
+    .map((script) => `<script>${script}</script>`)
+    .join("\n")}
   <script type="module" src="${path}"></script>
 </body>`;
 }
@@ -22,17 +26,13 @@ export default {
         headers: { "Content-Type": "application/javascript" },
       });
     }
-    let html = getHtml(clientFile);
     const fixture = url.searchParams.get("fixture");
-    if (isFixture(fixture)) {
-      html = html.replace(
-        "<body>",
-        () =>
-          `<body><script>${createHydrationScript(FIXTURES[fixture])}${assignToWindow("REALM", `"TESTING"`)}</script>`,
-      );
-    } else {
-      html = html.replace("<body>", () => `<body><script>${assignToWindow("REALM", `"TESTING"`)}</script>`);
-    }
+    const html = getHtml(
+      clientFile,
+      isFixture(fixture) ?
+        [createHydrationScript(FIXTURES[fixture]), assignToWindow("REALM", `"TESTING"`)]
+      : [assignToWindow("REALM", `"SPA"`)],
+    );
     return new Response(html, {
       headers: { "Content-Type": "text/html" },
     });

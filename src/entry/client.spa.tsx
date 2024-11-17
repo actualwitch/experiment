@@ -5,7 +5,7 @@ import { Shell } from "../root";
 
 createRoot(document.documentElement).render(
   <StrictMode>
-    <BrowserRouter>
+    <BrowserRouter basename={window[Symbol.for("BASE_URL")]}>
       <Shell />
     </BrowserRouter>
   </StrictMode>,
