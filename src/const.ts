@@ -4,3 +4,4 @@ import { version } from "../package.json";
 export const DEBUG = getDebug();
 const hash = await getReleaseHash();
 export const VERSION = version + "-" + hash.slice(0, 8);
+export const clientFile = "/client.js";

@@ -30,6 +30,7 @@ jobs:
         id: pages
         uses: actions/configure-pages@v5
       - run: BASE_URL="/experiment" bun run build:spa
+      - run: cp ./spa/index.html ./spa/404.html
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:

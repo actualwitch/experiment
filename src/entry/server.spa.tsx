@@ -2,6 +2,10 @@ import type { Serve } from "bun";
 import { FIXTURES, isFixture } from "../fixtures";
 import { assignToWindow, createHydrationScript } from "../utils/hydration";
 import { getClientAsString } from "./_macro" with { type: "macro" };
+import { renderToString } from "react-dom/server";
+import { StaticRouter } from "react-router-dom/server";
+import { Shell } from "../root";
+import { clientFile } from "../const";
 
 export function getHtml(path: string, additionalScripts: string[] = []) {
   return `<!DOCTYPE html>
@@ -14,24 +18,35 @@ export function getHtml(path: string, additionalScripts: string[] = []) {
   <script type="module" src="${path}"></script>
 </body>`;
 }
-
-const clientFile = "/client.js";
+const schema = "http";
+const hostname = "localhost";
+const port = 5173;
+const url = `${schema}://${hostname}:${port}`;
 
 export default {
+  development: true,
+  hostname,
+  port,
   fetch: async (req) => {
     const url = new URL(req.url);
-    console.log(req.url, req.headers);
+    console.log(url.pathname, clientFile);
     if (url.pathname === clientFile) {
-      return new Response(await getClientAsString("src/entry/client.spa.tsx"), {
+      return new Response(await getClientAsString(), {
         headers: { "Content-Type": "application/javascript" },
       });
     }
     const fixture = url.searchParams.get("fixture");
-    const html = getHtml(
-      clientFile,
-      isFixture(fixture) ?
-        [createHydrationScript(FIXTURES[fixture]), assignToWindow("REALM", `"TESTING"`)]
-      : [assignToWindow("REALM", `"SPA"`)],
+    const html = renderToString(
+      <StaticRouter location={url.pathname}>
+        <Shell
+          bootstrap
+          additionalScripts={
+            isFixture(fixture) ?
+              [createHydrationScript(FIXTURES[fixture]), assignToWindow("REALM", `"TESTING"`)]
+            : [assignToWindow("REALM", `"SPA"`)]
+          }
+        />
+      </StaticRouter>,
     );
     return new Response(html, {
       headers: { "Content-Type": "text/html" },

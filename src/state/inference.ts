@@ -74,6 +74,7 @@ export const testStreaming = entangledAtom(
 
     let index = 0;
     const int = setInterval(() => {
+      console.log("looping", index);
       if (index >= markdownTest.length) {
         clearInterval(int);
         set(saveExperimentAtom);

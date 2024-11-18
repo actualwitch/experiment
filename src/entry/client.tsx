@@ -7,7 +7,7 @@ startTransition(() => {
   hydrateRoot(
     document,
     <StrictMode>
-      <BrowserRouter>
+      <BrowserRouter basename={window[Symbol.for("BASE_URL")]}>
         <Shell />
       </BrowserRouter>
     </StrictMode>,

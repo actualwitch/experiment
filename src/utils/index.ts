@@ -30,10 +30,14 @@ export function createFileStorage(...keys: string[]): SyncStringStorage {
     timeouts.set(
       key,
       setTimeout(() => {
-        writeFileSync(filenameForKey(key), store.get(key)!, {
-          encoding: "utf-8",
-          flag: "w",
-        });
+        try {
+          writeFileSync(filenameForKey(key), store.get(key)!, {
+            encoding: "utf-8",
+            flag: "w",
+          });
+        } catch (e) {
+          console.error(e);
+        }
       }, 400),
     );
   };

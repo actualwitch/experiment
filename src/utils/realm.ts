@@ -19,3 +19,4 @@ export const getRealm = () => {
 };
 
 export const isClient = () => ["client", "spa", "testing"].includes(getRealm());
+export const hasBackend = () => getRealm() === "client";
