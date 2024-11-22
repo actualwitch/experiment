@@ -4,7 +4,7 @@ import { atomWithStorage, createJSONStorage } from "jotai/utils";
 
 import { createFileStorage } from "../utils";
 import { divergentAtom, entangledAtom } from "../utils/entanglement";
-import { getRealm } from "../utils/realm";
+import { getRealm, isClient } from "../utils/realm";
 
 type _Message =
   | { role: "system"; content: string }
@@ -48,7 +48,16 @@ export const storeAtom = divergentAtom(() => {
       },
     );
   }
-
+  if (isClient()) {
+    return atomWithStorage<Store>(
+      "store",
+      getInitialStore(),
+      createJSONStorage(() => localStorage),
+      {
+        getOnInit: true,
+      },
+    );
+  }
   return atom<Store>(getInitialStore());
 });
 

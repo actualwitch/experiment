@@ -11,6 +11,7 @@ import { Hydration } from "./utils/hydration";
 import { FavIcon } from "./components/FavIcon";
 import { getRealm } from "./utils/realm";
 import { clientFile } from "./const";
+import { titleAtom, descriptionAtom, iconAtom } from "./state/meta";
 
 const Context = ({ children }: PropsWithChildren) => {
   return <Provider store={store}>{children}</Provider>;
@@ -42,10 +43,6 @@ const App = () => {
   );
 };
 
-const titleAtom = atom(title);
-const descriptionAtom = atom(description);
-const iconAtom = atom("🔬");
-
 const Meta = () => {
   const [title] = useAtom(titleAtom);
   const [description] = useAtom(descriptionAtom);
@@ -59,7 +56,15 @@ const Meta = () => {
   );
 };
 
-export const Shell = ({ bootstrap, additionalScripts, baseUrl }: { bootstrap?: true; additionalScripts?: string[]; baseUrl?: string }) => {
+export const Shell = ({
+  bootstrap,
+  additionalScripts,
+  baseUrl,
+}: {
+  bootstrap?: true;
+  additionalScripts?: string[];
+  baseUrl?: string;
+}) => {
   return (
     <html lang="en">
       <head>

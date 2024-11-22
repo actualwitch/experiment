@@ -90,7 +90,7 @@ const button = css`
       box-shadow 0.1s ease-out,
       transform 0.1s cubic-bezier(0.18, 0.89, 0.32, 1.28);
     border: 1px solid transparent;
-    color: black;
+    color: ${Palette.black};
     border-radius: 6px;
     cursor: pointer;
     transform: translate(0px, 0px);
@@ -123,6 +123,12 @@ const buttonDarkMode = css`
 const input = css`
   input:not([type="file"]) {
     background-color: ${Palette.inputBackground};
+  }
+`;
+
+const inputDarkMode = css`
+  input {
+    color: ${Palette.black};
   }
 `;
 
@@ -165,6 +171,7 @@ export const darkMode = css`
     pre {
       background-color: ${Palette.white}30;
     }
+    ${inputDarkMode}
   }
   ${buttonDarkMode}
 `;

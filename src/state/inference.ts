@@ -1,51 +1,66 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { atom } from "jotai";
 import OpenAI from "openai";
+import { Literal, Union } from "runtypes";
 import { experimentToAnthropic } from "../adapters/anthropic";
 import { experimentToOpenai } from "../adapters/openai";
 import { markdownTest } from "../fixtures";
 import { maybeImport } from "../utils";
-import { entangledAtom } from "../utils/entanglement";
-import { type Message, createExperiment, experimentAtom, tokensAtom } from "./common";
+import { divergentAtom, entangledAtom } from "../utils/entanglement";
+import { type Message, type Store, createExperiment, experimentAtom, tokensAtom } from "./common";
 import makeRequestTool from "./makeRequestTool.json";
 import { store } from "./store";
+import { getRealm } from "../utils/realm";
 
 export { makeRequestTool };
 
 export const toolsAtom = atom([makeRequestTool]);
 
-export type InferenceProvider = "anthropic" | "openai";
-export type OpenAiModel = "gpt-4o" | "gpt-4o-mini";
+export const OpenAIModel = Union(Literal("gpt-4o"), Literal("gpt-4o-mini"), Literal("o1-preview"), Literal("o1-mini"));
+export const AnthropicModel = Union(Literal("claude-3-5-sonnet-latest"), Literal("claude-3-5-haiku-latest"));
+export const MistralModel = Union(
+  Literal("mistral-large-latest"),
+  Literal("mistral-medium-latest"),
+  Literal("mistral-small-latest"),
+);
 
-export const resolvedTokensAtom = atom<Promise<{ anthropic?: string; openai?: string }>>(async (get) => {
-  const references = get(tokensAtom);
-  const result: { anthropic?: string; openai?: string } = {};
-  if (!references) return result;
-  const [anthropic, openai] = await Promise.all(
-    [references.anthropic, references.openai].map(async (ref) => {
-      if (!ref) return null;
-      const { spawn } = await maybeImport("child_process");
-      if (!spawn) return null;
-      const handle = spawn("op", ["read", ref]);
-      return await new Promise<string | null>((ok, ko) => {
-        handle.stdout.on("data", (data: unknown) => {
-          ok(String(data).trim());
-        });
+export const resolvedTokensAtom = divergentAtom(
+  () => {
+    if (getRealm() !== "server" || getRealm() === "spa") {
+      return undefined;
+    }
+    return atom<Store["tokens"] | Promise<Store["tokens"]>>(async (get) => {
+      const references = get(tokensAtom);
+      const result: Store["tokens"] = {};
+      if (!references) return result;
+      const [anthropic, openai] = await Promise.all(
+        [references.anthropic, references.openai].map(async (ref) => {
+          if (!ref) return null;
+          const { spawn } = await maybeImport("child_process");
+          if (!spawn) return null;
+          const handle = spawn("op", ["read", ref]);
+          return await new Promise<string | null>((ok, ko) => {
+            handle.stdout.on("data", (data: unknown) => {
+              ok(String(data).trim());
+            });
 
-        handle.stderr.on("data", (data: unknown) => {
-          console.error(String(data));
-        });
+            handle.stderr.on("data", (data: unknown) => {
+              console.error(String(data));
+            });
 
-        handle.on("close", () => {
-          ok(null);
-        });
-      });
-    }),
-  );
-  if (anthropic) result.anthropic = anthropic;
-  if (openai) result.openai = openai;
-  return result;
-});
+            handle.on("close", () => {
+              ok(null);
+            });
+          });
+        }),
+      );
+      if (anthropic) result.anthropic = anthropic;
+      if (openai) result.openai = openai;
+      return result;
+    });
+  },
+  () => tokensAtom,
+);
 
 export const hasResolvedTokenAtom = entangledAtom(
   "has resolved tokens",
@@ -74,7 +89,6 @@ export const testStreaming = entangledAtom(
 
     let index = 0;
     const int = setInterval(() => {
-      console.log("looping", index);
       if (index >= markdownTest.length) {
         clearInterval(int);
         set(saveExperimentAtom);

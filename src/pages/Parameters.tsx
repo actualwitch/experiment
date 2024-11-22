@@ -5,6 +5,7 @@ import { bs } from "../style";
 import { withFormStyling, type FormProps } from "../style/form";
 import { hasResolvedTokenAtom } from "../state/inference";
 import { Switch } from "../components/switch";
+import { useState } from "react";
 
 const Input = styled.input<FormProps>(withFormStyling);
 
@@ -41,9 +42,12 @@ export default function Configure() {
   const [experimentLayout, setExperimentLayout] = useAtom(experimentLayoutAtom);
   const [hasResolvedToken] = useAtom(hasResolvedTokenAtom);
   const [tokens, setTokens] = useAtom(tokensAtom);
+  const [token, setToken] = useState("");
   return (
     <>
-      <StyledForm method="post">
+      <StyledForm onSubmit={(e) => {
+        e.preventDefault();
+      }}>
         <h3>Visual</h3>
         <Row>
           <header>Theme</header>
@@ -76,11 +80,31 @@ export default function Configure() {
             name="token"
             value={tokens.anthropic}
             onChange={(e) => {
+              e.preventDefault();
               let value = e.target.value;
               if (value.startsWith('"') && value.endsWith('"')) {
                 value = value.slice(1, -1);
               }
+              console.log(value);
               setTokens({ ...tokens, anthropic: value });
+            }}
+          />
+        </label>
+        <h5>Mistral</h5>
+        <label>
+          <span>{hasResolvedToken.anthropic ? "🔐" : "🔑"}</span>
+          <Input
+            _type={hasResolvedToken.anthropic ? "success" : undefined}
+            type="text"
+            name="token"
+            value={token}
+            onChange={(e) => {
+              e.preventDefault();
+              let value = e.target.value;
+              if (value.startsWith('"') && value.endsWith('"')) {
+                value = value.slice(1, -1);
+              }
+              setToken(value);
             }}
           />
         </label>

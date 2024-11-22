@@ -1,4 +1,5 @@
 import { defineConfig, devices } from '@playwright/test';
+import { url } from './src/const';
 
 export default defineConfig({
   // Look for test files in the "tests" directory, relative to this configuration file.
@@ -21,7 +22,7 @@ export default defineConfig({
 
   use: {
     // Base URL to use in actions like `await page.goto('/')`.
-    baseURL: 'http://127.0.0.1:3000',
+    baseURL: url,
 
     // Collect trace when retrying the failed test.
     trace: 'on-first-retry',
@@ -40,7 +41,7 @@ export default defineConfig({
   // Run your local dev server before starting the tests.
   webServer: {
     command: 'DEBUG=true bun --watch run src/entry/server.spa.tsx',
-    url: 'http://127.0.0.1:3000',
+    url,
     reuseExistingServer: !process.env.CI,
   },
 });

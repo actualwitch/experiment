@@ -1,12 +1,15 @@
 import { atom, useAtom } from "jotai";
-import { useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ChatPreview } from "../components/chat";
 import { ExperimentsSidebar } from "../sidebars/experiments";
-import { experimentAtom, getExperimentAtom, type ExperimentCursor, type Message } from "../state/common";
-import { entangledAtom } from "../utils/entanglement";
+import {
+  type ExperimentCursor,
+  type Message,
+  getExperimentAtom,
+  experimentAtom as newExperimentAtom,
+} from "../state/common";
 import { store } from "../state/store";
-import { getRealm } from "../utils/realm";
+import { entangledAtom } from "../utils/entanglement";
 
 const cursorAtom = entangledAtom({ name: "cursor" }, atom<ExperimentCursor | null>(null));
 
@@ -14,38 +17,24 @@ export const selectedExperimentAtom = entangledAtom(
   {
     name: "selected-experiment",
   },
-  atom<Message[]>([]),
-);
-
-const actionAtom = entangledAtom(
-  "action",
-  atom((get) => {
-    if (getRealm() === "server") {
-      const cursor = get(cursorAtom);
-      if (cursor) {
-        const experiment = get(getExperimentAtom(cursor));
-        store.set(selectedExperimentAtom, experiment ?? []);
-      }
+  atom<Message[]>((get) => {
+    const cursor = get(cursorAtom);
+    if (cursor) {
+      const experiment = get(getExperimentAtom(cursor));
+      return experiment ?? [];
     }
+    return [];
   }),
 );
 
 export default function Experiment() {
   const navigate = useNavigate();
   const { id, runId } = useParams();
-  const [cursor] = useAtom(cursorAtom);
+  const [cursor, setCursor] = useAtom(cursorAtom);
   const [experiment] = useAtom(selectedExperimentAtom);
-  useAtom(actionAtom);
-
-  if (!cursor && id && runId) {
-    store.set(cursorAtom, { id, runId });
+  if (id && runId && (!cursor || cursor.id !== id || cursor.runId !== runId)) {
+    setCursor({ id, runId });
   }
-
-  useEffect(() => {
-    if (id && runId) {
-      store.set(cursorAtom, { id, runId });
-    }
-  }, [id, runId]);
 
   return (
     <>
@@ -53,7 +42,7 @@ export default function Experiment() {
         <h1>
           Experiment {id}.{runId}
         </h1>
-        <ChatPreview history={experiment} />
+        <ChatPreview history={experiment ?? []} />
       </div>
       <aside>
         <h3>Actions</h3>
@@ -61,7 +50,7 @@ export default function Experiment() {
           type="submit"
           onClick={(e) => {
             e.preventDefault();
-            store.set(experimentAtom, experiment);
+            store.set(newExperimentAtom, experiment);
             navigate("/");
           }}
         >

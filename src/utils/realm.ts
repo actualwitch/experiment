@@ -1,3 +1,9 @@
+export const REALM_CONFIGS = {
+  fullstack: ["client", "server"],
+  spa: ["client"],
+  testing: ["client"],
+};
+
 export const getRealm = () => {
   if (typeof document !== "undefined") {
     if (window?.[Symbol.for("REALM")] === "TESTING") {

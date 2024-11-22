@@ -5,7 +5,7 @@ import { getClientAsString } from "./_macro" with { type: "macro" };
 import { renderToString } from "react-dom/server";
 import { StaticRouter } from "react-router-dom/server";
 import { Shell } from "../root";
-import { clientFile } from "../const";
+import { clientFile, hostname, port } from "../const";
 
 export function getHtml(path: string, additionalScripts: string[] = []) {
   return `<!DOCTYPE html>
@@ -18,10 +18,6 @@ export function getHtml(path: string, additionalScripts: string[] = []) {
   <script type="module" src="${path}"></script>
 </body>`;
 }
-const schema = "http";
-const hostname = "localhost";
-const port = 5173;
-const url = `${schema}://${hostname}:${port}`;
 
 export default {
   development: true,
@@ -48,7 +44,7 @@ export default {
         />
       </StaticRouter>,
     );
-    return new Response(html, {
+    return new Response("<!DOCTYPE html>" + html, {
       headers: { "Content-Type": "text/html" },
     });
   },

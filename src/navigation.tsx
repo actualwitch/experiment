@@ -4,6 +4,7 @@ import { VERSION } from "./const";
 import { bs } from "./style";
 import { nonInteractive, widthAwailable } from "./style/mixins";
 import { portalIO } from "./utils/portal";
+import { ROUTES } from "./pages/_router";
 
 export const [SidebarInput, SidebarOutput] = portalIO();
 
@@ -34,18 +35,11 @@ export const NavigationSidebar = () => {
   return (
     <Navigation>
       <header>
-        <h2>
-          🔬 <NavLink to="/">Experiment</NavLink>
-        </h2>
-        <h2>
-          ⛴️ <NavLink to="/import">Import</NavLink>
-        </h2>
-        <h2>
-          📝 <NavLink to="/templates">Templates</NavLink>
-        </h2>
-        <h2>
-          🔧 <NavLink to="/parameters">Parameters</NavLink>
-        </h2>
+        {ROUTES.map(({ icon, title, path, showInSidebar }) => showInSidebar && (
+          <h2 key={path}>
+            {icon} <NavLink to={path}>{title}</NavLink>
+          </h2>
+        ))}
       </header>
       <GrowBox>
         <SidebarOutput />
