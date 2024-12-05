@@ -4,6 +4,8 @@ import DOMPurify from "isomorphic-dompurify";
 import { atom } from "jotai";
 import { marked } from "marked";
 import { bs } from "../style";
+import { Iframe } from "./IFrame";
+import { createElement } from "react";
 
 type Primitive = string | number | boolean | null | undefined;
 
@@ -161,6 +163,30 @@ function asTreeNodes(
     </>
   );
 }
+function* asTextTreeNodes(input: string) {
+  const stack = [];
+  let buffer = "";
+  let currentBlock = "p";
+  let level = 0;
+  let index = 0;
+  for (const char of input) {
+    if (char === "\n" && buffer) {
+      try {
+        const obj = JSON.parse(buffer);
+        yield asTreeNodes(obj);
+        buffer = "";
+        continue;
+      } catch {}
+      yield createElement(currentBlock, { key: index++ }, buffer);
+      buffer = "";
+      continue;
+    }
+    buffer += char;
+  }
+  if (buffer) {
+    yield <p key={index++}>{buffer}</p>;
+  }
+}
 
 const ViewContainer = styled.div<{ markdownMode?: true }>`
   & > * {
@@ -187,7 +213,6 @@ const ViewContainer = styled.div<{ markdownMode?: true }>`
 `;
 
 const Markdown = ({ children, style }: { children: string; style?: React.CSSProperties }) => {
-  // const input = children.replaceAll(/(\\n)+/g, "\n\n");
   // images are common attack vectors
   const html = DOMPurify.sanitize(marked.parse(children, { async: false }), {
     FORBID_TAGS: ["img"],
@@ -201,12 +226,17 @@ export function View({
   onClick,
   onTitleClick,
   shouldBeCollapsed,
+  renderMode = "markdown",
 }: {
   children: unknown;
   style?: React.CSSProperties;
+  renderMode?: "markdown" | "text";
 } & Pick<TreeOptions, "onClick" | "onTitleClick" | "shouldBeCollapsed">) {
   if (typeof children === "string") {
-    return <Markdown style={{ ...style, width: undefined }}>{children}</Markdown>;
+    if (renderMode === "markdown") {
+      return <Markdown style={{ ...style, width: undefined }}>{children}</Markdown>;
+    }
+    return <ViewContainer style={style}>{Array.from(asTextTreeNodes(children))}</ViewContainer>;
   }
 
   const content = asTreeNodes(children, undefined, {

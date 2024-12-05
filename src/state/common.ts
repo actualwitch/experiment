@@ -4,7 +4,7 @@ import { atomWithStorage, createJSONStorage } from "jotai/utils";
 
 import { createFileStorage } from "../utils";
 import { divergentAtom, entangledAtom } from "../utils/entanglement";
-import { getRealm, isClient } from "../utils/realm";
+import { getRealm, hasBackend, isClient } from "../utils/realm";
 
 type _Message =
   | { role: "system"; content: string }
@@ -29,26 +29,34 @@ export type Store = {
   templates?: Record<string, _Message>;
   tokens: {
     anthropic?: string;
+    mistral?: string;
     openai?: string;
   };
 };
 
 export const getInitialStore = (): Store => ({
-  tokens: { anthropic: undefined },
+  tokens: {},
   experiments: {},
 });
-export const storeAtom = divergentAtom(() => {
-  if (getRealm() === "server") {
-    return atomWithStorage<Store>(
-      "store",
-      getInitialStore(),
-      createJSONStorage(() => createFileStorage("store")),
-      {
-        getOnInit: true,
-      },
-    );
-  }
-  if (isClient()) {
+export const storeAtom = divergentAtom(
+  () => {
+    if (getRealm() === "server") {
+      return atomWithStorage<Store>(
+        "store",
+        getInitialStore(),
+        createJSONStorage(() => createFileStorage("store")),
+        {
+          getOnInit: true,
+        },
+      );
+    }
+  },
+  () => {
+    if (hasBackend()) {
+      return atom<Store>(getInitialStore());
+    }
+  },
+  () => {
     return atomWithStorage<Store>(
       "store",
       getInitialStore(),
@@ -57,9 +65,8 @@ export const storeAtom = divergentAtom(() => {
         getOnInit: true,
       },
     );
-  }
-  return atom<Store>(getInitialStore());
-});
+  },
+);
 
 export const voidAtom = atom<void>(void 0);
 
@@ -139,3 +146,5 @@ export const experimentLayoutAtom = entangledAtom(
   "experimentLayout",
   focusAtom(storeAtom, (o) => o.prop("experimentLayout")),
 );
+
+export const parentAtom = entangledAtom("parent", atom<string | undefined>(undefined));

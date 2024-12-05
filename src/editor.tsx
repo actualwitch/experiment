@@ -1,6 +1,6 @@
 import { useAtom } from "jotai";
 import { atomEffect } from "jotai-effect";
-import { useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { isDarkModeAtom } from "./state/common";
 
 export type EditorProps = {
@@ -11,63 +11,62 @@ export type EditorProps = {
 
 export const Editor = ({ children = "", minHeight = "100%", setValue }: EditorProps) => {
   const monacoEl = useRef<HTMLDivElement | null>(null);
-  const mountEffect = useMemo(() => {
-    return atomEffect((get, set) => {
-      let value = "";
+  const [isDarkMode] = useAtom(isDarkModeAtom);
+  useEffect(() => {
+    if (!monacoEl.current) {
+      return;
+    }
+    let value = "";
 
-      if (typeof children === "object") {
-        value = JSON.stringify(children, null, 2);
-      }
-      if (typeof children === "string") {
-        value = children;
-      }
+    if (typeof children === "object") {
+      value = JSON.stringify(children, null, 2);
+    }
+    if (typeof children === "string") {
+      value = children;
+    }
 
-      const isDarkMode = get(isDarkModeAtom);
-
-      const promise = import("monaco-editor").then((monaco) => {
-        const newEditor = monaco.editor.create(monacoEl.current!, {
-          value,
-          language: "markdown",
-          theme: isDarkMode ? "vs-dark" : "vs",
-          automaticLayout: true,
-          lineNumbers: "off",
-          scrollBeyondLastLine: false,
-          wordWrap: "on",
-          wrappingStrategy: "advanced",
-          minimap: {
-            enabled: false,
-          },
-          overviewRulerLanes: 0,
-        });
-
-        newEditor.onDidBlurEditorText(() => {
-          if (setValue) {
-            setValue(newEditor.getValue());
-          }
-        });
-
-        //   let ignoreEvent = false;
-        //   const updateHeight = () => {
-        //     const contentHeight = Math.min(1000, newEditor.getContentHeight());
-        //     if (monacoEl.current) {
-        //       monacoEl.current.style.width = `${300}px`;
-        //       monacoEl.current.style.height = `${contentHeight}px`;
-        //     }
-        //     try {
-        //       ignoreEvent = true;
-        //       newEditor.layout({ width: 300, height: contentHeight });
-        //     } finally {
-        //       ignoreEvent = false;
-        //     }
-        //   };
-        //   newEditor.onDidContentSizeChange(updateHeight);
-        //   updateHeight();
-        return newEditor;
+    const promise = import("monaco-editor").then((monaco) => {
+      const newEditor = monaco.editor.create(monacoEl.current!, {
+        value,
+        language: "markdown",
+        theme: "vs-dark",
+        automaticLayout: true,
+        lineNumbers: "off",
+        scrollBeyondLastLine: false,
+        wordWrap: "on",
+        wrappingStrategy: "advanced",
+        minimap: {
+          enabled: false,
+        },
+        overviewRulerLanes: 0,
       });
-      return () => promise.then((editor) => editor.dispose());
+
+      newEditor.onDidBlurEditorText(() => {
+        if (setValue) {
+          setValue(newEditor.getValue());
+        }
+      });
+
+      //   let ignoreEvent = false;
+      //   const updateHeight = () => {
+      //     const contentHeight = Math.min(1000, newEditor.getContentHeight());
+      //     if (monacoEl.current) {
+      //       monacoEl.current.style.width = `${300}px`;
+      //       monacoEl.current.style.height = `${contentHeight}px`;
+      //     }
+      //     try {
+      //       ignoreEvent = true;
+      //       newEditor.layout({ width: 300, height: contentHeight });
+      //     } finally {
+      //       ignoreEvent = false;
+      //     }
+      //   };
+      //   newEditor.onDidContentSizeChange(updateHeight);
+      //   updateHeight();
+      return newEditor;
     });
-  }, []);
-  useAtom(mountEffect);
+    return () => promise.then((editor) => editor.dispose());
+  }, [children, isDarkMode, setValue]);
 
   return <div ref={monacoEl} style={{ minHeight }}></div>;
 };

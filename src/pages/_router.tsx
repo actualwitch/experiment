@@ -1,4 +1,4 @@
-import { Route, Routes } from "react-router-dom";
+import { Route, Routes } from "react-router";
 import Experiment from "./Experiment";
 import Import from "./Import";
 import NewExperiment from "./NewExperiment";
@@ -21,8 +21,8 @@ export const ROUTES: RouteList = [
   { icon: "🔬", title: "Experiment", showInSidebar: true, path: "/", component: NewExperiment },
   { icon: "🔬", title: "Experiment", showInSidebar: false, path: "/experiment/:id/:runId", component: Experiment },
   { icon: "⛴️", title: "Import", showInSidebar: true, path: "/import", component: Import },
-  { icon: "📝", title: "Templates", showInSidebar: true, path: "/templates", component: Templates },
-  { icon: "🔧", title: "Parameters", showInSidebar: true, path: "/parameters", component: Parameters },
+  { icon: "💿", title: "Templates", showInSidebar: true, path: "/templates", component: Templates },
+  { icon: "🛠️", title: "Parameters", showInSidebar: true, path: "/parameters", component: Parameters },
 ];
 
 function IconAndTitleUpdater({ icon, title, children }: PropsWithChildren<{ icon: string; title: string }>) {

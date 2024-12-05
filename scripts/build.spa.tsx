@@ -1,6 +1,6 @@
 import { $ } from "bun";
 import { renderToString } from "react-dom/server";
-import { StaticRouter } from "react-router-dom/server";
+import { StaticRouter } from "react-router/server";
 import { Shell } from "../src/root";
 import { assignToWindow } from "../src/utils/hydration";
 

@@ -2,8 +2,9 @@ import { $, type Serve } from "bun";
 import { DEBUG, hostname, port, url } from "../const";
 import { createFetch } from "../utils/handler";
 import { doPOST, doSSE, doStatic, doStreamingSSR } from "./_handlers";
+import { isMac } from "../utils/platform";
 
-if (process.env.OPEN_ON_START) {
+if (process.env.OPEN_ON_START && isMac()) {
   await $`open "${url}"`.quiet();
 }
 

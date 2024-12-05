@@ -1,6 +1,6 @@
-![Experiment screenshot](https://raw.githubusercontent.com/actualwitch/experiment/main/.github/Screenshot.png)
+[<img alt="Experiment screenshot" src="https://raw.githubusercontent.com/actualwitch/experiment/main/.github/Screenshot.png" />](https://actualwitch.github.io/experiment/)
 
-## 🔬 Let's start the experiment
+## 🔬 Let's start the <ins>Experiment</ins>
 
 **Experiment** is a simple tool to facilitate prompt engineering. You can use it to make chat completion requests, debug function calling and explore completions saved as CSV.
 

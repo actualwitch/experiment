@@ -21,7 +21,7 @@ export function divergentAtom<T extends Atom<unknown> | WritableAtom<unknown, un
 }
 
 export function entangledAtom<
-  _V extends any,
+  _V,
   V extends _V | Promise<_V>,
   A extends [_V],
   R extends unknown,

@@ -1,11 +1,18 @@
 import styled from "@emotion/styled";
 import { useAtom } from "jotai";
 import { experimentLayoutAtom, isDarkModeAtom, tokensAtom } from "../state/common";
-import { bs } from "../style";
+import { bs, Button } from "../style";
 import { withFormStyling, type FormProps } from "../style/form";
 import { hasResolvedTokenAtom } from "../state/inference";
 import { Switch } from "../components/switch";
-import { useState } from "react";
+import { useState, type PropsWithChildren } from "react";
+import { ModalTrigger } from "../components/ModalTrigger";
+import { Block, providers, providerTypes, type ProviderType } from "./NewExperiment";
+import { Select } from "../components/Select";
+import { Item } from "react-stately";
+import { withDarkMode, type WithDarkMode } from "../style/darkMode";
+import { css } from "@emotion/react";
+import { Palette } from "../style/palette";
 
 const Input = styled.input<FormProps>(withFormStyling);
 
@@ -37,17 +44,86 @@ const Row = styled.div`
   }
 `;
 
+const Container = styled.div<WithDarkMode>`
+  padding: ${bs(1.5)} ${bs(2)};
+  background: ${Palette.white};
+
+  width: 520px;
+
+  input {
+    width: 100%;
+  }
+  ${p => withDarkMode(p.isDarkMode, css`
+    background: ${Palette.black};
+    `)}
+`;
+
+const Actions = styled.p`
+  display: flex;
+  justify-content: flex-end;
+`;
+
+const ModalContent = ({ children, close }: PropsWithChildren<{close: () => void}>) => {
+  const [isDarkMode] = useAtom(isDarkModeAtom);
+  const [selectedProvider, setSelectedProvider] = useState<ProviderType | null>(null);
+  const [token, setToken] = useState("");
+  const [tokens, setTokens] = useAtom(tokensAtom);
+  const submit = () => {
+    if (!selectedProvider) {
+      return;
+    }
+    let value = token;
+
+    if (value.startsWith('"') && value.endsWith('"')) {
+      value = value.slice(1, -1);
+    }
+    setTokens({ ...tokens, [selectedProvider]: value });
+    close();
+  }
+
+  return (
+    <Container isDarkMode={isDarkMode}>
+      <h3>Add provider</h3>
+      <p>
+        <Select items={providers} onSelectionChange={(value) => setSelectedProvider(value)}>
+          {(item) => (
+            <Item textValue={item.name}>
+              <div>{item.name}</div>
+            </Item>
+          )}
+        </Select>
+      </p>
+      <p>
+        <Input
+          type="password"
+          placeholder="Token or 1password reference"
+          value={token}
+          onChange={(e) => setToken(e.target.value)}
+        />
+      </p>
+      <Actions>
+        {children}
+        <Button onClick={(e) => {
+          e.preventDefault();
+          submit();
+        }} disabled={!selectedProvider || !token}>Add</Button>
+      </Actions>
+    </Container>
+  );
+};
+
 export default function Configure() {
   const [isDarkMode, setIsDarkMode] = useAtom(isDarkModeAtom);
   const [experimentLayout, setExperimentLayout] = useAtom(experimentLayoutAtom);
   const [hasResolvedToken] = useAtom(hasResolvedTokenAtom);
   const [tokens, setTokens] = useAtom(tokensAtom);
-  const [token, setToken] = useState("");
   return (
     <>
-      <StyledForm onSubmit={(e) => {
-        e.preventDefault();
-      }}>
+      <StyledForm
+        onSubmit={(e) => {
+          e.preventDefault();
+        }}
+      >
         <h3>Visual</h3>
         <Row>
           <header>Theme</header>
@@ -70,61 +146,24 @@ export default function Configure() {
           </Switch>
         </Row>
         <h3>Inference</h3>
-        <p>For each provider, paste the secret reference from 1Password, it will be securely fetched just-in-time.</p>
-        <h5>Anthropic</h5>
-        <label>
-          <span>{hasResolvedToken.anthropic ? "🔐" : "🔑"}</span>
-          <Input
-            _type={hasResolvedToken.anthropic ? "success" : undefined}
-            type="text"
-            name="token"
-            value={tokens.anthropic}
-            onChange={(e) => {
-              e.preventDefault();
-              let value = e.target.value;
-              if (value.startsWith('"') && value.endsWith('"')) {
-                value = value.slice(1, -1);
-              }
-              console.log(value);
-              setTokens({ ...tokens, anthropic: value });
+        <Row>
+          <header>Providers</header>
+          <ModalTrigger label="Add">
+            {(close) => {
+              return (
+                <ModalContent close={close}>
+                  <Button onClick={close}>close</Button>
+                </ModalContent>
+              );
             }}
-          />
-        </label>
-        <h5>Mistral</h5>
-        <label>
-          <span>{hasResolvedToken.anthropic ? "🔐" : "🔑"}</span>
-          <Input
-            _type={hasResolvedToken.anthropic ? "success" : undefined}
-            type="text"
-            name="token"
-            value={token}
-            onChange={(e) => {
-              e.preventDefault();
-              let value = e.target.value;
-              if (value.startsWith('"') && value.endsWith('"')) {
-                value = value.slice(1, -1);
-              }
-              setToken(value);
-            }}
-          />
-        </label>
-        <h5>OpenAI</h5>
-        <label>
-          <span>{hasResolvedToken.openai ? "🔐" : "🔑"}</span>
-          <Input
-            _type={hasResolvedToken.openai ? "success" : undefined}
-            type="text"
-            name="token"
-            value={tokens.openai}
-            onChange={(e) => {
-              let value = e.target.value;
-              if (value.startsWith('"') && value.endsWith('"')) {
-                value = value.slice(1, -1);
-              }
-              setTokens({ ...tokens, openai: value });
-            }}
-          />
-        </label>
+          </ModalTrigger>
+        </Row>
+        {Object.keys(tokens).map((provider) => (
+          <Row key={provider}>
+            <header>{provider}</header>
+            <Button onClick={() => setTokens({ ...tokens, [provider]: undefined })}>Remove</Button>
+          </Row>
+        ))}
       </StyledForm>
     </>
   );

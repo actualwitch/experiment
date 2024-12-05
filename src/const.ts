@@ -1,5 +1,5 @@
 import { getReleaseHash, getDebug } from "./_macro" with { type: "macro" };
-import project from "../package.json";
+import project from "../package.json" with { type: "json" };
 
 export const DEBUG = getDebug();
 const hash = await getReleaseHash();

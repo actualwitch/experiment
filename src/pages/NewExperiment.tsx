@@ -1,12 +1,20 @@
 import styled from "@emotion/styled";
 import { useAtom } from "jotai";
 import { useEffect, useRef, useState } from "react";
+import { Item } from "react-stately";
+import { ModalTrigger } from "../components/ModalTrigger";
+import { Select } from "../components/Select";
 import { ChatPreview, selectionAtom } from "../components/chat";
+import { Editor } from "../editor";
 import { ExperimentsSidebar } from "../sidebars/experiments";
-import { type Role, experimentAtom, isDarkModeAtom, templatesAtom } from "../state/common";
+import { type Role, experimentAtom, isDarkModeAtom, templatesAtom, tokensAtom } from "../state/common";
 import { runExperimentAsAnthropic, runExperimentAsOpenAi, testStreaming } from "../state/inference";
 import { Button, Sidebar, bs } from "../style";
 import { useHandlers } from "../utils/keyboard";
+import { Slider } from "../components/Slider";
+import { withDarkMode } from "../style/darkMode";
+import { css } from "@emotion/react";
+import { Palette } from "../style/palette";
 
 type Provider = "anthropic" | "openai" | "test";
 
@@ -22,13 +30,14 @@ const Column = styled.div`
   overflow-x: hidden;
 `;
 
-const Block = styled.div<{ isDarkMode?: boolean }>`
+export const Block = styled.div<{ isDarkMode?: boolean }>`
   display: flex;
   flex-direction: column;
 
   border-radius: ${bs(0.5)};
   position: sticky;
   bottom: 0;
+  overflow: clip;
 
   margin: ${bs(0.5)} -${bs(0.5)} 0;
   width: auto;
@@ -66,9 +75,24 @@ const Block = styled.div<{ isDarkMode?: boolean }>`
   button {
     :hover {
       cursor: pointer;
-      background: ${(p) => (p.isDarkMode ? "#f0f0f024" : "#fff9")};
+      background: "#fff9";
     }
   }
+  ${(p) =>
+    withDarkMode(
+      p.isDarkMode,
+      css`
+        select,
+        textarea {
+          text-shadow: 0 0 2px ${Palette.black}22;
+        }
+        button {
+          :hover {
+            background: "#f0f0f024";
+          }
+        }
+      `,
+    )}
 `;
 
 const ActionRow = styled.div`
@@ -93,6 +117,21 @@ const TextArea = (props: React.TextareaHTMLAttributes<HTMLTextAreaElement>) => {
   return <textarea {...props} ref={ref} />;
 };
 
+export function withIds<T extends string>(items: T[]) {
+  return items.map((name) => ({
+    id: name,
+    name,
+  }))
+}
+export const providerTypes = ["anthropic", "mistral", "openai"] as const;
+export type ProviderType = typeof providerTypes[number];
+export const providers = withIds(providerTypes);
+
+const ModalContainer = styled.div`
+  min-height: 80vh;
+  min-width: 80vw;
+`;
+
 export default function NewExperiment() {
   const [isDarkMode] = useAtom(isDarkModeAtom);
   const [experiment, setExperiment] = useAtom(experimentAtom);
@@ -101,6 +140,8 @@ export default function NewExperiment() {
   const [role, setRole] = useState<Role>("user");
   const [provider, setProvider] = useState<Provider>("anthropic");
   const [templates, setTemplates] = useAtom(templatesAtom);
+  const [temp, setTemp] = useState(0.0);
+  const [tokens] = useAtom(tokensAtom);
 
   const [object, setObject] = useState<null | object>(null);
   useEffect(() => {
@@ -117,8 +158,24 @@ export default function NewExperiment() {
     return () => clearTimeout(id);
   }, [message]);
 
+  const isEditing = selection?.length === 2 && selection[1] === "content";
+
+  const isDisabled = role === "tool" && !object;
+
   const [_, runExperiment] = useAtom(actionMap[provider]);
   const submit = () => {
+    if (isEditing) {
+      // const newMessage: Message = { role, content: object || message, fromServer:  };
+      setSelection(null);
+      setExperiment(
+        experiment.map((item, i) => {
+          if (i === selection[0]) {
+            return { role, content: object || message };
+          }
+          return item;
+        }),
+      );
+    }
     if (!message) return;
     setMessage("");
     setExperiment([...experiment, { role, content: object || message }]);
@@ -136,7 +193,21 @@ export default function NewExperiment() {
     Backspace: deleteSelection,
   });
 
-  const isDisabled = role === "tool" && !object;
+  useEffect(() => {
+    if (isEditing) {
+      const { content, role } = experiment[selection[0]];
+      if (typeof content === "string") {
+        setMessage(content);
+        setRole(role);
+      } else if (typeof content === "object") {
+        setMessage(JSON.stringify(content, null, 2));
+        setRole("tool");
+      }
+    } else {
+      setMessage("");
+      setRole("user");
+    }
+  }, [experiment, selection, isEditing]);
 
   return (
     <>
@@ -150,7 +221,7 @@ export default function NewExperiment() {
               <option>tool</option>
             </select>
             <button type="button" disabled={isDisabled} onClick={() => submit()}>
-              add
+              {isEditing ? "update" : "add"}
             </button>
           </ActionRow>
           <TextArea
@@ -179,11 +250,29 @@ export default function NewExperiment() {
       </Column>
       <Sidebar>
         <h3>Actions</h3>
-        <select value={provider} onChange={(e) => setProvider(e.target.value as any)}>
-          <option>anthropic</option>
-          <option>openai</option>
-          <option>test</option>
-        </select>
+        <Select
+          label="Provider"
+          items={withIds(Object.keys(tokens) as ProviderType[])}
+          selectedKey={provider}
+          onSelectionChange={(provider) => {
+            setProvider(provider);
+          }}
+        >
+          {(item) => (
+            <Item textValue={item.name}>
+              <div>{item.name}</div>
+            </Item>
+          )}
+        </Select>
+        <Slider
+          value={temp}
+          onChange={(value) => setTemp(value)}
+          label="Temperature"
+          minValue={0}
+          maxValue={1}
+          step={0.01}
+          formatOptions={{ minimumFractionDigits: 2 }}
+        />
         <Button
           type="submit"
           onClick={(e) => {
@@ -193,10 +282,23 @@ export default function NewExperiment() {
         >
           start experiment
         </Button>
-        {selection !== null && (
+        {selection !== null && selection.length === 1 && (
           <>
             <h4>This message</h4>
             <div>
+              <ModalTrigger label="Edit">
+                {(close) => (
+                  <ModalContainer>
+                    <Editor
+                      setValue={() => {
+                        close();
+                      }}
+                    >
+                      {experiment[selection[0]].content}
+                    </Editor>
+                  </ModalContainer>
+                )}
+              </ModalTrigger>
               <button
                 type="submit"
                 onClick={(e) => {

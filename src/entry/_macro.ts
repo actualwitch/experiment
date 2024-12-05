@@ -1,6 +1,6 @@
 export const getClientAsString = async (entry = "src/entry/client.tsx") => {
   const {
-    outputs: [js],
+    outputs: [js, ...outputs],
     success,
     logs,
   } = await Bun.build({
@@ -9,5 +9,6 @@ export const getClientAsString = async (entry = "src/entry/client.tsx") => {
   if (!success) {
     throw new Error(logs.join("\n"));
   }
+  console.log(`Emitted ${outputs.length} files`, outputs);
   return js.text();
 };

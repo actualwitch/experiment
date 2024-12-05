@@ -1,36 +1,32 @@
 import { useAtom, useSetAtom } from "jotai";
 import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { ForkButton } from "../components";
 import { ChatPreview } from "../components/chat";
 import { View } from "../components/view";
 import { SidebarInput } from "../navigation";
 import { filenames, importsRegistry, processCsvAtom, selectedChat } from "../state/client";
-import { experimentAtom } from "../state/common";
-import { store } from "../state/store";
+import { Sidebar } from "../style";
 
-export const Sidebar = () => {
+const SidebarContents = () => {
   const [chats] = useAtom(filenames);
   const [registry] = useAtom(importsRegistry);
   const [_, setSelectedChat] = useAtom(selectedChat);
   const entries = chats.reduce((acc, chatId) => {
-    acc[chatId] = registry[chatId].map((chat, idx) => `Chat ${idx}`);
+    acc[chatId] = registry[chatId].map((chat, idx) => `Experiment ${idx}`);
     return acc;
   }, {} as any);
-
+  if (chats.length === 0) {
+    return null;
+  }
   return (
-    <>
-      <CsvInput />
-      {chats.length > 0 ?
-        <View
-          onClick={(value, key, path) => {
-            const [parent] = path;
-            setSelectedChat([parent, key!]);
-          }}
-        >
-          {entries}
-        </View>
-      : <p>Import csv</p>}
-    </>
+    <View
+      onClick={(value, key, path) => {
+        const [parent] = path;
+        setSelectedChat([parent, key!]);
+      }}
+    >
+      {entries}
+    </View>
   );
 };
 
@@ -48,64 +44,42 @@ const CsvInput = () => {
   );
 };
 
-function Imports() {
+export default function () {
   const [selected] = useAtom(selectedChat);
+  const [registry] = useAtom(importsRegistry);
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [selected]);
 
-  const [registry] = useAtom(importsRegistry);
-  const navigate = useNavigate();
+  const [filename, idx] = selected ?? [];
+  const chat = filename && idx ? registry[filename][idx] : undefined;
 
-  if (!selected) return <p>Nothing selected</p>;
-  const [filename, idx] = selected;
-  const chat = registry[filename][idx];
-  const experiment = [
-    ...chat.messages,
-    ...(chat.response.content ? [{ ...chat.response, role: "assistant", fromServer: true }] : []),
-    ...(chat.response.tool_calls || []).map((toolCall) => ({
-      content: toolCall,
-      role: "tool",
-      fromServer: true,
-    })),
-  ];
   return (
     <>
-      <ChatPreview history={experiment} />
-      <aside>
+      {chat ?
+        <ChatPreview key={`${filename}-${idx}`} history={chat} />
+      : <div />}
+      <Sidebar>
         <h3>Actions</h3>
-        <div>
-          <button
-            type="submit"
-            onClick={(e) => {
-              e.preventDefault();
-              store.set(experimentAtom, chat.messages);
-              navigate("/");
-            }}
-          >
-            Start experiment
-          </button>
-          <button
-            type="submit"
-            onClick={(e) => {
-              e.preventDefault();
-              navigator.clipboard.writeText(JSON.stringify(chat.messages));
-            }}
-          >
-            Copy to clipboard
-          </button>
-        </div>
-      </aside>
-    </>
-  );
-}
-
-export default function () {
-  return (
-    <>
-      <Imports />
+        <p>Import csv</p>
+        <CsvInput />
+        {selected && (
+          <div>
+            <ForkButton experiment={chat} />
+            <button
+              type="submit"
+              onClick={(e) => {
+                e.preventDefault();
+                navigator.clipboard.writeText(JSON.stringify(chat));
+              }}
+            >
+              Copy as json
+            </button>
+          </div>
+        )}
+      </Sidebar>
       <SidebarInput>
-        <Sidebar />
+        <SidebarContents />
       </SidebarInput>
     </>
   );

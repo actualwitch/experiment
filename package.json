@@ -12,7 +12,7 @@
   "scripts": {
     "build": "bun scripts/build.ts",
     "build:spa": "bun scripts/build.spa.tsx",
-    "dev": "bun i && DEBUG=true OPEN_ON_START=true bun --watch run src/entry/server.tsx",
+    "dev": "bun i && bun update && DEBUG=true OPEN_ON_START=true bun --watch run src/entry/server.tsx",
     "dev:spa": "REALM=spa bun --watch run src/entry/server.spa.tsx",
     "format": "bunx biome format --write ./src/*",
     "format:prettier": "prettier ./src/* --write",
@@ -25,29 +25,35 @@
     "@types/bun": "latest",
     "@types/react": "latest",
     "@types/react-dom": "latest",
+    "@types/selenium-webdriver": "latest",
     "ink": "latest",
     "playwright": "latest",
-    "prettier": "latest"
+    "prettier": "latest",
+    "selenium-webdriver": "latest"
   },
   "peerDependencies": {
     "typescript": "latest"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "latest",
+    "@emotion/cache": "latest",
     "@emotion/react": "latest",
     "@emotion/styled": "latest",
     "@mistralai/mistralai": "latest",
     "csvtojson": "latest",
+    "isomorphic-dompurify": "latest",
     "jotai": "latest",
     "jotai-effect": "latest",
     "jotai-optics": "latest",
-    "isomorphic-dompurify": "latest",
     "marked": "latest",
+    "monaco-editor": "latest",
     "nanoid": "latest",
     "openai": "latest",
     "react": "canary",
+    "react-aria": "latest",
     "react-dom": "canary",
-    "react-router-dom": "latest",
+    "react-router": "latest",
+    "react-stately": "latest",
     "runtypes": "latest",
     "shevyjs": "latest"
   }

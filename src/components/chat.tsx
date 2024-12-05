@@ -1,24 +1,25 @@
-import { css, type SerializedStyles } from "@emotion/react";
+import { type SerializedStyles, css } from "@emotion/react";
 import styled from "@emotion/styled";
 import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
 import { focusAtom } from "jotai-optics";
 import { type ReactNode, useEffect, useMemo, useRef } from "react";
+import { TRIANGLE } from "../const";
 import {
+  type Message,
+  type Store,
   experimentAtom,
   experimentLayoutAtom,
   isDarkModeAtom,
-  type Message,
-  type Store,
   templatesAtom,
 } from "../state/common";
 import { bs } from "../style";
-import { deepEqual } from "../utils";
-import { useScrollToTop } from "../utils/scroll";
-import { collapsedAtom, View } from "./view";
-import { Palette } from "../style/palette";
-import { useHandlers } from "../utils/keyboard";
 import type { WithDarkMode } from "../style/darkMode";
 import { widthAwailable } from "../style/mixins";
+import { Palette } from "../style/palette";
+import { deepEqual } from "../utils";
+import { useHandlers } from "../utils/keyboard";
+import { useScrollToTop } from "../utils/scroll";
+import { View, collapsedAtom } from "./view";
 
 const baseHeight = bs(6);
 export const ChatContainer = styled.div<WithDarkMode>`
@@ -87,7 +88,7 @@ export const MessageComponent = styled.article<{
       }
 
       &:before {
-        content: "${contentType ? contentType + " ▴ " : ""}${role}";
+        content: "${[contentType, role].filter(Boolean).join(` ${TRIANGLE} `)}";
         position: absolute;
         ${align}: 0;
         transform-origin: ${align};
@@ -235,6 +236,18 @@ export const ChatMessage = ({ message: _message, index }: { message: Message; in
         {{ name: message.template }}
       </View>
     );
+    // } else if (isSelected && selection?.[1] === "content") {
+    //   const [{ height }] = ref.current?.getClientRects() ?? [{ height: baseHeight }];
+    //   innerContent ??= (
+    //     <Editor
+    //       minHeight={height}
+    //       setValue={(value) => {
+    //         setter(value);
+    //         setSelection(null);
+    //       }}>
+    //       {message.content}
+    //     </Editor>
+    //   );
   } else if (!message.content) {
     innerContent ??= (
       <div>
@@ -271,7 +284,7 @@ export const ChatMessage = ({ message: _message, index }: { message: Message; in
 
   return (
     <MessageComponent
-      contentEditable={isSelected && selection?.[1] === "content"}
+      // contentEditable={isSelected && selection?.[1] === "content"}
       // onBlur={(e) => {
       //   setSelection([index]);
       // }}
@@ -281,10 +294,13 @@ export const ChatMessage = ({ message: _message, index }: { message: Message; in
       isSelected={isSelected}
       isDarkMode={isDarkMode}
       experimentLayout={experimentLayout}
-      onClick={() => {
+      onMouseUp={() => {
         if (selection?.length === 2) return;
         if (isSelected) return;
         setSelection([selector[0]]);
+      }}
+      onDoubleClick={() => {
+        setSelection(selector);
       }}
       ioType={message.fromServer ? "output" : "input"}
     >

@@ -1,10 +1,10 @@
 import styled from "@emotion/styled";
-import { NavLink } from "react-router-dom";
-import { VERSION } from "./const";
+import { NavLink } from "react-router";
+import { TRIANGLE, VERSION } from "./const";
+import { ROUTES } from "./pages/_router";
 import { bs } from "./style";
 import { nonInteractive, widthAwailable } from "./style/mixins";
 import { portalIO } from "./utils/portal";
-import { ROUTES } from "./pages/_router";
 
 export const [SidebarInput, SidebarOutput] = portalIO();
 
@@ -31,20 +31,29 @@ const Footer = styled.footer`
   ${nonInteractive}
 `;
 
+const H2 = styled.h2`
+  user-select: none;
+`;
+
 export const NavigationSidebar = () => {
   return (
     <Navigation>
       <header>
-        {ROUTES.map(({ icon, title, path, showInSidebar }) => showInSidebar && (
-          <h2 key={path}>
-            {icon} <NavLink to={path}>{title}</NavLink>
-          </h2>
-        ))}
+        {ROUTES.map(
+          ({ icon, title, path, showInSidebar }) =>
+            showInSidebar && (
+              <H2 key={path}>
+                {icon} <NavLink to={path}>{title}</NavLink>
+              </H2>
+            ),
+        )}
       </header>
       <GrowBox>
         <SidebarOutput />
       </GrowBox>
-      <Footer>© ∞ ▴ {VERSION}</Footer>
+      <Footer>
+        © ∞ {TRIANGLE} {VERSION}
+      </Footer>
     </Navigation>
   );
 };

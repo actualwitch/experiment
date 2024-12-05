@@ -1,7 +1,6 @@
 import { Global } from "@emotion/react";
 import { atom, Provider, useAtom } from "jotai";
 import { Suspense, useEffect, useState, type PropsWithChildren } from "react";
-import { description, title } from "./meta";
 import { NavigationSidebar } from "./navigation";
 import { Router } from "./pages/_router";
 import { subscriptionAtom, trackVisibleAtom } from "./state/focus";
@@ -12,6 +11,7 @@ import { FavIcon } from "./components/FavIcon";
 import { getRealm } from "./utils/realm";
 import { clientFile } from "./const";
 import { titleAtom, descriptionAtom, iconAtom } from "./state/meta";
+import { ErrorBoundary } from "./components/error";
 
 const Context = ({ children }: PropsWithChildren) => {
   return <Provider store={store}>{children}</Provider>;
@@ -80,7 +80,11 @@ export const Shell = ({
             <App />
           </SpaNormalizer>
         </Context>
-        <Hydration />
+        <Suspense fallback={null}>
+          <ErrorBoundary>
+            <Hydration />
+          </ErrorBoundary>
+        </Suspense>
         {additionalScripts?.map((script, index) => {
           return <script key={index} dangerouslySetInnerHTML={{ __html: script }} />;
         })}

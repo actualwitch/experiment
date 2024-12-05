@@ -1,6 +1,8 @@
 import type { SyncStringStorage } from "jotai/vanilla/utils/atomWithStorage";
-import { readFileSync, writeFileSync } from "node:fs";
+import { existsSync, readFileSync, writeFileSync, mkdirSync } from "node:fs";
+import {platform} from "node:os";
 import { getRealm } from "./realm";
+import { DEBUG } from "../const";
 
 const readFile = (fileName: string) => {
   try {
@@ -14,9 +16,35 @@ const readFile = (fileName: string) => {
   }
 };
 
+const getStoragePath = () => {
+  if (DEBUG) {
+    return "./state";
+  }
+  if (platform() === "win32") {
+    const appData = process.env.APPDATA;
+    if (!appData) {
+      throw new Error("APPDATA not found");
+    }
+    if (!existsSync(`${appData}/experiment`)) {
+      mkdirSync(`${appData}/experiment`, { recursive: true });
+    }
+    return `${appData}/experiment`;
+  }
+  const home = process.env.HOME;
+  if (!home) {
+    throw new Error("HOME not found");
+  }
+  if (!existsSync(`${home}/.experiment`)) {
+    mkdirSync(`${home}/.experiment`, { recursive: true });
+  }
+  return `${home}/.experiment`;
+}
+
+
+
 export function createFileStorage(...keys: string[]): SyncStringStorage {
   const store = new Map<string, string>();
-  const filenameForKey = (key: string) => `./state/${key}.json`;
+  const filenameForKey = (key: string) => `${getStoragePath()}/${key}.json`;
   for (const key of keys) {
     const fileName = filenameForKey(key);
     store.set(key, readFile(fileName));
@@ -60,6 +88,7 @@ export function createFileStorage(...keys: string[]): SyncStringStorage {
 
 export function deepEqual(a: any, b: any): boolean {
   if (a === b) return true;
+  if (a === null || b === null) return false;
   if (typeof a !== "object" || typeof b !== "object") return false;
   if (Object.keys(a).length !== Object.keys(b).length) return false;
   for (const [key, value] of Object.entries(a)) {

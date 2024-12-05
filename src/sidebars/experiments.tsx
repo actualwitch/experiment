@@ -1,5 +1,5 @@
 import { useAtom } from "jotai";
-import { NavLink } from "react-router-dom";
+import { NavLink } from "react-router";
 import { SidebarInput } from "../navigation";
 import { experimentIdsAtom } from "../state/common";
 
@@ -12,7 +12,7 @@ export function ExperimentsSidebar() {
         {[...experimentIds].reverse().map(([id, subId]) => (
           <li key={id + subId}>
             <NavLink to={`/experiment/${id}/${subId}`}>
-              Experiment {id}.{subId}
+              Experiment #{id}.{subId}
             </NavLink>
           </li>
         ))}

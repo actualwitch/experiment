@@ -1,7 +1,8 @@
 import { css } from "@emotion/react";
 import styled from "@emotion/styled";
 import { atom, useAtom } from "jotai";
-import { Component, type HTMLProps } from "react";
+import { type HTMLProps, useRef } from "react";
+import { useButton } from "react-aria";
 import Shevy from "shevyjs";
 import { isDarkModeAtom } from "../state/common";
 import { withDarkMode } from "./darkMode";
@@ -62,11 +63,13 @@ const InternalButton = styled.button<{ isDarkMode: boolean | undefined }>`
 //   return (Component: React.ComponentType<P>) => ((props: T & P) => <Component {...props} {...newProps} />);
 // }
 
-export const Button = ({ children, ...props }: HTMLProps<HTMLButtonElement>) => {
+export const Button = (props: HTMLProps<HTMLButtonElement>) => {
   const [isDarkMode] = useAtom(isDarkModeAtom);
+  const ref = useRef<HTMLButtonElement | null>(null);
+  const { buttonProps } = useButton({ ...props, isDisabled: props.disabled }, ref);
   return (
-    <InternalButton isDarkMode={isDarkMode} {...props}>
-      {children}
+    <InternalButton isDarkMode={isDarkMode} {...buttonProps}>
+      {props.children}
     </InternalButton>
   );
 };
@@ -212,6 +215,10 @@ export const appStyle = [
         padding: ${bs(1 / 3)} ${bs(1 / 2)};
         border-radius: ${bs(1 / 3)};
         overflow-x: scroll;
+      }
+
+      style {
+        display: none;
       }
     }
     ::selection {

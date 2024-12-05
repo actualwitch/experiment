@@ -1,11 +1,20 @@
-import { type Server } from "bun";
+import type { Server } from "bun";
 import { renderToReadableStream, renderToString } from "react-dom/server";
-import { StaticRouter } from "react-router-dom/server";
+import { StaticRouter } from "react-router";
 import { log } from "../utils/logger";
 import { Shell } from "../root";
 import { publish, subscribe, type Update } from "../state/æther";
 import { eventStream } from "../utils/eventStream";
 import { getClientAsString } from "./_macro" with { type: "macro" };
+
+export const getHtml = (location: string, additionalScripts?: string[]) => {
+  const html = renderToString(
+    <StaticRouter location={location}>
+      <Shell bootstrap additionalScripts={additionalScripts} />
+    </StaticRouter>,
+  );
+  return `<!DOCTYPE html>${html}`;
+};
 
 export const doStatic = async (request: Request) => {
   const url = new URL(request.url);
@@ -29,12 +38,7 @@ export const doStatic = async (request: Request) => {
 export const doSSR = async (request: Request) => {
   const url = new URL(request.url);
   log("SSR", request.url);
-  const html = renderToString(
-    <StaticRouter location={url.pathname}>
-      <Shell bootstrap />
-    </StaticRouter>,
-  );
-  return new Response("<!DOCTYPE html>" + html, {
+  return new Response(getHtml(url.pathname), {
     headers: {
       "Content-Type": "text/html",
     },

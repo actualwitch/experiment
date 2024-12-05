@@ -1,10 +1,9 @@
-export const REALM_CONFIGS = {
-  fullstack: ["client", "server"],
-  spa: ["client"],
-  testing: ["client"],
-};
+let realmOverride: string | null = null;
 
 export const getRealm = () => {
+  if (realmOverride) {
+    return realmOverride;
+  }
   if (typeof document !== "undefined") {
     if (window?.[Symbol.for("REALM")] === "TESTING") {
       return "testing";
@@ -22,6 +21,10 @@ export const getRealm = () => {
     return "worker";
   }
   throw new Error("Unknown realm");
+};
+
+export const setRealm = (realm: ReturnType<typeof getRealm>) => {
+  realmOverride = realm;
 };
 
 export const isClient = () => ["client", "spa", "testing"].includes(getRealm());
