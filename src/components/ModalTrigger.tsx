@@ -4,7 +4,14 @@ import { Button } from "../style";
 import { Modal } from "./Modal";
 import { cloneElement } from "react";
 
-export function ModalTrigger({ label, children, ...props }: { label: string; children: (close: () => void) => JSX.Element }) {
+export function ModalTrigger({
+  label,
+  children,
+  ...props
+}: {
+  label: string;
+  children: (close: () => void) => JSX.Element;
+}) {
   const state = useOverlayTriggerState(props);
   const { triggerProps, overlayProps } = useOverlayTrigger({ type: "dialog" }, state);
 

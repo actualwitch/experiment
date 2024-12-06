@@ -1,10 +1,5 @@
-
-
 // inversion of control container to store parked requests
-export type ParkingLot = Map<
-  string,
-  [{}, (value: Response) => void, (reason: unknown) => void]
->;
+export type ParkingLot = Map<string, [{}, (value: Response) => void, (reason: unknown) => void]>;
 
 export const parkingLot: ParkingLot = new Map();
 
@@ -17,14 +12,11 @@ export const setDeflectorStatus = (status: boolean) => {
 export const doDeflection = async (request: Request) => {
   const deflectTo = c.req.header("x-fpx-deflect-to");
   if (!isDeflectorEnabled || !deflectTo) {
-    return ;
+    return;
   }
 
   const traceId = crypto.randomUUID();
-  const [requestUrl, deflectionType] = getTargetUrlAndDeflectionType(
-    deflectTo,
-    request.url,
-  );
+  const [requestUrl, deflectionType] = getTargetUrlAndDeflectionType(deflectTo, request.url);
   console.info(`Deflecting request to ${requestUrl}`);
   const newHeaders = new Headers(c.req.raw.headers);
   newHeaders.append("x-fpx-trace-id", traceId);
@@ -83,13 +75,7 @@ export const doDeflection = async (request: Request) => {
       throw new Error();
     }
     const duration = Date.now() - startTime;
-    await handleSuccessfulRequest(
-      db,
-      requestId,
-      duration,
-      response.clone(),
-      traceId,
-    );
+    await handleSuccessfulRequest(db, requestId, duration, response.clone(), traceId);
 
     return response;
   } catch (error) {
@@ -108,9 +94,7 @@ function getTargetUrlAndDeflectionType(
   requestString: string,
 ): [finalUrl: URL, deflectionType: DeflectionType] {
   try {
-    const [targetUrl, requestUrl] = [targetString, requestString].map(
-      (url) => new URL(url),
-    );
+    const [targetUrl, requestUrl] = [targetString, requestString].map((url) => new URL(url));
     for (const prop of ["hostname", "port", "protocol"] as const) {
       requestUrl[prop] = targetUrl[prop];
     }

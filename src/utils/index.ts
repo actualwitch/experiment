@@ -1,6 +1,6 @@
 import type { SyncStringStorage } from "jotai/vanilla/utils/atomWithStorage";
 import { existsSync, readFileSync, writeFileSync, mkdirSync } from "node:fs";
-import {platform} from "node:os";
+import { platform } from "node:os";
 import { getRealm } from "./realm";
 import { DEBUG } from "../const";
 
@@ -38,9 +38,7 @@ const getStoragePath = () => {
     mkdirSync(`${home}/.experiment`, { recursive: true });
   }
   return `${home}/.experiment`;
-}
-
-
+};
 
 export function createFileStorage(...keys: string[]): SyncStringStorage {
   const store = new Map<string, string>();

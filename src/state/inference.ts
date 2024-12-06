@@ -26,43 +26,41 @@ export const MistralModel = Union(
 
 export const tempAtom = atom(0.0);
 
-export const resolvedTokensAtom = divergentAtom(
-  () => {
-    return atom<Store["tokens"] | Promise<Store["tokens"]>>(async (get) => {
-      const references = get(tokensAtom);
-      const result: Store["tokens"] = {};
-      if (!references) return result;
-      const promises = Object.entries(references).map(async ([key, ref]) => {
-        if (!ref) return [key, null];
-        if (ref.startsWith("op:")) {
-          const { spawn } = await maybeImport("child_process");
-          if (!spawn) return [key, null];
-          const handle = spawn("op", ["read", ref]);
-          return await new Promise<string | null>((ok, ko) => {
-            handle.stdout.on("data", (data: unknown) => {
-              ok(String(data).trim());
-            });
-
-            handle.stderr.on("data", (data: unknown) => {
-              console.error(String(data));
-            });
-
-            handle.on("close", () => {
-              ok(null);
-            });
+export const resolvedTokensAtom = divergentAtom(() => {
+  return atom<Store["tokens"] | Promise<Store["tokens"]>>(async (get) => {
+    const references = get(tokensAtom);
+    const result: Store["tokens"] = {};
+    if (!references) return result;
+    const promises = Object.entries(references).map(async ([key, ref]) => {
+      if (!ref) return [key, null];
+      if (ref.startsWith("op:")) {
+        const { spawn } = await maybeImport("child_process");
+        if (!spawn) return [key, null];
+        const handle = spawn("op", ["read", ref]);
+        const token = await new Promise<string | null>((ok, ko) => {
+          handle.stdout.on("data", (data: unknown) => {
+            ok(String(data).trim());
           });
-        }
-        return [key, ref];
-      });
-      const resolved = await Promise.all(promises);
-      for (const [key, value] of resolved) {
-        result[key] = value;
+
+          handle.stderr.on("data", (data: unknown) => {
+            console.error(String(data));
+          });
+
+          handle.on("close", () => {
+            ok(null);
+          });
+        });
+        return [key, token];
       }
-      return result;
+      return [key, null];
     });
-  },
-  () => tokensAtom,
-);
+    const resolved = await Promise.all(promises);
+    for (const [key, value] of resolved) {
+      result[key] = value;
+    }
+    return result;
+  });
+});
 
 export const hasResolvedTokenAtom = entangledAtom(
   "has resolved tokens",
@@ -122,7 +120,10 @@ export const runExperimentAsAnthropic = entangledAtom(
 
     const { stream, ...experimentAsAnthropic } = experimentToAnthropic(experiment);
 
-    const anthropic = new Anthropic({ apiKey: resolvedTokens.anthropic, dangerouslyAllowBrowser: hasBackend() ? undefined : true });
+    const anthropic = new Anthropic({
+      apiKey: resolvedTokens.anthropic,
+      dangerouslyAllowBrowser: hasBackend() ? undefined : true,
+    });
     if (stream) {
       const stream = await anthropic.messages.create({
         ...experimentAsAnthropic,
@@ -168,7 +169,7 @@ export const runExperimentAsAnthropic = entangledAtom(
 export const runExperimentAsOpenAi = entangledAtom(
   { name: "run-experiment-openai" },
   atom(null, async (get, set) => {
-    const resolvedTokens = await store.get(resolvedTokensAtom);
+    const resolvedTokens = await get(resolvedTokensAtom);
     const experiment = get(experimentAtom);
 
     if (!resolvedTokens.openai || !experiment) {

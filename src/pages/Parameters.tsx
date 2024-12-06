@@ -1,18 +1,19 @@
+import { css } from "@emotion/react";
 import styled from "@emotion/styled";
 import { useAtom } from "jotai";
-import { experimentLayoutAtom, isDarkModeAtom, tokensAtom } from "../state/common";
-import { bs, Button } from "../style";
-import { withFormStyling, type FormProps } from "../style/form";
-import { hasResolvedTokenAtom } from "../state/inference";
-import { Switch } from "../components/switch";
-import { useState, type PropsWithChildren } from "react";
-import { ModalTrigger } from "../components/ModalTrigger";
-import { Block, providers, providerTypes, type ProviderType } from "./NewExperiment";
-import { Select } from "../components/Select";
+import { type PropsWithChildren, useState } from "react";
 import { Item } from "react-stately";
-import { withDarkMode, type WithDarkMode } from "../style/darkMode";
-import { css } from "@emotion/react";
+import { ModalTrigger } from "../components/ModalTrigger";
+import { Select } from "../components/Select";
+import { Switch } from "../components/switch";
+import { experimentLayoutAtom, isDarkModeAtom, tokensAtom } from "../state/common";
+import { Button, bs } from "../style";
+import { type WithDarkMode, withDarkMode } from "../style/darkMode";
+import { type FormProps, withFormStyling } from "../style/form";
 import { Palette } from "../style/palette";
+import { type ProviderType, providers } from "./NewExperiment";
+import { hasBackend } from "../utils/realm";
+import { View } from "../components/view";
 
 const Input = styled.input<FormProps>(withFormStyling);
 
@@ -53,9 +54,13 @@ const Container = styled.div<WithDarkMode>`
   input {
     width: 100%;
   }
-  ${p => withDarkMode(p.isDarkMode, css`
-    background: ${Palette.black};
-    `)}
+  ${(p) =>
+    withDarkMode(
+      p.isDarkMode,
+      css`
+        background: ${Palette.black};
+      `,
+    )}
 `;
 
 const Actions = styled.p`
@@ -63,7 +68,7 @@ const Actions = styled.p`
   justify-content: flex-end;
 `;
 
-const ModalContent = ({ children, close }: PropsWithChildren<{close: () => void}>) => {
+const ModalContent = ({ children, close }: PropsWithChildren<{ close: () => void }>) => {
   const [isDarkMode] = useAtom(isDarkModeAtom);
   const [selectedProvider, setSelectedProvider] = useState<ProviderType | null>(null);
   const [token, setToken] = useState("");
@@ -79,7 +84,7 @@ const ModalContent = ({ children, close }: PropsWithChildren<{close: () => void}
     }
     setTokens({ ...tokens, [selectedProvider]: value });
     close();
-  }
+  };
 
   return (
     <Container isDarkMode={isDarkMode}>
@@ -96,17 +101,22 @@ const ModalContent = ({ children, close }: PropsWithChildren<{close: () => void}
       <p>
         <Input
           type="password"
-          placeholder="Token or 1password reference"
+          placeholder={hasBackend() ? "Token or 1password reference" : "Token"}
           value={token}
           onChange={(e) => setToken(e.target.value)}
         />
       </p>
       <Actions>
         {children}
-        <Button onClick={(e) => {
-          e.preventDefault();
-          submit();
-        }} disabled={!selectedProvider || !token}>Add</Button>
+        <Button
+          onClick={(e) => {
+            e.preventDefault();
+            submit();
+          }}
+          disabled={!selectedProvider || !token}
+        >
+          Add
+        </Button>
       </Actions>
     </Container>
   );
@@ -115,7 +125,6 @@ const ModalContent = ({ children, close }: PropsWithChildren<{close: () => void}
 export default function Configure() {
   const [isDarkMode, setIsDarkMode] = useAtom(isDarkModeAtom);
   const [experimentLayout, setExperimentLayout] = useAtom(experimentLayoutAtom);
-  const [hasResolvedToken] = useAtom(hasResolvedTokenAtom);
   const [tokens, setTokens] = useAtom(tokensAtom);
   return (
     <>

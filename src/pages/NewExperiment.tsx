@@ -121,10 +121,10 @@ export function withIds<T extends string>(items: T[]) {
   return items.map((name) => ({
     id: name,
     name,
-  }))
+  }));
 }
 export const providerTypes = ["anthropic", "mistral", "openai"] as const;
-export type ProviderType = typeof providerTypes[number];
+export type ProviderType = (typeof providerTypes)[number];
 export const providers = withIds(providerTypes);
 
 const ModalContainer = styled.div`

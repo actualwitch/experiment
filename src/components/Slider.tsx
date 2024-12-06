@@ -23,7 +23,7 @@ const Track = styled.div<{ orientation: "horizontal" | "vertical"; disabled?: bo
     display: block;
     position: absolute;
     background: gray;
-    
+
     height: 3px;
     width: 100%;
     top: 50%;
