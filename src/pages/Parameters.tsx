@@ -14,8 +14,9 @@ import { type FormProps, withFormStyling } from "../style/form";
 import { Palette } from "../style/palette";
 import { hasBackend } from "../utils/realm";
 import { type ProviderType, providers } from "./NewExperiment";
+import { TextField } from "../components/TextField";
 
-const Input = styled.input<FormProps>(withFormStyling);
+
 
 const StyledForm = styled.form`
   display: flex;
@@ -99,11 +100,12 @@ const ModalContent = ({ children, close }: PropsWithChildren<{ close: () => void
         </Select>
       </p>
       <p>
-        <Input
+        <TextField
           type="password"
+          label="Token"
           placeholder={hasBackend() ? "Token or 1password reference" : "Token"}
           value={token}
-          onChange={(e) => setToken(e.target.value)}
+          onChange={(e) => setToken(e)}
         />
       </p>
       <Actions>
@@ -126,6 +128,7 @@ export default function Configure() {
   const [isDarkMode, setIsDarkMode] = useAtom(isDarkModeAtom);
   const [experimentLayout, setExperimentLayout] = useAtom(experimentLayoutAtom);
   const [tokens, setTokens] = useAtom(tokensAtom);
+  
   return (
     <>
       <StyledForm
