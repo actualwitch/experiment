@@ -1,13 +1,14 @@
 import { useSetAtom } from "jotai";
 import { useNavigate } from "react-router";
 import { experimentAtom, parentAtom, type Message } from "../state/common";
+import { Button } from "../style";
 
 export const ForkButton = ({ experiment, parent }: { experiment?: Message[]; parent?: string }) => {
   const setExoeriment = useSetAtom(experimentAtom);
   const setParent = useSetAtom(parentAtom);
   const navigate = useNavigate();
   return (
-    <button
+    <Button
       type="submit"
       onClick={(e) => {
         if (!experiment) return;
@@ -18,6 +19,6 @@ export const ForkButton = ({ experiment, parent }: { experiment?: Message[]; par
       }}
     >
       fork experiment
-    </button>
+    </Button>
   );
 };

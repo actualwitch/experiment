@@ -1,5 +1,6 @@
 import { useAtom, useSetAtom } from "jotai";
 import { useEffect } from "react";
+
 import { ForkButton } from "../components";
 import { ChatPreview } from "../components/chat";
 import { View } from "../components/view";

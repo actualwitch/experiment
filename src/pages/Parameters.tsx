@@ -3,6 +3,7 @@ import styled from "@emotion/styled";
 import { useAtom } from "jotai";
 import { type PropsWithChildren, useState } from "react";
 import { Item } from "react-stately";
+
 import { ModalTrigger } from "../components/ModalTrigger";
 import { Select } from "../components/Select";
 import { Switch } from "../components/switch";
@@ -11,9 +12,8 @@ import { Button, bs } from "../style";
 import { type WithDarkMode, withDarkMode } from "../style/darkMode";
 import { type FormProps, withFormStyling } from "../style/form";
 import { Palette } from "../style/palette";
-import { type ProviderType, providers } from "./NewExperiment";
 import { hasBackend } from "../utils/realm";
-import { View } from "../components/view";
+import { type ProviderType, providers } from "./NewExperiment";
 
 const Input = styled.input<FormProps>(withFormStyling);
 

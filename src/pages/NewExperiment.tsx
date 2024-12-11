@@ -1,7 +1,9 @@
 import styled from "@emotion/styled";
+import { css } from "@emotion/react";
 import { useAtom } from "jotai";
 import { useEffect, useRef, useState } from "react";
 import { Item } from "react-stately";
+
 import { ModalTrigger } from "../components/ModalTrigger";
 import { Select } from "../components/Select";
 import { ChatPreview, selectionAtom } from "../components/chat";
@@ -13,7 +15,6 @@ import { Button, Sidebar, bs } from "../style";
 import { useHandlers } from "../utils/keyboard";
 import { Slider } from "../components/Slider";
 import { withDarkMode } from "../style/darkMode";
-import { css } from "@emotion/react";
 import { Palette } from "../style/palette";
 
 type Provider = "anthropic" | "openai" | "test";
@@ -117,7 +118,7 @@ const TextArea = (props: React.TextareaHTMLAttributes<HTMLTextAreaElement>) => {
   return <textarea {...props} ref={ref} />;
 };
 
-export function withIds<T extends string>(items: T[]) {
+export function withIds<T extends string>(items: T[] | readonly T[]) {
   return items.map((name) => ({
     id: name,
     name,
@@ -266,7 +267,7 @@ export default function NewExperiment() {
         </Select>
         <Slider
           value={temp}
-          onChange={(value) => setTemp(value)}
+          onChange={(value: number) => setTemp(value)}
           label="Temperature"
           minValue={0}
           maxValue={1}

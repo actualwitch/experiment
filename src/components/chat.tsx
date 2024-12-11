@@ -14,7 +14,7 @@ import {
 } from "../state/common";
 import { bs } from "../style";
 import type { WithDarkMode } from "../style/darkMode";
-import { widthAwailable } from "../style/mixins";
+import { widthAvailable } from "../style/mixins";
 import { Palette } from "../style/palette";
 import { deepEqual } from "../utils";
 import { useHandlers } from "../utils/keyboard";
@@ -84,7 +84,7 @@ export const MessageComponent = styled.article<{
         padding: ${bs(1 / 2)};
         padding-${align}: ${bs(1.5)};
         word-wrap: break-word;
-        ${widthAwailable}
+        ${widthAvailable}
       }
 
       &:before {

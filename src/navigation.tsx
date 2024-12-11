@@ -3,7 +3,7 @@ import { NavLink } from "react-router";
 import { TRIANGLE, VERSION } from "./const";
 import { ROUTES } from "./pages/_router";
 import { bs } from "./style";
-import { nonInteractive, widthAwailable } from "./style/mixins";
+import { nonInteractive, widthAvailable } from "./style/mixins";
 import { portalIO } from "./utils/portal";
 
 export const [SidebarInput, SidebarOutput] = portalIO();
@@ -17,7 +17,7 @@ const Navigation = styled.nav`
     padding: 0;
   }
   input {
-    ${widthAwailable}
+    ${widthAvailable}
   }
 `;
 

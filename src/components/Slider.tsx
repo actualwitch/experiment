@@ -1,4 +1,4 @@
-import { useSliderState } from "react-stately";
+import { useSliderState, type SliderProps } from "react-stately";
 
 import { VisuallyHidden, mergeProps, useFocusRing, useNumberFormatter, useSlider, useSliderThumb } from "react-aria";
 import { useRef } from "react";
@@ -40,14 +40,16 @@ const ThumbComponent = styled.div<{ isFocusVisible?: boolean; isDragging?: boole
   ${(p) => (p.isFocusVisible ? "background: orange;" : "")}
 `;
 
-export function Slider(props: {
-  value: number;
-  onChange: (value: number) => void;
-  label?: string;
-  name?: string;
-  formatOptions?: Intl.NumberFormatOptions;
-  orientation?: "horizontal" | "vertical";
-}) {
+export function Slider(
+  props: SliderProps & {
+    value: number;
+    onChange: (value: number) => void;
+    label?: string;
+    name?: string;
+    formatOptions?: Intl.NumberFormatOptions;
+    orientation?: "horizontal" | "vertical";
+  },
+) {
   const trackRef = useRef(null);
   const numberFormatter = useNumberFormatter(props.formatOptions);
   const state = useSliderState({ ...props, numberFormatter });

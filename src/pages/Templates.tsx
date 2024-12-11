@@ -1,8 +1,9 @@
 import { useAtom } from "jotai";
-import { templatesAtom } from "../state/common";
+import { useState } from "react";
+
 import { View } from "../components/view";
 import { SidebarInput } from "../navigation";
-import { useState } from "react";
+import { templatesAtom } from "../state/common";
 import { Sidebar } from "../style";
 
 export default function Templates() {

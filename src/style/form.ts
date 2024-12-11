@@ -1,5 +1,6 @@
 import { css } from "@emotion/react";
-import { type HTMLAttributes } from "react";
+import type { HTMLAttributes } from "react";
+
 import { bs } from ".";
 import { Palette } from "./palette";
 

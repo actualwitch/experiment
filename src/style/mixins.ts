@@ -5,7 +5,7 @@ export const nonInteractive = css`
   user-select: none;
 `;
 
-export const widthAwailable = css`
+export const widthAvailable = css`
   width: -moz-available;
   width: -webkit-fill-available;
 `;

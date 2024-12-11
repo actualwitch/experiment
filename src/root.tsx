@@ -14,7 +14,11 @@ import { titleAtom, descriptionAtom, iconAtom } from "./state/meta";
 import { ErrorBoundary } from "./components/error";
 
 const Context = ({ children }: PropsWithChildren) => {
-  return <Provider store={store}>{children}</Provider>;
+  return (
+    <Provider store={store}>
+      <ErrorBoundary>{children}</ErrorBoundary>
+    </Provider>
+  );
 };
 
 const SpaNormalizer = ({ children }: PropsWithChildren) => {
