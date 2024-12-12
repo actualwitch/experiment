@@ -31,6 +31,9 @@ export const resolvedTokensAtom = divergentAtom(() => {
     const references = get(tokensAtom);
     const result: Store["tokens"] = {};
     if (!references) return result;
+    if (!hasBackend()) {
+      return references;
+    }
     const promises = Object.entries(references).map(async ([key, ref]) => {
       if (!ref) return [key, null];
       if (ref.startsWith("op:")) {
@@ -172,10 +175,15 @@ export const runExperimentAsOpenAi = entangledAtom(
     const resolvedTokens = await get(resolvedTokensAtom);
     const experiment = get(experimentAtom);
 
-    if (!resolvedTokens.openai || !experiment) {
+    if (!resolvedTokens.openai) {
       console.error("No openai token");
       return;
     }
+    if (!experiment || experiment.length === 0) {
+      console.error("No experiment");
+      return;
+    }
+
 
     const experimentAsOpenai = experimentToOpenai(experiment);
     if (!experimentAsOpenai) return;

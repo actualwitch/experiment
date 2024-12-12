@@ -29,7 +29,7 @@ export const experimentToOpenai = (experiment: Message[]): ChatCompletionCreateP
   }
   const result: ChatCompletionCreateParams = {
     messages,
-    model: "gpt-4o-mini",
+    model: "gpt-4o",
     temperature: 0.0,
     max_tokens: 2048,
     stream: true,

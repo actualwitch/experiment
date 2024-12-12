@@ -42,7 +42,7 @@ export const experimentToAnthropic = (experiment: Message[]): MessageCreateParam
     messages,
     tools,
     tool_choice,
-    model: "claude-3-5-sonnet-20240620",
+    model: "claude-3-5-haiku-20241022",
     temperature: 0.0,
     max_tokens: 2048,
     stream: true,
