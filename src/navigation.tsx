@@ -19,6 +19,12 @@ const Navigation = styled.nav`
   input {
     ${widthAvailable}
   }
+  a {
+    text-decoration: none;
+    &[aria-current="page"] {
+      text-decoration: underline;
+    }
+  }
 `;
 
 const GrowBox = styled.div`

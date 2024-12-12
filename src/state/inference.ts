@@ -184,7 +184,6 @@ export const runExperimentAsOpenAi = entangledAtom(
       return;
     }
 
-
     const experimentAsOpenai = experimentToOpenai(experiment);
     if (!experimentAsOpenai) return;
 

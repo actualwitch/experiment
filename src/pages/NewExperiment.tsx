@@ -16,6 +16,7 @@ import { useHandlers } from "../utils/keyboard";
 import { Slider } from "../components/Slider";
 import { withDarkMode } from "../style/darkMode";
 import { Palette } from "../style/palette";
+import { NavLink } from "react-router";
 
 type Provider = "anthropic" | "openai" | "test";
 
@@ -127,6 +128,11 @@ export function withIds<T extends string>(items: T[] | readonly T[]) {
 export const providerTypes = ["anthropic", "mistral", "openai"] as const;
 export type ProviderType = (typeof providerTypes)[number];
 export const providers = withIds(providerTypes);
+export const providerLabels = {
+  anthropic: "Anthropic",
+  mistral: "Mistral",
+  openai: "OpenAI",
+} satisfies { [K in ProviderType]: string };
 
 const ModalContainer = styled.div`
   min-height: 80vh;
@@ -139,10 +145,13 @@ export default function NewExperiment() {
   const [selection, setSelection] = useAtom(selectionAtom);
   const [message, setMessage] = useState("");
   const [role, setRole] = useState<Role>("user");
-  const [provider, setProvider] = useState<Provider>("anthropic");
+
+  const [tokens] = useAtom(tokensAtom);
+  const tokenProviders = Object.keys(tokens) as ProviderType[];
+  const providerOptions = withIds(tokenProviders);
+  const [provider, setProvider] = useState<Provider | null>(tokenProviders[0] ?? null);
   const [templates, setTemplates] = useAtom(templatesAtom);
   const [temp, setTemp] = useState(0.0);
-  const [tokens] = useAtom(tokensAtom);
 
   const [object, setObject] = useState<null | object>(null);
   useEffect(() => {
@@ -163,7 +172,7 @@ export default function NewExperiment() {
 
   const isDisabled = role === "tool" && !object;
 
-  const [_, runExperiment] = useAtom(actionMap[provider]);
+  const [_, runExperiment] = useAtom(actionMap[provider ?? "anthropic"]);
   const submit = () => {
     if (isEditing) {
       // const newMessage: Message = { role, content: object || message, fromServer:  };
@@ -209,7 +218,17 @@ export default function NewExperiment() {
       setRole("user");
     }
   }, [experiment, selection, isEditing]);
-
+  if (providerOptions.length === 0) {
+    return (
+      <Column>
+        <h2>Welcome to Experiment</h2>
+        <p>
+          To start inference, add a token on <NavLink to="/parameters">Parameters</NavLink> page. You can also explore a
+          .csv file on the <NavLink to="/import">Import</NavLink> page.
+        </p>
+      </Column>
+    );
+  }
   return (
     <>
       <Column>
@@ -251,20 +270,22 @@ export default function NewExperiment() {
       </Column>
       <Sidebar>
         <h3>Actions</h3>
-        <Select
-          label="Provider"
-          items={withIds(Object.keys(tokens) as ProviderType[])}
-          selectedKey={provider}
-          onSelectionChange={(provider) => {
-            setProvider(provider);
-          }}
-        >
-          {(item) => (
-            <Item textValue={item.name}>
-              <div>{item.name}</div>
-            </Item>
-          )}
-        </Select>
+        {tokenProviders.length > 1 && (
+          <Select
+            label="Provider"
+            items={providerOptions}
+            selectedKey={provider}
+            onSelectionChange={(provider) => {
+              setProvider(provider);
+            }}
+          >
+            {(item) => (
+              <Item textValue={item.name}>
+                <div>{item.name}</div>
+              </Item>
+            )}
+          </Select>
+        )}
         <Slider
           value={temp}
           onChange={(value: number) => setTemp(value)}

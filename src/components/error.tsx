@@ -18,13 +18,18 @@ export class ErrorBoundary extends Component<Props, { error?: unknown }> {
 
   render() {
     if (this.state.error) {
-      return (<Container><h1>Something went wrong.</h1>
-        <details>
-          <summary>Details</summary>
-          <pre>{String(this.state.error)}</pre>
-          <pre><code>{JSON.stringify(this.state.error, null, 2)}</code></pre>
-        </details>
-      </Container>);
+      return (
+        <Container>
+          <h1>Something went wrong.</h1>
+          <details>
+            <summary>Details</summary>
+            <pre>{String(this.state.error)}</pre>
+            <pre>
+              <code>{JSON.stringify(this.state.error, null, 2)}</code>
+            </pre>
+          </details>
+        </Container>
+      );
     }
 
     return this.props.children;

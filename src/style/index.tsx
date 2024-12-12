@@ -63,10 +63,13 @@ const InternalButton = styled.button<{ isDarkMode: boolean | undefined }>`
 //   return (Component: React.ComponentType<P>) => ((props: T & P) => <Component {...props} {...newProps} />);
 // }
 
-export const Button = ({onClick, ...props}: HTMLProps<HTMLButtonElement>) => {
+export const Button = ({ onClick, ...props }: HTMLProps<HTMLButtonElement>) => {
   const [isDarkMode] = useAtom(isDarkModeAtom);
   const ref = useRef<HTMLButtonElement | null>(null);
-  const { buttonProps } = useButton({ ...props, isDisabled: props.disabled, onClick, onPress: props.onPress ?? onClick }, ref);
+  const { buttonProps } = useButton(
+    { ...props, isDisabled: props.disabled, onClick, onPress: props.onPress ?? onClick },
+    ref,
+  );
   return (
     <InternalButton isDarkMode={isDarkMode} {...buttonProps}>
       {props.children}
@@ -226,11 +229,7 @@ export const appStyle = [
     }
     a {
       color: inherit;
-      text-decoration: none;
       transition: color 0.1s ease-out;
-      &[aria-current="page"] {
-        text-decoration: underline;
-      }
       &:hover {
         color: ${Palette.link};
       }

@@ -13,15 +13,11 @@ import { type WithDarkMode, withDarkMode } from "../style/darkMode";
 import { type FormProps, withFormStyling } from "../style/form";
 import { Palette } from "../style/palette";
 import { hasBackend } from "../utils/realm";
-import { type ProviderType, providers } from "./NewExperiment";
+import { type ProviderType, providerLabels, providerTypes, providers } from "./NewExperiment";
 import { TextField } from "../components/TextField";
 
 const StyledForm = styled.form`
   display: flex;
-  & > * {
-    display: flex;
-    gap: ${bs(1 / 2)};
-  }
   flex-direction: column;
   input[type="text"] {
     flex: 1;
@@ -30,6 +26,10 @@ const StyledForm = styled.form`
     display: flex;
     align-items: baseline;
     margin-bottom: ${bs(1.5)};
+  }
+
+  * + h3 {
+    margin-top: ${bs(2 / 3)};
   }
 `;
 
@@ -130,7 +130,7 @@ export default function Configure() {
   const [selectedProvider, setSelectedProvider] = useState<ProviderType | null>(null);
   const [token, setToken] = useState("");
   const submit = () => {
-    if (!selectedProvider) {
+    if (!selectedProvider || !token) {
       return;
     }
     let value = token;
@@ -141,6 +141,7 @@ export default function Configure() {
     setTokens({ ...tokens, [selectedProvider]: value });
     setIsAdding(false);
     setToken("");
+    setSelectedProvider(null);
   };
 
   return (
@@ -155,9 +156,9 @@ export default function Configure() {
           <header>Theme</header>
           <Switch value={isDarkMode} onChange={setIsDarkMode}>
             {[
-              { value: undefined, label: "System", isDefault: true },
-              { value: false, label: "Light" },
-              { value: true, label: "Dark" },
+              { value: undefined, name: "System", isDefault: true },
+              { value: false, name: "Light" },
+              { value: true, name: "Dark" },
             ]}
           </Switch>
         </Row>
@@ -165,9 +166,9 @@ export default function Configure() {
           <header>Layout</header>
           <Switch value={experimentLayout} onChange={setExperimentLayout}>
             {[
-              { value: "left", label: "Left" },
-              { value: "chat", label: "Chat", isDefault: true },
-              { value: "chat-reverse", label: "Chat (rev)" },
+              { value: "left", name: "Left" },
+              { value: "chat", name: "Chat", isDefault: true },
+              { value: "chat-reverse", name: "Chat (rev)" },
             ]}
           </Switch>
         </Row>
@@ -176,14 +177,17 @@ export default function Configure() {
           <header>Providers</header>
           {isAdding ?
             <Switch value={selectedProvider} onChange={setSelectedProvider}>
-              {[
-                { value: "anthropic", label: "Anthropic" },
-                { value: "openai", label: "OpenAI" },
-              ]}
+              {providerTypes
+                .filter((provider) => !tokens[provider])
+                .map((provider) => ({
+                  value: provider,
+                  name: providerLabels[provider],
+                }))}
             </Switch>
           : <Button onClick={() => setIsAdding(true)}>add</Button>}
         </Row>
         {selectedProvider && (
+          <Row>
             <TextField
               type="password"
               placeholder={hasBackend() ? "Token or 1password reference" : "Token"}
@@ -192,10 +196,11 @@ export default function Configure() {
                 submit();
               }}
             />
+          </Row>
         )}
         {Object.keys(tokens).map((provider) => (
           <Row key={provider}>
-            <header>{provider}</header>
+            <header>{providerLabels[provider]}</header>
             <Button onClick={() => setTokens({ ...tokens, [provider]: undefined })}>Remove</Button>
           </Row>
         ))}

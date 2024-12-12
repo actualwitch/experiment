@@ -1,12 +1,15 @@
-import { useSliderState, type SliderProps } from "react-stately";
+import { type SliderProps, useSliderState } from "react-stately";
 
-import { VisuallyHidden, mergeProps, useFocusRing, useNumberFormatter, useSlider, useSliderThumb } from "react-aria";
-import { useRef } from "react";
+import { css } from "@emotion/react";
 import styled from "@emotion/styled";
+import { useRef } from "react";
+import { VisuallyHidden, mergeProps, useFocusRing, useNumberFormatter, useSlider, useSliderThumb } from "react-aria";
+import { TRIANGLE } from "../const";
+import { InputContainer } from "./shared";
+import { Palette } from "../style/palette";
 
-const Container = styled.div<{ orientation: "horizontal" | "vertical" }>`
-  display: flex;
-  ${(p) => (p.orientation === "horizontal" ? "flex-direction: column; width: 300px;" : "height: 150px;")}
+const Container = styled(InputContainer)<{ orientation: "horizontal" | "vertical" }>`
+  ${(p) => (p.orientation === "horizontal" ? "flex-direction: column;" : "height: 150px;")}
 `;
 
 const LabelContainer = styled.div`
@@ -22,7 +25,7 @@ const Track = styled.div<{ orientation: "horizontal" | "vertical"; disabled?: bo
     content: attr(x);
     display: block;
     position: absolute;
-    background: gray;
+    background: white;
 
     height: 3px;
     width: 100%;
@@ -34,10 +37,28 @@ const Track = styled.div<{ orientation: "horizontal" | "vertical"; disabled?: bo
 const ThumbComponent = styled.div<{ isFocusVisible?: boolean; isDragging?: boolean }>`
   width: 20px;
   height: 20px;
-  border-radius: 50%;
-  background: gray;
-  ${(p) => (p.isDragging ? "background: dimgray;" : "")}
-  ${(p) => (p.isFocusVisible ? "background: orange;" : "")}
+  :before {
+    content: "${TRIANGLE}";
+    display: block;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -10%) rotate(180deg) scale(2);
+  }
+  ${(p) =>
+    p.isDragging &&
+    css`
+      :before {
+        color: dimgray;
+      }
+    `}
+  ${(p) =>
+    p.isFocusVisible &&
+    css`
+      :before {
+        color: ${Palette.accent};
+      }
+    `}
 `;
 
 export function Slider(

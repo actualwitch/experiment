@@ -3,6 +3,7 @@ import type { AriaTextFieldProps } from "react-aria";
 import { useTextField } from "react-aria";
 import styled from "@emotion/styled";
 import { withFormStyling, type FormProps } from "../style/form";
+import { InputContainer } from "./shared";
 
 const Input = styled.input<FormProps>(withFormStyling);
 
@@ -15,8 +16,8 @@ export function TextField(props: AriaTextFieldProps) {
   );
 
   return (
-    <div style={{ display: "flex", flexDirection: "column" }}>
-      <label {...labelProps}>{label}</label>
+    <InputContainer>
+      {label && <label {...labelProps}>{label}</label>}
       <Input {...inputProps} ref={ref} />
       {props.description && (
         <div {...descriptionProps} style={{ fontSize: 12 }}>
@@ -28,6 +29,6 @@ export function TextField(props: AriaTextFieldProps) {
           {validationErrors.join(" ")}
         </div>
       )}
-    </div>
+    </InputContainer>
   );
 }

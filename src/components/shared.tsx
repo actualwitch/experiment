@@ -1,12 +1,14 @@
 import styled from "@emotion/styled";
-
-export const Wrapper = styled.div`
-  display: inline-flex;
-  flex-direction: column;
-  position: relative;
-`;
+import { bs } from "../style";
 
 export const Label = styled.label`
   display: block;
   text-align: left;
+`;
+
+export const InputContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  margin-bottom: ${bs(1 / 2)};
 `;

@@ -6,7 +6,7 @@ import { useSelectState } from "react-stately";
 
 import { ListBox } from "./ListBox";
 import { Popover } from "./Popover";
-import { Label, Wrapper } from "./shared";
+import { Label, InputContainer } from "./shared";
 import { TRIANGLE } from "../const";
 
 interface ButtonProps {
@@ -51,7 +51,7 @@ export function Select<T extends object>(props: AriaSelectProps<T>) {
   const { focusProps, isFocusVisible } = useFocusRing();
 
   return (
-    <Wrapper>
+    <InputContainer>
       <Label {...labelProps}>{props.label}</Label>
       <HiddenSelect state={state} triggerRef={ref} label={props.label} name={props.name} />
       <Button {...mergeProps(buttonProps, focusProps)} ref={ref} isOpen={state.isOpen} isFocusVisible={isFocusVisible}>
@@ -63,6 +63,6 @@ export function Select<T extends object>(props: AriaSelectProps<T>) {
           <ListBox {...menuProps} state={state} />
         </Popover>
       )}
-    </Wrapper>
+    </InputContainer>
   );
 }
