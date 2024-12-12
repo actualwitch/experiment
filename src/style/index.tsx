@@ -63,10 +63,10 @@ const InternalButton = styled.button<{ isDarkMode: boolean | undefined }>`
 //   return (Component: React.ComponentType<P>) => ((props: T & P) => <Component {...props} {...newProps} />);
 // }
 
-export const Button = (props: HTMLProps<HTMLButtonElement>) => {
+export const Button = ({onClick, ...props}: HTMLProps<HTMLButtonElement>) => {
   const [isDarkMode] = useAtom(isDarkModeAtom);
   const ref = useRef<HTMLButtonElement | null>(null);
-  const { buttonProps } = useButton({ ...props, isDisabled: props.disabled }, ref);
+  const { buttonProps } = useButton({ ...props, isDisabled: props.disabled, onClick, onPress: props.onPress ?? onClick }, ref);
   return (
     <InternalButton isDarkMode={isDarkMode} {...buttonProps}>
       {props.children}

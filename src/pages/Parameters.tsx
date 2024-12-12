@@ -16,8 +16,6 @@ import { hasBackend } from "../utils/realm";
 import { type ProviderType, providers } from "./NewExperiment";
 import { TextField } from "../components/TextField";
 
-
-
 const StyledForm = styled.form`
   display: flex;
   & > * {
@@ -100,12 +98,11 @@ const ModalContent = ({ children, close }: PropsWithChildren<{ close: () => void
         </Select>
       </p>
       <p>
-        <TextField
+        <input
           type="password"
-          label="Token"
           placeholder={hasBackend() ? "Token or 1password reference" : "Token"}
           value={token}
-          onChange={(e) => setToken(e)}
+          onChange={(e) => setToken(e.target.value)}
         />
       </p>
       <Actions>
@@ -128,7 +125,24 @@ export default function Configure() {
   const [isDarkMode, setIsDarkMode] = useAtom(isDarkModeAtom);
   const [experimentLayout, setExperimentLayout] = useAtom(experimentLayoutAtom);
   const [tokens, setTokens] = useAtom(tokensAtom);
-  
+  const [isAdding, setIsAdding] = useState(false);
+
+  const [selectedProvider, setSelectedProvider] = useState<ProviderType | null>(null);
+  const [token, setToken] = useState("");
+  const submit = () => {
+    if (!selectedProvider) {
+      return;
+    }
+    let value = token;
+
+    if (value.startsWith('"') && value.endsWith('"')) {
+      value = value.slice(1, -1);
+    }
+    setTokens({ ...tokens, [selectedProvider]: value });
+    setIsAdding(false);
+    setToken("");
+  };
+
   return (
     <>
       <StyledForm
@@ -160,16 +174,25 @@ export default function Configure() {
         <h3>Inference</h3>
         <Row>
           <header>Providers</header>
-          <ModalTrigger label="Add">
-            {(close) => {
-              return (
-                <ModalContent close={close}>
-                  <Button onClick={close}>close</Button>
-                </ModalContent>
-              );
-            }}
-          </ModalTrigger>
+          {isAdding ?
+            <Switch value={selectedProvider} onChange={setSelectedProvider}>
+              {[
+                { value: "anthropic", label: "Anthropic" },
+                { value: "openai", label: "OpenAI" },
+              ]}
+            </Switch>
+          : <Button onClick={() => setIsAdding(true)}>add</Button>}
         </Row>
+        {selectedProvider && (
+            <TextField
+              type="password"
+              placeholder={hasBackend() ? "Token or 1password reference" : "Token"}
+              onChange={(value) => setToken(value)}
+              onBlur={() => {
+                submit();
+              }}
+            />
+        )}
         {Object.keys(tokens).map((provider) => (
           <Row key={provider}>
             <header>{provider}</header>
