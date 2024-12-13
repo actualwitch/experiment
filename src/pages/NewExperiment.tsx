@@ -14,6 +14,7 @@ import {
   modelAtom,
   modelOptions,
   runExperimentAsAnthropic,
+  runExperimentAsMistral,
   runExperimentAsOpenAi,
   tempAtom,
   testStreaming,
@@ -27,6 +28,7 @@ type Provider = "anthropic" | "openai" | "test";
 
 const actionMap = {
   anthropic: runExperimentAsAnthropic,
+  mistral: runExperimentAsMistral,
   openai: runExperimentAsOpenAi,
   test: testStreaming,
 } as const;

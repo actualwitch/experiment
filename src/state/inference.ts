@@ -1,6 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { atom } from "jotai";
 import OpenAI from "openai";
+import { Mistral } from "@mistralai/mistralai";
 import { Literal, Union } from "runtypes";
 import { experimentToAnthropic } from "../adapters/anthropic";
 import { experimentToOpenai } from "../adapters/openai";
@@ -12,6 +13,8 @@ import makeRequestTool from "./makeRequestTool.json";
 import { store } from "./store";
 import { getRealm, hasBackend } from "../utils/realm";
 import type { ChatCompletionCreateParamsStreaming } from "openai/resources/index.mjs";
+import type { ChatCompletionStreamRequest } from "@mistralai/mistralai/models/components";
+import { experimentToMistral } from "../adapters/mistral";
 
 export { makeRequestTool };
 
@@ -29,7 +32,7 @@ export const modelOptions = {
   openai: OpenAIModel.alternatives.map((model) => model.value),
   anthropic: AnthropicModel.alternatives.map((model) => model.value),
   mistral: MistralModel.alternatives.map((model) => model.value),
-}
+};
 
 export const tempAtom = entangledAtom("temp", atom(0.0));
 export const modelAtom = entangledAtom("model", atom<string>(""));
@@ -140,6 +143,7 @@ export const runExperimentAsAnthropic = entangledAtom(
         ...experimentAsAnthropic,
         stream: true,
         temperature: get(tempAtom),
+        model: get(modelAtom) ?? "claude-3-5-sonnet-latest",
       });
       const contentBlocks: Message[] = [];
       for await (const messageStreamEvent of stream) {
@@ -206,7 +210,6 @@ export const runExperimentAsOpenAi = entangledAtom(
         temperature: get(tempAtom),
         model: get(modelAtom) ?? "gpt-4o",
       };
-      console.log(params);
       const stream = await client.chat.completions.create(params);
       const contentChunks: Message[] = [];
       for await (const chunk of stream) {
@@ -221,7 +224,61 @@ export const runExperimentAsOpenAi = entangledAtom(
             content: "",
           });
         }
-        contentChunks[choice.index].content += choice.delta.content ?? "";
+        if (typeof contentChunks[choice.index].content === "string") {
+          contentChunks[choice.index].content += choice.delta.content ?? "";
+        }
+        set(experimentAtom, [...experiment, ...contentChunks]);
+      }
+      set(saveExperimentAtom);
+    }
+  }),
+);
+
+export const runExperimentAsMistral = entangledAtom(
+  { name: "run-experiment-mistral" },
+  atom(null, async (get, set) => {
+    const resolvedTokens = await get(resolvedTokensAtom);
+    const experiment = get(experimentAtom);
+
+    if (!resolvedTokens.mistral) {
+      console.error("No mistral token");
+      return;
+    }
+    if (!experiment || experiment.length === 0) {
+      console.error("No experiment");
+      return;
+    }
+
+    const experimentAsMistral = experimentToMistral(experiment);
+    if (!experimentAsMistral) return;
+
+    const client = new Mistral({
+      apiKey: resolvedTokens.mistral,
+    });
+    if (experimentAsMistral.stream) {
+      const params: ChatCompletionStreamRequest = {
+        ...experimentAsMistral,
+        stream: true,
+        temperature: get(tempAtom),
+        model: get(modelAtom) ?? "mistral-small-latest",
+      };
+      const stream = await client.chat.stream(params);
+      const contentChunks: Message[] = [];
+      for await (const chunk of stream) {
+        if (chunk.data.choices.length === 0) {
+          continue;
+        }
+        const choice = chunk.data.choices[0];
+        if (choice.index !== contentChunks.length - 1) {
+          contentChunks.push({
+            role: "assistant",
+            fromServer: true,
+            content: "",
+          });
+        }
+        if (typeof contentChunks[choice.index].content === "string" && typeof choice.delta.content === "string") {
+          contentChunks[choice.index].content += choice.delta.content ?? "";
+        }
         set(experimentAtom, [...experiment, ...contentChunks]);
       }
       set(saveExperimentAtom);
