@@ -11,6 +11,7 @@ import { type Message, type Store, createExperiment, experimentAtom, parentAtom,
 import makeRequestTool from "./makeRequestTool.json";
 import { store } from "./store";
 import { getRealm, hasBackend } from "../utils/realm";
+import type { ChatCompletionCreateParamsStreaming } from "openai/resources/index.mjs";
 
 export { makeRequestTool };
 
@@ -24,14 +25,21 @@ export const MistralModel = Union(
   Literal("mistral-small-latest"),
 );
 
-export const tempAtom = atom(0.0);
+export const modelOptions = {
+  openai: OpenAIModel.alternatives.map((model) => model.value),
+  anthropic: AnthropicModel.alternatives.map((model) => model.value),
+  mistral: MistralModel.alternatives.map((model) => model.value),
+}
+
+export const tempAtom = entangledAtom("temp", atom(0.0));
+export const modelAtom = entangledAtom("model", atom<string>(""));
 
 export const resolvedTokensAtom = divergentAtom(() => {
   return atom<Store["tokens"] | Promise<Store["tokens"]>>(async (get) => {
     const references = get(tokensAtom);
     const result: Store["tokens"] = {};
     if (!references) return result;
-    if (!hasBackend()) {
+    if (["spa", "testing"].includes(getRealm())) {
       return references;
     }
     const promises = Object.entries(references).map(async ([key, ref]) => {
@@ -192,11 +200,14 @@ export const runExperimentAsOpenAi = entangledAtom(
       dangerouslyAllowBrowser: hasBackend() ? undefined : true,
     });
     if (experimentAsOpenai.stream) {
-      const stream = await client.chat.completions.create({
+      const params: ChatCompletionCreateParamsStreaming = {
         ...experimentAsOpenai,
         stream: true,
         temperature: get(tempAtom),
-      });
+        model: get(modelAtom) ?? "gpt-4o",
+      };
+      console.log(params);
+      const stream = await client.chat.completions.create(params);
       const contentChunks: Message[] = [];
       for await (const chunk of stream) {
         if (chunk.choices.length === 0) {

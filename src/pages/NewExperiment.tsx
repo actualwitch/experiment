@@ -1,22 +1,27 @@
-import styled from "@emotion/styled";
 import { css } from "@emotion/react";
+import styled from "@emotion/styled";
 import { useAtom } from "jotai";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Item } from "react-stately";
 
-import { ModalTrigger } from "../components/ModalTrigger";
+import { NavLink } from "react-router";
 import { Select } from "../components/Select";
+import { Slider } from "../components/Slider";
 import { ChatPreview, selectionAtom } from "../components/chat";
-import { Editor } from "../editor";
 import { ExperimentsSidebar } from "../sidebars/experiments";
 import { type Role, experimentAtom, isDarkModeAtom, templatesAtom, tokensAtom } from "../state/common";
-import { runExperimentAsAnthropic, runExperimentAsOpenAi, testStreaming } from "../state/inference";
+import {
+  modelAtom,
+  modelOptions,
+  runExperimentAsAnthropic,
+  runExperimentAsOpenAi,
+  tempAtom,
+  testStreaming,
+} from "../state/inference";
 import { Button, Sidebar, bs } from "../style";
-import { useHandlers } from "../utils/keyboard";
-import { Slider } from "../components/Slider";
 import { withDarkMode } from "../style/darkMode";
 import { Palette } from "../style/palette";
-import { NavLink } from "react-router";
+import { useHandlers } from "../utils/keyboard";
 
 type Provider = "anthropic" | "openai" | "test";
 
@@ -151,7 +156,19 @@ export default function NewExperiment() {
   const providerOptions = withIds(tokenProviders);
   const [provider, setProvider] = useState<Provider | null>(tokenProviders[0] ?? null);
   const [templates, setTemplates] = useAtom(templatesAtom);
-  const [temp, setTemp] = useState(0.0);
+  const [temp, setTemp] = useAtom(tempAtom);
+  const [model, setModel] = useAtom(modelAtom);
+
+  const models = useMemo(() => {
+    if (!provider) return [];
+    return modelOptions[provider];
+  }, [provider]);
+
+  useEffect(() => {
+    if (provider && !models.includes(model)) {
+      setModel(models[0]);
+    }
+  }, [provider, models, model]);
 
   const [object, setObject] = useState<null | object>(null);
   useEffect(() => {
@@ -172,7 +189,7 @@ export default function NewExperiment() {
 
   const isDisabled = role === "tool" && !object;
 
-  const [_, runExperiment] = useAtom(actionMap[provider ?? "anthropic"]);
+  const [_, runExperiment] = useAtom(actionMap[provider ?? "test"]);
   const submit = () => {
     if (isEditing) {
       // const newMessage: Message = { role, content: object || message, fromServer:  };
@@ -286,6 +303,20 @@ export default function NewExperiment() {
             )}
           </Select>
         )}
+        <Select
+          label="Model"
+          items={withIds(models)}
+          selectedKey={model}
+          onSelectionChange={(model) => {
+            setModel(model);
+          }}
+        >
+          {(item) => (
+            <Item textValue={item.name}>
+              <div>{item.name}</div>
+            </Item>
+          )}
+        </Select>
         <Slider
           value={temp}
           onChange={(value: number) => setTemp(value)}
@@ -308,20 +339,16 @@ export default function NewExperiment() {
           <>
             <h4>This message</h4>
             <div>
-              <ModalTrigger label="Edit">
-                {(close) => (
-                  <ModalContainer>
-                    <Editor
-                      setValue={() => {
-                        close();
-                      }}
-                    >
-                      {experiment[selection[0]].content}
-                    </Editor>
-                  </ModalContainer>
-                )}
-              </ModalTrigger>
-              <button
+              <Button
+                type="submit"
+                onClick={(e) => {
+                  e.preventDefault();
+                  setSelection([selection[0], "content"]);
+                }}
+              >
+                edit
+              </Button>
+              <Button
                 type="submit"
                 onClick={(e) => {
                   e.preventDefault();
@@ -329,8 +356,8 @@ export default function NewExperiment() {
                 }}
               >
                 delete
-              </button>
-              <button
+              </Button>
+              <Button
                 type="submit"
                 onClick={async (e) => {
                   e.preventDefault();
@@ -340,7 +367,7 @@ export default function NewExperiment() {
                 }}
               >
                 template
-              </button>
+              </Button>
             </div>
           </>
         )}
