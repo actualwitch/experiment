@@ -36,6 +36,7 @@ export const modelOptions = {
 
 export const tempAtom = entangledAtom("temp", atom(0.0));
 export const modelAtom = entangledAtom("model", atom<string>(""));
+export const isRunningAtom = entangledAtom("is running", atom(false));
 
 export const resolvedTokensAtom = divergentAtom(() => {
   return atom<Store["tokens"] | Promise<Store["tokens"]>>(async (get) => {
@@ -129,6 +130,7 @@ export const runExperimentAsAnthropic = entangledAtom(
   atom(null, async (get, set) => {
     const resolvedTokens = await store.get(resolvedTokensAtom);
     const experiment = get(experimentAtom);
+    set(isRunningAtom, true);
 
     if (!resolvedTokens.anthropic || !experiment) return;
 
@@ -166,7 +168,6 @@ export const runExperimentAsAnthropic = entangledAtom(
 
         set(experimentAtom, [...experiment, ...contentBlocks]);
       }
-      set(saveExperimentAtom);
     } else {
       const response = await anthropic.messages.create(experimentAsAnthropic);
       for (const contentBlock of response.content) {
@@ -178,6 +179,8 @@ export const runExperimentAsAnthropic = entangledAtom(
         }
       }
     }
+    set(saveExperimentAtom);
+    set(isRunningAtom, false);
   }),
 );
 
@@ -186,6 +189,7 @@ export const runExperimentAsOpenAi = entangledAtom(
   atom(null, async (get, set) => {
     const resolvedTokens = await get(resolvedTokensAtom);
     const experiment = get(experimentAtom);
+    set(isRunningAtom, true);
 
     if (!resolvedTokens.openai) {
       console.error("No openai token");
@@ -233,6 +237,7 @@ export const runExperimentAsOpenAi = entangledAtom(
         set(experimentAtom, [...experiment, ...contentChunks]);
       }
       set(saveExperimentAtom);
+      set(isRunningAtom, false);
     }
   }),
 );
@@ -242,6 +247,7 @@ export const runExperimentAsMistral = entangledAtom(
   atom(null, async (get, set) => {
     const resolvedTokens = await get(resolvedTokensAtom);
     const experiment = get(experimentAtom);
+    set(isRunningAtom, true);
 
     if (!resolvedTokens.mistral) {
       console.error("No mistral token");
@@ -285,6 +291,7 @@ export const runExperimentAsMistral = entangledAtom(
         set(experimentAtom, [...experiment, ...contentChunks]);
       }
       set(saveExperimentAtom);
+      set(isRunningAtom, false);
     }
   }),
 );

@@ -1,6 +1,6 @@
 import { css } from "@emotion/react";
 import styled from "@emotion/styled";
-import { useAtom } from "jotai";
+import { useAtom, useAtomValue } from "jotai";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Item } from "react-stately";
 
@@ -11,6 +11,7 @@ import { ChatPreview, selectionAtom } from "../components/chat";
 import { ExperimentsSidebar } from "../sidebars/experiments";
 import { type Role, experimentAtom, isDarkModeAtom, templatesAtom, tokensAtom } from "../state/common";
 import {
+  isRunningAtom,
   modelAtom,
   modelOptions,
   runExperimentAsAnthropic,
@@ -152,6 +153,7 @@ export default function NewExperiment() {
   const [selection, setSelection] = useAtom(selectionAtom);
   const [message, setMessage] = useState("");
   const [role, setRole] = useState<Role>("user");
+  const isRunning = useAtomValue(isRunningAtom);
 
   const [tokens] = useAtom(tokensAtom);
   const tokenProviders = Object.keys(tokens) as ProviderType[];
@@ -330,6 +332,7 @@ export default function NewExperiment() {
         />
         <Button
           type="submit"
+          disabled={isRunning || experiment.length === 0}
           onClick={(e) => {
             e.preventDefault();
             runExperiment();

@@ -68,8 +68,6 @@ export const storeAtom = divergentAtom(
   },
 );
 
-export const voidAtom = atom<void>(void 0);
-
 export const experimentAtom = entangledAtom("experiment", atom<Message[]>([]));
 
 export const experimentIdsAtom = entangledAtom(

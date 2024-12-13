@@ -7,6 +7,7 @@ import { VisuallyHidden, mergeProps, useFocusRing, useNumberFormatter, useSlider
 import { TRIANGLE } from "../const";
 import { InputContainer } from "./shared";
 import { Palette } from "../style/palette";
+import { bs } from "../style";
 
 const Container = styled(InputContainer)<{ orientation: "horizontal" | "vertical" }>`
   ${(p) => (p.orientation === "horizontal" ? "flex-direction: column;" : "height: 150px;")}
@@ -39,9 +40,10 @@ const ThumbComponent = styled.div<{ isFocusVisible?: boolean; isDragging?: boole
   height: 20px;
   :before {
     content: "${TRIANGLE}";
+    font-size: ${bs(1 / 2)};
     display: block;
     position: absolute;
-    top: 50%;
+    bottom: -50%;
     left: 50%;
     transform: translate(-50%, -10%) rotate(180deg) scale(2);
   }
