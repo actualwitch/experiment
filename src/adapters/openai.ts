@@ -31,7 +31,7 @@ export const experimentToOpenai = (experiment: Message[]): ChatCompletionCreateP
     messages,
     model: "gpt-4o",
     temperature: 0.0,
-    max_tokens: 2048,
+    max_completion_tokens: 2048,
     stream: true,
   };
   if (tools.length) {

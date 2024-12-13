@@ -210,6 +210,9 @@ export const runExperimentAsOpenAi = entangledAtom(
         temperature: get(tempAtom),
         model: get(modelAtom) ?? "gpt-4o",
       };
+      if (params.model === "o1-preview") {
+        params.temperature = undefined;
+      }
       const stream = await client.chat.completions.create(params);
       const contentChunks: Message[] = [];
       for await (const chunk of stream) {

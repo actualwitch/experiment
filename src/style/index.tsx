@@ -144,7 +144,7 @@ export const Container = styled.div(
     margin-bottom: 0;
     display: grid;
     grid-template-columns: 278px 1fr 320px;
-    height: 100lvh;
+    height: 100dvh;
     & > * {
       padding: ${bs()};
       overflow: auto;
