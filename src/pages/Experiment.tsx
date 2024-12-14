@@ -33,7 +33,7 @@ export default function Experiment() {
         <h1>
           Experiment {id}.{runId}
         </h1>
-        <ChatPreview history={experiment ?? []} />
+        <ChatPreview key={id + runId} history={experiment ?? []} />
       </div>
       <aside>
         <h3>Actions</h3>
