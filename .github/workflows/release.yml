@@ -19,6 +19,5 @@ jobs:
       - name: Release
         uses: softprops/action-gh-release@v2
         with:
-          draft: true
           files: |
             build/*
