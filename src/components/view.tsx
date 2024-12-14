@@ -193,6 +193,9 @@ const ViewContainer = styled.div<{ markdownMode?: true }>`
     margin-bottom: ${bs(1 / 3)};
     word-wrap: anywhere;
   }
+  li p {
+    margin-bottom: ${bs(1 / 3)};
+  }
   ${(p) =>
     !p.markdownMode &&
     css`

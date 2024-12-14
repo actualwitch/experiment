@@ -27,10 +27,6 @@ const StyledForm = styled.form`
     align-items: baseline;
     margin-bottom: ${bs(1.5)};
   }
-
-  * + h3 {
-    margin-top: ${bs(2 / 3)};
-  }
 `;
 
 const Row = styled.div`

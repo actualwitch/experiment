@@ -9,7 +9,7 @@ import { Select } from "../components/Select";
 import { Slider } from "../components/Slider";
 import { ChatPreview, selectionAtom } from "../components/chat";
 import { ExperimentsSidebar } from "../sidebars/experiments";
-import { type Role, experimentAtom, isDarkModeAtom, templatesAtom, tokensAtom } from "../state/common";
+import { type Message, type Role, experimentAtom, isDarkModeAtom, templatesAtom, tokensAtom } from "../state/common";
 import {
   isRunningAtom,
   modelAtom,
@@ -196,16 +196,17 @@ export default function NewExperiment() {
   const [_, runExperiment] = useAtom(actionMap[provider ?? "test"]);
   const submit = () => {
     if (isEditing) {
-      // const newMessage: Message = { role, content: object || message, fromServer:  };
       setSelection(null);
       setExperiment(
         experiment.map((item, i) => {
           if (i === selection[0]) {
-            return { role, content: object || message };
+            const newMessage: Message = { role, content: object || message, fromServer: item.fromServer };
+            return newMessage;
           }
           return item;
         }),
       );
+      return;
     }
     if (!message) return;
     setMessage("");

@@ -223,6 +223,10 @@ export const appStyle = [
       style {
         display: none;
       }
+
+      ${["h1", "h2", "h3", "h4", "h5", "h6"].map( el => `* + ${el}`).join(",")} {
+        margin-top: ${bs(2 / 3)};
+      }
     }
     ::selection {
       background-color: ${Palette.accent};

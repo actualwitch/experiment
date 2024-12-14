@@ -8,6 +8,9 @@ import { TRIANGLE } from "../const";
 import { InputContainer } from "./shared";
 import { Palette } from "../style/palette";
 import { bs } from "../style";
+import type { WithDarkMode } from "../style/darkMode";
+import { useAtomValue } from "jotai";
+import { isDarkModeAtom } from "../state/common";
 
 const Container = styled(InputContainer)<{ orientation: "horizontal" | "vertical" }>`
   ${(p) => (p.orientation === "horizontal" ? "flex-direction: column;" : "height: 150px;")}
@@ -18,7 +21,7 @@ const LabelContainer = styled.div`
   justify-content: space-between;
 `;
 
-const Track = styled.div<{ orientation: "horizontal" | "vertical"; disabled?: boolean }>`
+const Track = styled.div<{ orientation: "horizontal" | "vertical"; disabled?: boolean } & WithDarkMode>`
   position: relative;
   ${(p) => (p.orientation === "horizontal" ? "height: 30px; width: 100%;" : "width: 30px; height: 100%;")}
   ${(p) => (p.disabled ? "opacity: 0.4;" : "")}
@@ -26,7 +29,7 @@ const Track = styled.div<{ orientation: "horizontal" | "vertical"; disabled?: bo
     content: attr(x);
     display: block;
     position: absolute;
-    background: white;
+    background: ${p => p.isDarkMode ? Palette.white : Palette.black};
 
     height: 3px;
     width: 100%;
@@ -80,6 +83,7 @@ export function Slider(
 
   const orientation = props.orientation || "horizontal";
 
+  const isDarkMode = useAtomValue(isDarkModeAtom);
   return (
     <Container orientation={orientation} {...groupProps}>
       {/* Create a container for the label and output element. */}
@@ -90,7 +94,7 @@ export function Slider(
         </LabelContainer>
       )}
       {/* The track element holds the visible track line and the thumb. */}
-      <Track {...trackProps} ref={trackRef} orientation={orientation} disabled={state.isDisabled}>
+      <Track {...trackProps} ref={trackRef} orientation={orientation} disabled={state.isDisabled} isDarkMode={isDarkMode}>
         <Thumb index={0} state={state} trackRef={trackRef} name={props.name} />
       </Track>
     </Container>
