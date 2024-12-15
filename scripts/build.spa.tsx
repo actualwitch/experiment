@@ -4,9 +4,17 @@ import { StaticRouter } from "react-router";
 import { Shell } from "../src/root";
 import { assignToWindow } from "../src/utils/hydration";
 
+// why does this work but running it from Bun.build fails? #justbunthings
 await $`bun build ./src/entry/client.tsx --outdir ./spa`;
+// const buildResult = await Bun.build({
+//   entrypoints: ["./src/entry/client.tsx"],
+//   outdir: "./spa",
+// });
+// if (!buildResult.success) {
+//   throw new AggregateError(buildResult.logs, "Build failed");
+// }
 
-Bun.write(
+await Bun.write(
   "./spa/index.html",
   renderToString(
     <StaticRouter location={`${process.env.BASE_URL ?? ""}/`} basename={process.env.BASE_URL}>

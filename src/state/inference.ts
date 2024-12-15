@@ -15,8 +15,6 @@ import { getRealm, hasBackend } from "../utils/realm";
 import { type Message, type Store, createExperiment, experimentAtom, parentAtom, tokensAtom } from "./common";
 import { store } from "./store";
 
-
-
 export function withIds<T extends string>(items: T[] | readonly T[]) {
   return items.map((name) => ({
     id: name,
@@ -32,7 +30,7 @@ export const providerLabels = {
   openai: "OpenAI",
 } satisfies { [K in ProviderType]: string };
 
-export const availableProvidersAtom = atom<ProviderType[]>(get => {
+export const availableProvidersAtom = atom<ProviderType[]>((get) => {
   const tokens = get(tokensAtom);
   return Object.keys(tokens) as ProviderType[];
 });
@@ -57,14 +55,14 @@ export const tempAtom = entangledAtom("temp", atom(0.0));
 export const modelAtom = entangledAtom("model", atom<string>(""));
 export const isRunningAtom = entangledAtom("is running", atom(false));
 
-export const modelSupportsTemperatureAtom = atom(get => {
+export const modelSupportsTemperatureAtom = atom((get) => {
   const provider = get(selectedProviderAtom);
   const model = get(modelAtom);
   if (provider === "openai" && ["o1-mini", "o1-preview"].includes(model)) {
     return false;
   }
   return true;
-})
+});
 
 export const resolvedTokensAtom = divergentAtom(() => {
   return atom<Store["tokens"] | Promise<Store["tokens"]>>(async (get) => {
@@ -120,14 +118,28 @@ export const runInferenceAtom = entangledAtom(
   atom(null, async (get, set) => {
     const provider = get(selectedProviderAtom);
     if (!provider) return;
+    set(isRunningAtom, true);
 
-    switch (provider) {
-      case "anthropic":
-        return set(runExperimentAsAnthropic);
-      case "openai":
-        return set(runExperimentAsOpenAi);
-      case "mistral":
-        return set(runExperimentAsMistral);
+    try {
+      switch (provider) {
+        case "anthropic": {
+          await set(runExperimentAsAnthropic);
+          break;
+        }
+        case "openai": {
+          await set(runExperimentAsOpenAi);
+          break;
+        }
+        case "mistral": {
+          await set(runExperimentAsMistral);
+          break;
+        }
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      set(isRunningAtom, false);
+      set(saveExperimentAtom);
     }
   }),
 );
@@ -163,7 +175,6 @@ export const runExperimentAsAnthropic = entangledAtom(
   atom(null, async (get, set) => {
     const resolvedTokens = await store.get(resolvedTokensAtom);
     const experiment = get(experimentAtom);
-    set(isRunningAtom, true);
 
     if (!resolvedTokens.anthropic || !experiment) return;
 
@@ -212,8 +223,6 @@ export const runExperimentAsAnthropic = entangledAtom(
         }
       }
     }
-    set(saveExperimentAtom);
-    set(isRunningAtom, false);
   }),
 );
 
@@ -222,7 +231,6 @@ export const runExperimentAsOpenAi = entangledAtom(
   atom(null, async (get, set) => {
     const resolvedTokens = await get(resolvedTokensAtom);
     const experiment = get(experimentAtom);
-    set(isRunningAtom, true);
 
     if (!resolvedTokens.openai) {
       console.error("No openai token");
@@ -270,8 +278,6 @@ export const runExperimentAsOpenAi = entangledAtom(
         }
         set(experimentAtom, [...experiment, ...contentChunks]);
       }
-      set(saveExperimentAtom);
-      set(isRunningAtom, false);
     }
   }),
 );
@@ -281,7 +287,6 @@ export const runExperimentAsMistral = entangledAtom(
   atom(null, async (get, set) => {
     const resolvedTokens = await get(resolvedTokensAtom);
     const experiment = get(experimentAtom);
-    set(isRunningAtom, true);
 
     if (!resolvedTokens.mistral) {
       console.error("No mistral token");
@@ -324,8 +329,6 @@ export const runExperimentAsMistral = entangledAtom(
         }
         set(experimentAtom, [...experiment, ...contentChunks]);
       }
-      set(saveExperimentAtom);
-      set(isRunningAtom, false);
     }
   }),
 );

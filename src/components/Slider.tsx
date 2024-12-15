@@ -29,7 +29,7 @@ const Track = styled.div<{ orientation: "horizontal" | "vertical"; disabled?: bo
     content: attr(x);
     display: block;
     position: absolute;
-    background: ${p => p.isDarkMode ? Palette.white : Palette.black};
+    background: ${(p) => (p.isDarkMode ? Palette.white : Palette.black)};
 
     height: 3px;
     width: 100%;
@@ -94,7 +94,13 @@ export function Slider(
         </LabelContainer>
       )}
       {/* The track element holds the visible track line and the thumb. */}
-      <Track {...trackProps} ref={trackRef} orientation={orientation} disabled={state.isDisabled} isDarkMode={isDarkMode}>
+      <Track
+        {...trackProps}
+        ref={trackRef}
+        orientation={orientation}
+        disabled={state.isDisabled}
+        isDarkMode={isDarkMode}
+      >
         <Thumb index={0} state={state} trackRef={trackRef} name={props.name} />
       </Track>
     </Container>

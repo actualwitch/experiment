@@ -3,8 +3,8 @@ import styled from "@emotion/styled";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Item } from "react-stately";
-
 import { NavLink } from "react-router";
+
 import { Select } from "../components/Select";
 import { Slider } from "../components/Slider";
 import { ChatPreview, selectionAtom } from "../components/chat";
