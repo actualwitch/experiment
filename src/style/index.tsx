@@ -187,6 +187,7 @@ export const appStyle = [
   shevyStyle,
   css`
     :root {
+      background-color: ${Palette.white};
       font-family: ${fontFamily};
       font-weight: normal;
 

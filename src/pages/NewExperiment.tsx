@@ -1,6 +1,6 @@
 import { css } from "@emotion/react";
 import styled from "@emotion/styled";
-import { useAtom, useAtomValue } from "jotai";
+import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Item } from "react-stately";
 
@@ -9,30 +9,22 @@ import { Select } from "../components/Select";
 import { Slider } from "../components/Slider";
 import { ChatPreview, selectionAtom } from "../components/chat";
 import { ExperimentsSidebar } from "../sidebars/experiments";
-import { type Message, type Role, experimentAtom, isDarkModeAtom, templatesAtom, tokensAtom } from "../state/common";
+import { type Message, type Role, experimentAtom, isDarkModeAtom, templatesAtom } from "../state/common";
 import {
+  availableProvidersAtom,
   isRunningAtom,
   modelAtom,
   modelOptions,
-  runExperimentAsAnthropic,
-  runExperimentAsMistral,
-  runExperimentAsOpenAi,
+  modelSupportsTemperatureAtom,
+  runInferenceAtom,
+  selectedProviderAtom,
   tempAtom,
-  testStreaming,
+  withIds,
 } from "../state/inference";
 import { Button, Sidebar, bs } from "../style";
 import { withDarkMode } from "../style/darkMode";
 import { Palette } from "../style/palette";
 import { useHandlers } from "../utils/keyboard";
-
-type Provider = "anthropic" | "openai" | "test";
-
-const actionMap = {
-  anthropic: runExperimentAsAnthropic,
-  mistral: runExperimentAsMistral,
-  openai: runExperimentAsOpenAi,
-  test: testStreaming,
-} as const;
 
 const Column = styled.div`
   display: flex;
@@ -127,26 +119,6 @@ const TextArea = (props: React.TextareaHTMLAttributes<HTMLTextAreaElement>) => {
   return <textarea {...props} ref={ref} />;
 };
 
-export function withIds<T extends string>(items: T[] | readonly T[]) {
-  return items.map((name) => ({
-    id: name,
-    name,
-  }));
-}
-export const providerTypes = ["anthropic", "mistral", "openai"] as const;
-export type ProviderType = (typeof providerTypes)[number];
-export const providers = withIds(providerTypes);
-export const providerLabels = {
-  anthropic: "Anthropic",
-  mistral: "Mistral",
-  openai: "OpenAI",
-} satisfies { [K in ProviderType]: string };
-
-const ModalContainer = styled.div`
-  min-height: 80vh;
-  min-width: 80vw;
-`;
-
 export default function NewExperiment() {
   const [isDarkMode] = useAtom(isDarkModeAtom);
   const [experiment, setExperiment] = useAtom(experimentAtom);
@@ -155,10 +127,16 @@ export default function NewExperiment() {
   const [role, setRole] = useState<Role>("user");
   const isRunning = useAtomValue(isRunningAtom);
 
-  const [tokens] = useAtom(tokensAtom);
-  const tokenProviders = Object.keys(tokens) as ProviderType[];
+  const [tokenProviders] = useAtom(availableProvidersAtom);
   const providerOptions = withIds(tokenProviders);
-  const [provider, setProvider] = useState<Provider | null>(tokenProviders[0] ?? null);
+  const [provider, setProvider] = useAtom(selectedProviderAtom);
+
+  useEffect(() => {
+    if (!provider && providerOptions.length > 0) {
+      setProvider(providerOptions[0].id);
+    }
+  }, [provider, providerOptions]);
+
   const [templates, setTemplates] = useAtom(templatesAtom);
   const [temp, setTemp] = useAtom(tempAtom);
   const [model, setModel] = useAtom(modelAtom);
@@ -173,6 +151,8 @@ export default function NewExperiment() {
       setModel(models[0]);
     }
   }, [provider, models, model]);
+
+  const supportsTemp = useAtomValue(modelSupportsTemperatureAtom);
 
   const [object, setObject] = useState<null | object>(null);
   useEffect(() => {
@@ -193,7 +173,7 @@ export default function NewExperiment() {
 
   const isDisabled = role === "tool" && !object;
 
-  const [_, runExperiment] = useAtom(actionMap[provider ?? "test"]);
+  const runExperiment = useSetAtom(runInferenceAtom);
   const submit = () => {
     if (isEditing) {
       setSelection(null);
@@ -322,15 +302,17 @@ export default function NewExperiment() {
             </Item>
           )}
         </Select>
-        <Slider
-          value={temp}
-          onChange={(value: number) => setTemp(value)}
-          label="Temperature"
-          minValue={0}
-          maxValue={1}
-          step={0.01}
-          formatOptions={{ minimumFractionDigits: 2 }}
-        />
+        {supportsTemp && (
+          <Slider
+            value={temp}
+            onChange={(value: number) => setTemp(value)}
+            label="Temperature"
+            minValue={0}
+            maxValue={1}
+            step={0.01}
+            formatOptions={{ minimumFractionDigits: 2 }}
+          />
+        )}
         <Button
           type="submit"
           disabled={isRunning || experiment.length === 0}

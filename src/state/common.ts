@@ -4,7 +4,7 @@ import { atomWithStorage, createJSONStorage } from "jotai/utils";
 
 import { createFileStorage } from "../utils";
 import { divergentAtom, entangledAtom } from "../utils/entanglement";
-import { getRealm, hasBackend, isClient } from "../utils/realm";
+import { getRealm, hasBackend } from "../utils/realm";
 
 type _Message =
   | { role: "system"; content: string }

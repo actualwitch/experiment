@@ -6,6 +6,7 @@ import { marked } from "marked";
 import { bs } from "../style";
 import { Iframe } from "./IFrame";
 import { createElement } from "react";
+import { TRIANGLE } from "../const";
 
 type Primitive = string | number | boolean | null | undefined;
 
@@ -195,6 +196,12 @@ const ViewContainer = styled.div<{ markdownMode?: true }>`
   }
   li p {
     margin-bottom: ${bs(1 / 3)};
+  }
+  ul ::marker {
+    content: "▵ ";
+  }
+  ul ul ::marker {
+    content: "${TRIANGLE} ";
   }
   ${(p) =>
     !p.markdownMode &&

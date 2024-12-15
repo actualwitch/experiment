@@ -49,6 +49,7 @@
     "monaco-editor": "latest",
     "nanoid": "latest",
     "openai": "latest",
+    "polished": "latest",
     "react": "canary",
     "react-aria": "latest",
     "react-dom": "canary",

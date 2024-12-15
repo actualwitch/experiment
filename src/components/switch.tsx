@@ -1,10 +1,14 @@
 import styled from "@emotion/styled";
+import { ellipsis } from "polished";
 import { Button } from "../style";
 
 export type SwitchValue = boolean | undefined;
 
 const Container = styled.div`
+  display: flex;
+  flex-wrap: nowrap;
   button {
+    ${ellipsis()}
     border-radius: 0;
     &:first-of-type {
       border-top-left-radius: 6px;

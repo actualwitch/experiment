@@ -1,24 +1,43 @@
 import Anthropic from "@anthropic-ai/sdk";
+import { Mistral } from "@mistralai/mistralai";
+import type { ChatCompletionStreamRequest } from "@mistralai/mistralai/models/components";
 import { atom } from "jotai";
 import OpenAI from "openai";
-import { Mistral } from "@mistralai/mistralai";
+import type { ChatCompletionCreateParamsStreaming } from "openai/resources/index.mjs";
 import { Literal, Union } from "runtypes";
 import { experimentToAnthropic } from "../adapters/anthropic";
+import { experimentToMistral } from "../adapters/mistral";
 import { experimentToOpenai } from "../adapters/openai";
 import { markdownTest } from "../fixtures";
 import { maybeImport } from "../utils";
 import { divergentAtom, entangledAtom } from "../utils/entanglement";
-import { type Message, type Store, createExperiment, experimentAtom, parentAtom, tokensAtom } from "./common";
-import makeRequestTool from "./makeRequestTool.json";
-import { store } from "./store";
 import { getRealm, hasBackend } from "../utils/realm";
-import type { ChatCompletionCreateParamsStreaming } from "openai/resources/index.mjs";
-import type { ChatCompletionStreamRequest } from "@mistralai/mistralai/models/components";
-import { experimentToMistral } from "../adapters/mistral";
+import { type Message, type Store, createExperiment, experimentAtom, parentAtom, tokensAtom } from "./common";
+import { store } from "./store";
 
-export { makeRequestTool };
 
-export const toolsAtom = atom([makeRequestTool]);
+
+export function withIds<T extends string>(items: T[] | readonly T[]) {
+  return items.map((name) => ({
+    id: name,
+    name,
+  }));
+}
+export const providerTypes = ["anthropic", "mistral", "openai"] as const;
+export type ProviderType = (typeof providerTypes)[number];
+export const providers = withIds(providerTypes);
+export const providerLabels = {
+  anthropic: "Anthropic",
+  mistral: "Mistral",
+  openai: "OpenAI",
+} satisfies { [K in ProviderType]: string };
+
+export const availableProvidersAtom = atom<ProviderType[]>(get => {
+  const tokens = get(tokensAtom);
+  return Object.keys(tokens) as ProviderType[];
+});
+
+export const selectedProviderAtom = entangledAtom("selected-provider", atom<ProviderType | undefined>(undefined));
 
 export const OpenAIModel = Union(Literal("gpt-4o"), Literal("gpt-4o-mini"), Literal("o1-preview"), Literal("o1-mini"));
 export const AnthropicModel = Union(Literal("claude-3-5-sonnet-latest"), Literal("claude-3-5-haiku-latest"));
@@ -37,6 +56,15 @@ export const modelOptions = {
 export const tempAtom = entangledAtom("temp", atom(0.0));
 export const modelAtom = entangledAtom("model", atom<string>(""));
 export const isRunningAtom = entangledAtom("is running", atom(false));
+
+export const modelSupportsTemperatureAtom = atom(get => {
+  const provider = get(selectedProviderAtom);
+  const model = get(modelAtom);
+  if (provider === "openai" && ["o1-mini", "o1-preview"].includes(model)) {
+    return false;
+  }
+  return true;
+})
 
 export const resolvedTokensAtom = divergentAtom(() => {
   return atom<Store["tokens"] | Promise<Store["tokens"]>>(async (get) => {
@@ -77,18 +105,6 @@ export const resolvedTokensAtom = divergentAtom(() => {
   });
 });
 
-export const hasResolvedTokenAtom = entangledAtom(
-  "has resolved tokens",
-  atom(async (get) => {
-    const { anthropic, openai, mistral } = await get(resolvedTokensAtom);
-    return {
-      anthropic: !!anthropic,
-      mistral: !!mistral,
-      openai: !!openai,
-    };
-  }),
-);
-
 const saveExperimentAtom = entangledAtom(
   { name: "save-experiment" },
   atom(null, async (get, set) => {
@@ -96,6 +112,23 @@ const saveExperimentAtom = entangledAtom(
     const parent = get(parentAtom);
     if (!experiment.length) return;
     set(createExperiment, experiment, parent ?? undefined);
+  }),
+);
+
+export const runInferenceAtom = entangledAtom(
+  { name: "run-inference" },
+  atom(null, async (get, set) => {
+    const provider = get(selectedProviderAtom);
+    if (!provider) return;
+
+    switch (provider) {
+      case "anthropic":
+        return set(runExperimentAsAnthropic);
+      case "openai":
+        return set(runExperimentAsOpenAi);
+      case "mistral":
+        return set(runExperimentAsMistral);
+    }
   }),
 );
 
@@ -214,7 +247,8 @@ export const runExperimentAsOpenAi = entangledAtom(
         temperature: get(tempAtom),
         model: get(modelAtom) ?? "gpt-4o",
       };
-      if (params.model === "o1-preview") {
+      const supportsTemp = get(modelSupportsTemperatureAtom);
+      if (!supportsTemp) {
         params.temperature = undefined;
       }
       const stream = await client.chat.completions.create(params);

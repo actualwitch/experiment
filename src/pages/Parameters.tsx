@@ -4,17 +4,15 @@ import { useAtom } from "jotai";
 import { type PropsWithChildren, useState } from "react";
 import { Item } from "react-stately";
 
-import { ModalTrigger } from "../components/ModalTrigger";
 import { Select } from "../components/Select";
+import { TextField } from "../components/TextField";
 import { Switch } from "../components/switch";
 import { experimentLayoutAtom, isDarkModeAtom, tokensAtom } from "../state/common";
 import { Button, bs } from "../style";
 import { type WithDarkMode, withDarkMode } from "../style/darkMode";
-import { type FormProps, withFormStyling } from "../style/form";
 import { Palette } from "../style/palette";
 import { hasBackend } from "../utils/realm";
-import { type ProviderType, providerLabels, providerTypes, providers } from "./NewExperiment";
-import { TextField } from "../components/TextField";
+import { providerLabels, providers, providerTypes, type ProviderType } from "../state/inference";
 
 const StyledForm = styled.form`
   display: flex;
@@ -35,6 +33,7 @@ const Row = styled.div`
   justify-content: space-between;
   align-items: center;
   margin-bottom: ${bs()};
+  gap: ${bs(1 / 2)};
   & > header {
     font-size: 1.25em;
   }
