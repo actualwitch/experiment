@@ -7,7 +7,7 @@ import { Item } from "react-stately";
 import { Select } from "../components/Select";
 import { TextField } from "../components/TextField";
 import { Switch } from "../components/switch";
-import { experimentLayoutAtom, isDarkModeAtom, tokensAtom } from "../state/common";
+import { experimentLayoutAtom, isDarkModeAtom, rendererModeAtom, tokensAtom } from "../state/common";
 import { Button, bs } from "../style";
 import { type WithDarkMode, withDarkMode } from "../style/darkMode";
 import { Palette } from "../style/palette";
@@ -116,9 +116,10 @@ const ModalContent = ({ children, close }: PropsWithChildren<{ close: () => void
   );
 };
 
-export default function Configure() {
+export default function Parameters() {
   const [isDarkMode, setIsDarkMode] = useAtom(isDarkModeAtom);
   const [experimentLayout, setExperimentLayout] = useAtom(experimentLayoutAtom);
+  const [rendererMode, setRendererMode] = useAtom(rendererModeAtom);
   const [tokens, setTokens] = useAtom(tokensAtom);
   const [isAdding, setIsAdding] = useState(false);
 
@@ -164,6 +165,15 @@ export default function Configure() {
               { value: "left", name: "Left" },
               { value: "chat", name: "Chat", isDefault: true },
               { value: "chat-reverse", name: "Chat (rev)" },
+            ]}
+          </Switch>
+        </Row>
+        <Row>
+          <header>Renderer</header>
+          <Switch value={rendererMode} onChange={setRendererMode}>
+            {[
+              { value: "markdown", name: "Markdown", isDefault: true },
+              { value: "text+json", name: "Text + JSON" },
             ]}
           </Switch>
         </Row>

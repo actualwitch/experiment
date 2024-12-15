@@ -1,12 +1,13 @@
 import { css } from "@emotion/react";
 import styled from "@emotion/styled";
 import DOMPurify from "isomorphic-dompurify";
-import { atom } from "jotai";
+import { atom, useAtom } from "jotai";
 import { marked } from "marked";
 import { bs } from "../style";
 import { Iframe } from "./IFrame";
 import { createElement } from "react";
 import { TRIANGLE } from "../const";
+import { rendererModeAtom } from "../state/common";
 
 type Primitive = string | number | boolean | null | undefined;
 
@@ -236,14 +237,16 @@ export function View({
   onClick,
   onTitleClick,
   shouldBeCollapsed,
-  renderMode = "markdown",
+  renderMode,
 }: {
   children: unknown;
   style?: React.CSSProperties;
   renderMode?: "markdown" | "text";
 } & Pick<TreeOptions, "onClick" | "onTitleClick" | "shouldBeCollapsed">) {
+  const [rendererMode, setRendererMode] = useAtom(rendererModeAtom);
+  const mode = renderMode ?? rendererMode;
   if (typeof children === "string") {
-    if (renderMode === "markdown") {
+    if (mode === "markdown") {
       return <Markdown style={{ ...style, width: undefined }}>{children}</Markdown>;
     }
     return <ViewContainer style={style}>{Array.from(asTextTreeNodes(children))}</ViewContainer>;

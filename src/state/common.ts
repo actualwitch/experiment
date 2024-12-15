@@ -25,6 +25,7 @@ export type Experiment = {
 export type Store = {
   isDarkMode?: boolean;
   experimentLayout?: "left" | "chat" | "chat-reverse";
+  rendererMode?: "markdown" | "text+json";
   experiments?: Record<string, Experiment>;
   templates?: Record<string, _Message>;
   tokens: {
@@ -146,3 +147,8 @@ export const experimentLayoutAtom = entangledAtom(
 );
 
 export const parentAtom = entangledAtom("parent", atom<string | undefined>(undefined));
+
+export const rendererModeAtom = entangledAtom(
+  "rendererMode",
+  focusAtom(storeAtom, (o) => o.prop("rendererMode")),
+);

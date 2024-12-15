@@ -9,7 +9,7 @@ import { Select } from "../components/Select";
 import { Slider } from "../components/Slider";
 import { ChatPreview, selectionAtom } from "../components/chat";
 import { ExperimentsSidebar } from "../sidebars/experiments";
-import { type Message, type Role, experimentAtom, isDarkModeAtom, templatesAtom } from "../state/common";
+import { type Message, type Role, experimentAtom, isDarkModeAtom, parentAtom, templatesAtom } from "../state/common";
 import {
   availableProvidersAtom,
   isRunningAtom,
@@ -220,6 +220,15 @@ export default function NewExperiment() {
       setRole("user");
     }
   }, [experiment, selection, isEditing]);
+
+  const [parent, setParent] = useAtom(parentAtom);
+
+  useEffect(() => {
+    if (parent && experiment.length === 0) {
+      setParent(undefined);
+    }
+  }, [experiment, parent]);
+
   if (providerOptions.length === 0) {
     return (
       <Column>
