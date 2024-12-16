@@ -66,10 +66,7 @@ const InternalButton = styled.button<{ isDarkMode: boolean | undefined }>`
 export const Button = ({ onClick, ...props }: HTMLProps<HTMLButtonElement>) => {
   const [isDarkMode] = useAtom(isDarkModeAtom);
   const ref = useRef<HTMLButtonElement | null>(null);
-  const { buttonProps } = useButton(
-    { ...props, isDisabled: props.disabled, onClick, onPress: props.onPress ?? onClick },
-    ref,
-  );
+  const { buttonProps } = useButton({ ...props, isDisabled: props.disabled, onPress: props.onPress ?? onClick }, ref);
   return (
     <InternalButton isDarkMode={isDarkMode} {...buttonProps}>
       {props.children}
@@ -86,9 +83,9 @@ const button = css`
       background-color: ${Palette.buttonHoverBackground};
     }
   }
-  button {
+  button,
+  input[type="file"]::file-selector-button {
     ${content}
-    text-transform: capitalize;
     padding: 4px 13px;
     margin: 0;
     transition:

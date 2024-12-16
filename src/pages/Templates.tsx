@@ -4,7 +4,7 @@ import { useState } from "react";
 import { View } from "../components/view";
 import { SidebarInput } from "../navigation";
 import { templatesAtom } from "../state/common";
-import { Sidebar } from "../style";
+import { Button, Sidebar } from "../style";
 
 export default function Templates() {
   const [templates, setTemplates] = useAtom(templatesAtom);
@@ -21,7 +21,7 @@ export default function Templates() {
       <Sidebar>
         <h2>Actions</h2>
         {templates && selectedTemplate && (
-          <button
+          <Button
             type="button"
             onClick={() => {
               setTemplates(Object.fromEntries(Object.entries(templates).filter(([name]) => name !== selectedTemplate)));
@@ -29,7 +29,7 @@ export default function Templates() {
             }}
           >
             Delete
-          </button>
+          </Button>
         )}
       </Sidebar>
       <SidebarInput>

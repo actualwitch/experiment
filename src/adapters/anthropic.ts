@@ -5,7 +5,7 @@ import type {
   Tool,
 } from "@anthropic-ai/sdk/resources/index.mjs";
 import type { Message } from "../state/common";
-import { makeRequestTool } from "../state/inference";
+import type { makeRequestTool } from "../state/inference";
 
 export const experimentToAnthropic = (experiment: Message[]): MessageCreateParams | MessageCreateParamsNonStreaming => {
   let system = "";
@@ -24,7 +24,7 @@ export const experimentToAnthropic = (experiment: Message[]): MessageCreateParam
       }
     }
     if (role === "tool") {
-      let thisTool = content;
+      const thisTool = content;
 
       if (typeof thisTool === "object") {
         const tool = thisTool as typeof makeRequestTool;

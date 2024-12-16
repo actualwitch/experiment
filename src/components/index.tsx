@@ -10,15 +10,14 @@ export const ForkButton = ({ experiment, parent }: { experiment?: Message[]; par
   return (
     <Button
       type="submit"
-      onClick={(e) => {
+      onClick={() => {
         if (!experiment) return;
-        e.preventDefault();
         setExoeriment(experiment);
         if (parent) setParent(parent);
         navigate("/");
       }}
     >
-      fork experiment
+      Fork Experiment
     </Button>
   );
 };

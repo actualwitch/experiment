@@ -1,4 +1,4 @@
-import { atom, WritableAtom } from "jotai";
+import { atom, type WritableAtom } from "jotai";
 import { useState } from "react";
 
 export function ColorPicker() {
@@ -18,7 +18,7 @@ export function ColorPicker() {
         <input
           type="range"
           value={c1}
-          onChange={(e) => setC1(parseFloat(e.target.value))}
+          onChange={(e) => setC1(Number.parseFloat(e.target.value))}
           min={0}
           max={1}
           step={0.01}
@@ -28,7 +28,7 @@ export function ColorPicker() {
         <input
           type="range"
           value={c2}
-          onChange={(e) => setC2(parseFloat(e.target.value))}
+          onChange={(e) => setC2(Number.parseFloat(e.target.value))}
           min={0}
           max={1}
           step={0.01}
@@ -38,14 +38,21 @@ export function ColorPicker() {
         <input
           type="range"
           value={c3}
-          onChange={(e) => setC3(parseFloat(e.target.value))}
+          onChange={(e) => setC3(Number.parseFloat(e.target.value))}
           min={0}
           max={1}
           step={0.01}
         />
       </div>
       <div>
-        <input type="range" value={a} onChange={(e) => setA(parseFloat(e.target.value))} min={0} max={1} step={0.01} />
+        <input
+          type="range"
+          value={a}
+          onChange={(e) => setA(Number.parseFloat(e.target.value))}
+          min={0}
+          max={1}
+          step={0.01}
+        />
       </div>
     </>
   );

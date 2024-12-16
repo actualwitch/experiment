@@ -1,4 +1,9 @@
-[<img alt="Experiment screenshot" src="https://raw.githubusercontent.com/actualwitch/experiment/main/.github/Screenshot.png" />](https://actualwitch.github.io/experiment/)
+<a href="https://actualwitch.github.io/experiment/">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset=".github/screenshots/home-dark.png">
+    <img alt="Experiment screenshot" src=".github/screenshots/home-light.png">
+  </picture>
+</a>
 
 ## 🔬 Let's start the <ins>Experiment</ins>
 

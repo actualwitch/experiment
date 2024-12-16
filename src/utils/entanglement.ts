@@ -24,7 +24,7 @@ export function entangledAtom<
   _V,
   V extends _V | Promise<_V>,
   A extends [_V],
-  R extends unknown,
+  R,
   T extends Atom<V> | WritableAtom<V, A, R>,
 >(c: string | Config, thisAtom: T): T {
   const id = typeof c === "string" ? c : c.name;

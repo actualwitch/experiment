@@ -11,7 +11,7 @@ import { ChatPreview, selectionAtom } from "../components/chat";
 import { ExperimentsSidebar } from "../sidebars/experiments";
 import { type Message, type Role, experimentAtom, isDarkModeAtom, parentAtom, templatesAtom } from "../state/common";
 import {
-  availableProvidersAtom,
+  availableProviderOptionsAtom,
   isRunningAtom,
   modelAtom,
   modelOptions,
@@ -127,8 +127,7 @@ export default function NewExperiment() {
   const [role, setRole] = useState<Role>("user");
   const isRunning = useAtomValue(isRunningAtom);
 
-  const [tokenProviders] = useAtom(availableProvidersAtom);
-  const providerOptions = withIds(tokenProviders);
+  const [providerOptions] = useAtom(availableProviderOptionsAtom);
   const [provider, setProvider] = useAtom(selectedProviderAtom);
 
   useEffect(() => {
@@ -281,7 +280,7 @@ export default function NewExperiment() {
       </Column>
       <Sidebar>
         <h3>Actions</h3>
-        {tokenProviders.length > 1 && (
+        {providerOptions.length > 1 && (
           <Select
             label="Provider"
             items={providerOptions}
@@ -322,16 +321,27 @@ export default function NewExperiment() {
             formatOptions={{ minimumFractionDigits: 2 }}
           />
         )}
-        <Button
-          type="submit"
-          disabled={isRunning || experiment.length === 0}
-          onClick={(e) => {
-            e.preventDefault();
-            runExperiment();
-          }}
-        >
-          start experiment
-        </Button>
+        <div>
+          <Button
+            type="submit"
+            disabled={isRunning || experiment.length === 0}
+            onClick={() => {
+              runExperiment();
+            }}
+          >
+            Start Experiment
+          </Button>
+
+          <Button
+            type="submit"
+            onClick={() => {
+              setExperiment([]);
+            }}
+            disabled={isRunning || experiment.length === 0}
+          >
+            Reset
+          </Button>
+        </div>
         {selection !== null && selection.length === 1 && (
           <>
             <h4>This message</h4>
@@ -339,31 +349,28 @@ export default function NewExperiment() {
               <Button
                 type="submit"
                 onClick={(e) => {
-                  e.preventDefault();
                   setSelection([selection[0], "content"]);
                 }}
               >
-                edit
+                Edit
               </Button>
               <Button
                 type="submit"
                 onClick={(e) => {
-                  e.preventDefault();
                   deleteSelection();
                 }}
               >
-                delete
+                Delete
               </Button>
               <Button
                 type="submit"
-                onClick={async (e) => {
-                  e.preventDefault();
+                onClick={async () => {
                   const name = prompt("Name of the template");
                   if (!name) return;
                   setTemplates({ ...templates, [name]: experiment[selection[0]] });
                 }}
               >
-                template
+                Template
               </Button>
             </div>
           </>

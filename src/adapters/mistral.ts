@@ -9,7 +9,7 @@ export const experimentToMistral = (experiment: Message[]): ChatCompletionStream
   const tools: ChatCompletionStreamRequest["tools"] = [];
   for (const { role, content } of experiment) {
     if (role === "tool") {
-      let thisTool = content;
+      const thisTool = content;
 
       if (typeof thisTool === "object") {
         tools.push(thisTool as any);

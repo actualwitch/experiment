@@ -168,8 +168,8 @@ function asTreeNodes(
 function* asTextTreeNodes(input: string) {
   const stack = [];
   let buffer = "";
-  let currentBlock = "p";
-  let level = 0;
+  const currentBlock = "p";
+  const level = 0;
   let index = 0;
   for (const char of input) {
     if (char === "\n" && buffer) {

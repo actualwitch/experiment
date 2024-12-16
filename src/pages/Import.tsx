@@ -74,7 +74,7 @@ export default function () {
                 navigator.clipboard.writeText(JSON.stringify(chat));
               }}
             >
-              Copy as json
+              Copy JSON
             </button>
           </div>
         )}

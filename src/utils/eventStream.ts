@@ -21,16 +21,16 @@ type InitFunction = (send: SendFunction, abort: AbortFunction) => CleanupFunctio
  * @returns A Response object that can be returned from a loader
  */
 export function eventStream(signal: AbortSignal, init: InitFunction, options: ResponseInit = {}) {
-  let stream = new ReadableStream({
+  const stream = new ReadableStream({
     start(controller) {
-      let encoder = new TextEncoder();
+      const encoder = new TextEncoder();
 
       function send({ event = "message", data }: SendFunctionArgs) {
         controller.enqueue(encoder.encode(`event: ${event}\n`));
         controller.enqueue(encoder.encode(`data: ${data}\n\n`));
       }
 
-      let cleanup = init(send, close);
+      const cleanup = init(send, close);
 
       let closed = false;
 
@@ -48,7 +48,7 @@ export function eventStream(signal: AbortSignal, init: InitFunction, options: Re
     },
   });
 
-  let headers = new Headers(options.headers);
+  const headers = new Headers(options.headers);
 
   if (headers.has("Content-Type")) {
     console.warn("Overriding Content-Type header to `text/event-stream`");

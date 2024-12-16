@@ -16,6 +16,7 @@
     "dev:spa": "REALM=spa bun --watch run src/entry/server.spa.tsx",
     "format": "bunx biome format --write ./src/*",
     "format:prettier": "prettier ./src/* --write",
+    "lint": "bunx biome lint --write .",
     "test": "bunx playwright test",
     "playwright:update": "bunx playwright install"
   },

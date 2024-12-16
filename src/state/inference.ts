@@ -30,9 +30,13 @@ export const providerLabels = {
   openai: "OpenAI",
 } satisfies { [K in ProviderType]: string };
 
-export const availableProvidersAtom = atom<ProviderType[]>((get) => {
+export const availableProviderOptionsAtom = atom((get) => {
   const tokens = get(tokensAtom);
-  return Object.keys(tokens) as ProviderType[];
+  const providers = Object.keys(tokens) as ProviderType[];
+  return providers.map((provider) => ({
+    id: provider,
+    name: providerLabels[provider],
+  }));
 });
 
 export const selectedProviderAtom = entangledAtom("selected-provider", atom<ProviderType | undefined>(undefined));
@@ -173,7 +177,7 @@ export const testStreaming = entangledAtom(
 export const runExperimentAsAnthropic = entangledAtom(
   { name: "run-experiment-anthropic" },
   atom(null, async (get, set) => {
-    const resolvedTokens = await store.get(resolvedTokensAtom);
+    const resolvedTokens = await get(resolvedTokensAtom);
     const experiment = get(experimentAtom);
 
     if (!resolvedTokens.anthropic || !experiment) return;
@@ -212,6 +216,23 @@ export const runExperimentAsAnthropic = entangledAtom(
 
         set(experimentAtom, [...experiment, ...contentBlocks]);
       }
+      set(experimentAtom, [
+        ...experiment,
+        ...contentBlocks.map((block) => {
+          if (block.role === "tool" && typeof block.content === "string") {
+            try {
+              return {
+                role: "tool" as const,
+                fromServer: true,
+                content: JSON.parse(block.content),
+              };
+            } catch (e) {
+              return block;
+            }
+          }
+          return block;
+        }),
+      ]);
     } else {
       const response = await anthropic.messages.create(experimentAsAnthropic);
       for (const contentBlock of response.content) {
@@ -248,37 +269,80 @@ export const runExperimentAsOpenAi = entangledAtom(
       apiKey: resolvedTokens.openai,
       dangerouslyAllowBrowser: hasBackend() ? undefined : true,
     });
-    if (experimentAsOpenai.stream) {
-      const params: ChatCompletionCreateParamsStreaming = {
-        ...experimentAsOpenai,
-        stream: true,
-        temperature: get(tempAtom),
-        model: get(modelAtom) ?? "gpt-4o",
-      };
-      const supportsTemp = get(modelSupportsTemperatureAtom);
-      if (!supportsTemp) {
-        params.temperature = undefined;
+
+    const params: ChatCompletionCreateParamsStreaming = {
+      ...experimentAsOpenai,
+      stream: true,
+      temperature: get(tempAtom),
+      model: get(modelAtom) ?? "gpt-4o",
+    };
+    const supportsTemp = get(modelSupportsTemperatureAtom);
+    if (!supportsTemp) {
+      params.temperature = undefined;
+    }
+    const stream = await client.chat.completions.create(params);
+    const contentChunks: Message[] = [];
+    const namesForToolCalls = new Map<number, string>();
+    for await (const chunk of stream) {
+      if (chunk.choices.length === 0) {
+        continue;
       }
-      const stream = await client.chat.completions.create(params);
-      const contentChunks: Message[] = [];
-      for await (const chunk of stream) {
-        if (chunk.choices.length === 0) {
-          continue;
+      const choice = chunk.choices[0];
+      const delta = choice.delta;
+      if (!delta.content && !delta.tool_calls) {
+        continue;
+      }
+      if (delta.tool_calls && delta.tool_calls.length > 0) {
+        for (const toolCall of delta.tool_calls) {
+          if (!contentChunks[toolCall.index]) {
+            contentChunks[toolCall.index] = {
+              role: "tool",
+              fromServer: true,
+              content: "",
+            };
+          }
+          if (toolCall.function?.name) {
+            namesForToolCalls.set(toolCall.index, toolCall.function.name);
+          }
+          if (toolCall.function?.arguments) {
+            contentChunks[toolCall.index].content += toolCall.function.arguments;
+          }
         }
-        const choice = chunk.choices[0];
-        if (choice.index !== contentChunks.length - 1) {
-          contentChunks.push({
+      } else {
+        if (!contentChunks[choice.index]) {
+          contentChunks[choice.index] = {
             role: "assistant",
             fromServer: true,
             content: "",
-          });
+          };
         }
         if (typeof contentChunks[choice.index].content === "string") {
           contentChunks[choice.index].content += choice.delta.content ?? "";
         }
-        set(experimentAtom, [...experiment, ...contentChunks]);
       }
+
+      set(experimentAtom, [...experiment, ...contentChunks]);
     }
+    set(experimentAtom, [
+      ...experiment,
+      ...contentChunks.map((chunk, index) => {
+        if (chunk.role === "tool" && typeof chunk.content === "string") {
+          try {
+            return {
+              role: "tool" as const,
+              fromServer: true,
+              content: {
+                function: namesForToolCalls.get(index),
+                arguments: JSON.parse(chunk.content),
+              },
+            };
+          } catch (e) {
+            return chunk;
+          }
+        }
+        return chunk;
+      }),
+    ]);
   }),
 );
 

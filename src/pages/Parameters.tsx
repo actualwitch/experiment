@@ -189,7 +189,7 @@ export default function Parameters() {
                   name: providerLabels[provider],
                 }))}
             </Switch>
-          : <Button onClick={() => setIsAdding(true)}>add</Button>}
+          : <Button onClick={() => setIsAdding(true)}>Add</Button>}
         </Row>
         {selectedProvider && (
           <Row>

@@ -13,7 +13,7 @@ export const experimentToOpenai = (experiment: Message[]): ChatCompletionCreateP
   const tools: ChatCompletionTool[] = [];
   for (const { role, content } of experiment) {
     if (role === "tool") {
-      let thisTool = content;
+      const thisTool = content;
 
       if (typeof thisTool === "object") {
         tools.push(thisTool as any);
