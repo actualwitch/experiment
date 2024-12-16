@@ -150,5 +150,5 @@ export const parentAtom = entangledAtom("parent", atom<string | undefined>(undef
 
 export const rendererModeAtom = entangledAtom(
   "rendererMode",
-  focusAtom(storeAtom, (o) => o.prop("rendererMode")),
+  focusAtom(storeAtom, (o) => o.prop("rendererMode").valueOr("markdown")),
 );

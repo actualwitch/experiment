@@ -7,10 +7,10 @@ import { publish, subscribe, type Update } from "../state/æther";
 import { eventStream } from "../utils/eventStream";
 import { getClientAsString } from "./_macro" with { type: "macro" };
 
-export const getHtml = (location: string, additionalScripts?: string[]) => {
+export const getHtml = (location: string, additionalScripts?: string[], baseUrl?: string) => {
   const html = renderToString(
-    <StaticRouter location={location}>
-      <Shell bootstrap additionalScripts={additionalScripts} />
+    <StaticRouter location={location} basename={baseUrl}>
+      <Shell bootstrap additionalScripts={additionalScripts} baseUrl={baseUrl} />
     </StaticRouter>,
   );
   return `<!DOCTYPE html>${html}`;
