@@ -5,18 +5,32 @@
   </picture>
 </a>
 
-## 🔬 Let's start the <ins>Experiment</ins>
+<p align="center">
+  <a href="https://actualwitch.github.io/experiment/">
+    Web
+  </a>
+  ▴
+  <a href="https://github.com/actualwitch/experiment/releases/latest">
+    Binaries
+  </a>
+</p>
 
-**Experiment** is a simple tool to facilitate prompt engineering. You can use it to make chat completion requests, debug function calling and explore completions saved as CSV.
+# 🔬 Let's start the <ins>Experiment</ins>
 
-## Development
+**Experiment** is a LLM chat UI with advanced tool use debugging facilities. You can use it to make completion requests via Anthropic, OpenAI and Mistral APIs or explore/fork existing completions recorded for example via OpenAI proxy (not included in this repo). For now only .csv files are supported for importing completions.
 
-This project uses custom architecture I refer to as "entangled atoms" which extends [jōtai](https://jotai.org/) atoms to synchronize state across different [realms](https://262.ecma-international.org/#realm). This allows for end-to-end isomorphic state management where same primitives are used to manage state everywhere. Unconventional nature of this approach led me to design my own boilerplate; after trying out different runtimes I decided to make use of [Bun](https://bun.sh/) which is very fast and offers neat features like macros and programmatically accessible bundler. You will need Bun installed to run this repo locally.
+## Architecture
 
-There is no Next.js, Remix, Vite, Webpack or Babel here; my aim is simplicity and minimalism in terms of requirements and general architecture. Currently, boilerplate implements full streaming Server-Side Rendering(SSR) with transparent bundling, hydration and Server-Sent Events(SSE) for state sync.
+This project uses a custom React-based solution with full SSR and minimal dependencies.
 
-Shall you want to run this repo locally, you can do so by running `dev` script from Bun, dependencies will be installed automagically:
+<a href="docs/architecture.md">Read more about architecture →</a>
 
-```sh
-bun dev
-```
+## Installation
+
+Experiment is an universal/isomorphic app that runs in browser or as a self-contained binary that requires no dependencies. All variants are functionally equivalent with the exception of 1Password support which is only available in the binary edition. State is stored in LocalStorage/Filesystem respectively.
+
+<a href="https://github.com/actualwitch/experiment/releases/latest">Download the latest release →</a>
+
+<hr>
+
+Banner by <a href="https://unsplash.com/@jessbaileydesigns?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash">Jess Bailey</a> on <a href="https://unsplash.com/photos/pen-near-black-lined-paper-and-eyeglasses-q10VITrVYUM?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash">Unsplash</a>
