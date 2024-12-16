@@ -19,6 +19,8 @@
 
 **Experiment** is a LLM chat UI with advanced tool use debugging facilities. You can use it to make completion requests via Anthropic, OpenAI and Mistral APIs or explore/fork existing completions recorded for example via OpenAI proxy (not included in this repo). For now only .csv files are supported for importing completions.
 
+<a href="docs/tool-debugging.md">Read more about tool debugging →</a>
+
 ## Architecture
 
 This project uses a custom React-based solution with full SSR and minimal dependencies.

@@ -1,0 +1,3 @@
+# Tool use debugging
+
+While Experiment cannot execute actual tools (yet), it is still a massive boon when it comes to debugging them. Add tools by pasting a JSON schema into chat and you will see it visualized in a convenient form with all props sorted first by name, then by depth. Click on the name of the prop to collapse it. You can append multiple tools to chat and they will be available to the model. Tool use completions are also visualized in a similar manner. By default UI uses `markdown` renderer mode, but in some cases switching to `Text + JSON` can be helpful, as in this mode inline JSON is rendered by the same component as tools.
