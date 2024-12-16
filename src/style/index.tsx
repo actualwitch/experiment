@@ -185,6 +185,7 @@ export const appStyle = [
   css`
     :root {
       background-color: ${Palette.white};
+      color: ${Palette.black};
       font-family: ${fontFamily};
       font-weight: normal;
 
