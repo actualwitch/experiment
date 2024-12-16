@@ -139,11 +139,11 @@ export const runInferenceAtom = entangledAtom(
           break;
         }
       }
+      set(saveExperimentAtom);
     } catch (e) {
       console.error(e);
     } finally {
       set(isRunningAtom, false);
-      set(saveExperimentAtom);
     }
   }),
 );
