@@ -15,9 +15,9 @@ await Promise.all(
     }
 
     // Remove quarantine for Mac binaries
-    // if (target.startsWith("darwin")) {
-    //   await $`xattr -d com.apple.quarantine ${binary} || true`;
-    // }
+    if (target.startsWith("darwin")) {
+      await $`xattr -d com.apple.quarantine ${binary} || true`;
+    }
   
     // Create zip archive
     const filename = target.startsWith("windows") ? `${binary}.exe` : binary;

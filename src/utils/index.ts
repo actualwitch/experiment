@@ -21,7 +21,7 @@ const getStoragePath = () => {
     return "./state";
   }
   if (platform() === "win32") {
-    const appData = process.env.APPDATA;
+    const appData = Bun.env.APPDATA;
     if (!appData) {
       throw new Error("APPDATA not found");
     }
@@ -30,7 +30,7 @@ const getStoragePath = () => {
     }
     return `${appData}/experiment`;
   }
-  const home = process.env.HOME;
+  const home = Bun.env.HOME;
   if (!home) {
     throw new Error("HOME not found");
   }
