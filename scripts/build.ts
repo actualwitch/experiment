@@ -3,6 +3,8 @@ import { VERSION } from "../src/const";
 
 const TARGETS = ["linux-x64", "linux-arm64", "windows-x64", "darwin-x64", "darwin-arm64"];
 
+$`rm -rf ./build`;
+
 // Build all targets
 await Promise.all(
   TARGETS.map(
