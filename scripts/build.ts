@@ -5,23 +5,23 @@ const TARGETS = ["linux-x64", "linux-arm64", "windows-x64", "darwin-x64", "darwi
 
 // Build all targets
 await Promise.all(
-  TARGETS.map(
-    (target) =>
-      $`bun build --compile --minify --target=bun-${target}-modern ./src/entry/server.tsx --outfile ./build/experiment-${VERSION}-${target}`,
-  ),
-);
+  TARGETS.map(async (target) => {
+    const binary = `./build/experiment-${VERSION}-${target}`;
+    await $`bun build --compile --minify --target=bun-${target}-modern ./src/entry/server.tsx --outfile ${binary}`;
 
-// Create archives with proper permissions
-for (const target of TARGETS) {
-  const binary = `./build/experiment-${VERSION}-${target}`;
+    // Set executable permissions for Darwin/Linux binaries
+    if (!target.startsWith("windows")) {
+      await $`chmod +x ${binary}`;
+    }
+
+    // Remove quarantine for Mac binaries
+    // if (target.startsWith("darwin")) {
+    //   await $`xattr -d com.apple.quarantine ${binary} || true`;
+    // }
   
-  // Set executable permissions and remove quarantine for Mac binaries
-  if (target.startsWith('darwin')) {
-    await $`chmod +x ${binary}`;
-    await $`xattr -d com.apple.quarantine ${binary} || true`;
-  }
-  
-  // Create zip archive
-  await $`zip -j ${binary}.zip ${binary}`;
-  await $`rm ${binary}`;
-}
+    // Create zip archive
+    const filename = target.startsWith("windows") ? `${binary}.exe` : binary;
+    await $`zip -j ${binary}.zip ${filename}`;
+    await $`rm ${filename}`;
+  }),
+);
