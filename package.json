@@ -3,7 +3,7 @@
   "description": "🔬 Experiment is a LLM chat UI with advanced tool use debugging facilities.",
   "keywords": ["inference", "experiment-tracking", "llm"],
   "repository": "github:actualwitch/experiment",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "author": "Ade あで Fisher",
   "license": "MIT",
   "private": true,
