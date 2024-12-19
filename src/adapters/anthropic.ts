@@ -5,7 +5,6 @@ import type {
   Tool,
 } from "@anthropic-ai/sdk/resources/index.mjs";
 import type { Message } from "../state/common";
-import type { makeRequestTool } from "../state/inference";
 
 export const experimentToAnthropic = (experiment: Message[]): MessageCreateParams | MessageCreateParamsNonStreaming => {
   let system = "";
@@ -13,9 +12,9 @@ export const experimentToAnthropic = (experiment: Message[]): MessageCreateParam
   const tools: Tool[] = [];
   for (const { role, content } of experiment) {
     if (role === "system") {
-      system += content + "\n";
+      system += `${content}\n`;
     }
-    if (role === "user") {
+    if (role === "user" || role === "assistant") {
       if (typeof content === "string") {
         messages.push({ role: "user", content });
       }
@@ -24,10 +23,9 @@ export const experimentToAnthropic = (experiment: Message[]): MessageCreateParam
       }
     }
     if (role === "tool") {
-      const thisTool = content;
 
-      if (typeof thisTool === "object") {
-        const tool = thisTool as typeof makeRequestTool;
+      if (typeof content === "object") {
+        const tool = content as typeof makeRequestTool;
         tools.push({
           name: tool?.function?.name ?? "Unnamed tool",
           description: tool?.function?.description ?? "No description",

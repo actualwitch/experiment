@@ -8,12 +8,20 @@ import { Literal, Union } from "runtypes";
 import { experimentToAnthropic } from "../adapters/anthropic";
 import { experimentToMistral } from "../adapters/mistral";
 import { experimentToOpenai } from "../adapters/openai";
-import { markdownTest } from "../fixtures";
 import { maybeImport } from "../utils";
 import { divergentAtom, entangledAtom } from "../utils/entanglement";
 import { getRealm, hasBackend } from "../utils/realm";
-import { type Message, type Store, createExperiment, experimentAtom, parentAtom, tokensAtom } from "./common";
+import {
+  type Message,
+  type Store,
+  createExperiment,
+  experimentAtom,
+  parentAtom,
+  storeAtom,
+  tokensAtom,
+} from "./common";
 import { store } from "./store";
+import { focusAtom } from "jotai-optics";
 
 export function withIds<T extends string>(items: T[] | readonly T[]) {
   return items.map((name) => ({
@@ -67,6 +75,29 @@ export const modelSupportsTemperatureAtom = atom((get) => {
   }
   return true;
 });
+
+export const resolveToken = async (token: string) => {
+  if (token.startsWith("op:")) {
+    const { spawn } = await maybeImport("child_process");
+    if (!spawn) return null;
+    const handle = spawn("op", ["read", token]);
+    const resolvedToken = await new Promise<string | null>((ok, ko) => {
+      handle.stdout.on("data", (data: unknown) => {
+        ok(String(data).trim());
+      });
+
+      handle.stderr.on("data", (data: unknown) => {
+        console.error(String(data));
+      });
+
+      handle.on("close", () => {
+        ok(null);
+      });
+    });
+    return resolvedToken;
+  }
+  return token;
+};
 
 export const resolvedTokensAtom = divergentAtom(() => {
   return atom<Store["tokens"] | Promise<Store["tokens"]>>(async (get) => {
@@ -150,12 +181,12 @@ export const runInferenceAtom = entangledAtom(
 
 export const testStreaming = entangledAtom(
   { name: "test-streaming" },
-  atom(null, async (get, set) => {
+  atom(null, async (get, set, content: string) => {
     const experiment = get(experimentAtom);
 
     let index = 0;
     const int = setInterval(() => {
-      if (index >= markdownTest.length) {
+      if (index >= content.length) {
         clearInterval(int);
         set(saveExperimentAtom);
         return;
@@ -167,7 +198,7 @@ export const testStreaming = entangledAtom(
         {
           role: "assistant",
           fromServer: true,
-          content: markdownTest.slice(0, index),
+          content: content.slice(0, index),
         },
       ]);
     }, 10);
@@ -177,15 +208,29 @@ export const testStreaming = entangledAtom(
 export const runExperimentAsAnthropic = entangledAtom(
   { name: "run-experiment-anthropic" },
   atom(null, async (get, set) => {
-    const resolvedTokens = await get(resolvedTokensAtom);
-    const experiment = get(experimentAtom);
 
-    if (!resolvedTokens.anthropic || !experiment) return;
+    const tokenAtom = focusAtom(storeAtom, (o) => o.prop("tokens").prop("anthropic"));
+    const tokenOrReference = get(tokenAtom);
+    if (!tokenOrReference) {
+      console.error("No anthropic token");
+      return;
+    }
+    const resolvedToken = await resolveToken(tokenOrReference);
+    if (!resolvedToken) {
+      console.error("No resolved token");
+      return;
+    }
+
+    const experiment = get(experimentAtom);
+    if (!experiment || experiment.length === 0) {
+      console.error("No experiment");
+      return;
+    }
 
     const { stream, ...experimentAsAnthropic } = experimentToAnthropic(experiment);
 
     const anthropic = new Anthropic({
-      apiKey: resolvedTokens.anthropic,
+      apiKey: resolvedToken,
       dangerouslyAllowBrowser: hasBackend() ? undefined : true,
     });
     if (stream) {
@@ -250,13 +295,19 @@ export const runExperimentAsAnthropic = entangledAtom(
 export const runExperimentAsOpenAi = entangledAtom(
   { name: "run-experiment-openai" },
   atom(null, async (get, set) => {
-    const resolvedTokens = await get(resolvedTokensAtom);
-    const experiment = get(experimentAtom);
-
-    if (!resolvedTokens.openai) {
+    const tokenAtom = focusAtom(storeAtom, (o) => o.prop("tokens").prop("openai"));
+    const tokenOrReference = get(tokenAtom);
+    if (!tokenOrReference) {
       console.error("No openai token");
       return;
     }
+    const resolvedToken = await resolveToken(tokenOrReference);
+    if (!resolvedToken) {
+      console.error("No resolved token");
+      return;
+    }
+
+    const experiment = get(experimentAtom);
     if (!experiment || experiment.length === 0) {
       console.error("No experiment");
       return;
@@ -266,13 +317,16 @@ export const runExperimentAsOpenAi = entangledAtom(
     if (!experimentAsOpenai) return;
 
     const client = new OpenAI({
-      apiKey: resolvedTokens.openai,
+      apiKey: resolvedToken,
       dangerouslyAllowBrowser: hasBackend() ? undefined : true,
     });
 
     const params: ChatCompletionCreateParamsStreaming = {
       ...experimentAsOpenai,
       stream: true,
+      stream_options: {
+        include_usage: true
+      },
       temperature: get(tempAtom),
       model: get(modelAtom) ?? "gpt-4o",
     };
@@ -284,6 +338,7 @@ export const runExperimentAsOpenAi = entangledAtom(
     const contentChunks: Message[] = [];
     const namesForToolCalls = new Map<number, string>();
     for await (const chunk of stream) {
+      console.log(JSON.stringify(chunk, null, 2))
       if (chunk.choices.length === 0) {
         continue;
       }
@@ -311,7 +366,7 @@ export const runExperimentAsOpenAi = entangledAtom(
       } else {
         if (!contentChunks[choice.index]) {
           contentChunks[choice.index] = {
-            role: "assistant",
+            role: chunk.choices[0].delta.role ?? "assistant",
             fromServer: true,
             content: "",
           };

@@ -33,7 +33,7 @@
     "selenium-webdriver": "latest"
   },
   "peerDependencies": {
-    "typescript": "latest"
+    "typescript": "next"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "latest",

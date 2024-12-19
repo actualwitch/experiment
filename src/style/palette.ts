@@ -14,6 +14,7 @@ export const Palette = {
   buttonShadowDark: "#ececec",
   white: transFlag[2],
   black: "#000000",
+  blue: transFlag[0],
   inputBackground: "#eeeeee",
   link: enbyFlag[1],
   purple: enbyFlag[1],

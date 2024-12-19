@@ -3,7 +3,7 @@ import type {
   ChatCompletionMessageParam,
   ChatCompletionTool,
 } from "openai/resources/index.mjs";
-import type { Message } from "../state/common";
+import { ObjectOrStringType, StringType, type Message } from "../state/common";
 
 export const experimentToOpenai = (experiment: Message[]): ChatCompletionCreateParams | null => {
   if (experiment.length === 0) {
@@ -20,29 +20,22 @@ export const experimentToOpenai = (experiment: Message[]): ChatCompletionCreateP
       }
       continue;
     }
-    if (typeof content === "string") {
+    if (typeof content === "string" && StringType.guard(role)) {
       messages.push({ role, content });
     }
-    if (typeof content === "object") {
-      messages.push({ role: "user", content: JSON.stringify(content) });
+    if (typeof content === "object" && role !== "info" && ObjectOrStringType.guard(role)) {
+      messages.push({ role, content: JSON.stringify(content) });
     }
   }
   const result: ChatCompletionCreateParams = {
     messages,
     model: "gpt-4o",
     temperature: 0.0,
-    max_completion_tokens: 2048,
     stream: true,
   };
   if (tools.length) {
     result.tools = tools;
-    result.tool_choice =
-      tools.length === 1 ?
-        {
-          type: "function" as const,
-          function: { name: tools[0].function.name },
-        }
-      : undefined;
+    result.tool_choice = "auto";
   }
   return result;
 };

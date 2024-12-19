@@ -7,6 +7,7 @@ import { TRIANGLE } from "../const";
 import {
   type Message,
   type Store,
+  type _Message,
   experimentAtom,
   experimentLayoutAtom,
   isDarkModeAtom,
@@ -63,7 +64,7 @@ const getAlign = (fromServer: boolean, experimentLayout: Store["experimentLayout
 };
 
 export const MessageComponent = styled.article<{
-  role: "system" | "user" | "assistant" | "tool";
+  role: "assistant" | "developer" | "info" | "system" | "tool" | "user";
   contentType?: string;
   ioType?: "input" | "output";
   isSelected?: boolean;
@@ -123,6 +124,11 @@ export const MessageComponent = styled.article<{
       border-color: ${Palette.yellow};
     `);
   }
+  if (role === "developer") {
+    styles.push(css`
+      border-color: ${Palette.blue};
+    `);
+  }
   if (role === "user") {
     styles.push(css`
       border-color: ${Palette.purple};
@@ -137,6 +143,17 @@ export const MessageComponent = styled.article<{
     styles.push(css`
       border-color: ${Palette.green};
     `);
+  }
+  if (role === "info") {
+    if (isDarkMode) {
+      styles.push(css`
+        border-color: ${Palette.white}70;
+      `);
+    } else {
+      styles.push(css`
+        border-color: ${Palette.black}50;
+      `);
+    }
   }
   if (isSelected) {
     if (isDarkMode) {
@@ -188,22 +205,29 @@ const lensAtom = atom(
   },
 );
 
+function hasMessages(obj: _Message | { messages: Message[] }): obj is { messages: Message[] } {
+  return Object.hasOwn(obj, "messages");
+}
+
 export const ChatMessage = ({ message: _message, index }: { message: Message; index: number }) => {
   const ref = useRef<null | HTMLElement>(null);
   const selector: Path = [index, "content"];
   const [selection, setSelection] = useAtom(selectionAtom);
   const isSelected = index === selection?.[0];
   const [collapsed, setCollapsed] = useAtom(collapsedAtom);
-  const setter = useSetAtom(lensAtom);
   const templates = useAtomValue(templatesAtom);
   const isDarkMode = useAtomValue(isDarkModeAtom);
   const experimentLayout = useAtomValue(experimentLayoutAtom);
 
   const message = { ..._message };
   for (const [name, template] of Object.entries(templates ?? {})) {
-    if (message.role === template.role && deepEqual(message.content, template.content)) {
-      message.template = name;
-      break;
+    if (hasMessages(template)) {
+      template.messages;
+    } else {
+      if (message.role === template.role && deepEqual(message.content, template.content)) {
+        message.template = name;
+        break;
+      }
     }
   }
 

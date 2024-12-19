@@ -7,11 +7,19 @@
 
 <p align="center">
   <a href="https://actualwitch.github.io/experiment/">
-    Web
+    Browser
   </a>
   ▴
   <a href="https://github.com/actualwitch/experiment/releases/latest">
-    Binaries
+    Mac
+  </a>
+  ▴
+  <a href="https://github.com/actualwitch/experiment/releases/latest">
+    Linux
+  </a>
+  ▴
+  <a href="https://github.com/actualwitch/experiment/releases/latest">
+    Windows
   </a>
 </p>
 

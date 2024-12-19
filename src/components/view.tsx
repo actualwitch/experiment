@@ -4,7 +4,6 @@ import DOMPurify from "isomorphic-dompurify";
 import { atom, useAtom } from "jotai";
 import { marked } from "marked";
 import { bs } from "../style";
-import { Iframe } from "./IFrame";
 import { createElement } from "react";
 import { TRIANGLE } from "../const";
 import { rendererModeAtom } from "../state/common";

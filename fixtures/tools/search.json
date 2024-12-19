@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "function",
+  "function": {
+    "name": "search",
+    "description": "The `search` tool allows you to search for information.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "query": {
+          "type": "string",
+          "description": "The information you want to search for."
+        }
+      },
+      "required": ["query"]
+    }
+  }
+}

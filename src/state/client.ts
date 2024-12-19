@@ -1,7 +1,13 @@
 import { atom } from "jotai";
 import type { Message } from "./common";
 
-export const importsRegistry = atom<Record<string, Message[][]>>({});
+export type ExperimentWithMeta = {
+  id?: string;
+  messages: Message[];
+  timestamp?: string;
+};
+
+export const importsRegistry = atom<Record<string, Array<ExperimentWithMeta>>>({});
 
 export const filenames = atom((get) => {
   const registry = get(importsRegistry);
@@ -43,7 +49,7 @@ export const processCsvAtom = atom(null, (get, set, file?: File) => {
     const file = e.target?.result;
     if (!file) return;
     const { default: csv } = await import("csvtojson");
-    const experiments: Message[][] = [];
+    const experiments: Array<ExperimentWithMeta> = [];
     const lines = await csv().fromString(file.toString());
     for (const line of lines) {
       let timestamp: string | null = null;
@@ -83,7 +89,14 @@ export const processCsvAtom = atom(null, (get, set, file?: File) => {
         }
       }
       if (thisExperiment.length) {
-        experiments.push(thisExperiment);
+        const exp: ExperimentWithMeta = { messages: thisExperiment };
+        if (id !== null) {
+          exp.id = id;
+        }
+        if (timestamp !== null) {
+          exp.timestamp = timestamp;
+        }
+        experiments.push(exp);
       }
     }
     set(importsRegistry, (prev) => ({

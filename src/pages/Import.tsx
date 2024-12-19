@@ -5,15 +5,18 @@ import { ForkButton } from "../components";
 import { ChatPreview } from "../components/chat";
 import { View } from "../components/view";
 import { SidebarInput } from "../navigation";
-import { filenames, importsRegistry, processCsvAtom, selectedChat } from "../state/client";
-import { Sidebar } from "../style";
+import { filenames, importsRegistry, processCsvAtom, selectedChat, type ExperimentWithMeta } from "../state/client";
+import { Button, Sidebar } from "../style";
+import { Column } from "./NewExperiment";
+import { isDarkModeAtom } from "../state/common";
+import templates from "../../fixtures/templates.json";
 
 const SidebarContents = () => {
   const [chats] = useAtom(filenames);
   const [registry] = useAtom(importsRegistry);
   const [_, setSelectedChat] = useAtom(selectedChat);
   const entries = chats.reduce((acc, chatId) => {
-    acc[chatId] = registry[chatId].map((chat, idx) => `Experiment ${idx}`);
+    acc[chatId] = registry[chatId].map((chat, idx) => chat.id ?? `Experiment ${idx}`);
     return acc;
   }, {} as any);
   if (chats.length === 0) {
@@ -35,47 +38,75 @@ const CsvInput = () => {
   const processFile = useSetAtom(processCsvAtom);
 
   return (
-    <input
-      type="file"
-      accept=".csv"
-      onChange={(e) => {
-        processFile(e.target.files?.[0]);
-      }}
-    />
+    <p>
+      <input
+        type="file"
+        accept=".csv"
+        onChange={(e) => {
+          processFile(e.target.files?.[0]);
+        }}
+      />
+    </p>
   );
 };
 
 export default function () {
-  const [selected] = useAtom(selectedChat);
-  const [registry] = useAtom(importsRegistry);
+  const [isDarkMode] = useAtom(isDarkModeAtom);
+
+  const [selected, setSelected] = useAtom(selectedChat);
+  const [registry, setRegistry] = useAtom(importsRegistry);
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [selected]);
+  useEffect(
+    () => () => {
+      setSelected(undefined);
+    },
+    [],
+  );
 
   const [filename, idx] = selected ?? [];
-  const chat = filename && idx ? registry[filename][idx] : undefined;
+  const chat: ExperimentWithMeta | undefined = filename && idx ? registry[filename][idx] : undefined;
 
   return (
     <>
       {chat ?
-        <ChatPreview key={`${filename}-${idx}`} history={chat} />
-      : <div />}
+        <ChatPreview key={`${filename}-${idx}`} history={chat.messages} />
+      : <Column isDarkMode={isDarkMode}>
+          <h2>Import CSV</h2>
+          <p>
+            Import and explore previous completions from CSV files, or{" "}
+            <a
+              onClick={() => {
+                const samples = Object.entries(templates).reduce((acc, [id, value]) => {
+                  return [...acc, { ...value, id }];
+                }, []);
+                setRegistry({
+                  ...registry,
+                  Samples: samples,
+                });
+              }}
+            >
+              see some examples
+            </a>
+            .
+          </p>
+        </Column>
+      }
       <Sidebar>
         <h3>Actions</h3>
-        <p>Import csv</p>
         <CsvInput />
         {selected && (
           <div>
-            <ForkButton experiment={chat} />
-            <button
+            <ForkButton experiment={chat?.messages} />
+            <Button
               type="submit"
-              onClick={(e) => {
-                e.preventDefault();
+              onClick={() => {
                 navigator.clipboard.writeText(JSON.stringify(chat));
               }}
             >
               Copy JSON
-            </button>
+            </Button>
           </div>
         )}
       </Sidebar>

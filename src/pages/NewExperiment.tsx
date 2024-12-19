@@ -22,14 +22,22 @@ import {
   withIds,
 } from "../state/inference";
 import { Button, Sidebar, bs } from "../style";
-import { withDarkMode } from "../style/darkMode";
+import { withDarkMode, type WithDarkMode } from "../style/darkMode";
 import { Palette } from "../style/palette";
 import { useHandlers } from "../utils/keyboard";
 
-const Column = styled.div`
+export const Column = styled.div<WithDarkMode>`
   display: flex;
   flex-direction: column;
   overflow-x: hidden;
+  a {
+    color: ${(p) => (p.isDarkMode ? Palette.pink : Palette.pink)};
+    text-decoration: underline;
+    cursor: pointer;
+    :hover {
+      color: ${(p) => (p.isDarkMode ? Palette.purple : Palette.purple)};
+    }
+  }
 `;
 
 export const Block = styled.div<{ isDarkMode?: boolean }>`
@@ -43,6 +51,7 @@ export const Block = styled.div<{ isDarkMode?: boolean }>`
 
   margin: ${bs(0.5)} -${bs(0.5)} 0;
   width: auto;
+  min-height: 77px;
 
   backdrop-filter: blur(10px) brightness(${(p) => (p.isDarkMode ? 1.5 : 0.9)}) saturate(2);
   box-shadow:
@@ -230,7 +239,7 @@ export default function NewExperiment() {
 
   if (providerOptions.length === 0) {
     return (
-      <Column>
+      <Column isDarkMode={isDarkMode}>
         <h2>Welcome to Experiment</h2>
         <p>
           To start inference, add a token on <NavLink to="/parameters">Parameters</NavLink> page. You can also explore a
@@ -241,7 +250,7 @@ export default function NewExperiment() {
   }
   return (
     <>
-      <Column>
+      <Column isDarkMode={isDarkMode}>
         <ChatPreview history={experiment} autoScroll />
         <Block isDarkMode={isDarkMode}>
           <ActionRow>

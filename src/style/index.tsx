@@ -127,6 +127,9 @@ const input = css`
   input:not([type="file"]) {
     background-color: ${Palette.inputBackground};
   }
+  input[type="file"] {
+    width: 94px;
+  }
 `;
 
 const inputDarkMode = css`

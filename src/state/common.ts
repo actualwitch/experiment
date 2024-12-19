@@ -5,16 +5,25 @@ import { atomWithStorage, createJSONStorage } from "jotai/utils";
 import { createFileStorage } from "../utils";
 import { divergentAtom, entangledAtom } from "../utils/entanglement";
 import { getRealm, hasBackend } from "../utils/realm";
+import { Literal, Union, type Static } from "runtypes";
 
-type _Message =
-  | { role: "system"; content: string }
-  | { role: "user"; content: string }
-  | { role: "assistant"; content: object | string }
-  | { role: "tool"; content: object | string };
+export type StringContent = { content: string };
+export type ObjectOrStringContent = { content: object | string };
+export type WithName = { name: "string" };
 
-export type Message = _Message & { fromServer?: boolean } & {
+export const StringType = Union(Literal("system"), Literal("developer"), Literal("user"));
+export const ObjectOrStringType = Union(Literal("assistant"), Literal("info"), Literal("tool"));
+
+export type _Message =
+  | ({ role: Static<typeof StringType> } & StringContent & Partial<WithName>)
+  | ({ role: Static<typeof ObjectOrStringType> } & ObjectOrStringContent & Partial<WithName>);
+
+export type WithDirection = { fromServer?: boolean };
+export type WithTemplate = {
   template?: string;
 };
+
+export type Message = _Message & WithDirection & WithTemplate;
 
 export type Role = "system" | "user" | "assistant" | "tool";
 
@@ -27,7 +36,7 @@ export type Store = {
   experimentLayout?: "left" | "chat" | "chat-reverse";
   rendererMode?: "markdown" | "text+json";
   experiments?: Record<string, Experiment>;
-  templates?: Record<string, _Message>;
+  templates?: Record<string, _Message | {messages: Message[]}>;
   tokens: {
     anthropic?: string;
     mistral?: string;

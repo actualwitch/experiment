@@ -6,6 +6,7 @@ import { ChatPreview } from "../components/chat";
 import { ExperimentsSidebar } from "../sidebars/experiments";
 import { type ExperimentCursor, type Message, getExperimentAtom } from "../state/common";
 import { entangledAtom } from "../utils/entanglement";
+import { Button } from "../style";
 
 const cursorAtom = entangledAtom("cursor", atom<ExperimentCursor | null>(null));
 const selectedExperimentAtom = entangledAtom(
@@ -38,6 +39,14 @@ export default function Experiment() {
       <aside>
         <h3>Actions</h3>
         <ForkButton experiment={experiment} parent={id} />
+        <Button
+          type="submit"
+          onClick={() => {
+            navigator.clipboard.writeText(JSON.stringify(experiment));
+          }}
+        >
+          Copy JSON
+        </Button>
       </aside>
       <ExperimentsSidebar />
     </>
