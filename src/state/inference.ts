@@ -208,7 +208,6 @@ export const testStreaming = entangledAtom(
 export const runExperimentAsAnthropic = entangledAtom(
   { name: "run-experiment-anthropic" },
   atom(null, async (get, set) => {
-
     const tokenAtom = focusAtom(storeAtom, (o) => o.prop("tokens").prop("anthropic"));
     const tokenOrReference = get(tokenAtom);
     if (!tokenOrReference) {
@@ -325,7 +324,7 @@ export const runExperimentAsOpenAi = entangledAtom(
       ...experimentAsOpenai,
       stream: true,
       stream_options: {
-        include_usage: true
+        include_usage: true,
       },
       temperature: get(tempAtom),
       model: get(modelAtom) ?? "gpt-4o",
@@ -338,7 +337,7 @@ export const runExperimentAsOpenAi = entangledAtom(
     const contentChunks: Message[] = [];
     const namesForToolCalls = new Map<number, string>();
     for await (const chunk of stream) {
-      console.log(JSON.stringify(chunk, null, 2))
+      console.log(JSON.stringify(chunk, null, 2));
       if (chunk.choices.length === 0) {
         continue;
       }

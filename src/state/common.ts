@@ -6,6 +6,20 @@ import { createFileStorage } from "../utils";
 import { divergentAtom, entangledAtom } from "../utils/entanglement";
 import { getRealm, hasBackend } from "../utils/realm";
 import { Literal, Union, type Static } from "runtypes";
+import { atomEffect } from "jotai-effect";
+
+export const layoutAtom = atom<"mobile" | "desktop">("desktop");
+export const layoutTrackerAtom = atomEffect((get, set) => {
+  const listener = () => {
+    set(layoutAtom, window.innerWidth > 920 ? "desktop" : "mobile");
+  };
+  listener();
+  window.addEventListener("resize", listener);
+  return () => {
+    window.removeEventListener("resize", listener);
+  };
+});
+export type WithLayout = { layout: "mobile" | "desktop" };
 
 export type StringContent = { content: string };
 export type ObjectOrStringContent = { content: object | string };
@@ -36,7 +50,7 @@ export type Store = {
   experimentLayout?: "left" | "chat" | "chat-reverse";
   rendererMode?: "markdown" | "text+json";
   experiments?: Record<string, Experiment>;
-  templates?: Record<string, _Message | {messages: Message[]}>;
+  templates?: Record<string, _Message | { messages: Message[] }>;
   tokens: {
     anthropic?: string;
     mistral?: string;

@@ -5,6 +5,8 @@ import { ROUTES } from "./pages/_router";
 import { bs } from "./style";
 import { nonInteractive, widthAvailable } from "./style/mixins";
 import { portalIO } from "./utils/portal";
+import { atom, useAtom } from "jotai";
+import { templatesAtom } from "./state/common";
 
 export const [SidebarInput, SidebarOutput] = portalIO();
 
@@ -41,11 +43,20 @@ const H2 = styled.h2`
   user-select: none;
 `;
 
+const routesAtom = atom((get) => {
+  const templates = get(templatesAtom);
+  if (Object.keys(templates ?? {}).length === 0) {
+    return ROUTES.filter((route) => route.title !== "Templates");
+  }
+  return ROUTES;
+});
+
 export const NavigationSidebar = () => {
+  const [routes] = useAtom(routesAtom);
   return (
     <Navigation>
       <header>
-        {ROUTES.map(
+        {routes.map(
           ({ icon, title, path, showInSidebar }) =>
             showInSidebar && (
               <H2 key={path}>

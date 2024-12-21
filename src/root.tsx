@@ -12,6 +12,7 @@ import { getRealm } from "./utils/realm";
 import { clientFile } from "./const";
 import { titleAtom, descriptionAtom, iconAtom } from "./state/meta";
 import { ErrorBoundary } from "./components/error";
+import { layoutAtom, layoutTrackerAtom } from "./state/common";
 
 const Context = ({ children }: PropsWithChildren) => {
   return (
@@ -36,10 +37,12 @@ const App = () => {
   const [styles] = useAtom(stylesAtom);
   useAtom(trackVisibleAtom);
   useAtom(subscriptionAtom);
+  useAtom(layoutTrackerAtom);
+  const [layout] = useAtom(layoutAtom);
   return (
     <Suspense fallback={null}>
-      <Container>
-        <NavigationSidebar />
+      <Container layout={layout}>
+        {layout === "desktop" && <NavigationSidebar />}
         <Router />
         <Global styles={styles} />
       </Container>

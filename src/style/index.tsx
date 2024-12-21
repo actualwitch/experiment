@@ -4,7 +4,7 @@ import { atom, useAtom } from "jotai";
 import { type HTMLProps, useRef } from "react";
 import { useButton } from "react-aria";
 import Shevy from "shevyjs";
-import { isDarkModeAtom } from "../state/common";
+import { isDarkModeAtom, type WithLayout } from "../state/common";
 import { withDarkMode } from "./darkMode";
 import { Palette } from "./palette";
 import { reset } from "./reset";
@@ -83,6 +83,11 @@ const button = css`
       background-color: ${Palette.buttonHoverBackground};
     }
   }
+  button[disabled] {
+    background-color: ${Palette.disabledBackground};
+    color: ${Palette.black}54;
+    cursor: not-allowed;
+  }
   button,
   input[type="file"]::file-selector-button {
     ${content}
@@ -138,12 +143,12 @@ const inputDarkMode = css`
   }
 `;
 
-export const Container = styled.div(
+export const Container = styled.div<WithLayout>(
   content,
-  css`
+  (p) => css`
     margin-bottom: 0;
     display: grid;
-    grid-template-columns: 278px 1fr 320px;
+    grid-template-columns: ${p.layout === "mobile" ? css`1fr` : css`278px 1fr 320px`};
     height: 100dvh;
     & > * {
       padding: ${bs()};
@@ -178,8 +183,8 @@ export const darkMode = css`
       background-color: ${Palette.white}30;
     }
     ${inputDarkMode}
+    ${buttonDarkMode}
   }
-  ${buttonDarkMode}
 `;
 
 export const appStyle = [

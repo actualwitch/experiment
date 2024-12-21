@@ -8,7 +8,7 @@ import { SidebarInput } from "../navigation";
 import { filenames, importsRegistry, processCsvAtom, selectedChat, type ExperimentWithMeta } from "../state/client";
 import { Button, Sidebar } from "../style";
 import { Column } from "./NewExperiment";
-import { isDarkModeAtom } from "../state/common";
+import { isDarkModeAtom, layoutAtom } from "../state/common";
 import templates from "../../fixtures/templates.json";
 
 const SidebarContents = () => {
@@ -52,6 +52,7 @@ const CsvInput = () => {
 
 export default function () {
   const [isDarkMode] = useAtom(isDarkModeAtom);
+  const [layout] = useAtom(layoutAtom);
 
   const [selected, setSelected] = useAtom(selectedChat);
   const [registry, setRegistry] = useAtom(importsRegistry);
@@ -93,23 +94,25 @@ export default function () {
           </p>
         </Column>
       }
-      <Sidebar>
-        <h3>Actions</h3>
-        <CsvInput />
-        {selected && (
-          <div>
-            <ForkButton experiment={chat?.messages} />
-            <Button
-              type="submit"
-              onClick={() => {
-                navigator.clipboard.writeText(JSON.stringify(chat));
-              }}
-            >
-              Copy JSON
-            </Button>
-          </div>
-        )}
-      </Sidebar>
+      {layout === "desktop" && (
+        <Sidebar>
+          <h3>Actions</h3>
+          <CsvInput />
+          {selected && (
+            <div>
+              <ForkButton experiment={chat?.messages} />
+              <Button
+                type="submit"
+                onClick={() => {
+                  navigator.clipboard.writeText(JSON.stringify(chat));
+                }}
+              >
+                Copy JSON
+              </Button>
+            </div>
+          )}
+        </Sidebar>
+      )}
       <SidebarInput>
         <SidebarContents />
       </SidebarInput>

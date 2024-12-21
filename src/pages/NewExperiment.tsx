@@ -9,7 +9,15 @@ import { Select } from "../components/Select";
 import { Slider } from "../components/Slider";
 import { ChatPreview, selectionAtom } from "../components/chat";
 import { ExperimentsSidebar } from "../sidebars/experiments";
-import { type Message, type Role, experimentAtom, isDarkModeAtom, parentAtom, templatesAtom } from "../state/common";
+import {
+  type Message,
+  type Role,
+  experimentAtom,
+  isDarkModeAtom,
+  layoutAtom,
+  parentAtom,
+  templatesAtom,
+} from "../state/common";
 import {
   availableProviderOptionsAtom,
   isRunningAtom,
@@ -48,10 +56,10 @@ export const Block = styled.div<{ isDarkMode?: boolean }>`
   position: sticky;
   bottom: 0;
   overflow: clip;
+  flex-shrink: 0;
 
   margin: ${bs(0.5)} -${bs(0.5)} 0;
   width: auto;
-  min-height: 77px;
 
   backdrop-filter: blur(10px) brightness(${(p) => (p.isDarkMode ? 1.5 : 0.9)}) saturate(2);
   box-shadow:
@@ -122,14 +130,18 @@ const TextArea = (props: React.TextareaHTMLAttributes<HTMLTextAreaElement>) => {
   const ref = useRef<HTMLTextAreaElement | null>(null);
   useEffect(() => {
     if (!ref.current) return;
+    const docHeight = document.documentElement.clientHeight;
+    const contentScrollHeight = ref.current.scrollHeight;
+    const plannedHeight = Math.min(Math.max(contentScrollHeight, 0), Math.floor(docHeight / 2));
     ref.current.style.height = "inherit";
-    ref.current.style.height = `${Math.min(Math.max(ref.current.scrollHeight, 0), 192)}px`;
+    ref.current.style.height = `${plannedHeight}px`;
   }, [props.value]);
   return <textarea {...props} ref={ref} />;
 };
 
 export default function NewExperiment() {
   const [isDarkMode] = useAtom(isDarkModeAtom);
+  const [layout] = useAtom(layoutAtom);
   const [experiment, setExperiment] = useAtom(experimentAtom);
   const [selection, setSelection] = useAtom(selectionAtom);
   const [message, setMessage] = useState("");
@@ -287,15 +299,31 @@ export default function NewExperiment() {
           />
         </Block>
       </Column>
-      <Sidebar>
-        <h3>Actions</h3>
-        {providerOptions.length > 1 && (
+      {layout === "desktop" && (
+        <Sidebar>
+          <h3>Actions</h3>
+          {providerOptions.length > 1 && (
+            <Select
+              label="Provider"
+              items={providerOptions}
+              selectedKey={provider}
+              onSelectionChange={(provider) => {
+                setProvider(provider);
+              }}
+            >
+              {(item) => (
+                <Item textValue={item.name}>
+                  <div>{item.name}</div>
+                </Item>
+              )}
+            </Select>
+          )}
           <Select
-            label="Provider"
-            items={providerOptions}
-            selectedKey={provider}
-            onSelectionChange={(provider) => {
-              setProvider(provider);
+            label="Model"
+            items={withIds(models)}
+            selectedKey={model}
+            onSelectionChange={(model) => {
+              setModel(model);
             }}
           >
             {(item) => (
@@ -304,87 +332,73 @@ export default function NewExperiment() {
               </Item>
             )}
           </Select>
-        )}
-        <Select
-          label="Model"
-          items={withIds(models)}
-          selectedKey={model}
-          onSelectionChange={(model) => {
-            setModel(model);
-          }}
-        >
-          {(item) => (
-            <Item textValue={item.name}>
-              <div>{item.name}</div>
-            </Item>
+          {supportsTemp && (
+            <Slider
+              value={temp}
+              onChange={(value: number) => setTemp(value)}
+              label="Temperature"
+              minValue={0}
+              maxValue={1}
+              step={0.01}
+              formatOptions={{ minimumFractionDigits: 2 }}
+            />
           )}
-        </Select>
-        {supportsTemp && (
-          <Slider
-            value={temp}
-            onChange={(value: number) => setTemp(value)}
-            label="Temperature"
-            minValue={0}
-            maxValue={1}
-            step={0.01}
-            formatOptions={{ minimumFractionDigits: 2 }}
-          />
-        )}
-        <div>
-          <Button
-            type="submit"
-            disabled={isRunning || experiment.length === 0}
-            onClick={() => {
-              runExperiment();
-            }}
-          >
-            Start Experiment
-          </Button>
+          <div>
+            <Button
+              type="submit"
+              disabled={isRunning || experiment.length === 0}
+              onClick={() => {
+                runExperiment();
+              }}
+            >
+              Start Experiment
+            </Button>
 
-          <Button
-            type="submit"
-            onClick={() => {
-              setExperiment([]);
-            }}
-            disabled={isRunning || experiment.length === 0}
-          >
-            Reset
-          </Button>
-        </div>
-        {selection !== null && selection.length === 1 && (
-          <>
-            <h4>This message</h4>
-            <div>
-              <Button
-                type="submit"
-                onClick={(e) => {
-                  setSelection([selection[0], "content"]);
-                }}
-              >
-                Edit
-              </Button>
-              <Button
-                type="submit"
-                onClick={(e) => {
-                  deleteSelection();
-                }}
-              >
-                Delete
-              </Button>
-              <Button
-                type="submit"
-                onClick={async () => {
-                  const name = prompt("Name of the template");
-                  if (!name) return;
-                  setTemplates({ ...templates, [name]: experiment[selection[0]] });
-                }}
-              >
-                Template
-              </Button>
-            </div>
-          </>
-        )}
-      </Sidebar>
+            <Button
+              type="submit"
+              onClick={() => {
+                setExperiment([]);
+              }}
+              disabled={isRunning || experiment.length === 0}
+            >
+              Reset
+            </Button>
+          </div>
+          {selection !== null && selection.length === 1 && (
+            <>
+              <h4>This message</h4>
+              <div>
+                <Button
+                  type="submit"
+                  onClick={(e) => {
+                    setSelection([selection[0], "content"]);
+                  }}
+                >
+                  Edit
+                </Button>
+                <Button
+                  type="submit"
+                  onClick={(e) => {
+                    deleteSelection();
+                  }}
+                >
+                  Delete
+                </Button>
+                <Button
+                  type="submit"
+                  onClick={async () => {
+                    const name = prompt("Name of the template");
+                    if (!name) return;
+                    setTemplates({ ...templates, [name]: experiment[selection[0]] });
+                  }}
+                >
+                  Template
+                </Button>
+              </div>
+            </>
+          )}
+        </Sidebar>
+      )}
       <ExperimentsSidebar />
     </>
   );

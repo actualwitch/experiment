@@ -3,7 +3,7 @@ import project from "../package.json" with { type: "json" };
 
 export const DEBUG = getDebug();
 const hash = await getReleaseHash();
-export const VERSION = project.version + "-" + hash;
+export const VERSION = `${project.version}-${hash}`;
 export const clientFile = "/client.js";
 
 export const schema = "http";

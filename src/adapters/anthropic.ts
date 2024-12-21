@@ -23,7 +23,6 @@ export const experimentToAnthropic = (experiment: Message[]): MessageCreateParam
       }
     }
     if (role === "tool") {
-
       if (typeof content === "object") {
         const tool = content as typeof makeRequestTool;
         tools.push({
