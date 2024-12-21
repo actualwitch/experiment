@@ -133,14 +133,13 @@ const TextArea = (props: React.TextareaHTMLAttributes<HTMLTextAreaElement>) => {
   const ref = useRef<HTMLTextAreaElement | null>(null);
   useEffect(() => {
     if (!ref.current) return;
-    let plannedHeight = 0;
+    ref.current.style.height = "inherit";
     if (props.value) {
       const docHeight = document.documentElement.clientHeight;
       const contentScrollHeight = ref.current.scrollHeight;
-      plannedHeight = Math.min(Math.max(contentScrollHeight, 0), Math.floor(docHeight / 2));
-    } 
-    ref.current.style.height = "inherit";
-    ref.current.style.height = `${plannedHeight}px`;
+      const plannedHeight = Math.min(Math.max(contentScrollHeight, 0), Math.floor(docHeight / 2));
+      ref.current.style.height = `${plannedHeight}px`;
+    }
   }, [props.value]);
   return <textarea {...props} ref={ref} />;
 };
