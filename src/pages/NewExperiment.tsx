@@ -33,11 +33,14 @@ import { Button, Sidebar, bs } from "../style";
 import { withDarkMode, type WithDarkMode } from "../style/darkMode";
 import { Palette } from "../style/palette";
 import { useHandlers } from "../utils/keyboard";
+import { increaseSpecificity } from "../style/utils";
 
 export const Column = styled.div<WithDarkMode>`
   display: flex;
   flex-direction: column;
-  overflow-x: hidden;
+  ${increaseSpecificity()} {
+    overflow-x: hidden;
+  }
   a {
     color: ${(p) => (p.isDarkMode ? Palette.pink : Palette.pink)};
     text-decoration: underline;

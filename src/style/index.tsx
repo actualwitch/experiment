@@ -143,18 +143,28 @@ const inputDarkMode = css`
   }
 `;
 
-export const Container = styled.div<WithLayout>(
-  content,
-  (p) => css`
-    margin-bottom: 0;
-    display: grid;
-    grid-template-columns: ${p.layout === "mobile" ? css`1fr` : css`278px 1fr 320px`};
-    height: 100dvh;
-    & > * {
-      padding: ${bs()};
-      overflow: auto;
-    }
-  `,
+export const Container = styled.div<WithLayout>(content, (p) =>
+  p.layout === "desktop" ?
+    css`
+      margin-bottom: 0;
+      display: grid;
+      grid-template-columns: 278px 1fr 320px;
+      height: 100dvh;
+      & > * {
+        padding: ${bs()};
+        overflow: auto;
+      }
+    `
+  : css`
+      margin-bottom: 0;
+      display: grid;
+      grid-template-columns: 1fr;
+      height: 100dvh;
+      & > * {
+        padding: ${bs()};
+        overflow: auto;
+      }
+    `,
 );
 
 export const Sidebar = styled.aside`
@@ -182,9 +192,9 @@ export const darkMode = css`
     pre {
       background-color: ${Palette.white}30;
     }
-    ${inputDarkMode}
-    ${buttonDarkMode}
   }
+  ${buttonDarkMode}
+  ${inputDarkMode}
 `;
 
 export const appStyle = [
@@ -253,7 +263,6 @@ export const appStyle = [
     }
 
     ${button}
-
     ${input}
   `,
 ];

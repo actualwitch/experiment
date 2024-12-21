@@ -11,7 +11,7 @@ import { atomEffect } from "jotai-effect";
 export const layoutAtom = atom<"mobile" | "desktop">("desktop");
 export const layoutTrackerAtom = atomEffect((get, set) => {
   const listener = () => {
-    set(layoutAtom, window.innerWidth > 920 ? "desktop" : "mobile");
+    set(layoutAtom, window.innerWidth > 600 ? "desktop" : "mobile");
   };
   listener();
   window.addEventListener("resize", listener);
