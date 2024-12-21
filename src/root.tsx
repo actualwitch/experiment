@@ -93,9 +93,9 @@ export const Shell = ({
           </ErrorBoundary>
         </Suspense>
         {additionalScripts?.map((script, index) => {
-          return <script key={index} dangerouslySetInnerHTML={{ __html: script }} />;
+          return <script suppressHydrationWarning key={index} dangerouslySetInnerHTML={{ __html: script }} />;
         })}
-        {bootstrap && <script type="module" src={`${baseUrl ?? ""}${clientFile}`} async />}
+        {bootstrap && <script suppressHydrationWarning type="module" src={`${baseUrl ?? ""}${clientFile}`} async />}
       </body>
     </html>
   );

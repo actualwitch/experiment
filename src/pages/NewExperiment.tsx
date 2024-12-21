@@ -132,10 +132,11 @@ const ActionRow = styled.div`
 const TextArea = (props: React.TextareaHTMLAttributes<HTMLTextAreaElement>) => {
   const ref = useRef<HTMLTextAreaElement | null>(null);
   useEffect(() => {
-    if (!ref.current) return;
+    if (!ref.current || !props.value) return;
     const docHeight = document.documentElement.clientHeight;
     const contentScrollHeight = ref.current.scrollHeight;
     const plannedHeight = Math.min(Math.max(contentScrollHeight, 0), Math.floor(docHeight / 2));
+    console.log(docHeight, contentScrollHeight, plannedHeight);
     ref.current.style.height = "inherit";
     ref.current.style.height = `${plannedHeight}px`;
   }, [props.value]);
