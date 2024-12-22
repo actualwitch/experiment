@@ -4,9 +4,10 @@ import { useParams } from "react-router";
 import { ForkButton } from "../components";
 import { ChatPreview } from "../components/chat";
 import { ExperimentsSidebar } from "../sidebars/experiments";
-import { type ExperimentCursor, type Message, getExperimentAtom } from "../state/common";
+import { type ExperimentCursor, type Message, getExperimentAtom, isDarkModeAtom } from "../state/common";
 import { entangledAtom } from "../utils/entanglement";
-import { Button } from "../style";
+import { Button, Sidebar } from "../style";
+import { Page } from "./_page";
 
 const cursorAtom = entangledAtom("cursor", atom<ExperimentCursor | null>(null));
 const selectedExperimentAtom = entangledAtom(
@@ -30,13 +31,13 @@ export default function Experiment() {
 
   return (
     <>
-      <div>
+      <Page>
         <h1>
           Experiment {id}.{runId}
         </h1>
         <ChatPreview key={id + runId} history={experiment ?? []} />
-      </div>
-      <aside>
+      </Page>
+      <Sidebar>
         <h3>Actions</h3>
         <ForkButton experiment={experiment} parent={id} />
         <Button
@@ -47,7 +48,7 @@ export default function Experiment() {
         >
           Copy JSON
         </Button>
-      </aside>
+      </Sidebar>
       <ExperimentsSidebar />
     </>
   );

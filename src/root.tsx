@@ -1,18 +1,21 @@
 import { Global } from "@emotion/react";
-import { atom, Provider, useAtom } from "jotai";
+import { atom, Provider, useAtom, useSetAtom } from "jotai";
 import { Suspense, useEffect, useState, type PropsWithChildren } from "react";
+import { useLocation } from 'react-router';
+
 import { NavigationSidebar } from "./navigation";
 import { Router } from "./pages/_router";
 import { subscriptionAtom, trackVisibleAtom } from "./state/focus";
 import { store } from "./state/store";
-import { Container, stylesAtom } from "./style";
+import { Container, Slideover, stylesAtom } from "./style";
 import { Hydration } from "./utils/hydration";
 import { FavIcon } from "./components/FavIcon";
 import { getRealm } from "./utils/realm";
 import { clientFile } from "./const";
 import { titleAtom, descriptionAtom, iconAtom } from "./state/meta";
 import { ErrorBoundary } from "./components/error";
-import { layoutAtom, layoutTrackerAtom } from "./state/common";
+import { isActionPanelOpenAtom, isDarkModeAtom, isNavPanelOpenAtom, layoutAtom, layoutTrackerAtom } from "./state/common";
+import { MobileHeader } from "./components/Mobile";
 
 const Context = ({ children }: PropsWithChildren) => {
   return (
@@ -39,10 +42,25 @@ const App = () => {
   useAtom(subscriptionAtom);
   useAtom(layoutTrackerAtom);
   const [layout] = useAtom(layoutAtom);
+  const [isDarkMode] = useAtom(isDarkModeAtom);
+  const [isNavPanelOpen] = useAtom(isNavPanelOpenAtom);
+  const {pathname} = useLocation();
+  const setIsNavPanelOpened = useSetAtom(isNavPanelOpenAtom);
+  const setIsActionPanelOpened = useSetAtom(isActionPanelOpenAtom);
+  useEffect(() => {
+    setIsNavPanelOpened(false);
+    setIsActionPanelOpened(false);
+  }, [pathname]);
   return (
     <Suspense fallback={null}>
       <Container layout={layout}>
         {layout === "desktop" && <NavigationSidebar />}
+        {layout === "mobile" && <MobileHeader />}
+        {layout === "mobile" && (
+          <Slideover isOpen={isNavPanelOpen} isDarkMode={isDarkMode} from="right">
+            <NavigationSidebar />
+          </Slideover>
+        )}
         <Router />
         <Global styles={styles} />
       </Container>

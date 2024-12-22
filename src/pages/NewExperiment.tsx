@@ -4,6 +4,7 @@ import { type Setter, atom, useAtom } from "jotai";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { NavLink } from "react-router";
 
+import { cover } from "polished";
 import { type Config, ConfigRenderer } from "../components/ConfigRenderer";
 import { ChatPreview, selectionAtom } from "../components/chat";
 import { ExperimentsSidebar } from "../sidebars/experiments";
@@ -11,6 +12,7 @@ import {
   type Message,
   type Role,
   experimentAtom,
+  isActionPanelOpenAtom,
   isDarkModeAtom,
   layoutAtom,
   parentAtom,
@@ -27,27 +29,11 @@ import {
   selectedProviderAtom,
   tempAtom,
 } from "../state/inference";
-import { Button, Sidebar, bs } from "../style";
+import { Sidebar, Slideover, bs } from "../style";
 import { type WithDarkMode, withDarkMode } from "../style/darkMode";
 import { Palette } from "../style/palette";
-import { increaseSpecificity } from "../style/utils";
 import { useHandlers } from "../utils/keyboard";
-
-export const Column = styled.div<WithDarkMode>`
-  display: flex;
-  flex-direction: column;
-  ${increaseSpecificity()} {
-    overflow-x: hidden;
-  }
-  a {
-    color: ${(p) => (p.isDarkMode ? Palette.pink : Palette.pink)};
-    text-decoration: underline;
-    cursor: pointer;
-    :hover {
-      color: ${(p) => (p.isDarkMode ? Palette.purple : Palette.purple)};
-    }
-  }
-`;
+import { Page } from "./_page";
 
 export const Block = styled.div<{ isDarkMode?: boolean }>`
   display: flex;
@@ -221,20 +207,6 @@ const TextArea = (props: React.TextareaHTMLAttributes<HTMLTextAreaElement>) => {
   return <textarea {...props} ref={ref} />;
 };
 
-const MobileHeader = styled.h2`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  position: absolute;
-  left: ${bs()};
-  right: ${bs()};
-  z-index: 1;
-  span {
-    padding: 0 ${bs(0.5)};
-    text-shadow: black 1px 2px 14px, black 0px 0px 24px;
-  }
-`;
-
 export default function NewExperiment() {
   const [isDarkMode] = useAtom(isDarkModeAtom);
   const [layout] = useAtom(layoutAtom);
@@ -347,26 +319,22 @@ export default function NewExperiment() {
 
   const [actions] = useAtom(actionsAtom);
 
+  const [isActionsPanelOpen, setIsActionPanelOpened] = useAtom(isActionPanelOpenAtom);
+
   if (providerOptions.length === 0) {
     return (
-      <Column isDarkMode={isDarkMode}>
+      <Page>
         <h2>Welcome to Experiment</h2>
         <p>
           To start inference, add a token on <NavLink to="/parameters">Parameters</NavLink> page. You can also explore a
           .csv file on the <NavLink to="/import">Import</NavLink> page.
         </p>
-      </Column>
+      </Page>
     );
   }
   return (
     <>
-      <Column isDarkMode={isDarkMode}>
-        {layout === "mobile" && (
-          <MobileHeader>
-            <span>🔬 Experiment</span>
-            <Button>⍇</Button>
-          </MobileHeader>
-        )}
+      <Page>
         <ChatPreview history={experiment} autoScroll />
         <Block isDarkMode={isDarkMode}>
           <ActionRow>
@@ -402,11 +370,18 @@ export default function NewExperiment() {
             autoFocus
           />
         </Block>
-      </Column>
+      </Page>
       {layout === "desktop" && (
         <Sidebar>
           <ConfigRenderer>{actions}</ConfigRenderer>
         </Sidebar>
+      )}
+      {layout === "mobile" && (
+        <Slideover isOpen={isActionsPanelOpen} isDarkMode={isDarkMode}>
+          <Sidebar>
+            <ConfigRenderer>{actions}</ConfigRenderer>
+          </Sidebar>
+        </Slideover>
       )}
       <ExperimentsSidebar />
     </>

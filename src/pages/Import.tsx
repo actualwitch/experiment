@@ -7,9 +7,9 @@ import { View } from "../components/view";
 import { SidebarInput } from "../navigation";
 import { filenames, importsRegistry, processCsvAtom, selectedChat, type ExperimentWithMeta } from "../state/client";
 import { Button, Sidebar } from "../style";
-import { Column } from "./NewExperiment";
 import { isDarkModeAtom, layoutAtom } from "../state/common";
 import templates from "../../fixtures/templates.json";
+import { Page } from "./_page";
 
 const SidebarContents = () => {
   const [chats] = useAtom(filenames);
@@ -51,7 +51,6 @@ const CsvInput = () => {
 };
 
 export default function () {
-  const [isDarkMode] = useAtom(isDarkModeAtom);
   const [layout] = useAtom(layoutAtom);
 
   const [selected, setSelected] = useAtom(selectedChat);
@@ -71,29 +70,31 @@ export default function () {
 
   return (
     <>
-      {chat ?
-        <ChatPreview key={`${filename}-${idx}`} history={chat.messages} />
-      : <Column isDarkMode={isDarkMode}>
-          <h2>Import CSV</h2>
-          <p>
-            Import and explore previous completions from CSV files, or{" "}
-            <a
-              onClick={() => {
-                const samples = Object.entries(templates).reduce((acc, [id, value]) => {
-                  return [...acc, { ...value, id }];
-                }, []);
-                setRegistry({
-                  ...registry,
-                  Samples: samples,
-                });
-              }}
-            >
-              see some examples
-            </a>
-            .
-          </p>
-        </Column>
-      }
+      <Page>
+        {chat ?
+          <ChatPreview key={`${filename}-${idx}`} history={chat.messages} />
+        : <>
+            <h2>Import CSV</h2>
+            <p>
+              Import and explore previous completions from CSV files, or{" "}
+              <a
+                onClick={() => {
+                  const samples = Object.entries(templates).reduce((acc, [id, value]) => {
+                    return [...acc, { ...value, id }];
+                  }, []);
+                  setRegistry({
+                    ...registry,
+                    Samples: samples,
+                  });
+                }}
+              >
+                see some examples
+              </a>
+              .
+            </p>
+          </>
+        }
+      </Page>
       {layout === "desktop" && (
         <Sidebar>
           <h3>Actions</h3>

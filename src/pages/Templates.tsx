@@ -3,8 +3,9 @@ import { useState } from "react";
 
 import { View } from "../components/view";
 import { SidebarInput } from "../navigation";
-import { layoutAtom, templatesAtom } from "../state/common";
+import { isDarkModeAtom, layoutAtom, templatesAtom } from "../state/common";
 import { Button, Sidebar } from "../style";
+import { Page } from "./_page";
 
 export default function Templates() {
   const [layout] = useAtom(layoutAtom);
@@ -12,13 +13,14 @@ export default function Templates() {
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
   return (
     <>
+    <Page>
       <View>
         {templates ?
           selectedTemplate ?
             templates[selectedTemplate]
           : undefined
         : undefined}
-      </View>
+      </View></Page>
       {layout === "desktop" && (
         <Sidebar>
           <h2>Actions</h2>

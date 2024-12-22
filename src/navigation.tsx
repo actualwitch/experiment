@@ -12,6 +12,7 @@ export const [SidebarInput, SidebarOutput] = portalIO();
 
 const Navigation = styled.nav`
   padding: ${bs()};
+  overflow: auto;
   display: flex;
   flex-direction: column;
   ul {

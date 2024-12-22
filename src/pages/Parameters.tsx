@@ -13,6 +13,7 @@ import { type WithDarkMode, withDarkMode } from "../style/darkMode";
 import { Palette } from "../style/palette";
 import { hasBackend } from "../utils/realm";
 import { providerLabels, providers, providerTypes, type ProviderType } from "../state/inference";
+import { Page } from "./_page";
 
 const StyledForm = styled.form`
   display: flex;
@@ -141,7 +142,7 @@ export default function Parameters() {
   };
 
   return (
-    <>
+    <Page>
       <StyledForm
         onSubmit={(e) => {
           e.preventDefault();
@@ -210,6 +211,6 @@ export default function Parameters() {
           </Row>
         ))}
       </StyledForm>
-    </>
+    </Page>
   );
 }

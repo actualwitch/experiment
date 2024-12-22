@@ -21,6 +21,9 @@ export const layoutTrackerAtom = atomEffect((get, set) => {
 });
 export type WithLayout = { layout: "mobile" | "desktop" };
 
+export const isActionPanelOpenAtom = atom(false);
+export const isNavPanelOpenAtom = atom(false);
+
 export type StringContent = { content: string };
 export type ObjectOrStringContent = { content: object | string };
 export type WithName = { name: "string" };

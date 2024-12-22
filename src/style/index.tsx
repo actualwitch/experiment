@@ -5,9 +5,10 @@ import { type HTMLProps, useRef } from "react";
 import { useButton } from "react-aria";
 import Shevy from "shevyjs";
 import { isDarkModeAtom, type WithLayout } from "../state/common";
-import { withDarkMode } from "./darkMode";
+import { withDarkMode, type WithDarkMode } from "./darkMode";
 import { Palette } from "./palette";
 import { reset } from "./reset";
+import { cover } from "polished";
 
 const config: {
   fontScale: "majorSecond" | "minorThird" | "majorThird" | "perfectFourth" | "augmentedFourth";
@@ -150,20 +151,12 @@ export const Container = styled.div<WithLayout>(content, (p) =>
       display: grid;
       grid-template-columns: 278px 1fr 320px;
       height: 100dvh;
-      & > * {
-        padding: ${bs()};
-        overflow: auto;
-      }
     `
   : css`
       margin-bottom: 0;
       display: grid;
       grid-template-columns: 1fr;
       height: 100dvh;
-      & > * {
-        padding: ${bs()};
-        overflow: auto;
-      }
     `,
 );
 
@@ -171,6 +164,8 @@ export const Sidebar = styled.aside`
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+  padding: ${bs()};
+  overflow: auto;
 `;
 
 export const Main = styled.main(css`
@@ -272,3 +267,24 @@ export const stylesAtom = atom((get) => {
   const darkModeStyle = withDarkMode(isDarkMode, darkMode);
   return [...appStyle, darkModeStyle];
 });
+
+export const Slideover = styled.aside<{ isOpen: boolean; from?: "left" | "right" } & WithDarkMode>`
+  ${cover()}
+  background-color: ${Palette.white};
+  z-index: 2;
+  ${(p) =>
+    withDarkMode(
+      p.isDarkMode,
+      css`
+        background-color: ${Palette.black};
+      `,
+    )}
+  ${(p) =>
+    p.isOpen ?
+      css`
+        transform: translateX(0);
+      `
+    : css`
+        transform: translateX(${p.from === "left" ? "" : "-"}100%);
+      `}
+`;
