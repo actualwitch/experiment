@@ -1,11 +1,10 @@
 import { useAtom, type PrimitiveAtom, type Setter } from "jotai";
-import { createElement, useId } from "react";
+import { createElement, Fragment, useId } from "react";
 import { Button } from "../style";
 import { Slider } from "./Slider";
 import { Select } from "./Select";
 import { Item } from "react-stately";
 import { store } from "../state/store";
-
 
 export type LeafWithOptions<T extends string = string> = {
   label: string;
@@ -47,7 +46,9 @@ export const ConfigRenderer = ({ children, level = 3 }: { children: Config | boo
     return (
       <>
         {children.map((child, index) => (
-          <ConfigRenderer key={`${id}-${index}`} level={level}>{child}</ConfigRenderer>
+          <ConfigRenderer key={`${id}-${index}`} level={level}>
+            {child}
+          </ConfigRenderer>
         ))}
       </>
     );
@@ -120,10 +121,10 @@ export const ConfigRenderer = ({ children, level = 3 }: { children: Config | boo
     return (
       <>
         {Object.entries(children).map(([key, value]) => (
-          <>
+          <Fragment key={key}>
             {createElement(`h${level}`, {}, key)}
             <ConfigRenderer level={level + 1}>{value}</ConfigRenderer>
-          </>
+          </Fragment>
         ))}
       </>
     );

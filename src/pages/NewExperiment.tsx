@@ -27,7 +27,7 @@ import {
   selectedProviderAtom,
   tempAtom,
 } from "../state/inference";
-import { Sidebar, bs } from "../style";
+import { Button, Sidebar, bs } from "../style";
 import { type WithDarkMode, withDarkMode } from "../style/darkMode";
 import { Palette } from "../style/palette";
 import { increaseSpecificity } from "../style/utils";
@@ -221,6 +221,20 @@ const TextArea = (props: React.TextareaHTMLAttributes<HTMLTextAreaElement>) => {
   return <textarea {...props} ref={ref} />;
 };
 
+const MobileHeader = styled.h2`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: absolute;
+  left: ${bs()};
+  right: ${bs()};
+  z-index: 1;
+  span {
+    padding: 0 ${bs(0.5)};
+    text-shadow: black 1px 2px 14px, black 0px 0px 24px;
+  }
+`;
+
 export default function NewExperiment() {
   const [isDarkMode] = useAtom(isDarkModeAtom);
   const [layout] = useAtom(layoutAtom);
@@ -347,6 +361,12 @@ export default function NewExperiment() {
   return (
     <>
       <Column isDarkMode={isDarkMode}>
+        {layout === "mobile" && (
+          <MobileHeader>
+            <span>🔬 Experiment</span>
+            <Button>⍇</Button>
+          </MobileHeader>
+        )}
         <ChatPreview history={experiment} autoScroll />
         <Block isDarkMode={isDarkMode}>
           <ActionRow>
