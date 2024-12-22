@@ -62,6 +62,32 @@ export const modelOptions = {
   anthropic: AnthropicModel.alternatives.map((model) => model.value),
   mistral: MistralModel.alternatives.map((model) => model.value),
 };
+export const modelLabels = {
+  openai: {
+    "gpt-4o": "GPT-4o",
+    "gpt-4o-mini": "GPT-4o Mini",
+    "o1-preview": "O1 Preview",
+    "o1-mini": "O1 Mini",
+  },
+  anthropic: {
+    "claude-3-5-sonnet-latest": "Claude 3.5 Sonnet",
+    "claude-3-5-haiku-latest": "Claude 3.5 Haiku",
+  },
+  mistral: {
+    "mistral-large-latest": "Mistral Large",
+    "mistral-medium-latest": "Mistral Medium",
+    "mistral-small-latest": "Mistral Small",
+  },
+} as const;
+
+export const modelOptionsAtom = atom((get) => {
+  const provider = get(selectedProviderAtom);
+  if (!provider) return [];
+  return modelOptions[provider].map((model) => ({
+    id: model,
+    name: modelLabels[provider][model],
+  }));
+});
 
 export const tempAtom = entangledAtom("temp", atom(0.0));
 export const modelAtom = entangledAtom("model", atom<string>(""));

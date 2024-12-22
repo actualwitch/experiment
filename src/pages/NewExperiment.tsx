@@ -1,12 +1,10 @@
 import { css } from "@emotion/react";
 import styled from "@emotion/styled";
-import { useAtom, useAtomValue, useSetAtom } from "jotai";
+import { type Setter, atom, useAtom } from "jotai";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Item } from "react-stately";
 import { NavLink } from "react-router";
 
-import { Select } from "../components/Select";
-import { Slider } from "../components/Slider";
+import { type Config, ConfigRenderer } from "../components/ConfigRenderer";
 import { ChatPreview, selectionAtom } from "../components/chat";
 import { ExperimentsSidebar } from "../sidebars/experiments";
 import {
@@ -23,17 +21,17 @@ import {
   isRunningAtom,
   modelAtom,
   modelOptions,
+  modelOptionsAtom,
   modelSupportsTemperatureAtom,
   runInferenceAtom,
   selectedProviderAtom,
   tempAtom,
-  withIds,
 } from "../state/inference";
-import { Button, Sidebar, bs } from "../style";
-import { withDarkMode, type WithDarkMode } from "../style/darkMode";
+import { Sidebar, bs } from "../style";
+import { type WithDarkMode, withDarkMode } from "../style/darkMode";
 import { Palette } from "../style/palette";
-import { useHandlers } from "../utils/keyboard";
 import { increaseSpecificity } from "../style/utils";
+import { useHandlers } from "../utils/keyboard";
 
 export const Column = styled.div<WithDarkMode>`
   display: flex;
@@ -129,6 +127,85 @@ const ActionRow = styled.div`
   }
 `;
 
+const actionsAtom = atom((get) => {
+  const providerOptions = get(availableProviderOptionsAtom);
+  const modelOptions = get(modelOptionsAtom);
+  const supportsTemp = get(modelSupportsTemperatureAtom);
+  const isRunning = get(isRunningAtom);
+  const experiment = get(experimentAtom);
+  const selection = get(selectionAtom);
+  const config: Config = {
+    Actions: [
+      providerOptions.length > 1 && {
+        label: "Provider",
+        atom: selectedProviderAtom,
+        options: providerOptions,
+      },
+      {
+        label: "Model",
+        atom: modelAtom,
+        options: modelOptions,
+      },
+      supportsTemp && {
+        label: "Temperature",
+        atom: tempAtom,
+      },
+      {
+        buttons: [
+          {
+            label: "Start Experiment",
+            action: (set: Setter) => set(runInferenceAtom),
+            disabled: isRunning || experiment.length === 0,
+          },
+          {
+            label: "Reset",
+            action: (set: Setter) => set(experimentAtom, []),
+            disabled: isRunning || experiment.length === 0,
+          },
+        ],
+      },
+      (selection !== null &&
+        selection.length === 1 && {
+          Selection: {
+            buttons: [
+              {
+                label: "Edit",
+                action: (set: Setter) => set(selectionAtom, [selection[0], "content"]),
+              },
+              {
+                label: "Delete",
+                action: (set: Setter) =>
+                  set(
+                    experimentAtom,
+                    get(experimentAtom).filter((_, i) => i !== selection[0]),
+                  ),
+              },
+              {
+                label: "Template",
+                action: async (set: Setter) => {
+                  const name = prompt("Name of the template");
+                  if (!name) return;
+                  set(templatesAtom, { ...get(templatesAtom), [name]: get(experimentAtom)[selection[0]] });
+                },
+              },
+            ],
+          },
+        }) ||
+        (selection?.length === 2 && {
+          Selection: {
+            buttons: [
+              {
+                label: "Cancel",
+                action: (set: Setter) => set(selectionAtom, [selection[0]]),
+              },
+            ],
+          },
+        }),
+    ],
+  };
+  return config;
+});
+
 const TextArea = (props: React.TextareaHTMLAttributes<HTMLTextAreaElement>) => {
   const ref = useRef<HTMLTextAreaElement | null>(null);
   useEffect(() => {
@@ -151,7 +228,6 @@ export default function NewExperiment() {
   const [selection, setSelection] = useAtom(selectionAtom);
   const [message, setMessage] = useState("");
   const [role, setRole] = useState<Role>("user");
-  const isRunning = useAtomValue(isRunningAtom);
 
   const [providerOptions] = useAtom(availableProviderOptionsAtom);
   const [provider, setProvider] = useAtom(selectedProviderAtom);
@@ -162,8 +238,6 @@ export default function NewExperiment() {
     }
   }, [provider, providerOptions]);
 
-  const [templates, setTemplates] = useAtom(templatesAtom);
-  const [temp, setTemp] = useAtom(tempAtom);
   const [model, setModel] = useAtom(modelAtom);
 
   const models = useMemo(() => {
@@ -176,8 +250,6 @@ export default function NewExperiment() {
       setModel(models[0]);
     }
   }, [provider, models, model]);
-
-  const supportsTemp = useAtomValue(modelSupportsTemperatureAtom);
 
   const [object, setObject] = useState<null | object>(null);
   useEffect(() => {
@@ -198,7 +270,6 @@ export default function NewExperiment() {
 
   const isDisabled = role === "tool" && !object;
 
-  const runExperiment = useSetAtom(runInferenceAtom);
   const submit = () => {
     if (isEditing) {
       setSelection(null);
@@ -254,6 +325,14 @@ export default function NewExperiment() {
     }
   }, [experiment, parent]);
 
+  useEffect(() => {
+    if (selection && selection[0] >= experiment.length) {
+      setSelection(null);
+    }
+  }, [experiment, selection]);
+
+  const [actions] = useAtom(actionsAtom);
+
   if (providerOptions.length === 0) {
     return (
       <Column isDarkMode={isDarkMode}>
@@ -306,102 +385,7 @@ export default function NewExperiment() {
       </Column>
       {layout === "desktop" && (
         <Sidebar>
-          <h3>Actions</h3>
-          {providerOptions.length > 1 && (
-            <Select
-              label="Provider"
-              items={providerOptions}
-              selectedKey={provider}
-              onSelectionChange={(provider) => {
-                setProvider(provider);
-              }}
-            >
-              {(item) => (
-                <Item textValue={item.name}>
-                  <div>{item.name}</div>
-                </Item>
-              )}
-            </Select>
-          )}
-          <Select
-            label="Model"
-            items={withIds(models)}
-            selectedKey={model}
-            onSelectionChange={(model) => {
-              setModel(model);
-            }}
-          >
-            {(item) => (
-              <Item textValue={item.name}>
-                <div>{item.name}</div>
-              </Item>
-            )}
-          </Select>
-          {supportsTemp && (
-            <Slider
-              value={temp}
-              onChange={(value: number) => setTemp(value)}
-              label="Temperature"
-              minValue={0}
-              maxValue={1}
-              step={0.01}
-              formatOptions={{ minimumFractionDigits: 2 }}
-            />
-          )}
-          <div>
-            <Button
-              type="submit"
-              disabled={isRunning || experiment.length === 0}
-              onClick={() => {
-                runExperiment();
-              }}
-            >
-              Start Experiment
-            </Button>
-
-            <Button
-              type="submit"
-              onClick={() => {
-                setExperiment([]);
-              }}
-              disabled={isRunning || experiment.length === 0}
-            >
-              Reset
-            </Button>
-          </div>
-          {selection !== null && selection.length === 1 && (
-            <>
-              <h4>This message</h4>
-              <div>
-                <Button
-                  type="submit"
-                  onClick={(e) => {
-                    setSelection([selection[0], "content"]);
-                  }}
-                >
-                  Edit
-                </Button>
-                <Button
-                  type="submit"
-                  onClick={(e) => {
-                    deleteSelection();
-                  }}
-                >
-                  Delete
-                </Button>
-                <Button
-                  type="submit"
-                  onClick={async () => {
-                    const name = prompt("Name of the template");
-                    if (!name) return;
-                    setTemplates({ ...templates, [name]: experiment[selection[0]] });
-                  }}
-                >
-                  Template
-                </Button>
-              </div>
-            </>
-          )}
+          <ConfigRenderer>{actions}</ConfigRenderer>
         </Sidebar>
       )}
       <ExperimentsSidebar />
