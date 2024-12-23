@@ -12,8 +12,11 @@ export const MobileHeaderContainer = styled.h2<WithDarkMode>`
   left: ${bs()};
   top: ${bs()};
   z-index: 1;
+  user-select: none;
   span {
     text-decoration: underline;
+    text-decoration-thickness: 3px;
+  text-underline-offset: 4px;
     padding: 0 ${bs(0.5)};
     text-shadow:
       ${Palette.white} 1px 2px 14px,

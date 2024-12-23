@@ -1,5 +1,5 @@
 import { useAtom, type PrimitiveAtom, type Setter } from "jotai";
-import { createElement, Fragment, useId } from "react";
+import { createElement, Fragment, useId, type PropsWithChildren } from "react";
 import { Button } from "../style";
 import { Slider } from "./Slider";
 import { Select } from "./Select";
@@ -38,6 +38,40 @@ export type Config =
       [k in string]: Leaf | Array<Leaf | boolean> | Config;
     }
   | boolean;
+
+const RenderWithAtom = ({children}: {children: LeafWithSlider | LeafWithOptions}) => {
+  
+  const [value, setValue] = useAtom(children.atom);
+  if (typeof value === "number") {
+    return (
+      <Slider
+        value={value}
+        onChange={(value) => setValue(value)}
+        label={children.label}
+        minValue={0}
+        maxValue={1}
+        step={0.01}
+        formatOptions={{ minimumFractionDigits: 2 }}
+      />
+    );
+  }
+  if (children.options) {
+    return (
+      <Select
+        label={children.label}
+        items={children.options}
+        selectedKey={value}
+        onSelectionChange={(value) => setValue(value)}
+      >
+        {(item) => (
+          <Item textValue={item.name}>
+            <div>{item.name}</div>
+          </Item>
+        )}
+      </Select>
+    );
+  }
+}
 
 export const ConfigRenderer = ({ children, level = 3 }: { children: Config | boolean; level?: number }) => {
   const id = useId();
@@ -86,37 +120,7 @@ export const ConfigRenderer = ({ children, level = 3 }: { children: Config | boo
           </Button>
         );
       }
-      const [value, setValue] = useAtom(children.atom);
-      if (typeof value === "number") {
-        return (
-          <Slider
-            value={value}
-            onChange={(value) => setValue(value)}
-            label={children.label}
-            minValue={0}
-            maxValue={1}
-            step={0.01}
-            formatOptions={{ minimumFractionDigits: 2 }}
-          />
-        );
-      }
-      if (children.options) {
-        return (
-          <Select
-            label={children.label}
-            items={children.options}
-            selectedKey={value}
-            onSelectionChange={(value) => setValue(value)}
-          >
-            {(item) => (
-              <Item textValue={item.name}>
-                <div>{item.name}</div>
-              </Item>
-            )}
-          </Select>
-        );
-      }
-      return null;
+      return <RenderWithAtom>{children}</RenderWithAtom>;
     }
     return (
       <>
