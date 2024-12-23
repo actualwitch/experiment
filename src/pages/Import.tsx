@@ -1,15 +1,15 @@
 import { useAtom, useSetAtom } from "jotai";
 import { useEffect } from "react";
 
+import templates from "../../fixtures/templates.json";
 import { ForkButton } from "../components";
 import { ChatPreview } from "../components/chat";
 import { View } from "../components/view";
 import { SidebarInput } from "../navigation";
-import { filenames, importsRegistry, processCsvAtom, selectedChat, type ExperimentWithMeta } from "../state/client";
+import { type ExperimentWithMeta, filenames, importsRegistry, processCsvAtom, selectedChat } from "../state/client";
+import { layoutAtom } from "../state/common";
 import { Button, Sidebar } from "../style";
-import { isDarkModeAtom, layoutAtom } from "../state/common";
-import templates from "../../fixtures/templates.json";
-import { Page } from "./_page";
+import { Actions, Page } from "./_page";
 
 const SidebarContents = () => {
   const [chats] = useAtom(filenames);
@@ -95,7 +95,7 @@ export default function () {
           </>
         }
       </Page>
-      {layout === "desktop" && (
+      <Actions>
         <Sidebar>
           <h3>Actions</h3>
           <CsvInput />
@@ -113,7 +113,7 @@ export default function () {
             </div>
           )}
         </Sidebar>
-      )}
+      </Actions>
       <SidebarInput>
         <SidebarContents />
       </SidebarInput>

@@ -8,7 +8,7 @@ import { TRIANGLE } from "../const";
 import { InputContainer } from "./shared";
 import { Palette } from "../style/palette";
 import { bs } from "../style";
-import type { WithDarkMode } from "../style/darkMode";
+import { withDarkMode, type WithDarkMode } from "../style/darkMode";
 import { useAtomValue } from "jotai";
 import { isDarkModeAtom } from "../state/common";
 
@@ -21,22 +21,33 @@ const LabelContainer = styled.div`
   justify-content: space-between;
 `;
 
-const Track = styled.div<{ orientation: "horizontal" | "vertical"; disabled?: boolean } & WithDarkMode>`
-  position: relative;
-  ${(p) => (p.orientation === "horizontal" ? "height: 30px; width: 100%;" : "width: 30px; height: 100%;")}
-  ${(p) => (p.disabled ? "opacity: 0.4;" : "")}
+const Track = styled.div<{ orientation: "horizontal" | "vertical"; disabled?: boolean } & WithDarkMode>(
+  (p) => css`
+    position: relative;
+    ${p.orientation === "horizontal" ? "height: 30px; width: 100%;" : "width: 30px; height: 100%;"}
+    ${p.disabled ? "opacity: 0.4;" : ""}
   :before {
-    content: attr(x);
-    display: block;
-    position: absolute;
-    background: ${(p) => (p.isDarkMode ? Palette.white : Palette.black)};
+      content: attr(x);
+      display: block;
+      position: absolute;
+      background: ${Palette.black};
 
-    height: 3px;
-    width: 100%;
-    top: 50%;
-    transform: translateY(-50%);
-  }
-`;
+      height: 3px;
+      width: 100%;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+  `,
+  (p) =>
+    withDarkMode(
+      p.isDarkMode,
+      css`
+        :before {
+          background: ${Palette.white};
+        }
+      `,
+    ),
+);
 
 const ThumbComponent = styled.div<{ isFocusVisible?: boolean; isDragging?: boolean }>`
   width: 20px;

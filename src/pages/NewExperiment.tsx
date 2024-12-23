@@ -4,7 +4,6 @@ import { type Setter, atom, useAtom } from "jotai";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { NavLink } from "react-router";
 
-import { cover } from "polished";
 import { type Config, ConfigRenderer } from "../components/ConfigRenderer";
 import { ChatPreview, selectionAtom } from "../components/chat";
 import { ExperimentsSidebar } from "../sidebars/experiments";
@@ -12,11 +11,10 @@ import {
   type Message,
   type Role,
   experimentAtom,
-  isActionPanelOpenAtom,
   isDarkModeAtom,
   layoutAtom,
   parentAtom,
-  templatesAtom,
+  templatesAtom
 } from "../state/common";
 import {
   availableProviderOptionsAtom,
@@ -29,11 +27,11 @@ import {
   selectedProviderAtom,
   tempAtom,
 } from "../state/inference";
-import { Sidebar, Slideover, bs } from "../style";
-import { type WithDarkMode, withDarkMode } from "../style/darkMode";
+import { Sidebar, bs } from "../style";
+import { withDarkMode } from "../style/darkMode";
 import { Palette } from "../style/palette";
 import { useHandlers } from "../utils/keyboard";
-import { Page } from "./_page";
+import { Actions, Page } from "./_page";
 
 export const Block = styled.div<{ isDarkMode?: boolean }>`
   display: flex;
@@ -319,8 +317,6 @@ export default function NewExperiment() {
 
   const [actions] = useAtom(actionsAtom);
 
-  const [isActionsPanelOpen, setIsActionPanelOpened] = useAtom(isActionPanelOpenAtom);
-
   if (providerOptions.length === 0) {
     return (
       <Page>
@@ -371,18 +367,11 @@ export default function NewExperiment() {
           />
         </Block>
       </Page>
-      {layout === "desktop" && (
+      <Actions>
         <Sidebar>
           <ConfigRenderer>{actions}</ConfigRenderer>
         </Sidebar>
-      )}
-      {layout === "mobile" && (
-        <Slideover isOpen={isActionsPanelOpen} isDarkMode={isDarkMode}>
-          <Sidebar>
-            <ConfigRenderer>{actions}</ConfigRenderer>
-          </Sidebar>
-        </Slideover>
-      )}
+      </Actions>
       <ExperimentsSidebar />
     </>
   );

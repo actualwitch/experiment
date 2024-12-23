@@ -4,10 +4,10 @@ import { useParams } from "react-router";
 import { ForkButton } from "../components";
 import { ChatPreview } from "../components/chat";
 import { ExperimentsSidebar } from "../sidebars/experiments";
-import { type ExperimentCursor, type Message, getExperimentAtom, isDarkModeAtom } from "../state/common";
-import { entangledAtom } from "../utils/entanglement";
+import { type ExperimentCursor, type Message, getExperimentAtom } from "../state/common";
 import { Button, Sidebar } from "../style";
-import { Page } from "./_page";
+import { entangledAtom } from "../utils/entanglement";
+import { Actions, Page } from "./_page";
 
 const cursorAtom = entangledAtom("cursor", atom<ExperimentCursor | null>(null));
 const selectedExperimentAtom = entangledAtom(
@@ -37,18 +37,22 @@ export default function Experiment() {
         </h1>
         <ChatPreview key={id + runId} history={experiment ?? []} />
       </Page>
-      <Sidebar>
-        <h3>Actions</h3>
-        <ForkButton experiment={experiment} parent={id} />
-        <Button
-          type="submit"
-          onClick={() => {
-            navigator.clipboard.writeText(JSON.stringify(experiment));
-          }}
-        >
-          Copy JSON
-        </Button>
-      </Sidebar>
+      <Actions>
+        <Sidebar>
+          <h3>Actions</h3>
+          <p>
+            <ForkButton experiment={experiment} parent={id} />
+            <Button
+              type="submit"
+              onClick={() => {
+                navigator.clipboard.writeText(JSON.stringify(experiment));
+              }}
+            >
+              Copy JSON
+            </Button>
+          </p>
+        </Sidebar>
+      </Actions>
       <ExperimentsSidebar />
     </>
   );

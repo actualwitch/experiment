@@ -1,10 +1,10 @@
 import styled from "@emotion/styled";
 
-import { bs } from "../style";
+import { bs, Slideover } from "../style";
 import { type WithDarkMode } from "../style/darkMode";
 import { Palette } from "../style/palette";
 import { increaseSpecificity } from "../style/utils";
-import { isDarkModeAtom, layoutAtom, type WithLayout } from "../state/common";
+import { isActionPanelOpenAtom, isDarkModeAtom, layoutAtom, type WithLayout } from "../state/common";
 import { css } from "@emotion/react";
 import type { PropsWithChildren } from "react";
 import { useAtom } from "jotai";
@@ -38,5 +38,17 @@ export const Page = ({ children }: PropsWithChildren) => {
     <PageContainer isDarkMode={isDarkMode} layout={layout}>
       {children}
     </PageContainer>
+  );
+};
+
+export const Actions = ({ children, from = "left" }: PropsWithChildren<{ from?: "left" | "right" }>) => {
+  const [layout] = useAtom(layoutAtom);
+  const [isDarkMode] = useAtom(isDarkModeAtom);
+  const [isActionsPanelOpen, setIsActionPanelOpened] = useAtom(isActionPanelOpenAtom);
+  if (layout === "desktop") return children;
+  return (
+    <Slideover isOpen={isActionsPanelOpen} isDarkMode={isDarkMode} from={from}>
+      {children}
+    </Slideover>
   );
 };

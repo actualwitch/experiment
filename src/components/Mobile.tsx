@@ -1,12 +1,13 @@
 import styled from "@emotion/styled";
-import { atom, useAtom, useAtomValue } from "jotai";
+import { useAtom, useAtomValue } from "jotai";
 
+import { css } from "@emotion/react";
 import { isActionPanelOpenAtom, isNavPanelOpenAtom, layoutAtom } from "../state/common";
-import { iconAtom } from "../state/meta";
-import { bs, Button } from "../style";
-import { useState } from "react";
+import { Button, bs } from "../style";
+import { type WithDarkMode, withDarkMode } from "../style/darkMode";
+import { Palette } from "../style/palette";
 
-export const MobileHeaderContainer = styled.h2`
+export const MobileHeaderContainer = styled.h2<WithDarkMode>`
   position: absolute;
   left: ${bs()};
   top: ${bs()};
@@ -15,9 +16,20 @@ export const MobileHeaderContainer = styled.h2`
     text-decoration: underline;
     padding: 0 ${bs(0.5)};
     text-shadow:
-      black 1px 2px 14px,
-      black 0px 0px 24px;
+      ${Palette.white} 1px 2px 14px,
+      ${Palette.white} 0px 0px 24px;
   }
+  ${(p) =>
+    withDarkMode(
+      p.isDarkMode,
+      css`
+        span {
+          text-shadow:
+            ${Palette.black} 1px 2px 14px,
+            ${Palette.black} 0px 0px 24px;
+        }
+      `,
+    )}
 `;
 
 export const MobileAction = styled.div`
@@ -40,7 +52,7 @@ export const MobileHeader = () => {
           setIsNavPanelOpened(!isNavPanelOpen);
         }}
       >
-        🔬 
+        🔬
         <span>Experiment</span>
       </MobileHeaderContainer>
       <MobileAction>

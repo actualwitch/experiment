@@ -272,6 +272,7 @@ export const Slideover = styled.aside<{ isOpen: boolean; from?: "left" | "right"
   ${cover()}
   background-color: ${Palette.white};
   z-index: 2;
+  transition: transform 100ms ease-out;
   ${(p) =>
     withDarkMode(
       p.isDarkMode,

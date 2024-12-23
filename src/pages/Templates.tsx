@@ -3,25 +3,25 @@ import { useState } from "react";
 
 import { View } from "../components/view";
 import { SidebarInput } from "../navigation";
-import { isDarkModeAtom, layoutAtom, templatesAtom } from "../state/common";
+import { templatesAtom } from "../state/common";
 import { Button, Sidebar } from "../style";
-import { Page } from "./_page";
+import { Actions, Page } from "./_page";
 
 export default function Templates() {
-  const [layout] = useAtom(layoutAtom);
   const [templates, setTemplates] = useAtom(templatesAtom);
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
   return (
     <>
-    <Page>
-      <View>
-        {templates ?
-          selectedTemplate ?
-            templates[selectedTemplate]
-          : undefined
-        : undefined}
-      </View></Page>
-      {layout === "desktop" && (
+      <Page>
+        <View>
+          {templates ?
+            selectedTemplate ?
+              templates[selectedTemplate]
+            : undefined
+          : undefined}
+        </View>
+      </Page>
+      <Actions>
         <Sidebar>
           <h2>Actions</h2>
           {templates && selectedTemplate && (
@@ -38,7 +38,7 @@ export default function Templates() {
             </Button>
           )}
         </Sidebar>
-      )}
+      </Actions>
       <SidebarInput>
         <ul>
           {templates &&
