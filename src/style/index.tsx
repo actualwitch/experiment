@@ -257,6 +257,10 @@ export const appStyle = [
       font: inherit;
     }
 
+    body {
+      overflow-x: hidden;
+    }
+
     ${button}
     ${input}
   `,

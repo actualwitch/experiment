@@ -2,7 +2,7 @@ import styled from "@emotion/styled";
 import { useAtom, useAtomValue } from "jotai";
 
 import { css } from "@emotion/react";
-import { isActionPanelOpenAtom, isNavPanelOpenAtom, layoutAtom } from "../state/common";
+import { isActionPanelOpenAtom, isDarkModeAtom, isNavPanelOpenAtom, layoutAtom } from "../state/common";
 import { Button, bs } from "../style";
 import { type WithDarkMode, withDarkMode } from "../style/darkMode";
 import { Palette } from "../style/palette";
@@ -41,6 +41,7 @@ export const MobileAction = styled.div`
 `;
 
 export const MobileHeader = () => {
+  const [isDarkMode] = useAtom(isDarkModeAtom);
   const [isNavPanelOpen, setIsNavPanelOpened] = useAtom(isNavPanelOpenAtom);
   const [isActionsPanelOpen, setIsActionPanelOpened] = useAtom(isActionPanelOpenAtom);
   const layout = useAtomValue(layoutAtom);
@@ -48,6 +49,7 @@ export const MobileHeader = () => {
   return (
     <>
       <MobileHeaderContainer
+        isDarkMode={isDarkMode}
         onClick={() => {
           setIsNavPanelOpened(!isNavPanelOpen);
         }}
