@@ -207,7 +207,14 @@ export default function Parameters() {
         {Object.keys(tokens).map((provider) => (
           <Row key={provider}>
             <header>{providerLabels[provider]}</header>
-            <Button onClick={() => setTokens({ ...tokens, [provider]: undefined })}>Remove</Button>
+            <Button
+              onClick={() => {
+                const { [provider]: _, ...newTokens } = tokens;
+                setTokens(newTokens);
+              }}
+            >
+              Remove
+            </Button>
           </Row>
         ))}
       </StyledForm>

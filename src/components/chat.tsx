@@ -119,6 +119,13 @@ export const MessageComponent = styled.article<{
       }
     `,
   ];
+  if (align === "right" && contentType === "object") {
+    styles.push(css`
+      ol {
+        padding-left: 0;
+      }  
+    `);
+  }
   if (role === "system") {
     styles.push(css`
       border-color: ${Palette.yellow};

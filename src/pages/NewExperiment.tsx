@@ -74,6 +74,8 @@ export const Block = styled.div<{ isDarkMode?: boolean }>`
   button {
     background: transparent;
     color: inherit;
+    padding-top: 0;
+    padding-bottom: 0;
   }
   select,
   button {

@@ -23,7 +23,7 @@ export default function Templates() {
       </Page>
       <Actions>
         <Sidebar>
-          <h2>Actions</h2>
+          <h3>Actions</h3>
           {templates && selectedTemplate && (
             <Button
               type="button"
