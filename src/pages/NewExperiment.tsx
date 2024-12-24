@@ -1,6 +1,6 @@
 import { css } from "@emotion/react";
 import styled from "@emotion/styled";
-import { type Setter, atom, useAtom } from "jotai";
+import { type Setter, atom, useAtom, useSetAtom } from "jotai";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { NavLink } from "react-router";
 
@@ -14,7 +14,7 @@ import {
   isDarkModeAtom,
   layoutAtom,
   parentAtom,
-  templatesAtom
+  templatesAtom,
 } from "../state/common";
 import {
   availableProviderOptionsAtom,
@@ -254,25 +254,6 @@ export default function NewExperiment() {
 
   const isDisabled = role === "tool" && !object;
 
-  const submit = () => {
-    if (isEditing) {
-      setSelection(null);
-      setExperiment(
-        experiment.map((item, i) => {
-          if (i === selection[0]) {
-            const newMessage: Message = { role, content: object || message, fromServer: item.fromServer };
-            return newMessage;
-          }
-          return item;
-        }),
-      );
-      return;
-    }
-    if (!message) return;
-    setMessage("");
-    setExperiment([...experiment, { role, content: object || message }]);
-  };
-
   const deleteSelection = () => {
     if (selection && selection.length === 1) {
       const newExperiment = experiment.filter((_, i) => i !== selection[0]);
@@ -316,6 +297,12 @@ export default function NewExperiment() {
   }, [experiment, selection]);
 
   const [actions] = useAtom(actionsAtom);
+  const startExperiment = useSetAtom(runInferenceAtom);
+
+  const submit = () => {
+    setMessage("");
+    setExperiment([...experiment, { role, content: object || message }]);
+  };
 
   if (providerOptions.length === 0) {
     return (
@@ -339,9 +326,42 @@ export default function NewExperiment() {
               <option>user</option>
               <option>tool</option>
             </select>
-            <button type="button" disabled={isDisabled} onClick={() => submit()}>
-              {isEditing ? "update" : "add"}
-            </button>
+            {isEditing ?
+              <button
+                type="button"
+                disabled={isDisabled}
+                onClick={() => {
+                  setSelection(null);
+                  setExperiment(
+                    experiment.map((item, i) => {
+                      if (i === selection[0]) {
+                        const newMessage: Message = { role, content: object || message, fromServer: item.fromServer };
+                        return newMessage;
+                      }
+                      return item;
+                    }),
+                  );
+                }}
+              >
+                update
+              </button>
+            : null}
+            {!isEditing && message ?
+              <button type="button" disabled={isDisabled} onClick={submit}>
+                add
+              </button>
+            : null}
+            {!isEditing && !message && experiment.length ?
+              <button
+                type="button"
+                disabled={isDisabled}
+                onClick={() => {
+                  startExperiment();
+                }}
+              >
+                start
+              </button>
+            : null}
           </ActionRow>
           <TextArea
             placeholder={`${role === "tool" ? "Paste JSONSchema" : "Type a message and press Enter to append"}…`}
