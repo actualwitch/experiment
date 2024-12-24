@@ -144,19 +144,20 @@ const inputDarkMode = css`
   }
 `;
 
-export const Container = styled.div<WithLayout>(content, (p) =>
-  p.layout === "desktop" ?
+export const Container = styled.div<WithLayout>(
+  content,
+  css`
+    margin-bottom: 0;
+    display: grid;
+    grid-template-columns: 278px 1fr 320px;
+    height: 100dvh;
+  `,
+  (p) =>
+    p.layout === "mobile" &&
     css`
-      margin-bottom: 0;
-      display: grid;
-      grid-template-columns: 278px 1fr 320px;
-      height: 100dvh;
-    `
-  : css`
-      margin-bottom: 0;
-      display: grid;
+      position: relative;
+      overflow: hidden;
       grid-template-columns: 1fr;
-      height: 100dvh;
     `,
 );
 
@@ -277,6 +278,7 @@ export const Slideover = styled.aside<{ isOpen: boolean; from?: "left" | "right"
   background-color: ${Palette.white};
   z-index: 2;
   transition: transform 100ms ease-out;
+  display: flex;
   ${(p) =>
     withDarkMode(
       p.isDarkMode,

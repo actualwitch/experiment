@@ -43,13 +43,12 @@ const App = () => {
   useAtom(layoutTrackerAtom);
   const [layout] = useAtom(layoutAtom);
   const [isDarkMode] = useAtom(isDarkModeAtom);
-  const [isNavPanelOpen] = useAtom(isNavPanelOpenAtom);
   const {pathname} = useLocation();
-  const setIsNavPanelOpened = useSetAtom(isNavPanelOpenAtom);
-  const setIsActionPanelOpened = useSetAtom(isActionPanelOpenAtom);
+  const [isNavPanelOpen, setIsNavPanelOpen] = useAtom(isNavPanelOpenAtom);
+  const [isActionPanelOpen, setIsActionPanelOpen] = useAtom(isActionPanelOpenAtom);
   useEffect(() => {
-    setIsNavPanelOpened(false);
-    setIsActionPanelOpened(false);
+    setIsNavPanelOpen(false);
+    setIsActionPanelOpen(false);
   }, [pathname]);
   return (
     <Suspense fallback={null}>

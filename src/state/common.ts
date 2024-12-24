@@ -21,8 +21,17 @@ export const layoutTrackerAtom = atomEffect((get, set) => {
 });
 export type WithLayout = { layout: "mobile" | "desktop" };
 
-export const isActionPanelOpenAtom = atom(false);
-export const isNavPanelOpenAtom = atom(false);
+export const _isActionPanelOpenAtom = atom(false);
+export const _isNavPanelOpenAtom = atom(false);
+
+export const isActionPanelOpenAtom = atom(get => get(_isActionPanelOpenAtom), (get, set, value: boolean) => {
+  if (value && get(_isNavPanelOpenAtom)) set(_isNavPanelOpenAtom, false);
+  set(_isActionPanelOpenAtom, value);
+});
+export const isNavPanelOpenAtom = atom(get => get(_isNavPanelOpenAtom), (get, set, value: boolean) => {
+  if (value && get(_isActionPanelOpenAtom)) set(_isActionPanelOpenAtom, false);
+  set(_isNavPanelOpenAtom, value);
+});
 
 export type StringContent = { content: string };
 export type ObjectOrStringContent = { content: object | string };
