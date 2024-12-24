@@ -40,7 +40,12 @@ export const providerLabels = {
 
 export const availableProviderOptionsAtom = atom((get) => {
   const tokens = get(tokensAtom);
-  const providers = Object.keys(tokens) as ProviderType[];
+  const providers = Object.keys(tokens).reduce<ProviderType[]>((acc, item) => {
+    if (tokens[item]) {
+      acc.push(item);
+    }
+    return acc;
+  }, [])
   return providers.map((provider) => ({
     id: provider,
     name: providerLabels[provider],

@@ -12,7 +12,6 @@ import {
   type Role,
   experimentAtom,
   isDarkModeAtom,
-  layoutAtom,
   parentAtom,
   templatesAtom,
 } from "../state/common";
@@ -76,6 +75,9 @@ export const Block = styled.div<{ isDarkMode?: boolean }>`
     color: inherit;
     padding-top: 0;
     padding-bottom: 0;
+    :hover {
+      background-color: ${Palette.black}20;
+    }
   }
   select,
   button {
@@ -94,7 +96,7 @@ export const Block = styled.div<{ isDarkMode?: boolean }>`
         }
         button {
           :hover {
-            background: "#f0f0f024";
+            background-color: ${Palette.white}20;
           }
         }
       `,
@@ -209,7 +211,6 @@ const TextArea = (props: React.TextareaHTMLAttributes<HTMLTextAreaElement>) => {
 
 export default function NewExperiment() {
   const [isDarkMode] = useAtom(isDarkModeAtom);
-  const [layout] = useAtom(layoutAtom);
   const [experiment, setExperiment] = useAtom(experimentAtom);
   const [selection, setSelection] = useAtom(selectionAtom);
   const [message, setMessage] = useState("");
