@@ -303,8 +303,27 @@ export default function NewExperiment() {
   const startExperiment = useSetAtom(runInferenceAtom);
 
   const submit = () => {
-    setMessage("");
-    setExperiment([...experiment, { role, content: object || message }]);
+    if (isEditing) {
+      setSelection(null);
+      setExperiment(
+        experiment.map((item, i) => {
+          if (i === selection[0]) {
+            const newMessage: Message = { role, content: object || message, fromServer: item.fromServer };
+            return newMessage;
+          }
+          return item;
+        }),
+      );
+      return;
+    }
+    if (message) {
+      setMessage("");
+      setExperiment([...experiment, { role, content: object || message }]);
+      return;
+    }
+    if (experiment.length) {
+      startExperiment();
+    }
   };
 
   if (providerOptions.length === 0) {
@@ -333,18 +352,7 @@ export default function NewExperiment() {
               <button
                 type="button"
                 disabled={isDisabled}
-                onClick={() => {
-                  setSelection(null);
-                  setExperiment(
-                    experiment.map((item, i) => {
-                      if (i === selection[0]) {
-                        const newMessage: Message = { role, content: object || message, fromServer: item.fromServer };
-                        return newMessage;
-                      }
-                      return item;
-                    }),
-                  );
-                }}
+                onClick={submit}
               >
                 update
               </button>
@@ -358,9 +366,7 @@ export default function NewExperiment() {
               <button
                 type="button"
                 disabled={isDisabled}
-                onClick={() => {
-                  startExperiment();
-                }}
+                onClick={submit}
               >
                 start
               </button>
