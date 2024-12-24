@@ -28,6 +28,7 @@ export const PageContainer = styled.div<WithDarkMode & WithLayout>`
     p.layout === "mobile" &&
     css`
       padding-top: 80px;
+      padding-bottom: ${bs(1 / 2)};
     `}
 `;
 

@@ -7,7 +7,6 @@ import Templates from "./Templates";
 import { useSetAtom } from "jotai";
 import { iconAtom, titleAtom } from "../state/meta";
 import { useEffect, type PropsWithChildren } from "react";
-import { TRIANGLE } from "../const";
 
 type RouteList = Array<{
   icon: string;
@@ -29,8 +28,7 @@ function IconAndTitleUpdater({ icon, title, children }: PropsWithChildren<{ icon
   const setTitle = useSetAtom(titleAtom);
   const setIcon = useSetAtom(iconAtom);
   useEffect(() => {
-    const newTitle = title === "Experiment" ? title : `${title} ${TRIANGLE} Experiment`;
-    setTitle(newTitle);
+    setTitle(title);
     setIcon(icon);
   }, [title, icon]);
   return children;

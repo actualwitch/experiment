@@ -6,6 +6,7 @@ import { isActionPanelOpenAtom, isDarkModeAtom, isNavPanelOpenAtom, layoutAtom }
 import { Button, bs } from "../style";
 import { type WithDarkMode, withDarkMode } from "../style/darkMode";
 import { Palette } from "../style/palette";
+import { iconAtom, titleAtom } from "../state/meta";
 
 export const MobileHeaderContainer = styled.h2<WithDarkMode>`
   position: absolute;
@@ -44,6 +45,8 @@ export const MobileAction = styled.div`
 `;
 
 export const MobileHeader = () => {
+  const [icon] = useAtom(iconAtom);
+  const [title] = useAtom(titleAtom);
   const [isDarkMode] = useAtom(isDarkModeAtom);
   const [isNavPanelOpen, setIsNavPanelOpened] = useAtom(isNavPanelOpenAtom);
   const [isActionsPanelOpen, setIsActionPanelOpened] = useAtom(isActionPanelOpenAtom);
@@ -57,8 +60,8 @@ export const MobileHeader = () => {
           setIsNavPanelOpened(!isNavPanelOpen);
         }}
       >
-        🔬
-        <span>Experiment</span>
+        {icon}
+        <span>{title}</span>
       </MobileHeaderContainer>
       <MobileAction>
         <Button

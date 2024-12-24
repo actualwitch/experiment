@@ -12,7 +12,7 @@ import { Hydration } from "./utils/hydration";
 import { FavIcon } from "./components/FavIcon";
 import { getRealm } from "./utils/realm";
 import { clientFile } from "./const";
-import { titleAtom, descriptionAtom, iconAtom } from "./state/meta";
+import { pageTitleAtom, descriptionAtom, iconAtom } from "./state/meta";
 import { ErrorBoundary } from "./components/error";
 import { isActionPanelOpenAtom, isDarkModeAtom, isNavPanelOpenAtom, layoutAtom, layoutTrackerAtom } from "./state/common";
 import { MobileHeader } from "./components/Mobile";
@@ -68,7 +68,7 @@ const App = () => {
 };
 
 const Meta = () => {
-  const [title] = useAtom(titleAtom);
+  const [title] = useAtom(pageTitleAtom);
   const [description] = useAtom(descriptionAtom);
   const [icon] = useAtom(iconAtom);
   return (

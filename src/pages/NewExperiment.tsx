@@ -11,6 +11,7 @@ import {
   type Message,
   type Role,
   experimentAtom,
+  isActionPanelOpenAtom,
   isDarkModeAtom,
   parentAtom,
   templatesAtom,
@@ -27,12 +28,12 @@ import {
   tempAtom,
 } from "../state/inference";
 import { Sidebar, bs } from "../style";
-import { withDarkMode } from "../style/darkMode";
+import { withDarkMode, type WithDarkMode } from "../style/darkMode";
 import { Palette } from "../style/palette";
 import { useHandlers } from "../utils/keyboard";
 import { Actions, Page } from "./_page";
 
-export const Block = styled.div<{ isDarkMode?: boolean }>`
+export const Block = styled.div<WithDarkMode>`
   display: flex;
   flex-direction: column;
 
@@ -81,6 +82,7 @@ export const Block = styled.div<{ isDarkMode?: boolean }>`
   }
   select,
   button {
+    padding-top: ${bs(1 / 4)};
     :hover {
       cursor: pointer;
       background: "#fff9";
@@ -219,6 +221,8 @@ export default function NewExperiment() {
   const [providerOptions] = useAtom(availableProviderOptionsAtom);
   const [provider, setProvider] = useAtom(selectedProviderAtom);
 
+  const [isRunning] = useAtom(isRunningAtom);
+
   useEffect(() => {
     if (!provider && providerOptions.length > 0) {
       setProvider(providerOptions[0].id);
@@ -301,6 +305,11 @@ export default function NewExperiment() {
 
   const [actions] = useAtom(actionsAtom);
   const startExperiment = useSetAtom(runInferenceAtom);
+
+  const setIsActionPanelOpen = useSetAtom(isActionPanelOpenAtom);
+  useEffect(() => {
+    setIsActionPanelOpen(false);
+  }, [experiment, isRunning])
 
   const submit = () => {
     if (isEditing) {
