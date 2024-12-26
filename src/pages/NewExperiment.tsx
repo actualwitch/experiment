@@ -309,7 +309,7 @@ export default function NewExperiment() {
   const setIsActionPanelOpen = useSetAtom(isActionPanelOpenAtom);
   useEffect(() => {
     setIsActionPanelOpen(false);
-  }, [experiment, isRunning])
+  }, [experiment, isRunning, isEditing, selection]);
 
   const submit = () => {
     if (isEditing) {
@@ -358,11 +358,7 @@ export default function NewExperiment() {
               <option>tool</option>
             </select>
             {isEditing ?
-              <button
-                type="button"
-                disabled={isDisabled}
-                onClick={submit}
-              >
+              <button type="button" disabled={isDisabled} onClick={submit}>
                 update
               </button>
             : null}
@@ -372,11 +368,7 @@ export default function NewExperiment() {
               </button>
             : null}
             {!isEditing && !message && experiment.length ?
-              <button
-                type="button"
-                disabled={isDisabled}
-                onClick={submit}
-              >
+              <button type="button" disabled={isDisabled} onClick={submit}>
                 start
               </button>
             : null}

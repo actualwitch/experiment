@@ -123,7 +123,7 @@ export const MessageComponent = styled.article<{
     styles.push(css`
       ol {
         padding-left: 0;
-      }  
+      }
     `);
   }
   if (role === "system") {

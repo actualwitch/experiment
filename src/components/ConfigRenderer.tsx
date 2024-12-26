@@ -39,8 +39,7 @@ export type Config =
     }
   | boolean;
 
-const RenderWithAtom = ({children}: {children: LeafWithSlider | LeafWithOptions}) => {
-  
+const RenderWithAtom = ({ children }: { children: LeafWithSlider | LeafWithOptions }) => {
   const [value, setValue] = useAtom(children.atom);
   if (typeof value === "number") {
     return (
@@ -71,7 +70,7 @@ const RenderWithAtom = ({children}: {children: LeafWithSlider | LeafWithOptions}
       </Select>
     );
   }
-}
+};
 
 export const ConfigRenderer = ({ children, level = 3 }: { children: Config | boolean; level?: number }) => {
   const id = useId();

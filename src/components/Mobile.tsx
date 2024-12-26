@@ -17,7 +17,7 @@ export const MobileHeaderContainer = styled.h2<WithDarkMode>`
   span {
     text-decoration: underline;
     text-decoration-thickness: 3px;
-  text-underline-offset: 4px;
+    text-underline-offset: 4px;
     padding: 0 ${bs(0.5)};
     text-shadow:
       ${Palette.white} 1px 2px 14px,

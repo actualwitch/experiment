@@ -1,7 +1,7 @@
 import { Global } from "@emotion/react";
 import { atom, Provider, useAtom, useSetAtom } from "jotai";
 import { Suspense, useEffect, useState, type PropsWithChildren } from "react";
-import { useLocation } from 'react-router';
+import { useLocation } from "react-router";
 
 import { NavigationSidebar } from "./navigation";
 import { Router } from "./pages/_router";
@@ -14,7 +14,13 @@ import { getRealm } from "./utils/realm";
 import { clientFile } from "./const";
 import { pageTitleAtom, descriptionAtom, iconAtom } from "./state/meta";
 import { ErrorBoundary } from "./components/error";
-import { isActionPanelOpenAtom, isDarkModeAtom, isNavPanelOpenAtom, layoutAtom, layoutTrackerAtom } from "./state/common";
+import {
+  isActionPanelOpenAtom,
+  isDarkModeAtom,
+  isNavPanelOpenAtom,
+  layoutAtom,
+  layoutTrackerAtom,
+} from "./state/common";
 import { MobileHeader } from "./components/Mobile";
 
 const Context = ({ children }: PropsWithChildren) => {
@@ -43,7 +49,7 @@ const App = () => {
   useAtom(layoutTrackerAtom);
   const [layout] = useAtom(layoutAtom);
   const [isDarkMode] = useAtom(isDarkModeAtom);
-  const {pathname} = useLocation();
+  const { pathname } = useLocation();
   const [isNavPanelOpen, setIsNavPanelOpen] = useAtom(isNavPanelOpenAtom);
   const [isActionPanelOpen, setIsActionPanelOpen] = useAtom(isActionPanelOpenAtom);
   useEffect(() => {
@@ -94,6 +100,8 @@ export const Shell = ({
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="manifest" href="manifest.json" />
+        <link rel="icon" href="experiment-512.png" />
         <Context>
           <Meta />
         </Context>

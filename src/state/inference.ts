@@ -45,7 +45,7 @@ export const availableProviderOptionsAtom = atom((get) => {
       acc.push(item);
     }
     return acc;
-  }, [])
+  }, []);
   return providers.map((provider) => ({
     id: provider,
     name: providerLabels[provider],
