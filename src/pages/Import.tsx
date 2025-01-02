@@ -8,7 +8,7 @@ import { View } from "../components/view";
 import { SidebarInput } from "../navigation";
 import { type ExperimentWithMeta, filenames, importsRegistry, processCsvAtom, selectedChat } from "../state/client";
 import { layoutAtom } from "../state/common";
-import { Button, Sidebar } from "../style";
+import { Button } from "../style";
 import { Actions, Page } from "./_page";
 
 const SidebarContents = () => {
@@ -96,23 +96,21 @@ export default function () {
         }
       </Page>
       <Actions>
-        <Sidebar>
-          <h3>Actions</h3>
-          <CsvInput />
-          {selected && (
-            <div>
-              <ForkButton experiment={chat?.messages} />
-              <Button
-                type="submit"
-                onClick={() => {
-                  navigator.clipboard.writeText(JSON.stringify(chat));
-                }}
-              >
-                Copy JSON
-              </Button>
-            </div>
-          )}
-        </Sidebar>
+        <h3>Actions</h3>
+        <CsvInput />
+        {selected && (
+          <div>
+            <ForkButton experiment={chat?.messages} />
+            <Button
+              type="submit"
+              onClick={() => {
+                navigator.clipboard.writeText(JSON.stringify(chat));
+              }}
+            >
+              Copy JSON
+            </Button>
+          </div>
+        )}
       </Actions>
       <SidebarInput>
         <SidebarContents />

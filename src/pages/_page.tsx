@@ -1,13 +1,14 @@
 import styled from "@emotion/styled";
 
-import { bs, Slideover } from "../style";
+import { bs, Sidebar, Slideover } from "../style";
 import { type WithDarkMode } from "../style/darkMode";
 import { Palette } from "../style/palette";
 import { increaseSpecificity } from "../style/utils";
-import { isActionPanelOpenAtom, isDarkModeAtom, layoutAtom, type WithLayout } from "../state/common";
+import { isActionPanelOpenAtom, isDarkModeAtom, layoutAtom, mobileQuery, type WithLayout } from "../state/common";
 import { css } from "@emotion/react";
 import type { PropsWithChildren } from "react";
 import { useAtom } from "jotai";
+import { withOnMobile } from "../style/layout";
 
 export const PageContainer = styled.div<WithDarkMode & WithLayout>`
   display: flex;
@@ -25,11 +26,12 @@ export const PageContainer = styled.div<WithDarkMode & WithLayout>`
     }
   }
   ${(p) =>
-    p.layout === "mobile" &&
-    css`
-      padding-top: 80px;
-      padding-bottom: ${bs(1 / 2)};
-    `}
+    withOnMobile(
+      p.layout,
+      css`
+        padding-top: 80px;
+      `,
+    )}
 `;
 
 export const Page = ({ children }: PropsWithChildren) => {
@@ -46,10 +48,10 @@ export const Actions = ({ children, from = "left" }: PropsWithChildren<{ from?: 
   const [layout] = useAtom(layoutAtom);
   const [isDarkMode] = useAtom(isDarkModeAtom);
   const [isActionsPanelOpen, setIsActionPanelOpened] = useAtom(isActionPanelOpenAtom);
-  if (layout === "desktop") return children;
+  if (layout === "desktop") return <Sidebar shouldHideOnMobile>{children}</Sidebar>;
   return (
     <Slideover isOpen={isActionsPanelOpen} isDarkMode={isDarkMode} from={from}>
-      {children}
+      <Sidebar>{children}</Sidebar>
     </Slideover>
   );
 };

@@ -27,7 +27,7 @@ import {
   selectedProviderAtom,
   tempAtom,
 } from "../state/inference";
-import { Sidebar, bs } from "../style";
+import { bs } from "../style";
 import { withDarkMode, type WithDarkMode } from "../style/darkMode";
 import { Palette } from "../style/palette";
 import { useHandlers } from "../utils/keyboard";
@@ -398,9 +398,7 @@ export default function NewExperiment() {
         </Block>
       </Page>
       <Actions>
-        <Sidebar>
-          <ConfigRenderer>{actions}</ConfigRenderer>
-        </Sidebar>
+        <ConfigRenderer>{actions}</ConfigRenderer>
       </Actions>
       <ExperimentsSidebar />
     </>

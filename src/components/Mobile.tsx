@@ -2,7 +2,7 @@ import styled from "@emotion/styled";
 import { useAtom, useAtomValue } from "jotai";
 
 import { css } from "@emotion/react";
-import { isActionPanelOpenAtom, isDarkModeAtom, isNavPanelOpenAtom, layoutAtom } from "../state/common";
+import { isActionPanelOpenAtom, isDarkModeAtom, isNavPanelOpenAtom, layoutAtom, mobileQuery } from "../state/common";
 import { Button, bs } from "../style";
 import { type WithDarkMode, withDarkMode } from "../style/darkMode";
 import { Palette } from "../style/palette";
@@ -75,3 +75,9 @@ export const MobileHeader = () => {
     </>
   );
 };
+
+export const DesktopOnly = styled.div`
+  @media ${mobileQuery} {
+    display: none;
+  }
+`;

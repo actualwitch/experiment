@@ -4,11 +4,12 @@ import { atom, useAtom } from "jotai";
 import { type HTMLProps, useRef } from "react";
 import { useButton } from "react-aria";
 import Shevy from "shevyjs";
-import { isDarkModeAtom, type WithLayout } from "../state/common";
+import { isDarkModeAtom, mobileQuery, type WithLayout } from "../state/common";
 import { withDarkMode, type WithDarkMode } from "./darkMode";
 import { Palette } from "./palette";
 import { reset } from "./reset";
 import { cover } from "polished";
+import { withOnMobile } from "./layout";
 
 const config: {
   fontScale: "majorSecond" | "minorThird" | "majorThird" | "perfectFourth" | "augmentedFourth";
@@ -153,20 +154,27 @@ export const Container = styled.div<WithLayout>(
     height: 100dvh;
   `,
   (p) =>
-    p.layout === "mobile" &&
-    css`
-      position: relative;
-      overflow: hidden;
-      grid-template-columns: 1fr;
-    `,
+    withOnMobile(
+      p.layout,
+      css`
+        position: relative;
+        overflow: hidden;
+        grid-template-columns: 1fr;
+      `,
+    ),
 );
 
-export const Sidebar = styled.aside`
+export const Sidebar = styled.aside<{shouldHideOnMobile?: boolean}>`
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   padding: ${bs()};
   overflow: auto;
+  ${p => p.shouldHideOnMobile && css`
+    @media ${mobileQuery} {
+      display: none;
+    }
+    `}
 `;
 
 export const Main = styled.main(css`
@@ -237,7 +245,7 @@ export const appStyle = [
         display: none;
       }
 
-      ${["h1", "h2", "h3", "h4", "h5", "h6"].map((el) => `* + ${el}`).join(",")} {
+      ${["h1", "h2", "h3", "h4", "h5", "h6"].map((el) => `*:not(style) + ${el}`).join(",")} {
         margin-top: ${bs(2 / 3)};
       }
     }

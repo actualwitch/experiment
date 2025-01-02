@@ -1,22 +1,30 @@
+import { atomEffect } from "jotai-effect";
 import { atom } from "jotai";
 import { focusAtom } from "jotai-optics";
 import { atomWithStorage, createJSONStorage } from "jotai/utils";
+import { Literal, Union, type Static } from "runtypes";
 
 import { createFileStorage } from "../utils";
 import { divergentAtom, entangledAtom } from "../utils/entanglement";
 import { getRealm, hasBackend } from "../utils/realm";
-import { Literal, Union, type Static } from "runtypes";
-import { atomEffect } from "jotai-effect";
 
-export const layoutAtom = atom<"mobile" | "desktop">("desktop");
+export type LayoutType = "mobile" | "desktop";
+export const layoutAtom = atom<LayoutType>("desktop");
+export const mobileQuery = "(max-width: 920px)";
+
 export const layoutTrackerAtom = atomEffect((get, set) => {
-  const listener = () => {
-    set(layoutAtom, window.innerWidth > 920 ? "desktop" : "mobile");
-  };
-  listener();
-  window.addEventListener("resize", listener);
+  const mql = window.matchMedia(mobileQuery);
+  const listener = (mql: MediaQueryList | MediaQueryListEvent) => {
+    if (mql.matches) {
+      set(layoutAtom, "mobile");
+    } else {
+      set(layoutAtom, "desktop");
+    }
+  }
+  listener(mql);
+  mql.addEventListener("change", listener);
   return () => {
-    window.removeEventListener("resize", listener);
+    mql.removeEventListener("change", listener);
   };
 });
 export type WithLayout = { layout: "mobile" | "desktop" };
@@ -27,7 +35,10 @@ export const _isNavPanelOpenAtom = atom(false);
 export const isActionPanelOpenAtom = atom(
   (get) => get(_isActionPanelOpenAtom),
   (get, set, value: boolean) => {
-    if (value && get(_isNavPanelOpenAtom)) set(_isNavPanelOpenAtom, false);
+    if (value && get(_isNavPanelOpenAtom)) {
+      set(_isNavPanelOpenAtom, false);
+      return;
+    }
     set(_isActionPanelOpenAtom, value);
   },
 );

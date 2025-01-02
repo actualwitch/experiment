@@ -21,7 +21,7 @@ import {
   layoutAtom,
   layoutTrackerAtom,
 } from "./state/common";
-import { MobileHeader } from "./components/Mobile";
+import { DesktopOnly, MobileHeader } from "./components/Mobile";
 
 const Context = ({ children }: PropsWithChildren) => {
   return (

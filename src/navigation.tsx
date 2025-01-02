@@ -6,11 +6,12 @@ import { bs } from "./style";
 import { nonInteractive, widthAvailable } from "./style/mixins";
 import { portalIO } from "./utils/portal";
 import { atom, useAtom } from "jotai";
-import { templatesAtom } from "./state/common";
+import { layoutAtom, mobileQuery, templatesAtom } from "./state/common";
+import { css } from "@emotion/react";
 
 export const [SidebarInput, SidebarOutput] = portalIO();
 
-const Navigation = styled.nav`
+const Navigation = styled.nav<{shouldHideOnMobile?: boolean}>`
   padding: ${bs()};
   overflow: auto;
   display: flex;
@@ -28,6 +29,11 @@ const Navigation = styled.nav`
       text-decoration: underline;
     }
   }
+  ${p => p.shouldHideOnMobile && css`
+    @media ${mobileQuery} {
+      display: none;
+    }
+    `}
 `;
 
 const GrowBox = styled.div`
@@ -54,8 +60,9 @@ const routesAtom = atom((get) => {
 
 export const NavigationSidebar = () => {
   const [routes] = useAtom(routesAtom);
+  const [layout] = useAtom(layoutAtom);
   return (
-    <Navigation>
+    <Navigation shouldHideOnMobile={layout === "desktop"}>
       <header>
         {routes.map(
           ({ icon, title, path, showInSidebar }) =>

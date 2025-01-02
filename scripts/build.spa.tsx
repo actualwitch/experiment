@@ -35,7 +35,7 @@ await Bun.write(
     display: "standalone",
     description: project.description,
     background_color: Palette.white,
-    theme_color: Palette.pink,
+    theme_color: Palette.black,
     icons: resolutions.map((res) => ({
       src: `experiment-${res}.png`,
       sizes: `${res}x${res}`,

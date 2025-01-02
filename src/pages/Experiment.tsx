@@ -5,7 +5,7 @@ import { ForkButton } from "../components";
 import { ChatPreview } from "../components/chat";
 import { ExperimentsSidebar } from "../sidebars/experiments";
 import { type ExperimentCursor, type Message, getExperimentAtom } from "../state/common";
-import { Button, Sidebar } from "../style";
+import { Button } from "../style";
 import { entangledAtom } from "../utils/entanglement";
 import { Actions, Page } from "./_page";
 
@@ -38,20 +38,18 @@ export default function Experiment() {
         <ChatPreview key={id + runId} history={experiment ?? []} />
       </Page>
       <Actions>
-        <Sidebar>
-          <h3>Actions</h3>
-          <p>
-            <ForkButton experiment={experiment} parent={id} />
-            <Button
-              type="submit"
-              onClick={() => {
-                navigator.clipboard.writeText(JSON.stringify(experiment));
-              }}
-            >
-              Copy JSON
-            </Button>
-          </p>
-        </Sidebar>
+        <h3>Actions</h3>
+        <p>
+          <ForkButton experiment={experiment} parent={id} />
+          <Button
+            type="submit"
+            onClick={() => {
+              navigator.clipboard.writeText(JSON.stringify(experiment));
+            }}
+          >
+            Copy JSON
+          </Button>
+        </p>
       </Actions>
       <ExperimentsSidebar />
     </>
