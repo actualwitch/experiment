@@ -1,5 +1,5 @@
 import { Global } from "@emotion/react";
-import { atom, Provider, useAtom, useSetAtom } from "jotai";
+import { Provider, useAtom } from "jotai";
 import { Suspense, useEffect, useState, type PropsWithChildren } from "react";
 import { useLocation } from "react-router";
 
@@ -66,10 +66,9 @@ const App = () => {
           <MobileHeader />
         </MobileOnly>
         <MobileOnly>
-
-        <Slideover isOpen={isNavPanelOpen} isDarkMode={isDarkMode} from="right">
-          <NavigationSidebar />
-        </Slideover>
+          <Slideover isOpen={isNavPanelOpen} isDarkMode={isDarkMode} from="right">
+            <NavigationSidebar />
+          </Slideover>
         </MobileOnly>
         <Router />
         <Global styles={styles} />

@@ -94,6 +94,7 @@ export const DesktopOnly = ({ children }: PropsWithChildren) => {
 };
 
 export const MobileOnlyContainer = styled.div`
+  display: contents;
   @media ${desktopQuery} {
     display: none;
   }
