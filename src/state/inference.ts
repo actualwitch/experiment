@@ -20,7 +20,6 @@ import {
   storeAtom,
   tokensAtom,
 } from "./common";
-import { store } from "./store";
 import { focusAtom } from "jotai-optics";
 
 export function withIds<T extends string>(items: T[] | readonly T[]) {
@@ -54,8 +53,20 @@ export const availableProviderOptionsAtom = atom((get) => {
 
 export const selectedProviderAtom = entangledAtom("selected-provider", atom<ProviderType | undefined>(undefined));
 
-export const OpenAIModel = Union(Literal("gpt-4o"), Literal("gpt-4o-mini"), Literal("o1-preview"), Literal("o1-mini"));
-export const AnthropicModel = Union(Literal("claude-3-5-sonnet-latest"), Literal("claude-3-5-haiku-latest"));
+export const OpenAIModel = Union(
+  Literal("gpt-4o"),
+  Literal("gpt-4o-mini"),
+  Literal("gpt-4"),
+  Literal("gpt-4-turbo"),
+  Literal("o1"),
+  Literal("o1-preview"),
+  Literal("o1-mini"),
+);
+export const AnthropicModel = Union(
+  Literal("claude-3-5-sonnet-latest"),
+  Literal("claude-3-5-haiku-latest"),
+  Literal("claude-3-opus-latest"),
+);
 export const MistralModel = Union(
   Literal("mistral-large-latest"),
   Literal("mistral-medium-latest"),
@@ -71,12 +82,16 @@ export const modelLabels = {
   openai: {
     "gpt-4o": "GPT-4o",
     "gpt-4o-mini": "GPT-4o Mini",
+    "gpt-4": "GPT-4",
+    "gpt-4-turbo": "GPT-4 Turbo",
+    "o1": "O1",
     "o1-preview": "O1 Preview",
     "o1-mini": "O1 Mini",
   },
   anthropic: {
     "claude-3-5-sonnet-latest": "Claude 3.5 Sonnet",
     "claude-3-5-haiku-latest": "Claude 3.5 Haiku",
+    "claude-3-opus-latest": "Claude 3 Opus",
   },
   mistral: {
     "mistral-large-latest": "Mistral Large",
@@ -101,7 +116,7 @@ export const isRunningAtom = entangledAtom("is running", atom(false));
 export const modelSupportsTemperatureAtom = atom((get) => {
   const provider = get(selectedProviderAtom);
   const model = get(modelAtom);
-  if (provider === "openai" && ["o1-mini", "o1-preview"].includes(model)) {
+  if (provider === "openai" && ["o1-mini", "o1-preview", "o1"].includes(model)) {
     return false;
   }
   return true;

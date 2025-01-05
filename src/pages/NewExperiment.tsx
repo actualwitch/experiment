@@ -33,17 +33,20 @@ import { Palette } from "../style/palette";
 import { useHandlers } from "../utils/keyboard";
 import { Actions, Page } from "./_page";
 
+const baseRadius = 3 / 4;
+const baseMargin = 1 / 2;
+
 export const Block = styled.div<WithDarkMode>`
   display: flex;
   flex-direction: column;
 
-  border-radius: ${bs(0.5)};
+  border-radius: ${bs(baseRadius)};
   position: sticky;
   bottom: 0;
   overflow: clip;
   flex-shrink: 0;
 
-  margin: ${bs(0.5)} -${bs(0.5)} 0;
+  margin: ${bs(baseMargin)} -${bs(baseMargin)} 0;
   width: auto;
 
   backdrop-filter: blur(10px) brightness(${(p) => (p.isDarkMode ? 1.5 : 0.9)}) saturate(2);
@@ -58,17 +61,17 @@ export const Block = styled.div<WithDarkMode>`
   }
 
   textarea {
-    padding: 0 ${bs(0.5)} ${bs(0.25)};
+    padding: 0 ${bs(baseMargin)} ${bs(baseMargin)};
     resize: none;
-    border-bottom-left-radius: ${bs(0.5)};
-    border-bottom-right-radius: ${bs(0.5)};
+    border-bottom-left-radius: ${bs(baseRadius)};
+    border-bottom-right-radius: ${bs(baseRadius)};
     &:focus {
       outline: none;
     }
   }
 
   select {
-    padding: 0 ${bs(0.5)};
+    padding: 0 ${bs(baseMargin)};
     background: transparent;
   }
   button {
@@ -82,10 +85,11 @@ export const Block = styled.div<WithDarkMode>`
   }
   select,
   button {
-    padding-top: ${bs(1 / 4)};
+    padding-top: ${bs(baseMargin / 2)};
+    padding-bottom: ${bs(baseMargin / 2)};
     :hover {
       cursor: pointer;
-      background: "#fff9";
+      background: #fff9;
     }
   }
   ${(p) =>
@@ -107,13 +111,13 @@ export const Block = styled.div<WithDarkMode>`
 
 const ActionRow = styled.div`
   display: flex;
-  border-top-left-radius: ${bs(0.5)};
-  border-top-right-radius: ${bs(0.5)};
+  border-top-left-radius: ${bs(baseRadius)};
+  border-top-right-radius: ${bs(baseRadius)};
   select {
-    border-top-left-radius: ${bs(0.5)};
+    border-top-left-radius: ${bs(baseRadius)};
   }
   button {
-    border-top-right-radius: ${bs(0.5)};
+    border-top-right-radius: ${bs(baseRadius)};
   }
 `;
 
