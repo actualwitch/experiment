@@ -20,23 +20,24 @@ const config: {
 // from https://github.com/system-fonts/modern-font-stacks
 export const FONT_STACKS = {
   "System UI": "system-ui, sans-serif",
-  Transitional: "Charter, 'Bitstream Charter', 'Sitka Text', Cambria, serif",
+  "Transitional": "Charter, 'Bitstream Charter', 'Sitka Text', Cambria, serif",
   "Old Style": "'Iowan Old Style', 'Palatino Linotype', 'URW Palladio L', P052, serif",
-  Humanist: "Seravek, 'Gill Sans Nova', Ubuntu, Calibri, 'DejaVu Sans', source-sans-pro, sans-serif",
+  "Humanist": "Seravek, 'Gill Sans Nova', Ubuntu, Calibri, 'DejaVu Sans', source-sans-pro, sans-serif",
   "Geometric Humanist": "Avenir, Montserrat, Corbel, 'URW Gothic', source-sans-pro, sans-serif",
   "Classic Humanist": "Optima, Candara, 'Noto Sans', source-sans-pro, sans-serif",
   "Neo Grotesque": "Inter, Roboto, 'Helvetica Neue', 'Arial Nova', 'Nimbus Sans', Arial, sans-serif",
   "Monospace Slab Serif": "'Nimbus Mono PS', 'Courier New', monospace",
   "Monospace Code": "ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Consolas, 'DejaVu Sans Mono', monospace",
-  "Industrial": "Bahnschrift, 'DIN Alternate', 'Franklin Gothic Medium', 'Nimbus Sans Narrow', sans-serif-condensed, sans-serif",
-  "Rounded Sans": "ui-rounded, 'Hiragino Maru Gothic ProN', Quicksand, Comfortaa, Manjari, 'Arial Rounded MT', 'Arial Rounded MT Bold', Calibri, source-sans-pro, sans-serif",
+  "Industrial":
+    "Bahnschrift, 'DIN Alternate', 'Franklin Gothic Medium', 'Nimbus Sans Narrow', sans-serif-condensed, sans-serif",
+  "Rounded Sans":
+    "ui-rounded, 'Hiragino Maru Gothic ProN', Quicksand, Comfortaa, Manjari, 'Arial Rounded MT', 'Arial Rounded MT Bold', Calibri, source-sans-pro, sans-serif",
   "Slab Serif": "Rockwell, 'Rockwell Nova', 'Roboto Slab', 'DejaVu Serif', 'Sitka Small', serif",
-  Antique: "Superclarendon, 'Bookman Old Style', 'URW Bookman', 'URW Bookman L', 'Georgia Pro', Georgia, serif",
-  Didone: "Didot, 'Bodoni MT', 'Noto Serif Display', 'URW Palladio L', P052, Sylfaen, serif",
+  "Antique": "Superclarendon, 'Bookman Old Style', 'URW Bookman', 'URW Bookman L', 'Georgia Pro', Georgia, serif",
+  "Didone": "Didot, 'Bodoni MT', 'Noto Serif Display', 'URW Palladio L', P052, Sylfaen, serif",
 } as const;
 
 export const withEmoji = ", 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji'";
-
 
 export const { baseSpacing: bs, content, body, h1, h2, h3, h4, h5, h6 } = Shevy(config);
 const shevyStyle = css({
@@ -183,17 +184,12 @@ export const Container = styled.div<WithLayout>(
     ),
 );
 
-export const Sidebar = styled.aside<{shouldHideOnMobile?: boolean}>`
+export const Sidebar = styled.aside`
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   padding: ${bs()};
   overflow: auto;
-  ${p => p.shouldHideOnMobile && css`
-    @media ${mobileQuery} {
-      display: none;
-    }
-    `}
 `;
 
 export const Main = styled.main(css`
@@ -310,6 +306,9 @@ export const Slideover = styled.aside<{ isOpen: boolean; from?: "left" | "right"
   z-index: 2;
   transition: transform 100ms ease-out;
   display: flex;
+  & > * {
+    width: 100%;
+  }
   ${(p) =>
     withDarkMode(
       p.isDarkMode,

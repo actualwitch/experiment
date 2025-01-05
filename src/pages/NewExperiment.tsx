@@ -279,14 +279,16 @@ export default function NewExperiment() {
 
   useEffect(() => {
     if (isEditing) {
-      const { content, role } = experiment[selection[0]];
-      if (typeof content === "string") {
-        setMessage(content);
-        setRole(role);
-      } else if (typeof content === "object") {
-        setMessage(JSON.stringify(content, null, 2));
-        setRole("tool");
-      }
+      try {
+        const { content, role } = experiment[selection[0]];
+        if (typeof content === "string") {
+          setMessage(content);
+          setRole(role);
+        } else if (typeof content === "object") {
+          setMessage(JSON.stringify(content, null, 2));
+          setRole("tool");
+        }
+      } catch {}
     } else {
       setMessage("");
       setRole("user");

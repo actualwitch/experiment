@@ -21,7 +21,7 @@ import {
   layoutAtom,
   layoutTrackerAtom,
 } from "./state/common";
-import { DesktopOnly, MobileHeader } from "./components/Mobile";
+import { DesktopOnly, MobileHeader, MobileOnly } from "./components/Mobile";
 
 const Context = ({ children }: PropsWithChildren) => {
   return (
@@ -59,13 +59,18 @@ const App = () => {
   return (
     <Suspense fallback={null}>
       <Container layout={layout}>
-        {layout === "desktop" && <NavigationSidebar />}
-        {layout === "mobile" && <MobileHeader />}
-        {layout === "mobile" && (
-          <Slideover isOpen={isNavPanelOpen} isDarkMode={isDarkMode} from="right">
-            <NavigationSidebar />
-          </Slideover>
-        )}
+        <DesktopOnly>
+          <NavigationSidebar />
+        </DesktopOnly>
+        <MobileOnly>
+          <MobileHeader />
+        </MobileOnly>
+        <MobileOnly>
+
+        <Slideover isOpen={isNavPanelOpen} isDarkMode={isDarkMode} from="right">
+          <NavigationSidebar />
+        </Slideover>
+        </MobileOnly>
         <Router />
         <Global styles={styles} />
       </Container>

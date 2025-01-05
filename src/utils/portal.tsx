@@ -1,4 +1,4 @@
-import { atom, useAtomValue, useSetAtom } from "jotai";
+import { atom, useAtomValue, useAtom } from "jotai";
 import { type ReactNode, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 
@@ -12,11 +12,11 @@ export function portalIO() {
   }
 
   function Output() {
-    const setElement = useSetAtom(elementAtom);
+    const [element, setElement] = useAtom(elementAtom);
     const ref = useRef<HTMLDivElement | null>(null);
     useEffect(() => {
       setElement(ref.current);
-    }, [ref.current]);
+    }, [ref.current, element]);
     useEffect(
       () => () => {
         setElement(null);

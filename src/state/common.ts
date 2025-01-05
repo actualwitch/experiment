@@ -9,25 +9,22 @@ import { divergentAtom, entangledAtom } from "../utils/entanglement";
 import { getRealm, hasBackend } from "../utils/realm";
 
 export type LayoutType = "mobile" | "desktop";
-export const layoutAtom = atom<LayoutType>("desktop");
+export const layoutAtom = atom<LayoutType>();
 export const mobileQuery = "(max-width: 920px)";
+export const desktopQuery = "(min-width: 921px)";
 
 export const layoutTrackerAtom = atomEffect((get, set) => {
   const mql = window.matchMedia(mobileQuery);
   const listener = (mql: MediaQueryList | MediaQueryListEvent) => {
-    if (mql.matches) {
-      set(layoutAtom, "mobile");
-    } else {
-      set(layoutAtom, "desktop");
-    }
-  }
+    set(layoutAtom, mql.matches ? "mobile" : "desktop");
+  };
   listener(mql);
   mql.addEventListener("change", listener);
   return () => {
     mql.removeEventListener("change", listener);
   };
 });
-export type WithLayout = { layout: "mobile" | "desktop" };
+export type WithLayout = { layout?: "mobile" | "desktop" };
 
 export const _isActionPanelOpenAtom = atom(false);
 export const _isNavPanelOpenAtom = atom(false);

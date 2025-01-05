@@ -5,7 +5,7 @@ import { assignToWindow } from "../src/utils/hydration";
 import { Palette } from "../src/style/palette";
 
 // why does this work but running it from Bun.build fails? #justbunthings
-await $`bun build ./src/entry/client.tsx --outdir ./spa`;
+await $`bun build ./src/entry/client.tsx --outdir ./spa --minify`;
 // const buildResult = await Bun.build({
 //   entrypoints: ["./src/entry/client.tsx"],
 //   outdir: "./spa",

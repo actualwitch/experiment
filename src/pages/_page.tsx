@@ -1,14 +1,15 @@
 import styled from "@emotion/styled";
-
-import { bs, Sidebar, Slideover } from "../style";
-import { type WithDarkMode } from "../style/darkMode";
-import { Palette } from "../style/palette";
-import { increaseSpecificity } from "../style/utils";
-import { isActionPanelOpenAtom, isDarkModeAtom, layoutAtom, mobileQuery, type WithLayout } from "../state/common";
 import { css } from "@emotion/react";
 import type { PropsWithChildren } from "react";
 import { useAtom } from "jotai";
+
+import { bs, Sidebar, Slideover } from "../style";
+import type { WithDarkMode } from "../style/darkMode";
+import { Palette } from "../style/palette";
+import { increaseSpecificity } from "../style/utils";
+import { isActionPanelOpenAtom, isDarkModeAtom, layoutAtom, type WithLayout } from "../state/common";
 import { withOnMobile } from "../style/layout";
+import { DesktopOnly } from "../components/Mobile";
 
 export const PageContainer = styled.div<WithDarkMode & WithLayout>`
   display: flex;
@@ -48,10 +49,16 @@ export const Actions = ({ children, from = "left" }: PropsWithChildren<{ from?: 
   const [layout] = useAtom(layoutAtom);
   const [isDarkMode] = useAtom(isDarkModeAtom);
   const [isActionsPanelOpen, setIsActionPanelOpened] = useAtom(isActionPanelOpenAtom);
-  if (layout === "desktop") return <Sidebar shouldHideOnMobile>{children}</Sidebar>;
+  if (layout === "mobile") {
+    return (
+      <Slideover isOpen={isActionsPanelOpen} isDarkMode={isDarkMode} from={from}>
+        <Sidebar>{children}</Sidebar>
+      </Slideover>
+    );
+  }
   return (
-    <Slideover isOpen={isActionsPanelOpen} isDarkMode={isDarkMode} from={from}>
+    <DesktopOnly>
       <Sidebar>{children}</Sidebar>
-    </Slideover>
+    </DesktopOnly>
   );
 };

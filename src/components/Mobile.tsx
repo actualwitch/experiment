@@ -1,15 +1,24 @@
 import styled from "@emotion/styled";
-import { useAtom, useAtomValue } from "jotai";
-
+import { useAtom } from "jotai";
 import { css } from "@emotion/react";
-import { isActionPanelOpenAtom, isDarkModeAtom, isNavPanelOpenAtom, layoutAtom, mobileQuery } from "../state/common";
+
+import {
+  desktopQuery,
+  isActionPanelOpenAtom,
+  isDarkModeAtom,
+  isNavPanelOpenAtom,
+  layoutAtom,
+  mobileQuery,
+} from "../state/common";
 import { Button, bs } from "../style";
 import { type WithDarkMode, withDarkMode } from "../style/darkMode";
 import { Palette } from "../style/palette";
 import { iconAtom, titleAtom } from "../state/meta";
+import type { PropsWithChildren } from "react";
 
 export const MobileHeaderContainer = styled.h2<WithDarkMode>`
   position: absolute;
+  cursor: pointer;
   left: ${bs()};
   top: ${bs()};
   z-index: 1;
@@ -18,7 +27,6 @@ export const MobileHeaderContainer = styled.h2<WithDarkMode>`
     text-decoration: underline;
     text-decoration-thickness: 3px;
     text-underline-offset: 4px;
-    padding: 0 ${bs(0.5)};
     text-shadow:
       ${Palette.white} 1px 2px 14px,
       ${Palette.white} 0px 0px 24px;
@@ -50,8 +58,6 @@ export const MobileHeader = () => {
   const [isDarkMode] = useAtom(isDarkModeAtom);
   const [isNavPanelOpen, setIsNavPanelOpened] = useAtom(isNavPanelOpenAtom);
   const [isActionsPanelOpen, setIsActionPanelOpened] = useAtom(isActionPanelOpenAtom);
-  const layout = useAtomValue(layoutAtom);
-  if (layout !== "mobile") return null;
   return (
     <>
       <MobileHeaderContainer
@@ -60,8 +66,7 @@ export const MobileHeader = () => {
           setIsNavPanelOpened(!isNavPanelOpen);
         }}
       >
-        {icon}
-        <span>{title}</span>
+        {icon} <span>{title}</span>
       </MobileHeaderContainer>
       <MobileAction>
         <Button
@@ -76,8 +81,26 @@ export const MobileHeader = () => {
   );
 };
 
-export const DesktopOnly = styled.div`
+export const DesktopOnlyContainer = styled.div`
   @media ${mobileQuery} {
     display: none;
   }
 `;
+
+export const DesktopOnly = ({ children }: PropsWithChildren) => {
+  const [layout] = useAtom(layoutAtom);
+  if (!layout) return <DesktopOnlyContainer>{children}</DesktopOnlyContainer>;
+  return layout === "desktop" ? children : null;
+};
+
+export const MobileOnlyContainer = styled.div`
+  @media ${desktopQuery} {
+    display: none;
+  }
+`;
+
+export const MobileOnly = ({ children }: PropsWithChildren) => {
+  const [layout] = useAtom(layoutAtom);
+  if (!layout) return <MobileOnlyContainer>{children}</MobileOnlyContainer>;
+  return layout === "mobile" ? children : null;
+};

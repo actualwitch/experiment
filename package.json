@@ -17,6 +17,7 @@
     "format": "bunx biome format --write ./src/*",
     "format:prettier": "prettier ./src/* --write",
     "lint": "bunx biome lint --write .",
+    "start": "bun i && OPEN_ON_START=true bun --watch run src/entry/server.tsx",
     "test": "bunx playwright test",
     "playwright:update": "bunx playwright install"
   },
