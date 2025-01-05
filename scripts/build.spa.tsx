@@ -3,6 +3,7 @@ import project from "../package.json";
 import { getHtml } from "../src/entry/_handlers";
 import { assignToWindow } from "../src/utils/hydration";
 import { Palette } from "../src/style/palette";
+import { ROUTES } from "../src/pages/_router";
 
 // why does this work but running it from Bun.build fails? #justbunthings
 await $`bun build ./src/entry/client.tsx --outdir ./spa --minify`;
@@ -15,15 +16,22 @@ await $`bun build ./src/entry/client.tsx --outdir ./spa --minify`;
 // }
 
 const baseUrl = process.env.BASE_URL;
-const fullUrl = `${baseUrl ?? ""}/`;
+const regex = /\/\w*/gm;
 
-const html = getHtml(
-  fullUrl,
-  [assignToWindow("REALM", `"SPA"`), baseUrl && assignToWindow("BASE_URL", `"${baseUrl}"`)],
-  baseUrl,
-);
+for (const route of ROUTES) {
+  const path = route.path.match(regex)?.[0]!;
 
-await Bun.write("./spa/index.html", html);
+  const fullUrl = `${baseUrl ?? ""}${path}`;
+
+  const html = getHtml(
+    fullUrl,
+    [assignToWindow("REALM", `"SPA"`), baseUrl && assignToWindow("BASE_URL", `"${baseUrl}"`)],
+    baseUrl,
+  );
+  const pathname = path === "/" ? "index" : path.slice(1);
+
+  await Bun.write(`./spa/${pathname}.html`, html);
+}
 
 const resolutions = [128, 192, 256, 512, 1024];
 
@@ -31,7 +39,7 @@ await Bun.write(
   "./spa/manifest.json",
   JSON.stringify({
     name: project.name,
-    start_url: fullUrl,
+    start_url: `${baseUrl ?? ""}/`,
     display: "standalone",
     description: project.description,
     background_color: Palette.white,
