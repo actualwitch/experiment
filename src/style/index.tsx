@@ -171,7 +171,7 @@ export const Container = styled.div<WithLayout>(
     margin-bottom: 0;
     display: grid;
     grid-template-columns: 278px 1fr 320px;
-    height: 100dvh;
+    height: 100svh;
   `,
   (p) =>
     withOnMobile(
