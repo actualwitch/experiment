@@ -1,7 +1,7 @@
 import { atom } from "jotai";
-import { description, title, TRIANGLE } from "../const";
+import { description, name, TRIANGLE } from "../const";
 
-export const titleAtom = atom(title);
+export const titleAtom = atom(name);
 export const pageTitleAtom = atom((get) => {
   const title = get(titleAtom);
   const newTitle = title === "Experiment" ? title : `${title} ${TRIANGLE} Experiment`;

@@ -1,9 +1,9 @@
 import { $ } from "bun";
-import project from "../package.json";
 import { getHtml } from "../src/entry/_handlers";
 import { assignToWindow } from "../src/utils/hydration";
 import { Palette } from "../src/style/palette";
 import { ROUTES } from "../src/pages/_router";
+import { description, name } from "../src/const";
 
 // why does this work but running it from Bun.build fails? #justbunthings
 await $`bun build ./src/entry/client.tsx --outdir ./spa --minify`;
@@ -38,10 +38,10 @@ const resolutions = [128, 192, 256, 512, 1024];
 await Bun.write(
   "./spa/manifest.json",
   JSON.stringify({
-    name: project.name,
+    name,
+    description,
     start_url: `${baseUrl ?? ""}/`,
     display: "standalone",
-    description: project.description,
     background_color: Palette.white,
     theme_color: Palette.black,
     icons: resolutions.map((res) => ({

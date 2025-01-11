@@ -112,12 +112,10 @@ export async function spawn(command: string, args: string[], options?: any): Pro
 
     return await new Task<string, Error>((ok, ko) => {
       handle.stdout.on("data", (data: unknown) => {
-        console.log(String(data));
         ok(String(data).trim());
       });
 
       handle.stderr.on("data", (data: unknown) => {
-        console.error(String(data));
         ko(new Error(String(data)));
       });
 
