@@ -4,7 +4,7 @@ import { atom, useAtom } from "jotai";
 import { type HTMLProps, useRef } from "react";
 import { useButton } from "react-aria";
 import Shevy from "shevyjs";
-import { isDarkModeAtom, mobileQuery, type WithLayout } from "../state/common";
+import { isBoldTextAtom, isDarkModeAtom, mobileQuery, type WithLayout } from "../state/common";
 import { withDarkMode, type WithDarkMode } from "./darkMode";
 import { Palette } from "./palette";
 import { reset } from "./reset";
@@ -295,9 +295,19 @@ export const appStyle = [
 ];
 
 export const stylesAtom = atom((get) => {
+  const styleSet = [...appStyle];
   const isDarkMode = get(isDarkModeAtom);
   const darkModeStyle = withDarkMode(isDarkMode, darkMode);
-  return [...appStyle, darkModeStyle];
+  styleSet.push(darkModeStyle);
+  const isBoldText = get(isBoldTextAtom);
+  if (isBoldText) {
+    styleSet.push(css`
+      body {
+        font-weight: bold;
+      }
+    `);
+  }
+  return styleSet;
 });
 
 export const Slideover = styled.aside<{ isOpen: boolean; from?: "left" | "right" } & WithDarkMode>`

@@ -2,25 +2,17 @@ import Anthropic from "@anthropic-ai/sdk";
 import { Mistral } from "@mistralai/mistralai";
 import type { ChatCompletionStreamRequest } from "@mistralai/mistralai/models/components";
 import { atom } from "jotai";
+import { focusAtom } from "jotai-optics";
 import OpenAI from "openai";
 import type { ChatCompletionCreateParamsStreaming } from "openai/resources/index.mjs";
 import { Literal, Union } from "runtypes";
 import { experimentToAnthropic } from "../adapters/anthropic";
 import { experimentToMistral } from "../adapters/mistral";
 import { experimentToOpenai } from "../adapters/openai";
-import { maybeImport } from "../utils";
-import { divergentAtom, entangledAtom } from "../utils/entanglement";
-import { getRealm, hasBackend } from "../utils/realm";
-import {
-  type Message,
-  type Store,
-  createExperiment,
-  experimentAtom,
-  parentAtom,
-  storeAtom,
-  tokensAtom,
-} from "./common";
-import { focusAtom } from "jotai-optics";
+import { spawn } from "../utils";
+import { entangledAtom } from "../utils/entanglement";
+import { hasBackend } from "../utils/realm";
+import { type Message, createExperiment, experimentAtom, parentAtom, storeAtom, tokensAtom } from "./common";
 
 export function withIds<T extends string>(items: T[] | readonly T[]) {
   return items.map((name) => ({
@@ -124,65 +116,11 @@ export const modelSupportsTemperatureAtom = atom((get) => {
 
 export const resolveToken = async (token: string) => {
   if (token.startsWith("op:")) {
-    const { spawn } = await maybeImport("child_process");
-    if (!spawn) return null;
-    const handle = spawn("op", ["read", token]);
-    const resolvedToken = await new Promise<string | null>((ok, ko) => {
-      handle.stdout.on("data", (data: unknown) => {
-        ok(String(data).trim());
-      });
-
-      handle.stderr.on("data", (data: unknown) => {
-        console.error(String(data));
-      });
-
-      handle.on("close", () => {
-        ok(null);
-      });
-    });
-    return resolvedToken;
+    const resolvedToken = await spawn("op", ["read", token]);
+    return resolvedToken.unwrapOr(token);
   }
   return token;
 };
-
-export const resolvedTokensAtom = divergentAtom(() => {
-  return atom<Store["tokens"] | Promise<Store["tokens"]>>(async (get) => {
-    const references = get(tokensAtom);
-    const result: Store["tokens"] = {};
-    if (!references) return result;
-    if (["spa", "testing"].includes(getRealm())) {
-      return references;
-    }
-    const promises = Object.entries(references).map(async ([key, ref]) => {
-      if (!ref) return [key, null];
-      if (ref.startsWith("op:")) {
-        const { spawn } = await maybeImport("child_process");
-        if (!spawn) return [key, null];
-        const handle = spawn("op", ["read", ref]);
-        const token = await new Promise<string | null>((ok, ko) => {
-          handle.stdout.on("data", (data: unknown) => {
-            ok(String(data).trim());
-          });
-
-          handle.stderr.on("data", (data: unknown) => {
-            console.error(String(data));
-          });
-
-          handle.on("close", () => {
-            ok(null);
-          });
-        });
-        return [key, token];
-      }
-      return [key, null];
-    });
-    const resolved = await Promise.all(promises);
-    for (const [key, value] of resolved) {
-      result[key] = value;
-    }
-    return result;
-  });
-});
 
 const saveExperimentAtom = entangledAtom(
   { name: "save-experiment" },
@@ -254,10 +192,11 @@ export const testStreaming = entangledAtom(
 export const runExperimentAsAnthropic = entangledAtom(
   { name: "run-experiment-anthropic" },
   atom(null, async (get, set) => {
-    const tokenAtom = focusAtom(storeAtom, (o) => o.prop("tokens").prop("anthropic"));
+    const provider = "anthropic" as const;
+    const tokenAtom = focusAtom(storeAtom, (o) => o.prop("tokens").prop(provider));
     const tokenOrReference = get(tokenAtom);
     if (!tokenOrReference) {
-      console.error("No anthropic token");
+      console.error(`No ${provider} token`);
       return;
     }
     const resolvedToken = await resolveToken(tokenOrReference);
@@ -340,10 +279,11 @@ export const runExperimentAsAnthropic = entangledAtom(
 export const runExperimentAsOpenAi = entangledAtom(
   { name: "run-experiment-openai" },
   atom(null, async (get, set) => {
-    const tokenAtom = focusAtom(storeAtom, (o) => o.prop("tokens").prop("openai"));
+    const provider = "openai" as const;
+    const tokenAtom = focusAtom(storeAtom, (o) => o.prop("tokens").prop(provider));
     const tokenOrReference = get(tokenAtom);
     if (!tokenOrReference) {
-      console.error("No openai token");
+      console.error(`No ${provider} token`);
       return;
     }
     const resolvedToken = await resolveToken(tokenOrReference);
@@ -359,7 +299,6 @@ export const runExperimentAsOpenAi = entangledAtom(
     }
 
     const experimentAsOpenai = experimentToOpenai(experiment);
-    if (!experimentAsOpenai) return;
 
     const client = new OpenAI({
       apiKey: resolvedToken,
@@ -383,7 +322,6 @@ export const runExperimentAsOpenAi = entangledAtom(
     const contentChunks: Message[] = [];
     const namesForToolCalls = new Map<number, string>();
     for await (const chunk of stream) {
-      console.log(JSON.stringify(chunk, null, 2));
       if (chunk.choices.length === 0) {
         continue;
       }
@@ -449,23 +387,29 @@ export const runExperimentAsOpenAi = entangledAtom(
 export const runExperimentAsMistral = entangledAtom(
   { name: "run-experiment-mistral" },
   atom(null, async (get, set) => {
-    const resolvedTokens = await get(resolvedTokensAtom);
-    const experiment = get(experimentAtom);
-
-    if (!resolvedTokens.mistral) {
-      console.error("No mistral token");
+    const provider = "mistral" as const;
+    const tokenAtom = focusAtom(storeAtom, (o) => o.prop("tokens").prop(provider));
+    const tokenOrReference = get(tokenAtom);
+    if (!tokenOrReference) {
+      console.error(`No ${provider} token`);
       return;
     }
+    const resolvedToken = await resolveToken(tokenOrReference);
+    if (!resolvedToken) {
+      console.error("No resolved token");
+      return;
+    }
+
+    const experiment = get(experimentAtom);
     if (!experiment || experiment.length === 0) {
       console.error("No experiment");
       return;
     }
 
     const experimentAsMistral = experimentToMistral(experiment);
-    if (!experimentAsMistral) return;
 
     const client = new Mistral({
-      apiKey: resolvedTokens.mistral,
+      apiKey: resolvedToken,
     });
     if (experimentAsMistral.stream) {
       const params: ChatCompletionStreamRequest = {

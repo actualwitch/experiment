@@ -35,7 +35,7 @@ export default function Experiment() {
         <h1>
           Experiment {id}.{runId}
         </h1>
-        <ChatPreview key={id + runId} history={experiment ?? []} />
+        <ChatPreview key={id + runId} messages={experiment ?? []} />
       </Page>
       <Actions>
         <h3>Actions</h3>

@@ -1,8 +1,9 @@
-import type { SyncStringStorage } from "jotai/vanilla/utils/atomWithStorage";
-import { existsSync, readFileSync, writeFileSync, mkdirSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { platform } from "node:os";
+import type { SyncStringStorage } from "jotai/vanilla/utils/atomWithStorage";
+import { Result, Task } from "true-myth";
+
 import { getRealm } from "./realm";
-import { DEBUG } from "../const";
 
 const readFile = (fileName: string) => {
   try {
@@ -16,9 +17,9 @@ const readFile = (fileName: string) => {
   }
 };
 
-const getStoragePath = () => {
-  if (DEBUG) {
-    return "./state";
+export const getStoragePath = () => {
+  if (Bun.env.STORAGE_PATH) {
+    return Bun.env.STORAGE_PATH;
   }
   if (platform() === "win32") {
     const appData = Bun.env.APPDATA;
@@ -95,9 +96,35 @@ export function deepEqual(a: any, b: any): boolean {
   return true;
 }
 
-export function maybeImport(path: string) {
+export async function resolve(module: string): Promise<Result<any, Error>> {
   if (getRealm() === "server") {
-    return import(path);
+    return Result.ok(await import(module));
   }
-  return Promise.resolve({});
+  return Result.err(new Error("Cannot resolve modules in the browser"));
+}
+
+export async function spawn(command: string, args: string[], options?: any): Promise<Result<string, Error>> {
+  const maybeModule = await resolve("child_process");
+
+  if (maybeModule.isOk) {
+    const module = maybeModule.value;
+    const handle = module.spawn(command, args, options);
+
+    return await new Task<string, Error>((ok, ko) => {
+      handle.stdout.on("data", (data: unknown) => {
+        console.log(String(data));
+        ok(String(data).trim());
+      });
+
+      handle.stderr.on("data", (data: unknown) => {
+        console.error(String(data));
+        ko(new Error(String(data)));
+      });
+
+      handle.on("close", () => {
+        ok("");
+      });
+    });
+  }
+  return Result.err(new Error("Cannot spawn processes in the browser"));
 }

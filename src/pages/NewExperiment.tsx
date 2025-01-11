@@ -355,7 +355,7 @@ export default function NewExperiment() {
   return (
     <>
       <Page>
-        <ChatPreview history={experiment} autoScroll />
+        <ChatPreview messages={experiment} autoScroll />
         <Block isDarkMode={isDarkMode}>
           <ActionRow>
             <select value={role} onChange={(e) => setRole(e.target.value as Role)} style={{ flex: 1 }}>

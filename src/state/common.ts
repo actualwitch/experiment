@@ -4,7 +4,7 @@ import { focusAtom } from "jotai-optics";
 import { atomWithStorage, createJSONStorage } from "jotai/utils";
 import { Literal, Union, type Static } from "runtypes";
 
-import { createFileStorage } from "../utils";
+import { createFileStorage, spawn } from "../utils";
 import { divergentAtom, entangledAtom } from "../utils/entanglement";
 import { getRealm, hasBackend } from "../utils/realm";
 
@@ -72,6 +72,7 @@ export type Experiment = {
 };
 
 export type Store = {
+  isBoldText?: boolean;
   isDarkMode?: boolean;
   experimentLayout?: "left" | "chat" | "chat-reverse";
   rendererMode?: "markdown" | "text+json";
@@ -152,6 +153,11 @@ export const tokensAtom = entangledAtom(
   focusAtom(storeAtom, (o) => o.prop("tokens")),
 );
 
+export const isBoldTextAtom = entangledAtom(
+  "isBoldText",
+  focusAtom(storeAtom, (o) => o.prop("isBoldText")),
+);
+
 export const isDarkModeAtom = entangledAtom(
   "isDarkMode",
   focusAtom(storeAtom, (o) => o.prop("isDarkMode")),
@@ -200,4 +206,12 @@ export const parentAtom = entangledAtom("parent", atom<string | undefined>(undef
 export const rendererModeAtom = entangledAtom(
   "rendererMode",
   focusAtom(storeAtom, (o) => o.prop("rendererMode").valueOr("markdown")),
+);
+
+export const hasOpensslAtom = entangledAtom(
+  "hasOpenssl",
+  atom(async () => {
+    const result = await spawn("which", ["openssl"]);
+    return result.isOk && result.value !== "";
+  }),
 );

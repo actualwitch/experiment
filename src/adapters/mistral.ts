@@ -1,10 +1,7 @@
 import type { ChatCompletionStreamRequest } from "@mistralai/mistralai/models/components";
 import type { Message } from "../state/common";
 
-export const experimentToMistral = (experiment: Message[]): ChatCompletionStreamRequest | null => {
-  if (experiment.length === 0) {
-    return null;
-  }
+export const experimentToMistral = (experiment: Message[]): ChatCompletionStreamRequest => {
   const messages: ChatCompletionStreamRequest["messages"] = [];
   const tools: ChatCompletionStreamRequest["tools"] = [];
   for (const { role, content } of experiment) {

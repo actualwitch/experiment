@@ -5,10 +5,7 @@ import type {
 } from "openai/resources/index.mjs";
 import { ObjectOrStringType, StringType, type Message } from "../state/common";
 
-export const experimentToOpenai = (experiment: Message[]): ChatCompletionCreateParams | null => {
-  if (experiment.length === 0) {
-    return null;
-  }
+export const experimentToOpenai = (experiment: Message[]): ChatCompletionCreateParams => {
   const messages: ChatCompletionMessageParam[] = [];
   const tools: ChatCompletionTool[] = [];
   for (const { role, content } of experiment) {

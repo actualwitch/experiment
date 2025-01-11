@@ -21,6 +21,7 @@ import { deepEqual } from "../utils";
 import { useHandlers } from "../utils/keyboard";
 import { useScrollToTop } from "../utils/scroll";
 import { View, collapsedAtom } from "./view";
+import { isRunningAtom } from "../state/inference";
 
 const baseHeight = bs(6);
 export const ChatContainer = styled.div<WithDarkMode>`
@@ -348,17 +349,18 @@ const Banner = styled.div`
 `;
 
 export function ChatPreview({
-  history,
+  messages,
   autoScroll,
   autoScrollAnchor = "first",
 }: {
-  history: Message[];
+  messages: Message[];
   autoScroll?: boolean;
   autoScrollAnchor?: "first" | "last";
 }) {
-  const Anchor = useScrollToTop("top", [history.length, autoScroll, autoScrollAnchor]);
+  const Anchor = useScrollToTop("top", [messages.length, autoScroll, autoScrollAnchor]);
   const [selection, setSelection] = useAtom(selectionAtom);
   const [isDarkMode] = useAtom(isDarkModeAtom);
+  const [isRunning] = useAtom(isRunningAtom);
 
   useHandlers({
     Escape: () => {
@@ -370,18 +372,22 @@ export function ChatPreview({
     return () => void setSelection(null);
   }, []);
 
-  const keyedHistory = useMemo(() => {
-    const keyed = history.map((message, index) => ({ ...message, key: index }));
-    return [...keyed].reverse();
-  }, [history]);
+  const computedMessages = useMemo(() => {
+    const keyed = messages.map((message, index) => ({ ...message, key: index }));
+    const reversed = [...keyed].reverse();
+    if (isRunning && !reversed[0].fromServer) {
+      reversed.unshift({ role: "assistant", content: "...", fromServer: true, key: -1 });
+    }
+    return reversed;
+  }, [messages, isRunning]);
 
-  if (keyedHistory.length === 0) {
+  if (computedMessages.length === 0) {
     return <Banner>∅</Banner>;
   }
   return (
     <ChatContainer isDarkMode={isDarkMode}>
       {autoScroll && autoScrollAnchor === "first" && <Anchor />}
-      {keyedHistory.map?.(({ key, ...message }) => {
+      {computedMessages.map?.(({ key, ...message }) => {
         return <ChatMessage key={key} message={message} index={key} />;
       })}
       {autoScroll && autoScrollAnchor === "last" && <Anchor />}

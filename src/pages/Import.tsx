@@ -72,7 +72,7 @@ export default function () {
     <>
       <Page>
         {chat ?
-          <ChatPreview key={`${filename}-${idx}`} history={chat.messages} />
+          <ChatPreview key={`${filename}-${idx}`} messages={chat.messages} />
         : <>
             <h2>Import CSV</h2>
             <p>

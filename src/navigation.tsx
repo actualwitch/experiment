@@ -29,6 +29,7 @@ const Navigation = styled.nav<{ shouldHideOnMobile?: boolean }>`
     text-decoration: none;
     &[aria-current="page"] {
       text-decoration: underline;
+      text-underline-offset: 4px;
     }
   }
 `;

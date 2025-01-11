@@ -9,3 +9,7 @@ playwright-report
 playwright-screenshots
 playwright-traces
 test-results
+
+# Added by cargo
+
+/target

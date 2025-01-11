@@ -9,6 +9,9 @@ export const getClientAsString = async (entry = "src/entry/client.tsx") => {
   if (!success) {
     throw new Error(logs.join("\n"));
   }
-  console.log(`Emitted ${outputs.length} files`, outputs);
+  console.log(`Emitted 1+${outputs.length} files`);
+  if (outputs.length) {
+    console.log(outputs);
+  }
   return js.text();
 };

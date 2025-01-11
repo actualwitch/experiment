@@ -7,7 +7,7 @@ import { Item } from "react-stately";
 import { Select } from "../components/Select";
 import { TextField } from "../components/TextField";
 import { Switch } from "../components/switch";
-import { experimentLayoutAtom, isDarkModeAtom, rendererModeAtom, tokensAtom } from "../state/common";
+import { experimentLayoutAtom, isBoldTextAtom, isDarkModeAtom, rendererModeAtom, tokensAtom } from "../state/common";
 import { Button, bs } from "../style";
 import { type WithDarkMode, withDarkMode } from "../style/darkMode";
 import { Palette } from "../style/palette";
@@ -118,6 +118,7 @@ const ModalContent = ({ children, close }: PropsWithChildren<{ close: () => void
 };
 
 export default function Parameters() {
+  const [isBoldText, setIsBoldText] = useAtom(isBoldTextAtom);
   const [isDarkMode, setIsDarkMode] = useAtom(isDarkModeAtom);
   const [experimentLayout, setExperimentLayout] = useAtom(experimentLayoutAtom);
   const [rendererMode, setRendererMode] = useAtom(rendererModeAtom);
@@ -156,6 +157,15 @@ export default function Parameters() {
               { value: undefined, name: "System", isDefault: true },
               { value: false, name: "Light" },
               { value: true, name: "Dark" },
+            ]}
+          </Switch>
+        </Row>
+        <Row>
+          <header>Bold text</header>
+          <Switch value={isBoldText} onChange={setIsBoldText}>
+            {[
+              { value: false, name: "Off", isDefault: true },
+              { value: true, name: "On" },
             ]}
           </Switch>
         </Row>

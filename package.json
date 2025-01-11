@@ -49,7 +49,6 @@
     "jotai-optics": "latest",
     "marked": "latest",
     "monaco-editor": "latest",
-    "nanoid": "latest",
     "openai": "latest",
     "polished": "latest",
     "react": "canary",
@@ -58,6 +57,7 @@
     "react-router": "latest",
     "react-stately": "latest",
     "runtypes": "latest",
-    "shevyjs": "latest"
+    "shevyjs": "latest",
+    "true-myth": "latest"
   }
 }

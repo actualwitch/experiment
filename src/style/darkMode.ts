@@ -4,7 +4,7 @@ export type WithDarkMode = {
   isDarkMode: boolean | undefined;
 };
 
-const nope = css``;
+export const nope = css``;
 
 export const withDarkMode = (isDarkMode: boolean | undefined, style: SerializedStyles) => {
   if (isDarkMode === undefined) {
