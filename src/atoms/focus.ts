@@ -1,7 +1,7 @@
 import { atom } from "jotai";
 import { atomEffect } from "jotai-effect";
 import { log } from "../utils/logger";
-import { publish } from "./æther";
+import { publish } from "../utils/æther";
 import { divergentAtom } from "../utils/entanglement";
 import { getRealm, hasBackend } from "../utils/realm";
 

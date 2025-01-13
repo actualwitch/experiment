@@ -4,7 +4,7 @@ import type {
   MessageParam,
   Tool,
 } from "@anthropic-ai/sdk/resources/index.mjs";
-import type { Message } from "../state/common";
+import type { Message } from "../../../atoms/common";
 
 export const experimentToAnthropic = (experiment: Message[]): MessageCreateParams | MessageCreateParamsNonStreaming => {
   let system = "";

@@ -1,14 +1,14 @@
 import styled from "@emotion/styled";
 import { atom, useAtom } from "jotai";
-import { css } from "@emotion/react";
 import { NavLink } from "react-router";
 
-import { TRIANGLE, VERSION } from "./const";
-import { ROUTES } from "./pages/_router";
-import { bs } from "./style";
-import { nonInteractive, widthAvailable } from "./style/mixins";
-import { portalIO } from "./utils/portal";
-import { templatesAtom } from "./state/common";
+import { TRIANGLE } from "../../const";
+import { ROUTES } from ".";
+import { bs } from "../../style";
+import { nonInteractive, widthAvailable } from "../../style/mixins";
+import { portalIO } from "../../utils/portal";
+import { templatesAtom } from "../../atoms/common";
+import { VERSION } from "../../const/dynamic";
 
 export const [SidebarInput, SidebarOutput] = portalIO();
 

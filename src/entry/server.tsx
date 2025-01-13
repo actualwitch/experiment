@@ -1,10 +1,11 @@
 import { $, type Serve } from "bun";
-import { DEBUG, hostname, port, url } from "../const";
+import { hostname, port } from "../const";
+import { DEBUG } from "../const/dynamic";
 import { createFetch } from "../utils/handler";
 import { doPOST, doSSE, doStatic, doStreamingSSR } from "./_handlers";
 import { isMac } from "../utils/platform";
-import { store } from "../state/store";
-import { localCertAndKeyAtom } from "../state/common";
+import { store } from "../store";
+import { localCertAndKeyAtom } from "../atoms/common";
 
 const certAndKey = await store.get(localCertAndKeyAtom);
 

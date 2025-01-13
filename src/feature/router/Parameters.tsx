@@ -4,15 +4,15 @@ import { useAtom } from "jotai";
 import { type PropsWithChildren, useState } from "react";
 import { Item } from "react-stately";
 
-import { Select } from "../components/Select";
-import { TextField } from "../components/TextField";
-import { Switch } from "../components/switch";
-import { experimentLayoutAtom, isBoldTextAtom, isDarkModeAtom, rendererModeAtom, tokensAtom } from "../state/common";
-import { Button, bs } from "../style";
-import { type WithDarkMode, withDarkMode } from "../style/darkMode";
-import { Palette } from "../style/palette";
-import { hasBackend } from "../utils/realm";
-import { providerLabels, providers, providerTypes, type ProviderType } from "../state/inference";
+import { Select } from "../../components/Select";
+import { TextField } from "../../components/TextField";
+import { Switch } from "../../components/switch";
+import { experimentLayoutAtom, isBoldTextAtom, isDarkModeAtom, rendererModeAtom, tokensAtom } from "../../atoms/common";
+import { Button, bs } from "../../style";
+import { type WithDarkMode, withDarkMode } from "../../style/darkMode";
+import { Palette } from "../../style/palette";
+import { hasBackend } from "../../utils/realm";
+import { providerLabels, providers, providerTypes, type ProviderType } from "../inference/atoms";
 import { Page } from "./_page";
 
 const StyledForm = styled.form`

@@ -1,6 +1,6 @@
 import type { Serve } from "bun";
 import { clientFile, hostname, port } from "../const";
-import { FIXTURES, isFixture } from "../fixtures";
+import { FIXTURES, isFixture } from "./_fixtures";
 import { assignToWindow, createHydrationScript } from "../utils/hydration";
 import { getHtml } from "./_handlers";
 import { getClientAsString } from "./_macro" with { type: "macro" };

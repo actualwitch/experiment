@@ -1,6 +1,6 @@
 import { useSetAtom } from "jotai";
 import { useNavigate } from "react-router";
-import { experimentAtom, parentAtom, type Message } from "../state/common";
+import { experimentAtom, parentAtom, type Message } from "../atoms/common";
 import { Button } from "../style";
 
 export const ForkButton = ({ experiment, parent }: { experiment?: Message[]; parent?: string }) => {

@@ -1,10 +1,10 @@
 import { useAtom } from "jotai";
 import { useState } from "react";
 
-import { View } from "../components/view";
-import { SidebarInput } from "../navigation";
-import { templatesAtom } from "../state/common";
-import { Button } from "../style";
+import { View } from "../../components/view";
+import { SidebarInput } from "./navigation";
+import { templatesAtom } from "../../atoms/common";
+import { Button } from "../../style";
 import { Actions, Page } from "./_page";
 
 export default function Templates() {

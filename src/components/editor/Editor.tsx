@@ -1,7 +1,7 @@
 import { useAtom } from "jotai";
 import { atomEffect } from "jotai-effect";
 import { useEffect, useMemo, useRef } from "react";
-import { isDarkModeAtom } from "./state/common";
+import { isDarkModeAtom } from "../../atoms/common";
 
 export type EditorProps = {
   children?: string | object;

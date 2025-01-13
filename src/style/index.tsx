@@ -4,7 +4,7 @@ import { atom, useAtom } from "jotai";
 import { type HTMLProps, useRef } from "react";
 import { useButton } from "react-aria";
 import Shevy from "shevyjs";
-import { isBoldTextAtom, isDarkModeAtom, mobileQuery, type WithLayout } from "../state/common";
+import { isBoldTextAtom, isDarkModeAtom, mobileQuery, type WithLayout } from "../atoms/common";
 import { withDarkMode, type WithDarkMode } from "./darkMode";
 import { Palette } from "./palette";
 import { reset } from "./reset";

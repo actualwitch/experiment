@@ -1,5 +1,5 @@
 import type { ChatCompletionStreamRequest } from "@mistralai/mistralai/models/components";
-import type { Message } from "../state/common";
+import type { Message } from "../../../atoms/common";
 
 export const experimentToMistral = (experiment: Message[]): ChatCompletionStreamRequest => {
   const messages: ChatCompletionStreamRequest["messages"] = [];

@@ -1,5 +1,5 @@
 import { type SerializedStyles, css } from "@emotion/react";
-import { mobileQuery, type LayoutType } from "../state/common";
+import { mobileQuery, type LayoutType } from "../atoms/common";
 
 export const withOnMobile = (layout: LayoutType | undefined, style: SerializedStyles) => {
   if (layout === "mobile") {

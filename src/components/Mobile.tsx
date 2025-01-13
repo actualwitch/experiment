@@ -9,11 +9,11 @@ import {
   isNavPanelOpenAtom,
   layoutAtom,
   mobileQuery,
-} from "../state/common";
+} from "../atoms/common";
 import { Button, bs } from "../style";
 import { type WithDarkMode, withDarkMode } from "../style/darkMode";
 import { Palette } from "../style/palette";
-import { iconAtom, titleAtom } from "../state/meta";
+import { iconAtom, titleAtom } from "../atoms/meta";
 import type { PropsWithChildren } from "react";
 
 export const MobileHeaderContainer = styled.h2<WithDarkMode>`
@@ -26,7 +26,7 @@ export const MobileHeaderContainer = styled.h2<WithDarkMode>`
   span {
     text-decoration: underline;
     text-decoration-thickness: auto;
-      text-underline-offset: 4px;
+    text-underline-offset: 4px;
     text-shadow:
       ${Palette.white} 1px 2px 14px,
       ${Palette.white} 0px 0px 24px;

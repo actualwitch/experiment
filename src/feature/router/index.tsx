@@ -5,7 +5,7 @@ import NewExperiment from "./NewExperiment";
 import Parameters from "./Parameters";
 import Templates from "./Templates";
 import { useSetAtom } from "jotai";
-import { iconAtom, titleAtom } from "../state/meta";
+import { iconAtom, titleAtom } from "../../atoms/meta";
 import { useEffect, type PropsWithChildren } from "react";
 
 type RouteList = Array<{

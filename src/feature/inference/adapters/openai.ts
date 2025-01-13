@@ -3,7 +3,7 @@ import type {
   ChatCompletionMessageParam,
   ChatCompletionTool,
 } from "openai/resources/index.mjs";
-import { ObjectOrStringType, StringType, type Message } from "../state/common";
+import { ObjectOrStringType, StringType, type Message } from "../../../atoms/common";
 
 export const experimentToOpenai = (experiment: Message[]): ChatCompletionCreateParams => {
   const messages: ChatCompletionMessageParam[] = [];
@@ -20,8 +20,8 @@ export const experimentToOpenai = (experiment: Message[]): ChatCompletionCreateP
     if (typeof content === "string" && StringType.guard(role)) {
       messages.push({ role, content });
     }
-    if (typeof content === "object" && role !== "info" && ObjectOrStringType.guard(role)) {
-      messages.push({ role, content: JSON.stringify(content) });
+    if (role !== "info" && ObjectOrStringType.guard(role)) {
+      messages.push({ role, content: typeof content === "string" ? content : JSON.stringify(content) });
     }
   }
   const result: ChatCompletionCreateParams = {

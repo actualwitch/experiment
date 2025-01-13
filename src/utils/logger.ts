@@ -1,4 +1,4 @@
-import { DEBUG } from "../const";
+import { DEBUG } from "../const/dynamic";
 
 export const log = (...args: any[]) => {
   if (DEBUG) {

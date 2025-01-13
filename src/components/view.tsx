@@ -6,7 +6,7 @@ import { marked } from "marked";
 import { bs } from "../style";
 import { createElement } from "react";
 import { TRIANGLE } from "../const";
-import { rendererModeAtom } from "../state/common";
+import { rendererModeAtom } from "../atoms/common";
 
 type Primitive = string | number | boolean | null | undefined;
 

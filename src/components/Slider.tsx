@@ -10,7 +10,7 @@ import { Palette } from "../style/palette";
 import { bs } from "../style";
 import { withDarkMode, type WithDarkMode } from "../style/darkMode";
 import { useAtomValue } from "jotai";
-import { isDarkModeAtom } from "../state/common";
+import { isDarkModeAtom } from "../atoms/common";
 
 const Container = styled(InputContainer)<{ orientation: "horizontal" | "vertical" }>`
   ${(p) => (p.orientation === "horizontal" ? "flex-direction: column;" : "height: 150px;")}

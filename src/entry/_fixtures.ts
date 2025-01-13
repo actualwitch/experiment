@@ -1,4 +1,4 @@
-import templates from "../fixtures/templates.json";
+import templates from "../../fixtures/templates.json";
 
 const sampleChat = templates["Sample chat"];
 

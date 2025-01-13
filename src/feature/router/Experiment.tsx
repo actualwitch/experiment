@@ -1,12 +1,12 @@
 import { atom, useAtom } from "jotai";
 import { useParams } from "react-router";
 
-import { ForkButton } from "../components";
-import { ChatPreview } from "../components/chat";
-import { ExperimentsSidebar } from "../sidebars/experiments";
-import { type ExperimentCursor, type Message, getExperimentAtom } from "../state/common";
-import { Button } from "../style";
-import { entangledAtom } from "../utils/entanglement";
+import { ForkButton } from "../../components";
+import { ChatPreview } from "../../components/chat";
+import { ExperimentsSidebar } from "../../sidebars/experiments";
+import { type ExperimentCursor, type Message, getExperimentAtom } from "../../atoms/common";
+import { Button } from "../../style";
+import { entangledAtom } from "../../utils/entanglement";
 import { Actions, Page } from "./_page";
 
 const cursorAtom = entangledAtom("cursor", atom<ExperimentCursor | null>(null));

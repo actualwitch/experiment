@@ -70,7 +70,7 @@ export type Message = _Message & WithDirection & WithTemplate;
 export type Role = "system" | "user" | "assistant" | "tool";
 
 export type Experiment = {
-  [runId: string]: Message[];
+  [runId: string]: Message[] | { messages: Message[] };
 };
 
 export type Store = {
@@ -210,13 +210,10 @@ export const rendererModeAtom = entangledAtom(
   focusAtom(storeAtom, (o) => o.prop("rendererMode").valueOr("markdown")),
 );
 
-export const hasOpensslAtom = entangledAtom(
-  "hasOpenssl",
-  atom(async () => {
-    const result = await spawn("which", ["openssl"]);
-    return result.isOk && result.value !== "";
-  }),
-);
+export const hasOpensslAtom = atom(async () => {
+  const result = await spawn("which", ["openssl"]);
+  return result.isOk && result.value !== "";
+});
 
 export const localCertAndKeyAtom = atom(async () => {
   if (getRealm() !== "server") return Result.err(new Error("Cannot generate certificates in the browser"));

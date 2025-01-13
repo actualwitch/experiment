@@ -1,7 +1,7 @@
 import { useAtom } from "jotai";
 import { NavLink } from "react-router";
-import { SidebarInput } from "../navigation";
-import { experimentIdsAtom } from "../state/common";
+import { SidebarInput } from "../feature/router/navigation";
+import { experimentIdsAtom } from "../atoms/common";
 
 export function ExperimentsSidebar() {
   const [experimentIds] = useAtom(experimentIdsAtom);

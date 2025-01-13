@@ -4,7 +4,7 @@ import { Button } from "../style";
 import { Slider } from "./Slider";
 import { Select } from "./Select";
 import { Item } from "react-stately";
-import { store } from "../state/store";
+import { store } from "../store";
 
 export type LeafWithOptions<T extends string = string> = {
   label: string;

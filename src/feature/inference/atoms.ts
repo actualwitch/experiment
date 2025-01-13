@@ -6,13 +6,14 @@ import { focusAtom } from "jotai-optics";
 import OpenAI from "openai";
 import type { ChatCompletionCreateParamsStreaming } from "openai/resources/index.mjs";
 import { Literal, Union } from "runtypes";
-import { experimentToAnthropic } from "../adapters/anthropic";
-import { experimentToMistral } from "../adapters/mistral";
-import { experimentToOpenai } from "../adapters/openai";
-import { spawn } from "../utils";
-import { entangledAtom } from "../utils/entanglement";
-import { hasBackend } from "../utils/realm";
-import { type Message, createExperiment, experimentAtom, parentAtom, storeAtom, tokensAtom } from "./common";
+
+import { experimentToAnthropic } from "./adapters/anthropic";
+import { experimentToMistral } from "./adapters/mistral";
+import { experimentToOpenai } from "./adapters/openai";
+import { spawn } from "../../utils";
+import { entangledAtom } from "../../utils/entanglement";
+import { hasBackend } from "../../utils/realm";
+import { type Message, createExperiment, experimentAtom, parentAtom, storeAtom, tokensAtom } from "../../atoms/common";
 
 export function withIds<T extends string>(items: T[] | readonly T[]) {
   return items.map((name) => ({

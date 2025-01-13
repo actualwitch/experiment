@@ -3,16 +3,16 @@ import { Provider, useAtom } from "jotai";
 import { Suspense, useEffect, useState, type PropsWithChildren } from "react";
 import { useLocation } from "react-router";
 
-import { NavigationSidebar } from "./navigation";
-import { Router } from "./pages/_router";
-import { subscriptionAtom, trackVisibleAtom } from "./state/focus";
-import { store } from "./state/store";
+import { NavigationSidebar } from "./feature/router/navigation";
+import { Router } from "./feature/router";
+import { subscriptionAtom, trackVisibleAtom } from "./atoms/focus";
+import { store } from "./store";
 import { Container, Slideover, stylesAtom } from "./style";
 import { Hydration } from "./utils/hydration";
 import { FavIcon } from "./components/FavIcon";
 import { getRealm } from "./utils/realm";
 import { clientFile } from "./const";
-import { pageTitleAtom, descriptionAtom, iconAtom } from "./state/meta";
+import { pageTitleAtom, descriptionAtom, iconAtom } from "./atoms/meta";
 import { ErrorBoundary } from "./components/error";
 import {
   isActionPanelOpenAtom,
@@ -20,26 +20,20 @@ import {
   isNavPanelOpenAtom,
   layoutAtom,
   layoutTrackerAtom,
-} from "./state/common";
+} from "./atoms/common";
 import { DesktopOnly, MobileHeader, MobileOnly } from "./components/Mobile";
 
-const Context = ({ children }: PropsWithChildren) => {
+const Meta = () => {
+  const [title] = useAtom(pageTitleAtom);
+  const [description] = useAtom(descriptionAtom);
+  const [icon] = useAtom(iconAtom);
   return (
-    <Provider store={store}>
-      <ErrorBoundary>{children}</ErrorBoundary>
-    </Provider>
+    <>
+      <title>{title}</title>
+      <meta name="description" content={description} />
+      <FavIcon>{icon}</FavIcon>
+    </>
   );
-};
-
-const SpaNormalizer = ({ children }: PropsWithChildren) => {
-  if (getRealm() === "spa") {
-    const [shouldRender, setShouldRender] = useState(false);
-    useEffect(() => {
-      setShouldRender(true);
-    }, []);
-    if (!shouldRender) return null;
-  }
-  return children;
 };
 
 const App = () => {
@@ -77,17 +71,23 @@ const App = () => {
   );
 };
 
-const Meta = () => {
-  const [title] = useAtom(pageTitleAtom);
-  const [description] = useAtom(descriptionAtom);
-  const [icon] = useAtom(iconAtom);
+const Context = ({ children }: PropsWithChildren) => {
   return (
-    <>
-      <title>{title}</title>
-      <meta name="description" content={description} />
-      <FavIcon>{icon}</FavIcon>
-    </>
+    <Provider store={store}>
+      <ErrorBoundary>{children}</ErrorBoundary>
+    </Provider>
   );
+};
+
+const SpaNormalizer = ({ children }: PropsWithChildren) => {
+  if (getRealm() === "spa") {
+    const [shouldRender, setShouldRender] = useState(false);
+    useEffect(() => {
+      setShouldRender(true);
+    }, []);
+    if (!shouldRender) return null;
+  }
+  return children;
 };
 
 export const Shell = ({

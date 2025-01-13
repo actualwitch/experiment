@@ -1,9 +1,9 @@
 import { $ } from "bun";
+import { name, description, iconResolutions } from "../src/const";
 import { getHtml } from "../src/entry/_handlers";
+import { getManifest } from "../src/feature/pwa/manifest";
+import { ROUTES } from "../src/feature/router";
 import { assignToWindow } from "../src/utils/hydration";
-import { Palette } from "../src/style/palette";
-import { ROUTES } from "../src/pages/_router";
-import { description, name } from "../src/const";
 
 // why does this work but running it from Bun.build fails? #justbunthings
 await $`bun build ./src/entry/client.tsx --outdir ./spa --minify`;
@@ -19,8 +19,8 @@ const baseUrl = process.env.BASE_URL;
 const regex = /\/\w*/gm;
 
 for (const route of ROUTES) {
-  const path = route.path.match(regex)?.[0]!;
-
+  const path = route.path.match(regex)?.[0] ?? "/";
+  const pathname = path === "/" ? "index" : path.slice(1);
   const fullUrl = `${baseUrl ?? ""}${path}`;
 
   const html = getHtml(
@@ -28,31 +28,15 @@ for (const route of ROUTES) {
     [assignToWindow("REALM", `"SPA"`), baseUrl && assignToWindow("BASE_URL", `"${baseUrl}"`)],
     baseUrl,
   );
-  const pathname = path === "/" ? "index" : path.slice(1);
 
   await Bun.write(`./spa/${pathname}.html`, html);
 }
 
-const resolutions = [128, 192, 256, 512, 1024];
-
 await Bun.write(
   "./spa/manifest.json",
-  JSON.stringify({
-    name,
-    description,
-    start_url: `${baseUrl ?? ""}/`,
-    display: "standalone",
-    background_color: Palette.white,
-    theme_color: Palette.black,
-    icons: resolutions.map((res) => ({
-      src: `experiment-${res}.png`,
-      sizes: `${res}x${res}`,
-      type: "image/png",
-      purpose: "maskable",
-    })),
-  }),
+  JSON.stringify(getManifest(name, description, iconResolutions, baseUrl), null, 2),
 );
 
-for (const res of resolutions) {
+for (const res of iconResolutions) {
   await $`cp ./.github/assets/experiment-${res}.png ./spa`;
 }

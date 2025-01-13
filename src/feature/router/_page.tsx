@@ -3,13 +3,13 @@ import { css } from "@emotion/react";
 import type { PropsWithChildren } from "react";
 import { useAtom } from "jotai";
 
-import { bs, Sidebar, Slideover } from "../style";
-import type { WithDarkMode } from "../style/darkMode";
-import { Palette } from "../style/palette";
-import { increaseSpecificity } from "../style/utils";
-import { isActionPanelOpenAtom, isDarkModeAtom, layoutAtom, type WithLayout } from "../state/common";
-import { withOnMobile } from "../style/layout";
-import { DesktopOnly } from "../components/Mobile";
+import { bs, Sidebar, Slideover } from "../../style";
+import type { WithDarkMode } from "../../style/darkMode";
+import { Palette } from "../../style/palette";
+import { increaseSpecificity } from "../../style/utils";
+import { isActionPanelOpenAtom, isDarkModeAtom, layoutAtom, type WithLayout } from "../../atoms/common";
+import { withOnMobile } from "../../style/layout";
+import { DesktopOnly } from "../../components/Mobile";
 
 export const PageContainer = styled.div<WithDarkMode & WithLayout>`
   display: flex;

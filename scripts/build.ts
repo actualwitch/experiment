@@ -1,5 +1,5 @@
 import { $ } from "bun";
-import { VERSION } from "../src/const";
+import { VERSION } from "../src/const/dynamic";
 
 const TARGETS = ["linux-x64", "linux-arm64", "windows-x64", "darwin-x64", "darwin-arm64"];
 

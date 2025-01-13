@@ -50,15 +50,20 @@ export function createFileStorage(...keys: string[]): SyncStringStorage {
   }
   const timeouts = new Map<string, Timer>();
   const scheduleWrite = (key: string) => {
-    if (timeouts.has(key)) {
-      clearTimeout(timeouts.get(key)!);
+    const timer = timeouts.get(key);
+    if (timer !== undefined) {
+      clearTimeout(timer);
     }
 
     timeouts.set(
       key,
       setTimeout(() => {
+        const value = store.get(key);
+        if (value === undefined) {
+          return;
+        }
         try {
-          writeFileSync(filenameForKey(key), store.get(key)!, {
+          writeFileSync(filenameForKey(key), value, {
             encoding: "utf-8",
             flag: "w",
           });

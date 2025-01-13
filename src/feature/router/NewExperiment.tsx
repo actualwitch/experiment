@@ -4,9 +4,9 @@ import { type Setter, atom, useAtom, useSetAtom } from "jotai";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { NavLink } from "react-router";
 
-import { type Config, ConfigRenderer } from "../components/ConfigRenderer";
-import { ChatPreview, selectionAtom } from "../components/chat";
-import { ExperimentsSidebar } from "../sidebars/experiments";
+import { type Config, ConfigRenderer } from "../../components/ConfigRenderer";
+import { ChatPreview, selectionAtom } from "../../components/chat";
+import { ExperimentsSidebar } from "../../sidebars/experiments";
 import {
   type Message,
   type Role,
@@ -15,7 +15,7 @@ import {
   isDarkModeAtom,
   parentAtom,
   templatesAtom,
-} from "../state/common";
+} from "../../atoms/common";
 import {
   availableProviderOptionsAtom,
   isRunningAtom,
@@ -26,11 +26,11 @@ import {
   runInferenceAtom,
   selectedProviderAtom,
   tempAtom,
-} from "../state/inference";
-import { bs } from "../style";
-import { withDarkMode, type WithDarkMode } from "../style/darkMode";
-import { Palette } from "../style/palette";
-import { useHandlers } from "../utils/keyboard";
+} from "../inference/atoms";
+import { bs } from "../../style";
+import { withDarkMode, type WithDarkMode } from "../../style/darkMode";
+import { Palette } from "../../style/palette";
+import { useHandlers } from "../../utils/keyboard";
 import { Actions, Page } from "./_page";
 
 const baseRadius = 3 / 4;

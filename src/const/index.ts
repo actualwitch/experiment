@@ -1,9 +1,5 @@
-import { getReleaseHash, getDebug } from "./_macro" with { type: "macro" };
-import project from "../package.json";
+import project from "../../package.json";
 
-export const DEBUG = getDebug();
-const hash = await getReleaseHash();
-export const VERSION = `${project.version}-${hash}`;
 export const clientFile = "/client.js";
 
 export const schema = "http";
@@ -14,5 +10,8 @@ export const url = `${schema}://${hostname}:${port}`;
 export const name = project.name;
 export const description = project.description;
 export const author = project.author;
+export const version = project.version;
+
+export const iconResolutions = [128, 192, 256, 512, 1024];
 
 export const TRIANGLE = "▴";

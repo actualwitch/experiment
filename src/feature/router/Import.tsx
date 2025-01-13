@@ -1,14 +1,14 @@
 import { useAtom, useSetAtom } from "jotai";
 import { useEffect } from "react";
 
-import templates from "../../fixtures/templates.json";
-import { ForkButton } from "../components";
-import { ChatPreview } from "../components/chat";
-import { View } from "../components/view";
-import { SidebarInput } from "../navigation";
-import { type ExperimentWithMeta, filenames, importsRegistry, processCsvAtom, selectedChat } from "../state/client";
-import { layoutAtom } from "../state/common";
-import { Button } from "../style";
+import templates from "../../../fixtures/templates.json";
+import { ForkButton } from "../../components";
+import { ChatPreview } from "../../components/chat";
+import { View } from "../../components/view";
+import { SidebarInput } from "./navigation";
+import { type ExperimentWithMeta, filenames, importsRegistry, processCsvAtom, selectedChat } from "../../atoms/client";
+import { layoutAtom } from "../../atoms/common";
+import { Button } from "../../style";
 import { Actions, Page } from "./_page";
 
 const SidebarContents = () => {

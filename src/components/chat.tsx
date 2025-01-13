@@ -1,27 +1,24 @@
 import { type SerializedStyles, css } from "@emotion/react";
 import styled from "@emotion/styled";
-import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
-import { focusAtom } from "jotai-optics";
-import { type ReactNode, useEffect, useMemo, useRef } from "react";
+import { atom, useAtom, useAtomValue } from "jotai";
+import { type CSSProperties, type ReactNode, useEffect, useMemo, useRef } from "react";
 import { TRIANGLE } from "../const";
 import {
   type Message,
   type Store,
   type _Message,
-  experimentAtom,
   experimentLayoutAtom,
   isDarkModeAtom,
   templatesAtom,
-} from "../state/common";
+} from "../atoms/common";
+import { isRunningAtom } from "../feature/inference/atoms";
 import { bs } from "../style";
 import type { WithDarkMode } from "../style/darkMode";
-import { widthAvailable } from "../style/mixins";
 import { Palette } from "../style/palette";
 import { deepEqual } from "../utils";
 import { useHandlers } from "../utils/keyboard";
 import { useScrollToTop } from "../utils/scroll";
 import { View, collapsedAtom } from "./view";
-import { isRunningAtom } from "../state/inference";
 
 const baseHeight = bs(6);
 export const ChatContainer = styled.div<WithDarkMode>`
@@ -79,14 +76,12 @@ export const MessageComponent = styled.article<{
       border-${align}: 4px solid transparent;
       position: relative;
       overflow: hidden;
-      text-align: ${align};
 
       & > * {
-        display: block;
+        display: grid;
         padding: ${bs(1 / 2)};
         padding-${align}: ${bs(1.5)};
         word-wrap: break-word;
-        ${widthAvailable}
       }
 
       &:before {
@@ -181,38 +176,6 @@ export const MessageComponent = styled.article<{
 type Path = [number] | [number, "content"];
 export const selectionAtom = atom<Path | null>(null);
 
-const lensAtom = atom(
-  (get) => {
-    const selection = get(selectionAtom);
-    if (selection === null) {
-      return get(experimentAtom);
-    }
-    const [idx, key] = selection;
-    const lens = focusAtom(experimentAtom, (o) => {
-      if (key === "content") {
-        return o.nth(idx).prop("content");
-      }
-      return o.nth(idx);
-    });
-    return get(lens);
-  },
-  (get, set, update: string | Message[] | ((prev: string | Message) => string | Message)) => {
-    const selection = get(selectionAtom);
-    if (selection === null) {
-      set(experimentAtom, update as Message[]);
-      return;
-    }
-    const lens = focusAtom(experimentAtom, (o) => {
-      const [idx, key] = selection;
-      if (key === "content") {
-        return o.nth(idx).prop("content");
-      }
-      return o.nth(idx);
-    });
-    set(lens, update);
-  },
-);
-
 function hasMessages(obj: _Message | { messages: Message[] }): obj is { messages: Message[] } {
   return Object.hasOwn(obj, "messages");
 }
@@ -241,6 +204,12 @@ export const ChatMessage = ({ message: _message, index }: { message: Message; in
 
   let innerContent: ReactNode;
   let contentType: string | undefined;
+  const align = getAlign(message.fromServer ?? false, experimentLayout);
+  const viewStyle = {
+    float: align,
+    textAlign: typeof message.content === "object" ? align : undefined,
+    width: "initial",
+  } satisfies CSSProperties;
 
   if (message.template) {
     contentType = "tmpl";
@@ -260,10 +229,7 @@ export const ChatMessage = ({ message: _message, index }: { message: Message; in
           });
         }}
         shouldBeCollapsed={(path) => collapsed.includes(path.join("."))}
-        style={{
-          float: getAlign(message.fromServer ?? false, experimentLayout),
-          width: "initial",
-        }}
+        style={viewStyle}
       >
         {{ name: message.template }}
       </View>
@@ -304,10 +270,7 @@ export const ChatMessage = ({ message: _message, index }: { message: Message; in
           });
         }}
         shouldBeCollapsed={(path) => collapsed.includes(path.join("."))}
-        style={{
-          float: getAlign(message.fromServer ?? false, experimentLayout),
-          width: "initial",
-        }}
+        style={viewStyle}
       >
         {message.content}
       </View>

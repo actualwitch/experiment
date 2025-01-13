@@ -1,11 +1,14 @@
 import type { Server } from "bun";
 import { renderToReadableStream, renderToString } from "react-dom/server";
 import { StaticRouter } from "react-router";
+
 import { log } from "../utils/logger";
 import { Shell } from "../root";
-import { publish, subscribe, type Update } from "../state/æther";
+import { publish, subscribe, type Update } from "../utils/æther";
 import { eventStream } from "../utils/eventStream";
 import { getClientAsString } from "./_macro" with { type: "macro" };
+import { getManifest } from "../feature/pwa/manifest";
+import { description, iconResolutions, name } from "../const";
 
 export const getHtml = (location: string, additionalScripts?: string[], baseUrl?: string) => {
   const html = renderToString(
@@ -21,6 +24,13 @@ export const doStatic = async (request: Request) => {
   let response: Response | null = null;
   if (url.pathname === "/favicon.ico") {
     response = new Response("KO", { status: 404 });
+  }
+  if (url.pathname === "/manifest.json") {
+    response = new Response(JSON.stringify(getManifest(name, description, iconResolutions)), {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
   }
   if (url.pathname === "/script.js") {
     response = new Response(await getClientAsString(), {
