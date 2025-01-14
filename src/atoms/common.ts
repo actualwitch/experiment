@@ -2,13 +2,13 @@ import { atomEffect } from "jotai-effect";
 import { atom } from "jotai";
 import { focusAtom } from "jotai-optics";
 import { atomWithStorage, createJSONStorage } from "jotai/utils";
-import { Literal, Union, type Static } from "runtypes";
 import { Result } from "true-myth";
 
 import { createFileStorage, getStoragePath, resolve, spawn } from "../utils";
 import { divergentAtom, entangledAtom } from "../utils/entanglement";
 import { getRealm, hasBackend } from "../utils/realm";
 import { author } from "../const";
+import type { _Message, Experiment, ExperimentWithMeta, Message } from "../types";
 
 export type LayoutType = "mobile" | "desktop";
 export const layoutAtom = atom<LayoutType>();
@@ -49,37 +49,13 @@ export const isNavPanelOpenAtom = atom(
   },
 );
 
-export type StringContent = { content: string };
-export type ObjectOrStringContent = { content: object | string };
-export type WithName = { name: "string" };
-
-export const StringType = Union(Literal("system"), Literal("developer"), Literal("user"));
-export const ObjectOrStringType = Union(Literal("assistant"), Literal("info"), Literal("tool"));
-
-export type _Message =
-  | ({ role: Static<typeof StringType> } & StringContent & Partial<WithName>)
-  | ({ role: Static<typeof ObjectOrStringType> } & ObjectOrStringContent & Partial<WithName>);
-
-export type WithDirection = { fromServer?: boolean };
-export type WithTemplate = {
-  template?: string;
-};
-
-export type Message = _Message & WithDirection & WithTemplate;
-
-export type Role = "system" | "user" | "assistant" | "tool";
-
-export type Experiment = {
-  [runId: string]: Message[] | { messages: Message[] };
-};
-
 export type Store = {
   isBoldText?: boolean;
   isDarkMode?: boolean;
   experimentLayout?: "left" | "chat" | "chat-reverse";
   rendererMode?: "markdown" | "text+json";
   experiments?: Record<string, Experiment>;
-  templates?: Record<string, _Message | { messages: Message[] }>;
+  templates?: Record<string, _Message | ExperimentWithMeta>;
   tokens: {
     anthropic?: string;
     mistral?: string;

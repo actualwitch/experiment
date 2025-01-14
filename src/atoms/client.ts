@@ -1,11 +1,5 @@
 import { atom } from "jotai";
-import type { Message } from "./common";
-
-export type ExperimentWithMeta = {
-  id?: string;
-  messages: Message[];
-  timestamp?: string;
-};
+import type { ExperimentWithMeta, Message } from "../types";
 
 export const importsRegistry = atom<Record<string, Array<ExperimentWithMeta>>>({});
 

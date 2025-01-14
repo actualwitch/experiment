@@ -214,7 +214,7 @@ export default function Parameters() {
             />
           </Row>
         )}
-        {Object.keys(tokens).map((provider) => (
+        {(Object.keys(tokens) as Array<keyof typeof tokens>).map((provider) => (
           <Row key={provider}>
             <header>{providerLabels[provider]}</header>
             <Button

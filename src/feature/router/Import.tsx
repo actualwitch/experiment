@@ -6,10 +6,13 @@ import { ForkButton } from "../../components";
 import { ChatPreview } from "../../components/chat";
 import { View } from "../../components/view";
 import { SidebarInput } from "./navigation";
-import { type ExperimentWithMeta, filenames, importsRegistry, processCsvAtom, selectedChat } from "../../atoms/client";
+import { filenames, importsRegistry, processCsvAtom, selectedChat } from "../../atoms/client";
 import { layoutAtom } from "../../atoms/common";
 import { Button } from "../../style";
 import { Actions, Page } from "./_page";
+import { titleOverrideAtom } from "../../atoms/meta";
+import { DesktopOnly } from "../../components/Mobile";
+import type { ExperimentWithMeta } from "../../types";
 
 const SidebarContents = () => {
   const [chats] = useAtom(filenames);
@@ -68,13 +71,23 @@ export default function () {
   const [filename, idx] = selected ?? [];
   const chat: ExperimentWithMeta | undefined = filename && idx ? registry[filename][idx] : undefined;
 
+  const title = "Import CSV";
+  const [titleOverride, setTitleOverride] = useAtom(titleOverrideAtom);
+
+  useEffect(() => {
+    setTitleOverride(title);
+    return () => setTitleOverride(null);
+  }, []);
+
   return (
     <>
       <Page>
         {chat ?
           <ChatPreview key={`${filename}-${idx}`} messages={chat.messages} />
         : <>
-            <h2>Import CSV</h2>
+            <DesktopOnly>
+              <h2>{title}</h2>
+            </DesktopOnly>
             <p>
               Import and explore previous completions from CSV files, or{" "}
               <a

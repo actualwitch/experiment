@@ -1,14 +1,15 @@
 import styled from "@emotion/styled";
 import { atom, useAtom } from "jotai";
-import { NavLink } from "react-router";
+import { NavLink, useLocation } from "react-router";
 
 import { TRIANGLE } from "../../const";
-import { ROUTES } from ".";
+import { experimentsSidebarAtom, ROUTES } from ".";
 import { bs } from "../../style";
 import { nonInteractive, widthAvailable } from "../../style/mixins";
 import { portalIO } from "../../utils/portal";
 import { templatesAtom } from "../../atoms/common";
 import { VERSION } from "../../const/dynamic";
+import { increaseSpecificity } from "../../style/utils";
 
 export const [SidebarInput, SidebarOutput] = portalIO();
 
@@ -36,6 +37,9 @@ const Navigation = styled.nav<{ shouldHideOnMobile?: boolean }>`
 
 const GrowBox = styled.div`
   flex-grow: 1;
+  ${increaseSpecificity()} ul {
+    padding-left: 0;
+  }
 `;
 
 const Footer = styled.footer`
@@ -56,8 +60,29 @@ const routesAtom = atom((get) => {
   return ROUTES;
 });
 
+const Header = styled.h3`
+  user-select: none;
+`;
+
+const SidebarComponent = () => {
+  const [data] = useAtom(experimentsSidebarAtom);
+  return (
+    <>
+      <Header>History</Header>
+      <ul>
+        {data.map(({ link, name }) => (
+          <li key={name}>
+            <NavLink to={link}>{name}</NavLink>
+          </li>
+        ))}
+      </ul>
+    </>
+  );
+};
+
 export const NavigationSidebar = () => {
   const [routes] = useAtom(routesAtom);
+  const location = useLocation();
   return (
     <Navigation>
       <header>
@@ -72,6 +97,7 @@ export const NavigationSidebar = () => {
       </header>
       <GrowBox>
         <SidebarOutput />
+        {(location.pathname === "/" || location.pathname.startsWith("/experiment")) && <SidebarComponent />}
       </GrowBox>
       <Footer>
         © ∞ {TRIANGLE} {VERSION}

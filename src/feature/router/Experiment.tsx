@@ -3,11 +3,14 @@ import { useParams } from "react-router";
 
 import { ForkButton } from "../../components";
 import { ChatPreview } from "../../components/chat";
-import { ExperimentsSidebar } from "../../sidebars/experiments";
-import { type ExperimentCursor, type Message, getExperimentAtom } from "../../atoms/common";
+import { type ExperimentCursor, getExperimentAtom } from "../../atoms/common";
 import { Button } from "../../style";
 import { entangledAtom } from "../../utils/entanglement";
 import { Actions, Page } from "./_page";
+import type { Message } from "../../types";
+import { titleOverrideAtom } from "../../atoms/meta";
+import { DesktopOnly } from "../../components/Mobile";
+import { useEffect } from "react";
 
 const cursorAtom = entangledAtom("cursor", atom<ExperimentCursor | null>(null));
 const selectedExperimentAtom = entangledAtom(
@@ -29,12 +32,20 @@ export default function Experiment() {
     setCursor({ id, runId });
   }
 
+  const title = `Experiment #${id}.${runId}`;
+  const [titleOverride, setTitleOverride] = useAtom(titleOverrideAtom);
+
+  useEffect(() => {
+    setTitleOverride(title);
+    return () => setTitleOverride(null);
+  }, []);
+
   return (
     <>
       <Page>
-        <h1>
-          Experiment {id}.{runId}
-        </h1>
+        <DesktopOnly>
+          <h2>{title}</h2>
+        </DesktopOnly>
         <ChatPreview key={id + runId} messages={experiment ?? []} />
       </Page>
       <Actions>
@@ -51,7 +62,6 @@ export default function Experiment() {
           </Button>
         </p>
       </Actions>
-      <ExperimentsSidebar />
     </>
   );
 }

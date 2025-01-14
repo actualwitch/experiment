@@ -13,7 +13,7 @@ import {
 import { Button, bs } from "../style";
 import { type WithDarkMode, withDarkMode } from "../style/darkMode";
 import { Palette } from "../style/palette";
-import { iconAtom, titleAtom } from "../atoms/meta";
+import { effectiveTitleAtom, iconAtom, titleAtom } from "../atoms/meta";
 import type { PropsWithChildren } from "react";
 
 export const MobileHeaderContainer = styled.h2<WithDarkMode>`
@@ -54,7 +54,7 @@ export const MobileAction = styled.div`
 
 export const MobileHeader = () => {
   const [icon] = useAtom(iconAtom);
-  const [title] = useAtom(titleAtom);
+  const [title] = useAtom(effectiveTitleAtom);
   const [isDarkMode] = useAtom(isDarkModeAtom);
   const [isNavPanelOpen, setIsNavPanelOpened] = useAtom(isNavPanelOpenAtom);
   const [isActionsPanelOpen, setIsActionPanelOpened] = useAtom(isActionPanelOpenAtom);
@@ -82,6 +82,7 @@ export const MobileHeader = () => {
 };
 
 export const DesktopOnlyContainer = styled.div`
+  display: contents;
   @media ${mobileQuery} {
     display: none;
   }

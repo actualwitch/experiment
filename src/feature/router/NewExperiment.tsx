@@ -6,16 +6,7 @@ import { NavLink } from "react-router";
 
 import { type Config, ConfigRenderer } from "../../components/ConfigRenderer";
 import { ChatPreview, selectionAtom } from "../../components/chat";
-import { ExperimentsSidebar } from "../../sidebars/experiments";
-import {
-  type Message,
-  type Role,
-  experimentAtom,
-  isActionPanelOpenAtom,
-  isDarkModeAtom,
-  parentAtom,
-  templatesAtom,
-} from "../../atoms/common";
+import { experimentAtom, isActionPanelOpenAtom, isDarkModeAtom, parentAtom, templatesAtom } from "../../atoms/common";
 import {
   availableProviderOptionsAtom,
   isRunningAtom,
@@ -32,6 +23,7 @@ import { withDarkMode, type WithDarkMode } from "../../style/darkMode";
 import { Palette } from "../../style/palette";
 import { useHandlers } from "../../utils/keyboard";
 import { Actions, Page } from "./_page";
+import type { Role, Message } from "../../types";
 
 const baseRadius = 3 / 4;
 const baseMargin = 1 / 2;
@@ -406,7 +398,8 @@ export default function NewExperiment() {
       <Actions>
         <ConfigRenderer>{actions}</ConfigRenderer>
       </Actions>
-      <ExperimentsSidebar />
+
+      {/* <ExperimentsSidebar /> */}
     </>
   );
 }

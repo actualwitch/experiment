@@ -3,7 +3,7 @@ import type {
   ChatCompletionMessageParam,
   ChatCompletionTool,
 } from "openai/resources/index.mjs";
-import { ObjectOrStringType, StringType, type Message } from "../../../atoms/common";
+import { type Message, StringType, ObjectOrStringType } from "../../../types";
 
 export const experimentToOpenai = (experiment: Message[]): ChatCompletionCreateParams => {
   const messages: ChatCompletionMessageParam[] = [];
