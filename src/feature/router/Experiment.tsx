@@ -7,15 +7,16 @@ import { type ExperimentCursor, getExperimentAtom } from "../../atoms/common";
 import { Button } from "../../style";
 import { entangledAtom } from "../../utils/entanglement";
 import { Actions, Page } from "./_page";
-import type { Message } from "../../types";
+import type { Experiment } from "../../types";
 import { titleOverrideAtom } from "../../atoms/meta";
 import { DesktopOnly } from "../../components/Mobile";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
+import { View } from "../../components/view";
 
 const cursorAtom = entangledAtom("cursor", atom<ExperimentCursor | null>(null));
 const selectedExperimentAtom = entangledAtom(
   "selected-experiment",
-  atom<Message[]>((get) => {
+  atom<Experiment>((get) => {
     const cursor = get(cursorAtom);
     if (cursor) {
       const experiment = get(getExperimentAtom(cursor));
@@ -24,7 +25,7 @@ const selectedExperimentAtom = entangledAtom(
     return [];
   }),
 );
-export default function Experiment() {
+export default function () {
   const { id, runId } = useParams();
   const [cursor, setCursor] = useAtom(cursorAtom);
   const [experiment] = useAtom(selectedExperimentAtom);
@@ -40,13 +41,22 @@ export default function Experiment() {
     return () => setTitleOverride(null);
   }, []);
 
+  const meta = useMemo(() => {
+    if (Array.isArray(experiment)) {
+      return null;
+    }
+    const { messages, ...meta } = experiment;
+    return meta;
+  }, [experiment]);
+
   return (
     <>
       <Page>
         <DesktopOnly>
           <h2>{title}</h2>
         </DesktopOnly>
-        <ChatPreview key={id + runId} messages={experiment ?? []} />
+        {meta && <View>{meta}</View>}
+        <ChatPreview key={title} experiment={experiment} />
       </Page>
       <Actions>
         <h3>Actions</h3>

@@ -3,12 +3,7 @@ import styled from "@emotion/styled";
 import { atom, useAtom, useAtomValue } from "jotai";
 import { type CSSProperties, type ReactNode, useEffect, useMemo, useRef } from "react";
 import { TRIANGLE } from "../const";
-import {
-  type Store,
-  experimentLayoutAtom,
-  isDarkModeAtom,
-  templatesAtom,
-} from "../atoms/common";
+import { type Store, experimentLayoutAtom, isDarkModeAtom, templatesAtom } from "../atoms/common";
 import { isRunningAtom } from "../feature/inference/atoms";
 import { bs } from "../style";
 import type { WithDarkMode } from "../style/darkMode";
@@ -17,7 +12,7 @@ import { deepEqual } from "../utils";
 import { useHandlers } from "../utils/keyboard";
 import { useScrollToTop } from "../utils/scroll";
 import { View, collapsedAtom } from "./view";
-import type { _Message, Message } from "../types";
+import type { _Message, Experiment, ExperimentWithMeta, Message } from "../types";
 
 const baseHeight = bs(6);
 export const ChatContainer = styled.div<WithDarkMode>`
@@ -67,7 +62,8 @@ export const MessageComponent = styled.article<{
   isSelected?: boolean;
   isDarkMode?: boolean;
   experimentLayout: Store["experimentLayout"];
-}>(({ role, ioType, contentType, isSelected, isDarkMode, experimentLayout }) => {
+  name?: string
+}>(({ name, role, ioType, contentType, isSelected, isDarkMode, experimentLayout }) => {
   const fromServer = ioType === "output";
   const align = getAlign(fromServer, experimentLayout);
   const styles: SerializedStyles[] = [
@@ -84,7 +80,7 @@ export const MessageComponent = styled.article<{
       }
 
       &:before {
-        content: "${[contentType, role].filter(Boolean).join(` ${TRIANGLE} `)}";
+        content: "${[contentType, name ?? role].filter(Boolean).join(` ${TRIANGLE} `)}";
         position: absolute;
         ${align}: 0;
         transform-origin: ${align};
@@ -175,7 +171,7 @@ export const MessageComponent = styled.article<{
 type Path = [number] | [number, "content"];
 export const selectionAtom = atom<Path | null>(null);
 
-function hasMessages(obj: _Message | { messages: Message[] }): obj is { messages: Message[] } {
+function hasMessages(obj: _Message | ExperimentWithMeta): obj is ExperimentWithMeta{
   return Object.hasOwn(obj, "messages");
 }
 
@@ -285,6 +281,7 @@ export const ChatMessage = ({ message: _message, index }: { message: Message; in
       ref={ref}
       role={message.role}
       contentType={contentType}
+      name={message.name}
       isSelected={isSelected}
       isDarkMode={isDarkMode}
       experimentLayout={experimentLayout}
@@ -311,18 +308,29 @@ const Banner = styled.div`
 `;
 
 export function ChatPreview({
-  messages,
+  experiment,
   autoScroll,
-  autoScrollAnchor = "first",
+  autoScrollAnchor = "first"
 }: {
-  messages: Message[];
+  experiment: Experiment;
   autoScroll?: boolean;
   autoScrollAnchor?: "first" | "last";
 }) {
-  const Anchor = useScrollToTop("top", [messages.length, autoScroll, autoScrollAnchor]);
   const [selection, setSelection] = useAtom(selectionAtom);
   const [isDarkMode] = useAtom(isDarkModeAtom);
   const [isRunning] = useAtom(isRunningAtom);
+  const computedMessages = useMemo(() => {
+    const messages = Array.isArray(experiment) ? experiment : experiment.messages;
+    const keyed = messages.map((message, index) => {
+      return { ...message, key: index };
+    });
+    const reversed = [...keyed].reverse();
+    if (isRunning && !reversed[0].fromServer) {
+      reversed.unshift({ role: "assistant", content: "...", fromServer: true, key: -1 });
+    }
+    return reversed;
+  }, [experiment, isRunning]);
+  const Anchor = useScrollToTop("top", [computedMessages.length, autoScroll, autoScrollAnchor]);
 
   useHandlers({
     Escape: () => {
@@ -333,15 +341,6 @@ export function ChatPreview({
   useEffect(() => {
     return () => void setSelection(null);
   }, []);
-
-  const computedMessages = useMemo(() => {
-    const keyed = messages.map((message, index) => ({ ...message, key: index }));
-    const reversed = [...keyed].reverse();
-    if (isRunning && !reversed[0].fromServer) {
-      reversed.unshift({ role: "assistant", content: "...", fromServer: true, key: -1 });
-    }
-    return reversed;
-  }, [messages, isRunning]);
 
   if (computedMessages.length === 0) {
     return <Banner>∅</Banner>;

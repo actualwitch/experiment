@@ -1,5 +1,5 @@
 import { useAtom, useSetAtom } from "jotai";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 
 import templates from "../../../fixtures/templates.json";
 import { ForkButton } from "../../components";
@@ -66,7 +66,7 @@ export default function () {
   );
 
   const [filename, idx] = selected ?? [];
-  const chat: ExperimentWithMeta | undefined = filename && idx ? registry[filename][idx] : undefined;
+  const experiment: ExperimentWithMeta | undefined = filename && idx ? registry[filename][idx] : undefined;
 
   const title = "Import CSV";
   const [titleOverride, setTitleOverride] = useAtom(titleOverrideAtom);
@@ -75,12 +75,22 @@ export default function () {
     setTitleOverride(title);
     return () => setTitleOverride(null);
   }, []);
+  const meta = useMemo(() => {
+    if (Array.isArray(experiment) || !experiment) {
+      return null;
+    }
+    const { messages, ...meta } = experiment;
+    return meta;
+  }, [experiment]);
 
   return (
     <>
       <Page>
-        {chat ?
-          <ChatPreview key={`${filename}-${idx}`} messages={chat.messages} />
+        {experiment ?
+          <>
+            {meta && <View>{meta}</View>}
+            <ChatPreview key={`${filename}-${idx}`} experiment={experiment} />
+          </>
         : <>
             <DesktopOnly>
               <h2>{title}</h2>
@@ -110,11 +120,11 @@ export default function () {
         <CsvInput />
         {selected && (
           <div>
-            <ForkButton experiment={chat?.messages} />
+            <ForkButton experiment={experiment} />
             <Button
               type="submit"
               onClick={() => {
-                navigator.clipboard.writeText(JSON.stringify(chat));
+                navigator.clipboard.writeText(JSON.stringify(experiment));
               }}
             >
               Copy JSON

@@ -122,9 +122,11 @@ export const Shell = ({
             <Hydration />
           </ErrorBoundary>
         </Suspense>
-        {additionalScripts?.filter(Boolean).map((script, index) => {
-          return <script suppressHydrationWarning key={index} dangerouslySetInnerHTML={{ __html: script }} />;
-        })}
+        {additionalScripts
+          ?.filter((script): script is string => Boolean(script))
+          .map((script, index) => {
+            return <script suppressHydrationWarning key={index} dangerouslySetInnerHTML={{ __html: script }} />;
+          })}
         {bootstrap && <script suppressHydrationWarning type="module" src={`${baseUrl ?? ""}${clientFile}`} async />}
       </body>
     </html>

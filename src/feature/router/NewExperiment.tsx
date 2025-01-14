@@ -6,16 +6,13 @@ import { NavLink } from "react-router";
 
 import { type Config, ConfigRenderer } from "../../components/ConfigRenderer";
 import { ChatPreview, selectionAtom } from "../../components/chat";
-import { experimentAtom, isActionPanelOpenAtom, isDarkModeAtom, parentAtom, templatesAtom } from "../../atoms/common";
+import { experimentAtom, isActionPanelOpenAtom, isDarkModeAtom, modelAtom, parentAtom, selectedProviderAtom, templatesAtom } from "../../atoms/common";
 import {
   availableProviderOptionsAtom,
   isRunningAtom,
-  modelAtom,
-  modelOptions,
   modelOptionsAtom,
   modelSupportsTemperatureAtom,
   runInferenceAtom,
-  selectedProviderAtom,
   tempAtom,
 } from "../inference/atoms";
 import { bs } from "../../style";
@@ -24,6 +21,7 @@ import { Palette } from "../../style/palette";
 import { useHandlers } from "../../utils/keyboard";
 import { Actions, Page } from "./_page";
 import type { Role, Message } from "../../types";
+import { modelOptions } from "../inference/types";
 
 const baseRadius = 3 / 4;
 const baseMargin = 1 / 2;
@@ -233,7 +231,7 @@ export default function NewExperiment() {
   }, [provider]);
 
   useEffect(() => {
-    if (provider && !models.includes(model)) {
+    if (provider && model && !models.includes(model)) {
       setModel(models[0]);
     }
   }, [provider, models, model]);
@@ -347,7 +345,7 @@ export default function NewExperiment() {
   return (
     <>
       <Page>
-        <ChatPreview messages={experiment} autoScroll />
+        <ChatPreview experiment={experiment} autoScroll />
         <Block isDarkMode={isDarkMode}>
           <ActionRow>
             <select value={role} onChange={(e) => setRole(e.target.value as Role)} style={{ flex: 1 }}>

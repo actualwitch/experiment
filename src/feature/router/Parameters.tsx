@@ -12,7 +12,7 @@ import { Button, bs } from "../../style";
 import { type WithDarkMode, withDarkMode } from "../../style/darkMode";
 import { Palette } from "../../style/palette";
 import { hasBackend } from "../../utils/realm";
-import { providerLabels, providers, providerTypes, type ProviderType } from "../inference/atoms";
+import { providerLabels, providers, providerTypes, type ProviderType } from "../inference/types";
 import { Page } from "./_page";
 
 const StyledForm = styled.form`

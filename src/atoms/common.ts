@@ -9,7 +9,7 @@ import { divergentAtom, entangledAtom } from "../utils/entanglement";
 import { getRealm, hasBackend } from "../utils/realm";
 import { author } from "../const";
 import type { _Message, SerialExperiment, ExperimentWithMeta, Message } from "../types";
-import type { ProviderType } from "../feature/inference/atoms";
+import { modelLabels, type ProviderType } from "../feature/inference/types";
 
 export type LayoutType = "mobile" | "desktop";
 export const layoutAtom = atom<LayoutType>();
@@ -84,23 +84,36 @@ export const storeAtom = divergentAtom(
     }
   },
   () => {
-    if (hasBackend()) {
+    if (getRealm() === "client") {
       return atom<Store>(getInitialStore());
     }
   },
   () => {
-    return atomWithStorage<Store>(
-      "store",
-      getInitialStore(),
-      createJSONStorage(() => localStorage),
-      {
-        getOnInit: true,
-      },
-    );
+    try {
+      return atomWithStorage<Store>(
+        "store",
+        getInitialStore(),
+        createJSONStorage(() => localStorage),
+        {
+          getOnInit: true,
+        },
+      );
+    } catch (e) {
+      console.error(e);
+      return atom<Store>(getInitialStore());
+    }
   },
 );
 
 export const experimentAtom = entangledAtom("experiment", atom<Message[]>([]));
+export const selectedProviderAtom = entangledAtom(
+  "selected-provider",
+  focusAtom(storeAtom, (o) => o.prop("selectedProvider")),
+);
+export const modelAtom = entangledAtom(
+  "model",
+  focusAtom(storeAtom, (o) => o.prop("selectedModel")),
+);
 
 export const experimentIdsAtom = entangledAtom(
   "experimentIds",
@@ -150,7 +163,7 @@ export const createExperiment = atom(
   null,
   (get, set, messages?: Message[], id?: string, runId?: string): ExperimentCursor => {
     const exp = get(experimentsAtom) ?? {};
-    
+
     const parent = get(parentAtom);
     id ??= parent;
 
@@ -159,9 +172,20 @@ export const createExperiment = atom(
     const thisExperiment = exp[id] ?? {};
     runId ??= String(Object.keys(thisExperiment).length + 1);
 
+    const provider = get(selectedProviderAtom);
+    const model = get(modelAtom);
+    const modelName = provider && model && modelLabels[provider][model];
+
     set(experimentsAtom, (prev) => ({
       ...prev,
-      [id]: { ...thisExperiment, [runId]: messages ?? [] },
+      [id]: {
+        ...thisExperiment,
+        [runId]: {
+          messages: messages ?? [],
+          timestamp: new Date().toISOString(),
+          model: modelName,
+        },
+      },
     }));
 
     return { id, runId };

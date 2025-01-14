@@ -14,6 +14,9 @@ export const getRealm = () => {
     return "client";
   }
   if (typeof process === "object") {
+    if (process.env.REALM === "spa") {
+      return "spa";
+    }
     return "server";
   }
   // @ts-ignore
