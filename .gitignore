@@ -3,6 +3,7 @@ node_modules
 build
 spa
 *.bun-build
+magick
 
 # playwright
 playwright-report

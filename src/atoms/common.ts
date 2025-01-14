@@ -8,7 +8,8 @@ import { createFileStorage, getStoragePath, resolve, spawn } from "../utils";
 import { divergentAtom, entangledAtom } from "../utils/entanglement";
 import { getRealm, hasBackend } from "../utils/realm";
 import { author } from "../const";
-import type { _Message, Experiment, ExperimentWithMeta, Message } from "../types";
+import type { _Message, SerialExperiment, ExperimentWithMeta, Message } from "../types";
+import type { ProviderType } from "../feature/inference/atoms";
 
 export type LayoutType = "mobile" | "desktop";
 export const layoutAtom = atom<LayoutType>();
@@ -54,7 +55,9 @@ export type Store = {
   isDarkMode?: boolean;
   experimentLayout?: "left" | "chat" | "chat-reverse";
   rendererMode?: "markdown" | "text+json";
-  experiments?: Record<string, Experiment>;
+  selectedProvider?: ProviderType;
+  selectedModel?: string;
+  experiments?: Record<string, SerialExperiment>;
   templates?: Record<string, _Message | ExperimentWithMeta>;
   tokens: {
     anthropic?: string;
@@ -147,6 +150,10 @@ export const createExperiment = atom(
   null,
   (get, set, messages?: Message[], id?: string, runId?: string): ExperimentCursor => {
     const exp = get(experimentsAtom) ?? {};
+    
+    const parent = get(parentAtom);
+    id ??= parent;
+
     id ??= String(Object.keys(exp).length + 1);
 
     const thisExperiment = exp[id] ?? {};
@@ -160,14 +167,6 @@ export const createExperiment = atom(
     return { id, runId };
   },
 );
-
-export const appendToRun = atom(null, (get, set, cursor: ExperimentCursor, messages: Message[]) => {
-  const { id, runId } = cursor || {};
-  const focus = getExperimentAtom({ id, runId });
-  const current = get(focus);
-  set(focus, (prev = []) => [...prev, ...messages]);
-  return current?.length ?? 0;
-});
 
 export const templatesAtom = entangledAtom(
   "templates",

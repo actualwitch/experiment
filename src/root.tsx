@@ -22,6 +22,7 @@ import {
   layoutTrackerAtom,
 } from "./atoms/common";
 import { DesktopOnly, MobileHeader, MobileOnly } from "./components/Mobile";
+import type { Nullish } from "./types";
 
 const Meta = () => {
   const [title] = useAtom(pageTitleAtom);
@@ -96,7 +97,7 @@ export const Shell = ({
   baseUrl,
 }: {
   bootstrap?: true;
-  additionalScripts?: string[];
+  additionalScripts?: Array<string | Nullish>;
   baseUrl?: string;
 }) => {
   return (
@@ -121,7 +122,7 @@ export const Shell = ({
             <Hydration />
           </ErrorBoundary>
         </Suspense>
-        {additionalScripts?.map((script, index) => {
+        {additionalScripts?.filter(Boolean).map((script, index) => {
           return <script suppressHydrationWarning key={index} dangerouslySetInnerHTML={{ __html: script }} />;
         })}
         {bootstrap && <script suppressHydrationWarning type="module" src={`${baseUrl ?? ""}${clientFile}`} async />}

@@ -10,7 +10,7 @@
   "module": "src/entry/server.tsx",
   "type": "module",
   "scripts": {
-    "build:bin": "bun scripts/build.ts",
+    "build:bin": "bun scripts/build.bin.ts",
     "build:spa": "bun scripts/build.spa.tsx",
     "start": "bun i && OPEN_ON_START=true bun scripts/start.ts",
     "dev": "bun i && bun update && DEBUG=true OPEN_ON_START=true bun scripts/start.ts",

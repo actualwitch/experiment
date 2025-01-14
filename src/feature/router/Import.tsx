@@ -7,7 +7,6 @@ import { ChatPreview } from "../../components/chat";
 import { View } from "../../components/view";
 import { SidebarInput } from "./navigation";
 import { filenames, importsRegistry, processCsvAtom, selectedChat } from "../../atoms/client";
-import { layoutAtom } from "../../atoms/common";
 import { Button } from "../../style";
 import { Actions, Page } from "./_page";
 import { titleOverrideAtom } from "../../atoms/meta";
@@ -54,8 +53,6 @@ const CsvInput = () => {
 };
 
 export default function () {
-  const [layout] = useAtom(layoutAtom);
-
   const [selected, setSelected] = useAtom(selectedChat);
   const [registry, setRegistry] = useAtom(importsRegistry);
   useEffect(() => {
@@ -92,8 +89,8 @@ export default function () {
               Import and explore previous completions from CSV files, or{" "}
               <a
                 onClick={() => {
-                  const samples = Object.entries(templates).reduce((acc, [id, value]) => {
-                    return [...acc, { ...value, id }];
+                  const samples = Object.entries(templates).reduce<ExperimentWithMeta[]>((acc, [name, experiment]) => {
+                    return [...acc, { ...experiment, id: name }];
                   }, []);
                   setRegistry({
                     ...registry,

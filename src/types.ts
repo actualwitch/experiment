@@ -27,6 +27,10 @@ export type ExperimentWithMeta = {
   model?: string;
 };
 
-export type Experiment = {
-  [runId: string]: Message[] | ExperimentWithMeta;
+export type Experiment = Message[] | ExperimentWithMeta;
+
+export type SerialExperiment = {
+  [runId: string]: Experiment;
 };
+
+export type Nullish = null | undefined;

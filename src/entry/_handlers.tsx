@@ -8,9 +8,10 @@ import { publish, subscribe, type Update } from "../utils/æther";
 import { eventStream } from "../utils/eventStream";
 import { getClientAsString } from "./_macro" with { type: "macro" };
 import { getManifest } from "../feature/pwa/manifest";
-import { description, iconResolutions, name } from "../const";
+import { clientFile, description, iconResolutions, name } from "../const";
+import type { Nullish } from "../types";
 
-export const getHtml = (location: string, additionalScripts?: string[], baseUrl?: string) => {
+export const getHtml = (location: string, additionalScripts?: Array<string | Nullish>, baseUrl?: string) => {
   const html = renderToString(
     <StaticRouter location={location} basename={baseUrl}>
       <Shell bootstrap additionalScripts={additionalScripts} baseUrl={baseUrl} />
@@ -32,7 +33,7 @@ export const doStatic = async (request: Request) => {
       },
     });
   }
-  if (url.pathname === "/script.js") {
+  if (url.pathname === clientFile) {
     response = new Response(await getClientAsString(), {
       headers: {
         "Content-Type": "application/javascript",
@@ -68,7 +69,7 @@ export const doStreamingSSR = async (request: Request) => {
         // Log streaming rendering errors from inside the shell
         console.error(error);
       },
-      bootstrapModules: ["/script.js"],
+      bootstrapModules: [clientFile],
     },
   );
   await stream.allReady;

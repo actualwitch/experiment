@@ -13,7 +13,8 @@ import { experimentToOpenai } from "./adapters/openai";
 import { spawn } from "../../utils";
 import { entangledAtom } from "../../utils/entanglement";
 import { hasBackend } from "../../utils/realm";
-import { type Message, createExperiment, experimentAtom, parentAtom, storeAtom, tokensAtom } from "../../atoms/common";
+import {createExperiment, experimentAtom, parentAtom, storeAtom, tokensAtom } from "../../atoms/common";
+import type { Message } from "../../types";
 
 export function withIds<T extends string>(items: T[] | readonly T[]) {
   return items.map((name) => ({
@@ -44,7 +45,7 @@ export const availableProviderOptionsAtom = atom((get) => {
   }));
 });
 
-export const selectedProviderAtom = entangledAtom("selected-provider", atom<ProviderType | undefined>(undefined));
+export const selectedProviderAtom = entangledAtom("selected-provider", focusAtom(storeAtom, (o) => o.prop("selectedProvider")));
 
 export const OpenAIModel = Union(
   Literal("gpt-4o"),
@@ -103,13 +104,13 @@ export const modelOptionsAtom = atom((get) => {
 });
 
 export const tempAtom = entangledAtom("temp", atom(0.0));
-export const modelAtom = entangledAtom("model", atom<string>(""));
+export const modelAtom = entangledAtom("model", focusAtom(storeAtom, (o) => o.prop("selectedModel")));
 export const isRunningAtom = entangledAtom("is running", atom(false));
 
 export const modelSupportsTemperatureAtom = atom((get) => {
   const provider = get(selectedProviderAtom);
   const model = get(modelAtom);
-  if (provider === "openai" && ["o1-mini", "o1-preview", "o1"].includes(model)) {
+  if (provider === "openai" && model && ["o1-mini", "o1-preview", "o1"].includes(model)) {
     return false;
   }
   return true;
@@ -127,9 +128,8 @@ const saveExperimentAtom = entangledAtom(
   { name: "save-experiment" },
   atom(null, async (get, set) => {
     const experiment: Message[] = get(experimentAtom);
-    const parent = get(parentAtom);
     if (!experiment.length) return;
-    set(createExperiment, experiment, parent ?? undefined);
+    set(createExperiment, experiment);
   }),
 );
 

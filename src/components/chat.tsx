@@ -4,9 +4,7 @@ import { atom, useAtom, useAtomValue } from "jotai";
 import { type CSSProperties, type ReactNode, useEffect, useMemo, useRef } from "react";
 import { TRIANGLE } from "../const";
 import {
-  type Message,
   type Store,
-  type _Message,
   experimentLayoutAtom,
   isDarkModeAtom,
   templatesAtom,
@@ -19,6 +17,7 @@ import { deepEqual } from "../utils";
 import { useHandlers } from "../utils/keyboard";
 import { useScrollToTop } from "../utils/scroll";
 import { View, collapsedAtom } from "./view";
+import type { _Message, Message } from "../types";
 
 const baseHeight = bs(6);
 export const ChatContainer = styled.div<WithDarkMode>`

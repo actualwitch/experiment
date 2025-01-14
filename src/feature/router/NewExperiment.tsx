@@ -398,8 +398,6 @@ export default function NewExperiment() {
       <Actions>
         <ConfigRenderer>{actions}</ConfigRenderer>
       </Actions>
-
-      {/* <ExperimentsSidebar /> */}
     </>
   );
 }
