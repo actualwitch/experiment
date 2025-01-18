@@ -1,5 +1,5 @@
 import type { Server } from "bun";
-import { renderToReadableStream, renderToString } from "react-dom/server";
+import { renderToReadableStream } from "react-dom/server";
 import { prerenderToNodeStream as prerender } from "react-dom/static";
 import { StaticRouter } from "react-router";
 
@@ -7,36 +7,29 @@ import { log } from "../utils/logger";
 import { Shell } from "../root";
 import { publish, subscribe, type Update } from "../utils/æther";
 import { eventStream } from "../utils/eventStream";
-import { getClientAsString } from "./_macro" with { type: "macro" };
 import { getManifest } from "../feature/pwa/manifest";
 import { clientFile, description, iconResolutions, name } from "../const";
 import type { Nullish } from "../types";
+import { clientScriptAtom } from "../atoms/server";
+import { store } from "../store";
 
-export const getHtml = (location: string, additionalScripts?: Array<string | Nullish>, baseUrl?: string) => {
-  const html = renderToString(
+export const getStaticHtml = async (
+  location: string,
+  additionalScripts?: Array<string | Nullish>,
+  baseUrl?: string,
+): Promise<string> => {
+  const { prelude } = await prerender(
     <StaticRouter location={location} basename={baseUrl}>
       <Shell bootstrap additionalScripts={additionalScripts} baseUrl={baseUrl} />
     </StaticRouter>,
   );
-  return `<!DOCTYPE html>${html}`;
-};
-
-export const getStaticHtml = async (location: string, additionalScripts?: Array<string | Nullish>, baseUrl?: string) => {
-  const { prelude } = await prerender(
-    <StaticRouter location={location} basename={baseUrl}>
-      <Shell additionalScripts={additionalScripts} baseUrl={baseUrl} />
-    </StaticRouter>,
-    {
-      bootstrapScripts: [clientFile],
-    },
-  );  
   return new Promise((resolve, reject) => {
-    let data = '';
-    prelude.on('data', chunk => {
+    let data = "";
+    prelude.on("data", (chunk) => {
       data += chunk;
     });
-    prelude.on('end', () => resolve(data));
-    prelude.on('error', reject);
+    prelude.on("end", () => resolve(data));
+    prelude.on("error", reject);
   });
 };
 
@@ -54,10 +47,10 @@ export const doStatic = async (request: Request) => {
     });
   }
   if (url.pathname === clientFile) {
-    response = new Response(await getClientAsString(), {
-      headers: {
-        "Content-Type": "application/javascript",
-      },
+    const clientScript = await store.get(clientScriptAtom);
+    response = clientScript.match({
+      Just: (script) => new Response(script, { headers: { "Content-Type": "application/javascript" } }),
+      Nothing: () => new Response("KO", { status: 500 }),
     });
   }
   if (response) {
@@ -69,7 +62,7 @@ export const doStatic = async (request: Request) => {
 export const doSSR = async (request: Request) => {
   const url = new URL(request.url);
   log("SSR", request.url);
-  return new Response(getHtml(url.pathname), {
+  return new Response(await getStaticHtml(url.pathname), {
     headers: {
       "Content-Type": "text/html",
     },

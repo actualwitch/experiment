@@ -242,6 +242,7 @@ export const runExperimentAsOpenAi = entangledAtom(
 
     const client = new OpenAI({
       apiKey: resolvedToken,
+      baseURL: "localhost:8080/v1",
       dangerouslyAllowBrowser: hasBackend() ? undefined : true,
     });
 
@@ -252,7 +253,7 @@ export const runExperimentAsOpenAi = entangledAtom(
         include_usage: true,
       },
       temperature: get(tempAtom),
-      model: get(modelAtom) ?? "gpt-4o",
+      model: undefined,
     };
     const supportsTemp = get(modelSupportsTemperatureAtom);
     if (!supportsTemp) {

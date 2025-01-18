@@ -2,9 +2,10 @@ import type { Serve } from "bun";
 import { clientFile, hostname, port } from "../const";
 import { FIXTURES, isFixture } from "./_fixtures";
 import { assignToWindow, createHydrationScript } from "../utils/hydration";
-import { getHtml } from "./_handlers";
-import { getClientAsString } from "./_macro" with { type: "macro" };
+import { getStaticHtml } from "./_handlers";
 import { setRealm } from "../utils/realm";
+import { store } from "../store";
+import { clientScriptAtom } from "../atoms/server";
 
 export default {
   development: true,
@@ -14,19 +15,22 @@ export default {
     const url = new URL(req.url);
     console.log(url.pathname, clientFile);
     if (url.pathname === clientFile) {
-      return new Response(await getClientAsString(), {
-        headers: { "Content-Type": "application/javascript" },
+      const clientScript = await store.get(clientScriptAtom);
+      return clientScript.match({
+        Just: (script) => new Response(script, { headers: { "Content-Type": "application/javascript" } }),
+        Nothing: () => new Response("KO", { status: 500 }),
       });
     }
     const fixture = url.searchParams.get("fixture");
     setRealm(isFixture(fixture) ? "testing" : "spa");
+    const html = await getStaticHtml(
+      url.pathname,
+      isFixture(fixture) ?
+        [createHydrationScript(FIXTURES[fixture]), assignToWindow("REALM", `"TESTING"`)]
+      : [assignToWindow("REALM", `"SPA"`)],
+    )
     return new Response(
-      getHtml(
-        url.pathname,
-        isFixture(fixture) ?
-          [createHydrationScript(FIXTURES[fixture]), assignToWindow("REALM", `"TESTING"`)]
-        : [assignToWindow("REALM", `"SPA"`)],
-      ),
+      html,
       {
         headers: { "Content-Type": "text/html" },
       },

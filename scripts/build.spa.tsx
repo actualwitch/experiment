@@ -1,20 +1,16 @@
 import { $ } from "bun";
-import { name, description, iconResolutions } from "../src/const";
-import { getHtml } from "../src/entry/_handlers";
+import { name, description, iconResolutions, staticDir } from "../src/const";
+import { getStaticHtml } from "../src/entry/_handlers";
 import { getManifest } from "../src/feature/pwa/manifest";
 import { ROUTES } from "../src/feature/router";
 import { assignToWindow } from "../src/utils/hydration";
+import { store } from "../src/store";
+import { clientScriptAtom } from "../src/atoms/server";
 
-// why does this work but running it from Bun.build fails? #justbunthings
-await $`bun build ./src/entry/client.tsx --outdir ./spa --minify`;
-// const buildResult = await Bun.build({
-//   entrypoints: ["./src/entry/client.tsx"],
-//   outdir: "./spa",
-// });
-// if (!buildResult.success) {
-//   throw new AggregateError(buildResult.logs, "Build failed");
-// }
-
+const result = await store.get(clientScriptAtom);
+if (result.isNothing) {
+  throw new Error("could not build frontend");
+}
 const baseUrl = process.env.BASE_URL;
 const regex = /\/\w*/gm;
 
@@ -23,20 +19,20 @@ for (const route of ROUTES) {
   const pathname = path === "/" ? "index" : path.slice(1);
   const fullUrl = `${baseUrl ?? ""}${path}`;
 
-  const html = getHtml(
+  const html = await getStaticHtml(
     fullUrl,
     [assignToWindow("REALM", `"SPA"`), baseUrl && assignToWindow("BASE_URL", `"${baseUrl}"`)],
     baseUrl,
   );
 
-  await Bun.write(`./spa/${pathname}.html`, html);
+  await Bun.write(`./${staticDir}/${pathname}.html`, html);
 }
 
 await Bun.write(
-  "./spa/manifest.json",
+  `./${staticDir}/manifest.json`,
   JSON.stringify(getManifest(name, description, iconResolutions, baseUrl), null, 2),
 );
 
 for (const res of iconResolutions) {
-  await $`cp ./.github/assets/experiment-${res}.png ./spa`;
+  await $`cp ./.github/assets/experiment-${res}.png ./${staticDir}`;
 }

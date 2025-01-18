@@ -28,10 +28,8 @@
     "@types/react": "latest",
     "@types/react-dom": "latest",
     "@types/selenium-webdriver": "latest",
-    "ink": "latest",
     "playwright": "latest",
-    "prettier": "latest",
-    "selenium-webdriver": "latest"
+    "prettier": "latest"
   },
   "peerDependencies": {
     "typescript": "next"

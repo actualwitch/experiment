@@ -2,13 +2,13 @@ import styled from "@emotion/styled";
 import { atom, useAtom } from "jotai";
 import { NavLink, useLocation } from "react-router";
 
-import { TRIANGLE } from "../../const";
+import { TRIANGLE, version } from "../../const";
 import { experimentsSidebarAtom, ROUTES } from ".";
 import { bs } from "../../style";
 import { nonInteractive, widthAvailable } from "../../style/mixins";
 import { portalIO } from "../../utils/portal";
-import { templatesAtom } from "../../atoms/common";
-import { VERSION } from "../../const/dynamic";
+import { revisionAtom, templatesAtom } from "../../atoms/common";
+import { VERSION } from "../../const";
 import { increaseSpecificity } from "../../style/utils";
 
 export const [SidebarInput, SidebarOutput] = portalIO();
@@ -83,6 +83,7 @@ const SidebarComponent = () => {
 export const NavigationSidebar = () => {
   const [routes] = useAtom(routesAtom);
   const location = useLocation();
+  const [revision] = useAtom(revisionAtom);
   return (
     <Navigation>
       <header>
@@ -100,7 +101,7 @@ export const NavigationSidebar = () => {
         {(location.pathname === "/" || location.pathname.startsWith("/experiment")) && <SidebarComponent />}
       </GrowBox>
       <Footer>
-        © ∞ {TRIANGLE} {VERSION}
+        © ∞ {TRIANGLE} {revision}
       </Footer>
     </Navigation>
   );

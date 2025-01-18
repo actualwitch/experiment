@@ -4,27 +4,31 @@ import type {
   MessageParam,
   Tool,
 } from "@anthropic-ai/sdk/resources/index.mjs";
-import type { Message } from "../../../atoms/common";
+import type { Message } from "../../../types";
 
-export const experimentToAnthropic = (experiment: Message[]): MessageCreateParams | MessageCreateParamsNonStreaming => {
+export const experimentToAnthropic = (
+  experiment: Message[],
+  { max_tokens = 2048 }: { max_tokens?: number } = {},
+): MessageCreateParams | MessageCreateParamsNonStreaming => {
   let system = "";
   const messages: MessageParam[] = [];
   const tools: Tool[] = [];
-  for (const { role, content } of experiment) {
+  for (const { role, content, fromServer } of experiment) {
     if (role === "system") {
-      system += `${content}\n`;
+      system += `${content}
+`;
     }
     if (role === "user" || role === "assistant") {
-      if (typeof content === "string") {
-        messages.push({ role: "user", content });
-      }
       if (typeof content === "object") {
-        messages.push({ role: "user", content: JSON.stringify(content) });
+        messages.push({ role, content: JSON.stringify(content) });
+      }
+      if (typeof content === "string") {
+        messages.push({ role, content });
       }
     }
-    if (role === "tool") {
+    if (role === "tool" && !fromServer) {
       if (typeof content === "object") {
-        const tool = content as typeof makeRequestTool;
+        const tool = content as any;
         tools.push({
           name: tool?.function?.name ?? "Unnamed tool",
           description: tool?.function?.description ?? "No description",
@@ -41,7 +45,7 @@ export const experimentToAnthropic = (experiment: Message[]): MessageCreateParam
     tool_choice,
     model: "claude-3-5-haiku-20241022",
     temperature: 0.0,
-    max_tokens: 2048,
+    max_tokens,
     stream: true,
   };
 };

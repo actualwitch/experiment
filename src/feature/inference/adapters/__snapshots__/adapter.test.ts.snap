@@ -1,0 +1,462 @@
+// Bun Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`inference/anthropic tool use experiment 1`] = `
+{
+  "max_tokens": 2048,
+  "messages": [
+    {
+      "content": "hello friend! my name is ade, please remember that. then, search for the definition of singularity",
+      "role": "user",
+    },
+  ],
+  "model": "claude-3-5-haiku-20241022",
+  "stream": true,
+  "system": "",
+  "temperature": 0,
+  "tool_choice": undefined,
+  "tools": [
+    {
+      "description": "The \`bio\` tool allows you to persist information across conversations. The information will appear in the model set context below in future conversations.",
+      "input_schema": {
+        "properties": {
+          "memory": {
+            "description": "The information you want to persist across conversations.",
+            "type": "string",
+          },
+        },
+        "required": [
+          "memory",
+        ],
+        "type": "object",
+      },
+      "name": "bio",
+    },
+    {
+      "description": "The \`search\` tool allows you to search for information.",
+      "input_schema": {
+        "properties": {
+          "query": {
+            "description": "The information you want to search for.",
+            "type": "string",
+          },
+        },
+        "required": [
+          "query",
+        ],
+        "type": "object",
+      },
+      "name": "search",
+    },
+  ],
+}
+`;
+
+exports[`inference/anthropic sample 1`] = `
+{
+  "max_tokens": 2048,
+  "messages": [
+    {
+      "content": "This is a user message.",
+      "role": "user",
+    },
+    {
+      "content": 
+"
+## Header
+
+This is a small showcase of common elements in markdown for testing purposes. Here's a \`span\`, and *italics*  and **bold** text. Here's a [link](https://www.kaggle.com). Here's a list:
+
+- item 1
+- item 2
+- item 3
+
+Here's a numbered list:
+
+1. item 1
+2. item 2
+3. item 3
+
+Here's a table:
+
+| Header 1 | Header 2 |
+|----------|----------|
+| cell 1   | cell 2   |
+| cell 3   | cell 4   |
+
+Here's a code block:
+
+\`\`\`typescript
+const interactive = css\`
+  cursor: pointer;
+  user-select: none;
+  :hover {
+    opacity: 1;
+  }
+\`;
+const Emphasis = styled.em<{ isCollapsed?: boolean }>(
+  css\`
+    font-weight: italic;
+    opacity: 0.7;
+  \`,
+  ({ isCollapsed }) => {
+    if (!isCollapsed) return;
+    return css\`
+      :before {
+        content: "( ";
+        opacity: 0.3;
+      }
+      :after {
+        content: " )";
+        opacity: 0.3;
+      }
+    \`;
+  },
+  interactive,
+);
+\`\`\`
+
+Here's an image:
+
+![image](https://www.kaggle.com/static/images/site-logo.png)
+
+Here's a blockquote:
+
+> This is a blockquote.
+
+Here's a horizontal rule:
+
+---
+"
+,
+      "role": "assistant",
+    },
+  ],
+  "model": "claude-3-5-haiku-20241022",
+  "stream": true,
+  "system": 
+"This is a system message.
+"
+,
+  "temperature": 0,
+  "tool_choice": undefined,
+  "tools": [],
+}
+`;
+
+exports[`inference/mistral tool use experiment 1`] = `
+{
+  "maxTokens": 2048,
+  "messages": [
+    {
+      "content": "hello friend! my name is ade, please remember that. then, search for the definition of singularity",
+      "role": "user",
+    },
+    {
+      "content": "{"function":"bio","arguments":{"memory":"User's name is Ade."}}",
+      "role": "tool",
+    },
+    {
+      "content": "{"function":"search","arguments":{"query":"definition of singularity"}}",
+      "role": "tool",
+    },
+  ],
+  "model": "mistral-small-latest",
+  "stream": true,
+  "temperature": 0,
+  "toolChoice": undefined,
+  "tools": [
+    {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "function": {
+        "description": "The \`bio\` tool allows you to persist information across conversations. The information will appear in the model set context below in future conversations.",
+        "name": "bio",
+        "parameters": {
+          "properties": {
+            "memory": {
+              "description": "The information you want to persist across conversations.",
+              "type": "string",
+            },
+          },
+          "required": [
+            "memory",
+          ],
+          "type": "object",
+        },
+      },
+      "type": "function",
+    },
+    {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "function": {
+        "description": "The \`search\` tool allows you to search for information.",
+        "name": "search",
+        "parameters": {
+          "properties": {
+            "query": {
+              "description": "The information you want to search for.",
+              "type": "string",
+            },
+          },
+          "required": [
+            "query",
+          ],
+          "type": "object",
+        },
+      },
+      "type": "function",
+    },
+  ],
+}
+`;
+
+exports[`inference/mistral sample 1`] = `
+{
+  "maxTokens": 2048,
+  "messages": [
+    {
+      "content": "This is a system message.",
+      "role": "system",
+    },
+    {
+      "content": "This is a developer message.",
+      "role": "developer",
+    },
+    {
+      "content": "This is a user message.",
+      "role": "user",
+    },
+    {
+      "content": 
+"
+## Header
+
+This is a small showcase of common elements in markdown for testing purposes. Here's a \`span\`, and *italics*  and **bold** text. Here's a [link](https://www.kaggle.com). Here's a list:
+
+- item 1
+- item 2
+- item 3
+
+Here's a numbered list:
+
+1. item 1
+2. item 2
+3. item 3
+
+Here's a table:
+
+| Header 1 | Header 2 |
+|----------|----------|
+| cell 1   | cell 2   |
+| cell 3   | cell 4   |
+
+Here's a code block:
+
+\`\`\`typescript
+const interactive = css\`
+  cursor: pointer;
+  user-select: none;
+  :hover {
+    opacity: 1;
+  }
+\`;
+const Emphasis = styled.em<{ isCollapsed?: boolean }>(
+  css\`
+    font-weight: italic;
+    opacity: 0.7;
+  \`,
+  ({ isCollapsed }) => {
+    if (!isCollapsed) return;
+    return css\`
+      :before {
+        content: "( ";
+        opacity: 0.3;
+      }
+      :after {
+        content: " )";
+        opacity: 0.3;
+      }
+    \`;
+  },
+  interactive,
+);
+\`\`\`
+
+Here's an image:
+
+![image](https://www.kaggle.com/static/images/site-logo.png)
+
+Here's a blockquote:
+
+> This is a blockquote.
+
+Here's a horizontal rule:
+
+---
+"
+,
+      "role": "assistant",
+    },
+  ],
+  "model": "mistral-small-latest",
+  "stream": true,
+  "temperature": 0,
+}
+`;
+
+exports[`inference/openai tool use experiment 1`] = `
+{
+  "messages": [
+    {
+      "content": "hello friend! my name is ade, please remember that. then, search for the definition of singularity",
+      "role": "user",
+    },
+    {
+      "content": "{"function":"bio","arguments":{"memory":"User's name is Ade."}}",
+      "role": "tool",
+    },
+    {
+      "content": "{"function":"search","arguments":{"query":"definition of singularity"}}",
+      "role": "tool",
+    },
+  ],
+  "model": "gpt-4o",
+  "stream": true,
+  "temperature": 0,
+  "tool_choice": "auto",
+  "tools": [
+    {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "function": {
+        "description": "The \`bio\` tool allows you to persist information across conversations. The information will appear in the model set context below in future conversations.",
+        "name": "bio",
+        "parameters": {
+          "properties": {
+            "memory": {
+              "description": "The information you want to persist across conversations.",
+              "type": "string",
+            },
+          },
+          "required": [
+            "memory",
+          ],
+          "type": "object",
+        },
+      },
+      "type": "function",
+    },
+    {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "function": {
+        "description": "The \`search\` tool allows you to search for information.",
+        "name": "search",
+        "parameters": {
+          "properties": {
+            "query": {
+              "description": "The information you want to search for.",
+              "type": "string",
+            },
+          },
+          "required": [
+            "query",
+          ],
+          "type": "object",
+        },
+      },
+      "type": "function",
+    },
+  ],
+}
+`;
+
+exports[`inference/openai sample 1`] = `
+{
+  "messages": [
+    {
+      "content": "This is a system message.",
+      "role": "system",
+    },
+    {
+      "content": "This is a developer message.",
+      "role": "developer",
+    },
+    {
+      "content": "This is a user message.",
+      "role": "user",
+    },
+    {
+      "content": 
+"
+## Header
+
+This is a small showcase of common elements in markdown for testing purposes. Here's a \`span\`, and *italics*  and **bold** text. Here's a [link](https://www.kaggle.com). Here's a list:
+
+- item 1
+- item 2
+- item 3
+
+Here's a numbered list:
+
+1. item 1
+2. item 2
+3. item 3
+
+Here's a table:
+
+| Header 1 | Header 2 |
+|----------|----------|
+| cell 1   | cell 2   |
+| cell 3   | cell 4   |
+
+Here's a code block:
+
+\`\`\`typescript
+const interactive = css\`
+  cursor: pointer;
+  user-select: none;
+  :hover {
+    opacity: 1;
+  }
+\`;
+const Emphasis = styled.em<{ isCollapsed?: boolean }>(
+  css\`
+    font-weight: italic;
+    opacity: 0.7;
+  \`,
+  ({ isCollapsed }) => {
+    if (!isCollapsed) return;
+    return css\`
+      :before {
+        content: "( ";
+        opacity: 0.3;
+      }
+      :after {
+        content: " )";
+        opacity: 0.3;
+      }
+    \`;
+  },
+  interactive,
+);
+\`\`\`
+
+Here's an image:
+
+![image](https://www.kaggle.com/static/images/site-logo.png)
+
+Here's a blockquote:
+
+> This is a blockquote.
+
+Here's a horizontal rule:
+
+---
+"
+,
+      "role": "assistant",
+    },
+  ],
+  "model": "gpt-4o",
+  "stream": true,
+  "temperature": 0,
+}
+`;

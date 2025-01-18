@@ -1,11 +1,14 @@
 import type { ChatCompletionStreamRequest } from "@mistralai/mistralai/models/components";
-import type { Message } from "../../../atoms/common";
+import { type Message, ObjectOrStringType, StringType } from "../../../types";
 
-export const experimentToMistral = (experiment: Message[]): ChatCompletionStreamRequest => {
+export const experimentToMistral = (
+  experiment: Message[],
+  { maxTokens = 2048 }: { maxTokens?: number } = {},
+): ChatCompletionStreamRequest => {
   const messages: ChatCompletionStreamRequest["messages"] = [];
   const tools: ChatCompletionStreamRequest["tools"] = [];
-  for (const { role, content } of experiment) {
-    if (role === "tool") {
+  for (const { role, content, fromServer } of experiment) {
+    if (role === "tool" && !fromServer) {
       const thisTool = content;
 
       if (typeof thisTool === "object") {
@@ -13,18 +16,18 @@ export const experimentToMistral = (experiment: Message[]): ChatCompletionStream
       }
       continue;
     }
-    if (typeof content === "string") {
+    if (typeof content === "string" && StringType.guard(role)) {
       messages.push({ role, content });
     }
-    if (typeof content === "object") {
-      messages.push({ role: "user", content: JSON.stringify(content) });
+    if (role !== "info" && ObjectOrStringType.guard(role)) {
+      messages.push({ role, content: typeof content === "string" ? content : JSON.stringify(content) });
     }
   }
   const result: ChatCompletionStreamRequest = {
     messages,
     model: "mistral-small-latest",
     temperature: 0.0,
-    maxTokens: 2048,
+    maxTokens,
     stream: true,
   };
   if (tools.length) {

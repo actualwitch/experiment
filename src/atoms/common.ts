@@ -7,7 +7,7 @@ import { Result } from "true-myth";
 import { createFileStorage, getStoragePath, resolve, spawn } from "../utils";
 import { divergentAtom, entangledAtom } from "../utils/entanglement";
 import { getRealm, hasBackend } from "../utils/realm";
-import { author } from "../const";
+import { author, version } from "../const";
 import type { _Message, SerialExperiment, ExperimentWithMeta, Message } from "../types";
 import { modelLabels, type ProviderType } from "../feature/inference/types";
 
@@ -257,3 +257,21 @@ export const localCertAndKeyAtom = atom(async () => {
   }
   return Result.ok({ key: `${getStoragePath()}/cert.key`, cert: `${getStoragePath()}/key.cert` });
 });
+
+export const revisionAtom = entangledAtom(
+  "revision",
+  atom(async (get) => {
+    const result = await spawn("git", ["rev-parse", "HEAD"]);
+    const hash = result.map((hash) => hash.slice(0, 6));
+    const revision = [version, hash.unwrapOr(undefined)].filter(Boolean).join("-");
+    return revision;
+  }),
+);
+
+export const debugAtom = entangledAtom(
+  "debug",
+  atom(() => {
+    if (getRealm() !== "server") return false;
+    return process.env.DEBUG === "true";
+  }),
+);
