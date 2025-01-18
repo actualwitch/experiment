@@ -1,5 +1,6 @@
 import type { Server } from "bun";
 import { renderToReadableStream, renderToString } from "react-dom/server";
+import { prerenderToNodeStream as prerender } from "react-dom/static";
 import { StaticRouter } from "react-router";
 
 import { log } from "../utils/logger";
@@ -18,6 +19,25 @@ export const getHtml = (location: string, additionalScripts?: Array<string | Nul
     </StaticRouter>,
   );
   return `<!DOCTYPE html>${html}`;
+};
+
+export const getStaticHtml = async (location: string, additionalScripts?: Array<string | Nullish>, baseUrl?: string) => {
+  const { prelude } = await prerender(
+    <StaticRouter location={location} basename={baseUrl}>
+      <Shell additionalScripts={additionalScripts} baseUrl={baseUrl} />
+    </StaticRouter>,
+    {
+      bootstrapScripts: [clientFile],
+    },
+  );  
+  return new Promise((resolve, reject) => {
+    let data = '';
+    prelude.on('data', chunk => {
+      data += chunk;
+    });
+    prelude.on('end', () => resolve(data));
+    prelude.on('error', reject);
+  });
 };
 
 export const doStatic = async (request: Request) => {
