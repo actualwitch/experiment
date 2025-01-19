@@ -1,4 +1,4 @@
-import { $, type Serve } from "bun";
+import type { Serve } from "bun";
 import { hostname, port } from "../const";
 import { createFetch } from "../utils/handler";
 import { doPOST, doSSE, doStatic, doStreamingSSR } from "./_handlers";
