@@ -2,7 +2,7 @@
 
 exports[`inference/anthropic tool use experiment 1`] = `
 {
-  "max_tokens": 2048,
+  "max_tokens": 8192,
   "messages": [
     {
       "content": "hello friend! my name is ade, please remember that. then, search for the definition of singularity",
@@ -53,7 +53,7 @@ exports[`inference/anthropic tool use experiment 1`] = `
 
 exports[`inference/anthropic sample 1`] = `
 {
-  "max_tokens": 2048,
+  "max_tokens": 8192,
   "messages": [
     {
       "content": "This is a user message.",
@@ -145,7 +145,7 @@ Here's a horizontal rule:
 
 exports[`inference/mistral tool use experiment 1`] = `
 {
-  "maxTokens": 2048,
+  "maxTokens": 8192,
   "messages": [
     {
       "content": "hello friend! my name is ade, please remember that. then, search for the definition of singularity",
@@ -211,7 +211,7 @@ exports[`inference/mistral tool use experiment 1`] = `
 
 exports[`inference/mistral sample 1`] = `
 {
-  "maxTokens": 2048,
+  "maxTokens": 8192,
   "messages": [
     {
       "content": "This is a system message.",

@@ -1,9 +1,10 @@
 import type { ChatCompletionStreamRequest } from "@mistralai/mistralai/models/components";
 import { type Message, ObjectOrStringType, StringType } from "../../../types";
+import { tokenLimit } from "../../../const";
 
 export const experimentToMistral = (
   experiment: Message[],
-  { maxTokens = 2048 }: { maxTokens?: number } = {},
+  { maxTokens = tokenLimit }: { maxTokens?: number } = {},
 ): ChatCompletionStreamRequest => {
   const messages: ChatCompletionStreamRequest["messages"] = [];
   const tools: ChatCompletionStreamRequest["tools"] = [];

@@ -5,10 +5,11 @@ import type {
   Tool,
 } from "@anthropic-ai/sdk/resources/index.mjs";
 import type { Message } from "../../../types";
+import { tokenLimit } from "../../../const";
 
 export const experimentToAnthropic = (
   experiment: Message[],
-  { max_tokens = 2048 }: { max_tokens?: number } = {},
+  { max_tokens = tokenLimit }: { max_tokens?: number } = {},
 ): MessageCreateParams | MessageCreateParamsNonStreaming => {
   let system = "";
   const messages: MessageParam[] = [];
