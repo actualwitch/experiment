@@ -1,11 +1,9 @@
 import { atom } from "jotai";
-import { getRealm } from "../utils/realm";
 import { Maybe } from "true-myth";
 import { resolve, spawn } from "../utils";
 import { clientFile, staticDir } from "../const";
 
 export const clientScriptAtom = atom(async () => {
-  if (getRealm() !== "server") return Maybe.nothing();
   const result = await spawn("bun", [
     "build",
     "./src/entry/client.tsx",
