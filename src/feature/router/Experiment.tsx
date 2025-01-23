@@ -1,17 +1,18 @@
-import { atom, useAtom } from "jotai";
+import { atom, useAtom, useSetAtom, type Setter } from "jotai";
 import { useParams } from "react-router";
 
 import { ForkButton } from "../../components";
-import { ChatPreview } from "../../components/chat";
-import { type ExperimentCursor, getExperimentAtom } from "../../atoms/common";
+import { ChatPreview, selectionAtom } from "../../components/chat";
+import { experimentAtom, type ExperimentCursor, getExperimentAtom, parentAtom, templatesAtom } from "../../atoms/common";
 import { Button } from "../../style";
 import { entangledAtom } from "../../utils/entanglement";
 import { Actions, Page } from "./_page";
 import type { Experiment } from "../../types";
-import { titleOverrideAtom } from "../../atoms/meta";
 import { DesktopOnly } from "../../components/Mobile";
 import { useEffect, useMemo } from "react";
 import { View } from "../../components/view";
+import { routeAtom, titleOverrideAtom } from ".";
+import { ConfigRenderer, type Config } from "../../components/ConfigRenderer";
 
 const cursorAtom = entangledAtom("cursor", atom<ExperimentCursor | null>(null));
 const selectedExperimentAtom = entangledAtom(
@@ -20,18 +21,89 @@ const selectedExperimentAtom = entangledAtom(
     const cursor = get(cursorAtom);
     if (cursor) {
       const experiment = get(getExperimentAtom(cursor));
-      return experiment ?? [];
+      if (Array.isArray(experiment)) {
+        return experiment ?? [];
+      }
+      return experiment?.messages ?? [];
     }
     return [];
   }),
 );
+
+export const paramsAtom = atom<Record<string, string | undefined>>({});
+
+export const actionsAtom = atom((get) => {
+  const selection = get(selectionAtom);
+  const experiment = get(selectedExperimentAtom);
+  const route = get(routeAtom);
+  const params = get(paramsAtom);
+  let counter = 0;
+  const config: Config = {
+    Actions: [],
+  };
+  {
+    config.Actions.push({
+      buttons: [
+        {
+          label: "Fork",
+          action: (set: Setter) => {
+            if (!experiment) return;
+            const messages = Array.isArray(experiment) ? experiment : experiment.messages;
+            set(experimentAtom, messages);
+            if (parent) set(parentAtom, params?.id);
+            setTimeout(() => {
+              const base = document.location.pathname.startsWith("/experiment/experiment") ? "/experiment" : "";
+              document.location.href = `${base}/`;
+            }, 100);
+          },
+        },
+        {
+          label: "Copy",
+          action: (set: Setter) => void navigator.clipboard.writeText(JSON.stringify(experiment)),
+        },
+      ],
+    });
+    counter += 2;
+  }
+  if (selection !== null) {
+    config.Actions.push({
+      Selection: {
+        buttons: [
+          {
+            label: "Unselect",
+            action: (set: Setter) => set(selectionAtom, null),
+          },
+          {
+            label: "Template",
+            action: async (set: Setter) => {
+              const name = prompt("Name of the template");
+              if (!name) return;
+              const templates = get(templatesAtom);
+              const experiment = get(selectedExperimentAtom);
+              console.log({ templates, name, experiment, selection });
+              set(templatesAtom, { ...templates, [name]: experiment[selection[0]] });
+            },
+          },
+        ],
+      },
+    });
+    counter++;
+  }
+  return { config, counter };
+});
+
 export default function () {
-  const { id, runId } = useParams();
+  const params = useParams();
+  const { id, runId } = params;
+  const setParams = useSetAtom(paramsAtom);
+  useEffect(() => setParams(params), [params]);
   const [cursor, setCursor] = useAtom(cursorAtom);
   const [experiment] = useAtom(selectedExperimentAtom);
   if (id && runId && (!cursor || cursor.id !== id || cursor.runId !== runId)) {
     setCursor({ id, runId });
   }
+
+  const [{ config, counter }] = useAtom(actionsAtom);
 
   const title = `Experiment #${id}.${runId}`;
   const [titleOverride, setTitleOverride] = useAtom(titleOverrideAtom);
@@ -59,18 +131,7 @@ export default function () {
         <ChatPreview key={title} experiment={experiment} />
       </Page>
       <Actions>
-        <h3>Actions</h3>
-        <p>
-          <ForkButton experiment={experiment} parent={id} />
-          <Button
-            type="submit"
-            onClick={() => {
-              navigator.clipboard.writeText(JSON.stringify(experiment));
-            }}
-          >
-            Copy JSON
-          </Button>
-        </p>
+        <ConfigRenderer>{config}</ConfigRenderer>
       </Actions>
     </>
   );

@@ -9,9 +9,10 @@ import { SidebarInput } from "./navigation";
 import { filenames, importsRegistry, processCsvAtom, selectedChat } from "../../atoms/client";
 import { Button } from "../../style";
 import { Actions, Page } from "./_page";
-import { titleOverrideAtom } from "../../atoms/meta";
 import { DesktopOnly } from "../../components/Mobile";
 import type { ExperimentWithMeta } from "../../types";
+import { titleOverrideAtom } from ".";
+import { isNavPanelOpenAtom, layoutAtom } from "../../atoms/common";
 
 const SidebarContents = () => {
   const [chats] = useAtom(filenames);
@@ -55,6 +56,8 @@ const CsvInput = () => {
 export default function () {
   const [selected, setSelected] = useAtom(selectedChat);
   const [registry, setRegistry] = useAtom(importsRegistry);
+  const [layout] = useAtom(layoutAtom);
+  const [_, setIsNavPanelOpen] = useAtom(isNavPanelOpenAtom);
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [selected]);
@@ -106,6 +109,9 @@ export default function () {
                     ...registry,
                     Samples: samples,
                   });
+                  if (layout === "mobile") {
+                    setIsNavPanelOpen(true);
+                  }
                 }}
               >
                 see some examples

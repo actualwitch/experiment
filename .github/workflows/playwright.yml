@@ -1,4 +1,4 @@
-name: Test (Playwright)
+name: Tests ▴ E2E
 on:
   workflow_dispatch:
 #   push:

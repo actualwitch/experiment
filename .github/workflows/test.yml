@@ -1,4 +1,4 @@
-name: Test (Unit)
+name: Tests ▴ Unit
 
 on:
   push:

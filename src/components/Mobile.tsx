@@ -13,8 +13,9 @@ import {
 import { Button, bs } from "../style";
 import { type WithDarkMode, withDarkMode } from "../style/darkMode";
 import { Palette } from "../style/palette";
-import { effectiveTitleAtom, iconAtom, titleAtom } from "../atoms/meta";
-import type { PropsWithChildren } from "react";
+import { useMemo, type PropsWithChildren } from "react";
+import { iconAtom, effectiveTitleAtom, routeAtom } from "../feature/router";
+import { nopeAtom } from "../atoms/util";
 
 export const MobileHeaderContainer = styled.h2<WithDarkMode>`
   position: absolute;
@@ -58,6 +59,8 @@ export const MobileHeader = () => {
   const [isDarkMode] = useAtom(isDarkModeAtom);
   const [isNavPanelOpen, setIsNavPanelOpened] = useAtom(isNavPanelOpenAtom);
   const [isActionsPanelOpen, setIsActionPanelOpened] = useAtom(isActionPanelOpenAtom);
+  const [route] = useAtom(routeAtom);
+  const [actions] = useAtom(route?.sidebar?.atom ?? nopeAtom);
   return (
     <>
       <MobileHeaderContainer
@@ -74,7 +77,7 @@ export const MobileHeader = () => {
             setIsActionPanelOpened(!isActionsPanelOpen);
           }}
         >
-          ⍇
+          {actions?.counter || "⍇"}
         </Button>
       </MobileAction>
     </>

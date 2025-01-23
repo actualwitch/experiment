@@ -4,7 +4,7 @@ import { Suspense, useEffect, useState, type PropsWithChildren } from "react";
 import { useLocation } from "react-router";
 
 import { NavigationSidebar } from "./feature/router/navigation";
-import { Router } from "./feature/router";
+import { descriptionAtom, iconAtom, pageTitleAtom, Router } from "./feature/router";
 import { subscriptionAtom, trackVisibleAtom } from "./atoms/focus";
 import { store } from "./store";
 import { Container, Slideover, stylesAtom } from "./style";
@@ -12,7 +12,6 @@ import { Hydration } from "./utils/hydration";
 import { FavIcon } from "./components/FavIcon";
 import { getRealm } from "./utils/realm";
 import { clientFile } from "./const";
-import { pageTitleAtom, descriptionAtom, iconAtom } from "./atoms/meta";
 import { ErrorBoundary } from "./components/error";
 import {
   isActionPanelOpenAtom,
@@ -106,7 +105,7 @@ export const Shell = ({
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
         <link rel="manifest" href="manifest.json" />
-        <link rel="icon" href="experiment-512.png" />
+        <link rel="icon" href="experiment.png" />
         <Context>
           <Meta />
         </Context>

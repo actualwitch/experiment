@@ -4,7 +4,7 @@ import DOMPurify from "isomorphic-dompurify";
 import { atom, useAtom } from "jotai";
 import { marked } from "marked";
 import { bs } from "../style";
-import { createElement } from "react";
+import { createElement, memo, useMemo } from "react";
 import { TRIANGLE } from "../const";
 import { rendererModeAtom } from "../atoms/common";
 
@@ -224,13 +224,15 @@ const ViewContainer = styled.div<{ markdownMode?: true }>`
 
 const Markdown = ({ children, style }: { children: string; style?: React.CSSProperties }) => {
   // images are common attack vectors
-  const html = DOMPurify.sanitize(marked.parse(children, { async: false }), {
-    FORBID_TAGS: ["img"],
-  });
+  const html = useMemo(() => {
+    return DOMPurify.sanitize(marked.parse(children, { async: false }), {
+      FORBID_TAGS: ["img"],
+    });
+  }, [children]);
   return <ViewContainer markdownMode style={style} dangerouslySetInnerHTML={{ __html: html }} />;
 };
 
-export function View({
+export function ViewComponent({
   children,
   style,
   onClick,
@@ -258,3 +260,5 @@ export function View({
   });
   return <ViewContainer style={style}>{content}</ViewContainer>;
 }
+
+export const View = memo(ViewComponent);

@@ -6,7 +6,15 @@ import { NavLink } from "react-router";
 
 import { type Config, ConfigRenderer } from "../../components/ConfigRenderer";
 import { ChatPreview, selectionAtom } from "../../components/chat";
-import { experimentAtom, isActionPanelOpenAtom, isDarkModeAtom, modelAtom, parentAtom, selectedProviderAtom, templatesAtom } from "../../atoms/common";
+import {
+  experimentAtom,
+  isActionPanelOpenAtom,
+  isDarkModeAtom,
+  modelAtom,
+  parentAtom,
+  selectedProviderAtom,
+  templatesAtom,
+} from "../../atoms/common";
 import {
   availableProviderOptionsAtom,
   isRunningAtom,
@@ -22,6 +30,7 @@ import { useHandlers } from "../../utils/keyboard";
 import { Actions, Page } from "./_page";
 import type { Role, Message } from "../../types";
 import { modelOptions } from "../inference/types";
+import { TextArea } from "../ui/TextArea";
 
 const baseRadius = 3 / 4;
 const baseMargin = 1 / 2;
@@ -111,101 +120,107 @@ const ActionRow = styled.div`
   }
 `;
 
-const actionsAtom = atom((get) => {
+export const actionsAtom = atom((get) => {
   const providerOptions = get(availableProviderOptionsAtom);
   const modelOptions = get(modelOptionsAtom);
   const supportsTemp = get(modelSupportsTemperatureAtom);
   const isRunning = get(isRunningAtom);
   const experiment = get(experimentAtom);
   const selection = get(selectionAtom);
+  let counter = 0;
   const config: Config = {
-    Actions: [
-      providerOptions.length > 1 && {
-        label: "Provider",
-        atom: selectedProviderAtom,
-        options: providerOptions,
-      },
-      {
-        label: "Model",
-        atom: modelAtom,
-        options: modelOptions,
-      },
-      supportsTemp && {
-        label: "Temperature",
-        atom: tempAtom,
-      },
-      {
-        buttons: [
-          {
-            label: "Start Experiment",
-            action: (set: Setter) => set(runInferenceAtom),
-            disabled: isRunning || experiment.length === 0,
-          },
-          {
-            label: "Reset",
-            action: (set: Setter) => set(experimentAtom, []),
-            disabled: isRunning || experiment.length === 0,
-          },
-        ],
-      },
-      (selection !== null &&
-        selection.length === 1 && {
-          Selection: {
-            buttons: [
-              {
-                label: "Edit",
-                action: (set: Setter) => set(selectionAtom, [selection[0], "content"]),
-              },
-              {
-                label: "Delete",
-                action: (set: Setter) =>
-                  set(
-                    experimentAtom,
-                    get(experimentAtom).filter((_, i) => i !== selection[0]),
-                  ),
-              },
-              {
-                label: "Template",
-                action: async (set: Setter) => {
-                  const name = prompt("Name of the template");
-                  if (!name) return;
-                  set(templatesAtom, { ...get(templatesAtom), [name]: get(experimentAtom)[selection[0]] });
-                },
-              },
-            ],
-          },
-        }) ||
-        (selection?.length === 2 && {
-          Selection: {
-            buttons: [
-              {
-                label: "Cancel",
-                action: (set: Setter) => set(selectionAtom, [selection[0]]),
-              },
-            ],
-          },
-        }),
-    ],
+    Actions: [],
   };
-  return config;
+  if (providerOptions.length === 0 || modelOptions.length === 0) {
+    return { config, counter };
+  }
+  if (providerOptions.length > 1) {
+    config.Actions.push({
+      label: "Provider",
+      atom: selectedProviderAtom,
+      options: providerOptions,
+    });
+    counter++;
+  }
+  if (modelOptions.length > 1) {
+    config.Actions.push({
+      label: "Model",
+      atom: modelAtom,
+      options: modelOptions,
+    });
+    counter++;
+  }
+  if (supportsTemp) {
+    config.Actions.push({
+      label: "Temperature",
+      atom: tempAtom,
+    });
+    counter++;
+  }
+  {
+    config.Actions.push({
+      buttons: [
+        {
+          label: "Start Experiment",
+          action: (set: Setter) => set(runInferenceAtom),
+          disabled: isRunning || experiment.length === 0,
+        },
+        {
+          label: "Reset",
+          action: (set: Setter) => set(experimentAtom, []),
+          disabled: isRunning || experiment.length === 0,
+        },
+      ],
+    });
+    counter += 2;
+  }
+  if (selection !== null) {
+    if (selection.length === 1) {
+      config.Actions.push({
+        Selection: {
+          buttons: [
+            {
+              label: "Edit",
+              action: (set: Setter) => set(selectionAtom, [selection[0], "content"]),
+            },
+            {
+              label: "Delete",
+              action: (set: Setter) =>
+                set(
+                  experimentAtom,
+                  get(experimentAtom).filter((_, i) => i !== selection[0]),
+                ),
+            },
+            {
+              label: "Template",
+              action: async (set: Setter) => {
+                const name = prompt("Name of the template");
+                if (!name) return;
+                set(templatesAtom, { ...get(templatesAtom), [name]: get(experimentAtom)[selection[0]] });
+              },
+            },
+          ],
+        },
+      });
+      counter += 3;
+    } else if (selection.length === 2) {
+      config.Actions.push({
+        Selection: {
+          buttons: [
+            {
+              label: "Cancel",
+              action: (set: Setter) => set(selectionAtom, [selection[0]]),
+            },
+          ],
+        },
+      });
+      counter++;
+    }
+  }
+  return { config, counter };
 });
 
-const TextArea = (props: React.TextareaHTMLAttributes<HTMLTextAreaElement>) => {
-  const ref = useRef<HTMLTextAreaElement | null>(null);
-  useEffect(() => {
-    if (!ref.current) return;
-    ref.current.style.height = "inherit";
-    if (props.value) {
-      const docHeight = document.documentElement.clientHeight;
-      const contentScrollHeight = ref.current.scrollHeight;
-      const plannedHeight = Math.min(Math.max(contentScrollHeight, 0), Math.floor(docHeight / 2));
-      ref.current.style.height = `${plannedHeight}px`;
-    }
-  }, [props.value]);
-  return <textarea {...props} ref={ref} />;
-};
-
-export default function NewExperiment() {
+export default function () {
   const [isDarkMode] = useAtom(isDarkModeAtom);
   const [experiment, setExperiment] = useAtom(experimentAtom);
   const [selection, setSelection] = useAtom(selectionAtom);
@@ -299,7 +314,7 @@ export default function NewExperiment() {
     }
   }, [experiment, selection]);
 
-  const [actions] = useAtom(actionsAtom);
+  const [{ config: actions, counter }] = useAtom(actionsAtom);
   const startExperiment = useSetAtom(runInferenceAtom);
 
   const setIsActionPanelOpen = useSetAtom(isActionPanelOpenAtom);
@@ -331,26 +346,23 @@ export default function NewExperiment() {
     }
   };
 
-  if (providerOptions.length === 0) {
-    return (
+  const page =
+    providerOptions.length === 0 ?
       <Page>
-        <h2>Welcome to Experiment</h2>
+        <h2>Welcome to the Experiment</h2>
         <p>
           To start inference, add a token on <NavLink to="/parameters">Parameters</NavLink> page. You can also explore a
           .csv file on the <NavLink to="/import">Import</NavLink> page.
         </p>
       </Page>
-    );
-  }
-  return (
-    <>
-      <Page>
+    : <Page>
         <ChatPreview experiment={experiment} autoScroll />
         <Block isDarkMode={isDarkMode}>
           <ActionRow>
             <select value={role} onChange={(e) => setRole(e.target.value as Role)} style={{ flex: 1 }}>
               <option>system</option>
               <option>user</option>
+              <option>assistant</option>
               <option>tool</option>
             </select>
             {isEditing ?
@@ -392,7 +404,11 @@ export default function NewExperiment() {
             autoFocus
           />
         </Block>
-      </Page>
+      </Page>;
+
+  return (
+    <>
+      {page}
       <Actions>
         <ConfigRenderer>{actions}</ConfigRenderer>
       </Actions>

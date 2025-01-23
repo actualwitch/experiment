@@ -7,6 +7,8 @@ import { assignToWindow } from "../src/utils/hydration";
 import { store } from "../src/store";
 import { clientScriptAtom } from "../src/atoms/server";
 
+$`rm -rf ./${staticDir}`;
+
 const result = await store.get(clientScriptAtom);
 if (result.isNothing) {
   throw new Error("could not build frontend");
@@ -33,6 +35,7 @@ await Bun.write(
   JSON.stringify(getManifest(name, description, iconResolutions, baseUrl), null, 2),
 );
 
+await $`cp ./.github/assets/experiment.png ./${staticDir}`;
 for (const res of iconResolutions) {
   await $`cp ./.github/assets/experiment-${res}.png ./${staticDir}`;
 }

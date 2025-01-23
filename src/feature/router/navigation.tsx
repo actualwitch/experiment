@@ -8,7 +8,6 @@ import { bs } from "../../style";
 import { nonInteractive, widthAvailable } from "../../style/mixins";
 import { portalIO } from "../../utils/portal";
 import { revisionAtom, templatesAtom } from "../../atoms/common";
-import { VERSION } from "../../const";
 import { increaseSpecificity } from "../../style/utils";
 
 export const [SidebarInput, SidebarOutput] = portalIO();

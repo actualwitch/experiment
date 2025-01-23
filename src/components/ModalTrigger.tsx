@@ -2,7 +2,7 @@ import { useOverlayTrigger } from "react-aria";
 import { useOverlayTriggerState } from "react-stately";
 import { Button } from "../style";
 import { Modal } from "./Modal";
-import { cloneElement } from "react";
+import { cloneElement, type JSX } from "react";
 
 export function ModalTrigger({
   label,
