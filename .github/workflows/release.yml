@@ -17,15 +17,22 @@ jobs:
       - run: bun install
       - run: bun ./scripts/fix.bun.ts
       - run: bun run build:bin
-      - name: Upload
-        if: github.ref != 'refs/tags/v*.*.*'
-        uses: actions/upload-artifact@v4
-        with:
-          path: |
-            build/*
+      # - name: Upload
+      #   if: github.ref != 'refs/tags/v*.*.*'
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     path: |
+      #       build/*
       - name: Release
-        if: github.ref == 'refs/tags/v*.*.*'
+        # if: github.ref == 'refs/tags/v*.*.*'
         uses: softprops/action-gh-release@v2
         with:
           files: |
             build/*
+          body: |
+            > [!IMPORTANT]
+            > If you are using macos, you will need to run following commands to be able to run these binaries:
+            > ```shellscript
+            > chmod +x ./experiment-*
+            > xattr -d com.apple.quarantine ./experiment-*
+            > ```
