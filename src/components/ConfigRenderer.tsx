@@ -1,10 +1,11 @@
-import { useAtom, type PrimitiveAtom, type Setter } from "jotai";
+import { useAtom, useSetAtom, type PrimitiveAtom, type Setter } from "jotai";
 import { createElement, Fragment, useId, type PropsWithChildren } from "react";
 import { Button } from "../style";
 import { Slider } from "./Slider";
 import { Select } from "./Select";
 import { Item } from "react-stately";
 import { store } from "../store";
+import { processCsvAtom } from "../atoms/client";
 
 export type LeafWithOptions<T extends string = string> = {
   label: string;
@@ -16,6 +17,11 @@ export type LeafWithSlider = {
   label: string;
   atom: PrimitiveAtom<number>;
 };
+
+export type LeafWithCSVImport = {
+  label: string;
+  type: "csv";
+}
 
 export type LeafWithAction = {
   label: string;
@@ -72,6 +78,23 @@ const RenderWithAtom = ({ children }: { children: LeafWithSlider | LeafWithOptio
   }
 };
 
+
+const CsvInput = () => {
+  const processFile = useSetAtom(processCsvAtom);
+
+  return (
+    <p>
+      <input
+        type="file"
+        accept=".csv"
+        onChange={(e) => {
+          processFile(e.target.files?.[0]);
+        }}
+      />
+    </p>
+  );
+};
+
 export const ConfigRenderer = ({ children, level = 3 }: { children: Config | boolean; level?: number }) => {
   const id = useId();
   if (!children) return null;
@@ -106,6 +129,9 @@ export const ConfigRenderer = ({ children, level = 3 }: { children: Config | boo
       );
     }
     if (children.label) {
+      if (children.type === "csv") {
+        return <CsvInput />;
+      }
       if (children.action) {
         return (
           <Button

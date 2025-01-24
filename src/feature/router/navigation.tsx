@@ -2,13 +2,13 @@ import styled from "@emotion/styled";
 import { atom, useAtom } from "jotai";
 import { NavLink, useLocation } from "react-router";
 
-import { TRIANGLE, version } from "../../const";
-import { experimentsSidebarAtom, ROUTES } from ".";
+import { ROUTES, experimentsSidebarAtom } from ".";
+import { revisionAtom, templatesAtom } from "../../atoms/common";
+import { TRIANGLE } from "../../const";
 import { bs } from "../../style";
 import { nonInteractive, widthAvailable } from "../../style/mixins";
-import { portalIO } from "../../utils/portal";
-import { revisionAtom, templatesAtom } from "../../atoms/common";
 import { increaseSpecificity } from "../../style/utils";
+import { portalIO } from "../../utils/portal";
 
 export const [SidebarInput, SidebarOutput] = portalIO();
 

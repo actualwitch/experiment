@@ -1,10 +1,10 @@
 import { Global } from "@emotion/react";
-import { Provider, useAtom } from "jotai";
+import { Provider, useAtom, useSetAtom } from "jotai";
 import { Suspense, useEffect, useState, type PropsWithChildren } from "react";
-import { useLocation } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 
 import { NavigationSidebar } from "./feature/router/navigation";
-import { descriptionAtom, iconAtom, pageTitleAtom, Router } from "./feature/router";
+import { descriptionAtom, iconAtom, navigateAtom, pageTitleAtom, Router } from "./feature/router";
 import { subscriptionAtom, trackVisibleAtom } from "./atoms/focus";
 import { store } from "./store";
 import { Container, Slideover, stylesAtom } from "./style";
@@ -44,6 +44,11 @@ const App = () => {
   const [layout] = useAtom(layoutAtom);
   const [isDarkMode] = useAtom(isDarkModeAtom);
   const { pathname } = useLocation();
+  const navigate = useNavigate();
+  const setNavigate = useSetAtom(navigateAtom);
+  useEffect(() => {
+    setNavigate(() => navigate);
+  }, [navigate]);
   const [isNavPanelOpen, setIsNavPanelOpen] = useAtom(isNavPanelOpenAtom);
   const [isActionPanelOpen, setIsActionPanelOpen] = useAtom(isActionPanelOpenAtom);
   useEffect(() => {

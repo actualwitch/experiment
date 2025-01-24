@@ -1,15 +1,47 @@
-import { useAtom } from "jotai";
-import { useState } from "react";
+import { atom, useAtom, type Setter } from "jotai";
 
 import { View } from "../../components/view";
 import { SidebarInput } from "./navigation";
 import { templatesAtom } from "../../atoms/common";
-import { Button } from "../../style";
 import { Actions, Page } from "./_page";
+import { ConfigRenderer, type Config } from "../../components/ConfigRenderer";
+
+const selectedTemplateAtom = atom<string | null>(null);
+
+export const actionsAtom = atom((get) => {
+  const templates = get(templatesAtom);
+  const selectedTemplate = get(selectedTemplateAtom);
+  let counter = 0;
+  const config: Config = {
+    Actions: [],
+  };
+
+  if (templates && selectedTemplate) {
+    config.Actions.push({
+      buttons: [
+        {
+          label: "Delete",
+          action: (set: Setter) => {
+            set(
+              templatesAtom,
+              Object.fromEntries(Object.entries(templates).filter(([name]) => name !== selectedTemplate)),
+            );
+            set(selectedTemplateAtom, null);
+          },
+        },
+      ],
+    });
+    counter++;
+  }
+
+  return { config, counter };
+});
 
 export default function Templates() {
   const [templates, setTemplates] = useAtom(templatesAtom);
-  const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
+  const [selectedTemplate, setSelectedTemplate] = useAtom(selectedTemplateAtom);
+
+  const [{ config, counter }] = useAtom(actionsAtom);
   return (
     <>
       <Page>
@@ -22,18 +54,7 @@ export default function Templates() {
         </View>
       </Page>
       <Actions>
-        <h3>Actions</h3>
-        {templates && selectedTemplate && (
-          <Button
-            type="button"
-            onClick={() => {
-              setTemplates(Object.fromEntries(Object.entries(templates).filter(([name]) => name !== selectedTemplate)));
-              setSelectedTemplate(null);
-            }}
-          >
-            Delete
-          </Button>
-        )}
+        <ConfigRenderer>{config}</ConfigRenderer>
       </Actions>
       <SidebarInput>
         <ul>

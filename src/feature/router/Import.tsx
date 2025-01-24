@@ -1,18 +1,17 @@
-import { useAtom, useSetAtom } from "jotai";
+import { type Setter, atom, useAtom } from "jotai";
 import { useEffect, useMemo } from "react";
 
+import { navigateAtom, titleOverrideAtom } from ".";
 import templates from "../../../fixtures/templates.json";
-import { ForkButton } from "../../components";
-import { ChatPreview } from "../../components/chat";
-import { View } from "../../components/view";
-import { SidebarInput } from "./navigation";
-import { filenames, importsRegistry, processCsvAtom, selectedChat } from "../../atoms/client";
-import { Button } from "../../style";
-import { Actions, Page } from "./_page";
+import { filenames, importsRegistry, selectedChat } from "../../atoms/client";
+import { experimentAtom, isNavPanelOpenAtom, layoutAtom, templatesAtom } from "../../atoms/common";
+import { type Config, ConfigRenderer } from "../../components/ConfigRenderer";
 import { DesktopOnly } from "../../components/Mobile";
+import { ChatPreview, selectionAtom } from "../../components/chat";
+import { View } from "../../components/view";
 import type { ExperimentWithMeta } from "../../types";
-import { titleOverrideAtom } from ".";
-import { isNavPanelOpenAtom, layoutAtom } from "../../atoms/common";
+import { Actions, Page } from "./_page";
+import { SidebarInput } from "./navigation";
 
 const SidebarContents = () => {
   const [chats] = useAtom(filenames);
@@ -37,21 +36,69 @@ const SidebarContents = () => {
   );
 };
 
-const CsvInput = () => {
-  const processFile = useSetAtom(processCsvAtom);
+const selectedExperimentAtom = atom((get) => {
+  const [filename, idx] = get(selectedChat) ?? [];
+  return filename && idx ? get(importsRegistry)[filename][idx] : undefined;
+});
 
-  return (
-    <p>
-      <input
-        type="file"
-        accept=".csv"
-        onChange={(e) => {
-          processFile(e.target.files?.[0]);
-        }}
-      />
-    </p>
-  );
-};
+export const actionsAtom = atom((get) => {
+  const selection = get(selectionAtom);
+  const experiment = get(selectedExperimentAtom);
+  const navigate = get(navigateAtom);
+  let counter = 0;
+  const config: Config = {
+    Actions: [],
+  };
+  config.Actions.push({
+    type: "csv",
+    label: "Import CSV",
+  });
+  counter += 1;
+  if (experiment) {
+    config.Actions.push({
+      buttons: [
+        {
+          label: "Fork",
+          action: (set: Setter) => {
+            if (!experiment) return;
+            const messages = Array.isArray(experiment) ? experiment : experiment.messages;
+            set(experimentAtom, messages);
+            navigate?.("/");
+          },
+        },
+        {
+          label: "Copy",
+          action: (set: Setter) => void navigator.clipboard.writeText(JSON.stringify(experiment)),
+        },
+      ],
+    });
+    counter += 2;
+  }
+  if (selection !== null) {
+    config.Actions.push({
+      Selection: {
+        buttons: [
+          {
+            label: "Unselect",
+            action: (set: Setter) => set(selectionAtom, null),
+          },
+          {
+            label: "Template",
+            action: async (set: Setter) => {
+              const name = prompt("Name of the template");
+              if (!name) return;
+              const templates = get(templatesAtom);
+              const experiment = get(selectedExperimentAtom);
+              set(templatesAtom, { ...templates, [name]: experiment[selection[0]] });
+            },
+          },
+        ],
+      },
+    });
+    counter++;
+  }
+  return { config, counter };
+});
 
 export default function () {
   const [selected, setSelected] = useAtom(selectedChat);
@@ -69,7 +116,7 @@ export default function () {
   );
 
   const [filename, idx] = selected ?? [];
-  const experiment: ExperimentWithMeta | undefined = filename && idx ? registry[filename][idx] : undefined;
+  const [experiment, setExperiment] = useAtom(selectedExperimentAtom);
 
   const title = "Import CSV";
   const [titleOverride, setTitleOverride] = useAtom(titleOverrideAtom);
@@ -85,6 +132,8 @@ export default function () {
     const { messages, ...meta } = experiment;
     return meta;
   }, [experiment]);
+
+  const [{ config, counter }] = useAtom(actionsAtom);
 
   return (
     <>
@@ -122,21 +171,7 @@ export default function () {
         }
       </Page>
       <Actions>
-        <h3>Actions</h3>
-        <CsvInput />
-        {selected && (
-          <div>
-            <ForkButton experiment={experiment} />
-            <Button
-              type="submit"
-              onClick={() => {
-                navigator.clipboard.writeText(JSON.stringify(experiment));
-              }}
-            >
-              Copy JSON
-            </Button>
-          </div>
-        )}
+        <ConfigRenderer>{config}</ConfigRenderer>
       </Actions>
       <SidebarInput>
         <SidebarContents />

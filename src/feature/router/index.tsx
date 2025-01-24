@@ -1,14 +1,15 @@
-import { Route, Routes, useLocation, useParams } from "react-router";
+import { type Atom, atom, useAtom } from "jotai";
+import type { JSX, PropsWithChildren } from "react";
+import { Route, Routes, useLocation } from "react-router";
+
+import { experimentIdsAtom } from "../../atoms/common";
+import type { Config } from "../../components/ConfigRenderer";
+import { TRIANGLE, description, name } from "../../const";
 import Experiment, { actionsAtom as experimentActionsAtom } from "./Experiment";
-import Import from "./Import";
+import Import, { actionsAtom as importActionsAtom } from "./Import";
 import NewExperiment, { actionsAtom as newExperimentActionsAtom } from "./NewExperiment";
 import Parameters from "./Parameters";
-import Templates from "./Templates";
-import { atom, useAtom, useSetAtom, type Atom } from "jotai";
-import { useEffect, type JSX, type PropsWithChildren } from "react";
-import { experimentIdsAtom } from "../../atoms/common";
-import { description, TRIANGLE, name } from "../../const";
-import type { Config } from "../../components/ConfigRenderer";
+import Templates, { actionsAtom as templateActionsAtom } from "./Templates";
 
 export type AppRoute = {
   icon: string;
@@ -46,16 +47,29 @@ export const ROUTES: AppRoute[] = [
     component: Experiment,
     sidebar: { atom: experimentActionsAtom, title: "Actions" },
   },
-  { icon: "⛴️", title: "Import", showInSidebar: true, path: "/import", component: Import },
-  { icon: "💿", title: "Templates", showInSidebar: true, path: "/templates", component: Templates },
+  {
+    icon: "⛴️",
+    title: "Import",
+    showInSidebar: true,
+    path: "/import",
+    component: Import,
+    sidebar: { atom: importActionsAtom, title: "Actions" },
+  },
+  {
+    icon: "💿",
+    title: "Templates",
+    showInSidebar: true,
+    path: "/templates",
+    component: Templates,
+    sidebar: { atom: templateActionsAtom, title: "Actions" },
+  },
   { icon: "🛠️", title: "Parameters", showInSidebar: true, path: "/parameters", component: Parameters },
 ];
 
-export const routeAtom = atom<(AppRoute & { params: Record<string, string | undefined> }) | null>(null);
+export const routeAtom = atom<AppRoute | null>(null);
 
 function RouteSync({ thisRoute, children }: PropsWithChildren<{ thisRoute: AppRoute }>) {
   const location = useLocation();
-  // const params = useParams();
   const [route, setRoute] = useAtom(routeAtom);
   if (!route || route.path !== location.pathname) {
     setRoute(thisRoute);
@@ -98,3 +112,5 @@ export const iconAtom = atom((get) => {
   const route = get(routeAtom);
   return route?.icon ?? "🔬";
 });
+
+export const navigateAtom = atom<null | ((path: string) => void)>(null);

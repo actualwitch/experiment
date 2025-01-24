@@ -1,17 +1,21 @@
 import { atom, useAtom, useSetAtom, type Setter } from "jotai";
 import { useParams } from "react-router";
 
-import { ForkButton } from "../../components";
 import { ChatPreview, selectionAtom } from "../../components/chat";
-import { experimentAtom, type ExperimentCursor, getExperimentAtom, parentAtom, templatesAtom } from "../../atoms/common";
-import { Button } from "../../style";
+import {
+  experimentAtom,
+  type ExperimentCursor,
+  getExperimentAtom,
+  parentAtom,
+  templatesAtom,
+} from "../../atoms/common";
 import { entangledAtom } from "../../utils/entanglement";
 import { Actions, Page } from "./_page";
 import type { Experiment } from "../../types";
 import { DesktopOnly } from "../../components/Mobile";
 import { useEffect, useMemo } from "react";
 import { View } from "../../components/view";
-import { routeAtom, titleOverrideAtom } from ".";
+import { navigateAtom, titleOverrideAtom } from ".";
 import { ConfigRenderer, type Config } from "../../components/ConfigRenderer";
 
 const cursorAtom = entangledAtom("cursor", atom<ExperimentCursor | null>(null));
@@ -35,8 +39,8 @@ export const paramsAtom = atom<Record<string, string | undefined>>({});
 export const actionsAtom = atom((get) => {
   const selection = get(selectionAtom);
   const experiment = get(selectedExperimentAtom);
-  const route = get(routeAtom);
   const params = get(paramsAtom);
+  const navigate = get(navigateAtom);
   let counter = 0;
   const config: Config = {
     Actions: [],
@@ -51,10 +55,7 @@ export const actionsAtom = atom((get) => {
             const messages = Array.isArray(experiment) ? experiment : experiment.messages;
             set(experimentAtom, messages);
             if (parent) set(parentAtom, params?.id);
-            setTimeout(() => {
-              const base = document.location.pathname.startsWith("/experiment/experiment") ? "/experiment" : "";
-              document.location.href = `${base}/`;
-            }, 100);
+            navigate?.("/");
           },
         },
         {
@@ -80,7 +81,6 @@ export const actionsAtom = atom((get) => {
               if (!name) return;
               const templates = get(templatesAtom);
               const experiment = get(selectedExperimentAtom);
-              console.log({ templates, name, experiment, selection });
               set(templatesAtom, { ...templates, [name]: experiment[selection[0]] });
             },
           },

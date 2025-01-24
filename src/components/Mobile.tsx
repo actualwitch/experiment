@@ -13,7 +13,7 @@ import {
 import { Button, bs } from "../style";
 import { type WithDarkMode, withDarkMode } from "../style/darkMode";
 import { Palette } from "../style/palette";
-import { useMemo, type PropsWithChildren } from "react";
+import { useEffect, useMemo, type PropsWithChildren } from "react";
 import { iconAtom, effectiveTitleAtom, routeAtom } from "../feature/router";
 import { nopeAtom } from "../atoms/util";
 
@@ -61,6 +61,11 @@ export const MobileHeader = () => {
   const [isActionsPanelOpen, setIsActionPanelOpened] = useAtom(isActionPanelOpenAtom);
   const [route] = useAtom(routeAtom);
   const [actions] = useAtom(route?.sidebar?.atom ?? nopeAtom);
+  useEffect(() => {
+    if (isActionsPanelOpen && actions?.counter === 0) {
+      setIsActionPanelOpened(false);
+    }
+  }, [isActionsPanelOpen, actions]);
   return (
     <>
       <MobileHeaderContainer
@@ -72,13 +77,15 @@ export const MobileHeader = () => {
         {icon} <span>{title}</span>
       </MobileHeaderContainer>
       <MobileAction>
-        <Button
-          onClick={() => {
-            setIsActionPanelOpened(!isActionsPanelOpen);
-          }}
-        >
-          {actions?.counter || "⍇"}
-        </Button>
+        {actions?.counter ?
+          <Button
+            onClick={() => {
+              setIsActionPanelOpened(!isActionsPanelOpen);
+            }}
+          >
+            {actions.counter}
+          </Button>
+        : null}
       </MobileAction>
     </>
   );
