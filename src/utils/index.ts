@@ -4,15 +4,20 @@ import type { SyncStringStorage } from "jotai/vanilla/utils/atomWithStorage";
 import { Result, Task } from "true-myth";
 
 import { getRealm } from "./realm";
+import { debugAtom } from "../atoms/common";
+import { store } from "../store";
 
 const readFile = (fileName: string) => {
+  const isDebug = Bun.env.DEBUG === "true";
   try {
     return readFileSync(fileName, {
       encoding: "utf-8",
       flag: "r+",
     });
   } catch (e) {
-    console.error(e);
+    if (isDebug) {
+      console.error(e);
+    }
     return "";
   }
 };
@@ -42,11 +47,18 @@ export const getStoragePath = () => {
 };
 
 export function createFileStorage(...keys: string[]): SyncStringStorage {
-  const store = new Map<string, string>();
+  const isDebug = Bun.env.DEBUG === "true";
+  const cache = new Map<string, string>();
   const filenameForKey = (key: string) => `${getStoragePath()}/${key}.json`;
   for (const key of keys) {
     const fileName = filenameForKey(key);
-    store.set(key, readFile(fileName));
+    try {
+      cache.set(key, readFile(fileName));
+    } catch (e) {
+      if (isDebug) {
+        console.error(e);
+      }
+    }
   }
   const timeouts = new Map<string, Timer>();
   const scheduleWrite = (key: string) => {
@@ -58,7 +70,7 @@ export function createFileStorage(...keys: string[]): SyncStringStorage {
     timeouts.set(
       key,
       setTimeout(() => {
-        const value = store.get(key);
+        const value = cache.get(key);
         if (value === undefined) {
           return;
         }
@@ -68,7 +80,9 @@ export function createFileStorage(...keys: string[]): SyncStringStorage {
             flag: "w",
           });
         } catch (e) {
-          console.error(e);
+          if (isDebug) {
+            console.error(e);
+          }
         }
       }, 400),
     );
@@ -76,14 +90,14 @@ export function createFileStorage(...keys: string[]): SyncStringStorage {
 
   const FileStorage: SyncStringStorage = {
     getItem(key) {
-      return store.get(key) ?? null;
+      return cache.get(key) ?? null;
     },
     setItem(key, value) {
-      store.set(key, value);
+      cache.set(key, value);
       scheduleWrite(key);
     },
     removeItem(key) {
-      store.delete(key);
+      cache.delete(key);
       scheduleWrite(key);
     },
   };

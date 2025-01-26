@@ -25,10 +25,7 @@ const selectedExperimentAtom = entangledAtom(
     const cursor = get(cursorAtom);
     if (cursor) {
       const experiment = get(getExperimentAtom(cursor));
-      if (Array.isArray(experiment)) {
-        return experiment ?? [];
-      }
-      return experiment?.messages ?? [];
+      return experiment ?? [];
     }
     return [];
   }),

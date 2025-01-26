@@ -165,12 +165,14 @@ const inputDarkMode = css`
   }
 `;
 
+const sidebarWidth = "320px";
+
 export const Container = styled.div<WithLayout>(
   content,
   css`
     margin-bottom: 0;
     display: grid;
-    grid-template-columns: 278px 1fr 320px;
+    grid-template-columns: ${sidebarWidth} 1fr ${sidebarWidth};
     height: 100svh;
   `,
   (p) =>
