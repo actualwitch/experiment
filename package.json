@@ -1,6 +1,6 @@
 {
   "name": "Experiment",
-  "description": "🔬 Experiment is a LLM chat UI with advanced tool use debugging facilities.",
+  "description": "🔬 Experiment is a feature-rich chat interface for Large Language Models (LLMs) like Anthropic, OpenAI, and Mistral.",
   "keywords": ["inference", "experiment-tracking", "llm"],
   "repository": "github:actualwitch/experiment",
   "version": "0.4.0",

@@ -29,6 +29,19 @@
 
 **Experiment** is a feature-rich chat interface for Large Language Models (LLMs) like Anthropic, OpenAI, and Mistral. It offers advanced debugging tools for prompt engineering and tool integration, allowing developers to visualize and manage tool interactions seamlessly.
 
+## Features
+
+- Supports completion requests via Anthropic, OpenAI, and Mistral APIs.
+- Advanced tool use debugging with JSON schema visualization.
+- Import and explore previous completions from CSV files.
+- Universal app: runs in both browser and as a self-contained binary.
+- Full featured mobile version, installable as Progressive Web App (PWA).
+- Free as in MIT: all code is open source and permissively licensed.
+- Perfect for OLED: dark mode uses pure black for energy efficiency.
+- No telemetry or tracking.
+- Your data is yours: completions are saved to LocalStorage/File system.
+- Securely store your tokens in 1Password (Binary version only).
+
 <a href="docs/tool-debugging.md">Read more about tool debugging →</a>
 
 ## Architecture
