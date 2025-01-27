@@ -7,7 +7,7 @@
 
 <p align="center">
   <a href="https://actualwitch.github.io/experiment/">
-    Browser
+    Web
   </a>
   ▴
   <a href="https://github.com/actualwitch/experiment/releases/latest">
@@ -27,7 +27,7 @@
 
 [![Tests](https://github.com/actualwitch/experiment/actions/workflows/test.yml/badge.svg)](https://github.com/actualwitch/experiment/actions/workflows/test.yml)
 
-**Experiment** is a LLM chat UI with advanced tool use debugging facilities. You can use it to make completion requests via Anthropic, OpenAI and Mistral APIs or explore/fork existing completions recorded for example via OpenAI proxy (not included in this repo). For now only .csv files are supported for importing completions.
+**Experiment** is a feature-rich chat interface for Large Language Models (LLMs) like Anthropic, OpenAI, and Mistral. It offers advanced debugging tools for prompt engineering and tool integration, allowing developers to visualize and manage tool interactions seamlessly.
 
 <a href="docs/tool-debugging.md">Read more about tool debugging →</a>
 

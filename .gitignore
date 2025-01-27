@@ -1,16 +1,14 @@
 .DS_Store
-node_modules
-build
-static
 *.bun-build
-magick
+/node_modules
+/build
+/static
+/magick
+/target
+/.venv
 
 # playwright
 playwright-report
 playwright-screenshots
 playwright-traces
 test-results
-
-# Added by cargo
-
-/target
