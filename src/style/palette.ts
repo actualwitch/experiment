@@ -21,4 +21,5 @@ export const Palette = {
   yellow: enbyFlag[3],
   green: "lightgreen",
   pink: "color(display-p3 0.9 0.66 0.81)",
+  red: "red",
 } as const;

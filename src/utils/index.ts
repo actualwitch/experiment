@@ -4,8 +4,6 @@ import type { SyncStringStorage } from "jotai/vanilla/utils/atomWithStorage";
 import { Result, Task } from "true-myth";
 
 import { getRealm } from "./realm";
-import { debugAtom } from "../atoms/common";
-import { store } from "../store";
 
 const readFile = (fileName: string) => {
   const isDebug = Bun.env.DEBUG === "true";

@@ -59,12 +59,14 @@
       { "role": "system", "content": "This is a system message." },
       { "role": "developer", "content": "This is a developer message." },
       { "role": "user", "content": "This is a user message." },
+      { "role": "tool", "content": "This is a tool message." },
       {
         "role": "assistant",
         "fromServer": true,
         "content": "\n## Header\n\nThis is a small showcase of common elements in markdown for testing purposes. Here's a `span`, and *italics*  and **bold** text. Here's a [link](https://www.kaggle.com). Here's a list:\n\n- item 1\n- item 2\n- item 3\n\nHere's a numbered list:\n\n1. item 1\n2. item 2\n3. item 3\n\nHere's a table:\n\n| Header 1 | Header 2 |\n|----------|----------|\n| cell 1   | cell 2   |\n| cell 3   | cell 4   |\n\nHere's a code block:\n\n```typescript\nconst interactive = css`\n  cursor: pointer;\n  user-select: none;\n  :hover {\n    opacity: 1;\n  }\n`;\nconst Emphasis = styled.em<{ isCollapsed?: boolean }>(\n  css`\n    font-weight: italic;\n    opacity: 0.7;\n  `,\n  ({ isCollapsed }) => {\n    if (!isCollapsed) return;\n    return css`\n      :before {\n        content: \"( \";\n        opacity: 0.3;\n      }\n      :after {\n        content: \" )\";\n        opacity: 0.3;\n      }\n    `;\n  },\n  interactive,\n);\n```\n\nHere's an image:\n\n![image](https://www.kaggle.com/static/images/site-logo.png)\n\nHere's a blockquote:\n\n> This is a blockquote.\n\nHere's a horizontal rule:\n\n---\n"
       },
-      { "role": "info", "fromServer": true, "content": "This is a info message." }
+      { "role": "info", "fromServer": true, "content": "This is an info message." },
+      { "role": "error", "fromServer": true, "content": "This is an error message." }
     ]
   },
   "Meta prompt": {

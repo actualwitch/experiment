@@ -56,7 +56,7 @@ const getAlign = (fromServer: boolean, experimentLayout: Store["experimentLayout
 };
 
 export const MessageComponent = styled.article<{
-  role: "assistant" | "developer" | "info" | "system" | "tool" | "user";
+  role: "assistant" | "developer" | "info" | "error" | "system" | "tool" | "user";
   contentType?: string;
   ioType?: "input" | "output";
   isSelected?: boolean;
@@ -152,6 +152,11 @@ export const MessageComponent = styled.article<{
         border-color: ${Palette.black}50;
       `);
     }
+  }
+  if (role === "error") {
+    styles.push(css`
+      border-color: ${Palette.red};
+    `);
   }
   if (isSelected) {
     if (isDarkMode) {

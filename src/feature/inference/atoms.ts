@@ -12,7 +12,15 @@ import { experimentToOpenai } from "./adapters/openai";
 import { spawn } from "../../utils";
 import { entangledAtom } from "../../utils/entanglement";
 import { hasBackend } from "../../utils/realm";
-import {createExperiment, experimentAtom, modelAtom, selectedProviderAtom, storeAtom, tokensAtom } from "../../atoms/common";
+import {
+  createExperiment,
+  experimentAtom,
+  modelAtom,
+  parentAtom,
+  selectedProviderAtom,
+  storeAtom,
+  tokensAtom,
+} from "../../atoms/common";
 import type { Message } from "../../types";
 import { modelLabels, modelOptions, providerLabels, type ProviderType } from "./types";
 
@@ -74,6 +82,11 @@ export const runInferenceAtom = entangledAtom(
     const provider = get(selectedProviderAtom);
     if (!provider) return;
     set(isRunningAtom, true);
+    const experiment = get(experimentAtom);
+    const noErrors = experiment.filter((msg) => msg.role !== "error");
+    if (experiment.length !== noErrors.length) {
+      set(experimentAtom, noErrors);
+    }
 
     try {
       switch (provider) {
@@ -92,11 +105,15 @@ export const runInferenceAtom = entangledAtom(
       }
       const experiment: Message[] = get(experimentAtom);
       if (experiment.length > 0) {
-        const model = get(modelAtom);
-        set(createExperiment, experiment);
+        const { id } = set(createExperiment, experiment);
+        const parent = get(parentAtom);
+        if (!parent) {
+          set(parentAtom, id);
+        }
       }
-    } catch (e) {
-      console.error(e);
+    } catch (content) {
+      const experiment = get(experimentAtom);
+      set(experimentAtom, [...experiment, { role: "error", fromServer: true, content }]);
     } finally {
       set(isRunningAtom, false);
     }

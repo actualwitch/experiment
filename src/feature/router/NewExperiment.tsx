@@ -167,7 +167,11 @@ export const actionsAtom = atom((get) => {
         },
         {
           label: "Reset",
-          action: (set: Setter) => set(experimentAtom, []),
+          action: (set: Setter) => {
+            set(experimentAtom, []);
+            set(parentAtom, undefined);
+            set(selectionAtom, null);
+          },
           disabled: isRunning || experiment.length === 0,
         },
       ],

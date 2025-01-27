@@ -31,8 +31,11 @@ jobs:
             build/*
           body: |
             > [!IMPORTANT]
-            > If you are using macos, you will need to run following commands to be able to run these binaries:
+            > If you are using macOS or Linux, you need to give the downloaded file permission to execute:
             > ```shellscript
             > chmod +x ./experiment-*
+            > ```
+            > For macOS users specifically, removing quarantine is also necessary:
+            > ```shellscript
             > xattr -d com.apple.quarantine ./experiment-*
             > ```
