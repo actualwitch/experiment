@@ -31,6 +31,7 @@ import { Actions, Page } from "./_page";
 import type { Role, Message } from "../../types";
 import { modelOptions } from "../inference/types";
 import { TextArea } from "../ui/TextArea";
+import { name } from "../../const";
 
 const baseRadius = 3 / 4;
 const baseMargin = 1 / 2;
@@ -118,6 +119,10 @@ const ActionRow = styled.div`
   button {
     border-top-right-radius: ${bs(baseRadius)};
   }
+`;
+
+export const Underline = styled.span`
+  text-decoration: underline;
 `;
 
 export const actionsAtom = atom((get) => {
@@ -353,7 +358,9 @@ export default function () {
   const page =
     providerOptions.length === 0 ?
       <Page>
-        <h2>Welcome to the Experiment</h2>
+        <h2>
+          Welcome to <Underline>{name}</Underline>
+        </h2>
         <p>
           To start inference, add a token on <NavLink to="/parameters">Parameters</NavLink> page. You can also explore a
           .csv file on the <NavLink to="/import">Import</NavLink> page.
@@ -413,9 +420,11 @@ export default function () {
   return (
     <>
       {page}
-      <Actions>
-        <ConfigRenderer>{actions}</ConfigRenderer>
-      </Actions>
+      {counter ?
+        <Actions>
+          <ConfigRenderer>{actions}</ConfigRenderer>
+        </Actions>
+      : null}
     </>
   );
 }

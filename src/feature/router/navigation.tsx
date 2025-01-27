@@ -65,6 +65,7 @@ const Header = styled.h3`
 
 const SidebarComponent = () => {
   const [data] = useAtom(experimentsSidebarAtom);
+  if (!data.length) return null;
   return (
     <>
       <Header>History</Header>
