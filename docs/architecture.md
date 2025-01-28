@@ -6,11 +6,19 @@ This project uses custom architecture I refer to as `entangled atoms` which exte
 
 For this project, I decided to explore what modern frontend project can look like if you discard conventional approach and carefully craft the dependency tree decision by decision. Instead of using Next.js or Remix, I simply implemented streaming Server-Side Rendering (SSR) server and static HTML render. Instead of implementing api routes to exchange information, I used `entangled atoms` which use Server-Sent Events (SSE) to sync state behind the scenes.
 
-The choice of TypeScript seems natural for an isomorphic crosplatform app, and I picked [Bun](https://bun.sh/) as a runtime and bundler. Not using Babel presents challenges for dependencies that require Babel plugins to work properly, like `emotion` which is used for styling. 
+The choice of TypeScript seems natural for an isomorphic crosplatform app, and I picked [Bun](https://bun.sh/) as a runtime and bundler. Not using Babel presents challenges for dependencies that require Babel plugins to work properly, however this is not an unsolvable problem.
 
 # Jōtai
 
-In my experience, projects making use of dedicated state management libraries invariably also use hooks given enough time and scope. Impedance mismatch between these two forms may end up inflicting significant story point damage on the project in the long term. Jōtai solves this by offering a drop-in replacement for `useState` so you can easily refactor between them.
+In my experience, projects making use of dedicated state management libraries invariably also use hooks given enough time and scope. Impedance mismatch between these two forms may end up inflicting significant story point damage on the project in the long term. Jōtai solves this by offering a drop-in replacement for `useState`, giving you freedom to switch between them depending on your needs.
+
+# Emotion
+
+This is an area where I have particularly strong opinions on: seeing codebases using utility frameworks like Tailwind makes my eyes bleed, and implementing a separate templating/DSL to generate CSS out of it seems wasteful and backwards. In Experiment, I went with my go-to choice of [Emotion](https://emotion.sh) which is a JSS framework like Styled-Components. It allows incredible flexibility in defining styles programmatically and handles SSR with ease.
+
+# React
+
+Is ethically compromised and best avoided. I architected Experiment to allow for easy switching off it, and plan to transition the codebase to Preact/Solid in near future.
 
 # Principles
 
