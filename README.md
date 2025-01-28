@@ -28,6 +28,7 @@
 [![Tests](https://github.com/actualwitch/experiment/actions/workflows/test.yml/badge.svg)](https://github.com/actualwitch/experiment/actions/workflows/test.yml)
 
 **Experiment** is a feature-rich chat interface for Large Language Models (LLMs) like Anthropic, OpenAI, and Mistral. It offers advanced debugging tools for prompt engineering and tool integration, allowing developers to visualize and manage tool interactions seamlessly.
+**Experiment** is designed to make building LLM applications quicker and easier through rapid iteratation and greater understanding of tool interactions. 
 
 ## Features
 
@@ -46,9 +47,9 @@
 
 ## Architecture
 
-This project uses a custom React-based solution with full SSR and minimal dependencies.
+This project is itself an experiment in using a custom architecture I refer to as `entangled atoms`, which extends [jōtai](https://jotai.org/) atoms to synchronize state across different [realms](https://262.ecma-international.org/#realm). 
 
-<a href="docs/architecture.md">Read more about architecture →</a>
+<a href="docs/architecture.md">Read more about the architecture →</a>
 
 ## Installation
 
