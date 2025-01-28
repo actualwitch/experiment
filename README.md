@@ -27,9 +27,7 @@
 
 [![Tests](https://github.com/actualwitch/experiment/actions/workflows/test.yml/badge.svg)](https://github.com/actualwitch/experiment/actions/workflows/test.yml)
 
-**Experiment** is a feature-rich chat interface for Large Language Models (LLMs) like Anthropic, OpenAI, and Mistral. It offers advanced debugging tools for prompt engineering and tool integration, allowing developers to visualize and manage tool interactions seamlessly.
-
-**Experiment** is designed to make building LLM applications quicker and easier through rapid iteration and greater understanding of tool interactions. 
+**Experiment** is a feature-rich chat interface for Large Language Models (LLMs) like Anthropic, OpenAI, and Mistral. It offers advanced debugging tools for prompt engineering and tool integration, allowing developers to visualize and manage tool interactions seamlessly. It is designed to make building LLM applications quicker and easier through rapid iteration and greater understanding of tool interactions. 
 
 ## Features
 
