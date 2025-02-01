@@ -23,6 +23,7 @@ export const OpenAIModel = Union(
   Literal("o1"),
   Literal("o1-preview"),
   Literal("o1-mini"),
+  Literal("o3-mini"),
 );
 export const AnthropicModel = Union(
   Literal("claude-3-5-sonnet-latest"),
@@ -49,6 +50,7 @@ export const modelLabels = {
     "o1": "O1",
     "o1-preview": "O1 Preview",
     "o1-mini": "O1 Mini",
+    "o3-mini": "O3 Mini",
   },
   anthropic: {
     "claude-3-5-sonnet-latest": "Claude 3.5 Sonnet",

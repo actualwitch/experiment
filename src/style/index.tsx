@@ -4,11 +4,11 @@ import { atom, useAtom } from "jotai";
 import { type HTMLProps, useRef } from "react";
 import { useButton } from "react-aria";
 import Shevy from "shevyjs";
-import { isBoldTextAtom, isDarkModeAtom, mobileQuery, type WithLayout } from "../atoms/common";
+import { fontStackAtom, isBoldTextAtom, isDarkModeAtom, mobileQuery, type WithLayout } from "../atoms/common";
 import { withDarkMode, type WithDarkMode } from "./darkMode";
 import { Palette } from "./palette";
 import { reset } from "./reset";
-import { cover } from "polished";
+import { cover, fontFace } from "polished";
 import { withOnMobile } from "./layout";
 
 const config: {
@@ -192,6 +192,9 @@ export const Sidebar = styled.aside`
   align-items: flex-start;
   padding: ${bs()};
   overflow: auto;
+  & > div {
+    margin-bottom: ${bs(1/2)};
+  }
 `;
 
 export const Main = styled.main(css`
@@ -228,7 +231,6 @@ export const appStyle = [
     :root {
       background-color: ${Palette.white};
       color: ${Palette.black};
-      font-family: ${FONT_STACKS.Transitional}${withEmoji};
       font-weight: normal;
       hyphens: auto;
 
@@ -296,7 +298,13 @@ export const stylesAtom = atom((get) => {
   const styleSet = [...appStyle];
   const isDarkMode = get(isDarkModeAtom);
   const darkModeStyle = withDarkMode(isDarkMode, darkMode);
+  const fontStack = get(fontStackAtom) ?? "Transitional";
   styleSet.push(darkModeStyle);
+  styleSet.push(css`
+    :root {
+      font-family: ${FONT_STACKS[fontStack]}${withEmoji};
+    }
+  `);
   const isBoldText = get(isBoldTextAtom);
   if (isBoldText) {
     styleSet.push(css`

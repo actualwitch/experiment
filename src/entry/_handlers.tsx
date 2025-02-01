@@ -37,10 +37,10 @@ export const doStatic = async (request: Request) => {
   const url = new URL(request.url);
   let response: Response | null = null;
   if (url.pathname === "/favicon.ico") {
-    response = new Response("KO", { status: 404 });
+    response ??= new Response("KO", { status: 404 });
   }
   if (url.pathname === "/manifest.json") {
-    response = new Response(JSON.stringify(getManifest(name, description, iconResolutions)), {
+    response ??= new Response(JSON.stringify(getManifest(name, description, iconResolutions)), {
       headers: {
         "Content-Type": "application/json",
       },
@@ -48,7 +48,7 @@ export const doStatic = async (request: Request) => {
   }
   if (url.pathname === clientFile) {
     const clientScript = await store.get(clientScriptAtom);
-    response = clientScript.match({
+    response ??= clientScript.match({
       Just: (script) => new Response(script, { headers: { "Content-Type": "application/javascript" } }),
       Nothing: () => new Response("KO", { status: 500 }),
     });

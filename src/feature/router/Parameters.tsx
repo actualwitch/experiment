@@ -7,12 +7,19 @@ import { Item } from "react-stately";
 import { Select } from "../../components/Select";
 import { TextField } from "../../components/TextField";
 import { Switch } from "../../components/switch";
-import { experimentLayoutAtom, isBoldTextAtom, isDarkModeAtom, rendererModeAtom, tokensAtom } from "../../atoms/common";
-import { Button, bs } from "../../style";
+import {
+  experimentLayoutAtom,
+  fontStackAtom,
+  isBoldTextAtom,
+  isDarkModeAtom,
+  rendererModeAtom,
+  tokensAtom,
+} from "../../atoms/common";
+import { Button, FONT_STACKS, bs } from "../../style";
 import { type WithDarkMode, withDarkMode } from "../../style/darkMode";
 import { Palette } from "../../style/palette";
 import { hasBackend } from "../../utils/realm";
-import { providerLabels, providers, providerTypes, type ProviderType } from "../inference/types";
+import { providerLabels, providers, providerTypes, withIds, type ProviderType } from "../inference/types";
 import { Page } from "./_page";
 
 const StyledForm = styled.form`
@@ -26,6 +33,9 @@ const StyledForm = styled.form`
     align-items: baseline;
     margin-bottom: ${bs(1.5)};
   }
+  & > :not(h3) {
+    margin-bottom: ${bs()};
+  }
 `;
 
 const Row = styled.div`
@@ -33,10 +43,13 @@ const Row = styled.div`
   flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: ${bs()};
   gap: ${bs(1 / 2)};
   & > header {
     font-size: 1.25em;
+  }
+  & > div {
+    width: unset;
+    display: unset;
   }
 `;
 
@@ -120,6 +133,7 @@ const ModalContent = ({ children, close }: PropsWithChildren<{ close: () => void
 export default function Parameters() {
   const [isBoldText, setIsBoldText] = useAtom(isBoldTextAtom);
   const [isDarkMode, setIsDarkMode] = useAtom(isDarkModeAtom);
+  const [fontStack, setFontStack] = useAtom(fontStackAtom);
   const [experimentLayout, setExperimentLayout] = useAtom(experimentLayoutAtom);
   const [rendererMode, setRendererMode] = useAtom(rendererModeAtom);
   const [tokens, setTokens] = useAtom(tokensAtom);
@@ -159,6 +173,20 @@ export default function Parameters() {
               { value: true, name: "Dark" },
             ]}
           </Switch>
+        </Row>
+        <Row>
+          <header>Font</header>
+          <Select
+            items={withIds(Object.keys(FONT_STACKS))}
+            onSelectionChange={(value) => setFontStack(value)}
+            selectedKey={fontStack}
+          >
+            {(item) => (
+              <Item textValue={item.name}>
+                <div>{item.name}</div>
+              </Item>
+            )}
+          </Select>
         </Row>
         <Row>
           <header>Bold text</header>
@@ -203,7 +231,6 @@ export default function Parameters() {
           : <Button onClick={() => setIsAdding(true)}>Add</Button>}
         </Row>
         {selectedProvider && (
-          <Row>
             <TextField
               type="password"
               placeholder={hasBackend() ? "Token or 1password reference" : "Token"}
@@ -212,7 +239,6 @@ export default function Parameters() {
                 submit();
               }}
             />
-          </Row>
         )}
         {(Object.keys(tokens) as Array<keyof typeof tokens>).map((provider) => (
           <Row key={provider}>

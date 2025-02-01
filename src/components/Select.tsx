@@ -19,7 +19,6 @@ const Button = styled.button<ButtonProps>`
   background: ${(props) => (props.isOpen ? "#eee" : "white")};
   border: 1px solid;
   padding: 6px 2px 6px 8px;
-  margin-top: 6px;
   outline: none;
   border-color: ${(props) => (props.isFocusVisible ? "seagreen" : "lightgray")};
   border-radius: 4px;
@@ -52,7 +51,9 @@ export function Select<T extends object>(props: AriaSelectProps<T>) {
 
   return (
     <InputContainer>
-      <Label {...labelProps}>{props.label}</Label>
+      {props.label ?
+        <Label {...labelProps}>{props.label}</Label>
+      : null}
       <HiddenSelect state={state} triggerRef={ref} label={props.label} name={props.name} />
       <Button {...mergeProps(buttonProps, focusProps)} ref={ref} isOpen={state.isOpen} isFocusVisible={isFocusVisible}>
         <Value {...valueProps}>{state.selectedItem ? state.selectedItem.rendered : "Select an option"}</Value>

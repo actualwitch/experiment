@@ -10,6 +10,7 @@ import { getRealm, hasBackend } from "../utils/realm";
 import { author, version } from "../const";
 import type { _Message, SerialExperiment, ExperimentWithMeta, Message } from "../types";
 import { modelLabels, type ProviderType } from "../feature/inference/types";
+import type { FONT_STACKS } from "../style";
 
 export type LayoutType = "mobile" | "desktop";
 export const layoutAtom = atom<LayoutType>();
@@ -53,6 +54,7 @@ export const isNavPanelOpenAtom = atom(
 export type Store = {
   isBoldText?: boolean;
   isDarkMode?: boolean;
+  fontStack?: keyof typeof FONT_STACKS;
   experimentLayout?: "left" | "chat" | "chat-reverse";
   rendererMode?: "markdown" | "text+json";
   selectedProvider?: ProviderType;
@@ -150,6 +152,11 @@ export const tokensAtom = entangledAtom(
 export const isBoldTextAtom = entangledAtom(
   "isBoldText",
   focusAtom(storeAtom, (o) => o.prop("isBoldText")),
+);
+
+export const fontStackAtom = entangledAtom(
+  "fontStack",
+  focusAtom(storeAtom, (o) => o.prop("fontStack")),
 );
 
 export const isDarkModeAtom = entangledAtom(
