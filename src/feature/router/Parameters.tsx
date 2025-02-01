@@ -179,7 +179,7 @@ export default function Parameters() {
           <Select
             items={withIds(Object.keys(FONT_STACKS))}
             onSelectionChange={(value) => setFontStack(value)}
-            selectedKey={fontStack}
+            selectedKey={fontStack ?? "Transitional"}
           >
             {(item) => (
               <Item textValue={item.name}>

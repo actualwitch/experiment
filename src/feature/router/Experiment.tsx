@@ -1,22 +1,22 @@
-import { atom, useAtom, useSetAtom, type Setter } from "jotai";
+import { type Setter, atom, useAtom, useSetAtom } from "jotai";
 import { useParams } from "react-router";
 
-import { ChatPreview, selectionAtom } from "../../components/chat";
+import { useEffect } from "react";
+import { navigateAtom, titleOverrideAtom } from ".";
 import {
-  experimentAtom,
   type ExperimentCursor,
+  experimentAtom,
   getExperimentAtom,
   parentAtom,
   templatesAtom,
 } from "../../atoms/common";
+import { type Config, ConfigRenderer } from "../../components/ConfigRenderer";
+import { ExperimentPreview } from "../../components/ExperimentPreview";
+import { DesktopOnly } from "../../components/Mobile";
+import { selectionAtom } from "../../components/chat";
+import type { Experiment } from "../../types";
 import { entangledAtom } from "../../utils/entanglement";
 import { Actions, Page } from "./_page";
-import type { Experiment } from "../../types";
-import { DesktopOnly } from "../../components/Mobile";
-import { useEffect, useMemo } from "react";
-import { View } from "../../components/view";
-import { navigateAtom, titleOverrideAtom } from ".";
-import { ConfigRenderer, type Config } from "../../components/ConfigRenderer";
 
 const cursorAtom = entangledAtom("cursor", atom<ExperimentCursor | null>(null));
 const selectedExperimentAtom = entangledAtom(
@@ -110,22 +110,13 @@ export default function () {
     return () => setTitleOverride(null);
   }, []);
 
-  const meta = useMemo(() => {
-    if (Array.isArray(experiment)) {
-      return null;
-    }
-    const { messages, ...meta } = experiment;
-    return meta;
-  }, [experiment]);
-
   return (
     <>
       <Page>
         <DesktopOnly>
           <h2>{title}</h2>
         </DesktopOnly>
-        {meta && <View>{meta}</View>}
-        <ChatPreview key={title} experiment={experiment} />
+        <ExperimentPreview key={title} experiment={experiment} />
       </Page>
       <Actions>
         <ConfigRenderer>{config}</ConfigRenderer>

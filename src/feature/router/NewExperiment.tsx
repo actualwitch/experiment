@@ -372,6 +372,7 @@ export default function () {
           <ActionRow>
             <select value={role} onChange={(e) => setRole(e.target.value as Role)} style={{ flex: 1 }}>
               <option>system</option>
+              <option>developer</option>
               <option>user</option>
               <option>assistant</option>
               <option>tool</option>

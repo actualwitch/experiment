@@ -12,6 +12,7 @@ import { View } from "../../components/view";
 import type { ExperimentWithMeta } from "../../types";
 import { Actions, Page } from "./_page";
 import { SidebarInput } from "./navigation";
+import { ExperimentPreview } from "../../components/ExperimentPreview";
 
 const SidebarContents = () => {
   const [chats] = useAtom(filenames);
@@ -125,13 +126,6 @@ export default function () {
     setTitleOverride(title);
     return () => setTitleOverride(null);
   }, []);
-  const meta = useMemo(() => {
-    if (Array.isArray(experiment) || !experiment) {
-      return null;
-    }
-    const { messages, ...meta } = experiment;
-    return meta;
-  }, [experiment]);
 
   const [{ config, counter }] = useAtom(actionsAtom);
 
@@ -139,10 +133,7 @@ export default function () {
     <>
       <Page>
         {experiment ?
-          <>
-            {meta && <View>{meta}</View>}
-            <ChatPreview key={`${filename}-${idx}`} experiment={experiment} />
-          </>
+          <ExperimentPreview key={`${filename}-${idx}`} experiment={experiment} />
         : <>
             <DesktopOnly>
               <h2>{title}</h2>
