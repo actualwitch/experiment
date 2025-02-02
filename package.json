@@ -3,7 +3,7 @@
   "description": "🔬 Experiment is a feature-rich chat interface for Large Language Models (LLMs) like Anthropic, OpenAI, and Mistral.",
   "keywords": ["inference", "experiment-tracking", "llm"],
   "repository": "github:actualwitch/experiment",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "author": "Ade あで Fisher",
   "license": "MIT",
   "private": true,
@@ -18,7 +18,8 @@
     "format": "bunx biome format --write ./src/*",
     "format:prettier": "prettier ./src/* --write",
     "lint": "bunx biome lint --write .",
-    "test": "bunx playwright test",
+    "test:unit": "bun test src/feature",
+    "test:e2e": "bunx playwright test",
     "playwright:update": "bunx playwright install"
   },
   "devDependencies": {

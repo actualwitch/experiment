@@ -25,7 +25,7 @@
         "useValidAnchor": "warn"
       },
       "complexity": {
-        "noUselessLoneBlockStatements": "warn"
+        "noUselessLoneBlockStatements": "off"
       },
       "correctness": {
         "useExhaustiveDependencies": "warn"
