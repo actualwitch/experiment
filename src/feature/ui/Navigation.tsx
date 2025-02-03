@@ -2,7 +2,7 @@ import styled from "@emotion/styled";
 import { atom, useAtom } from "jotai";
 import { NavLink, useLocation } from "react-router";
 
-import { ROUTES, experimentsSidebarAtom } from ".";
+import { ROUTES, experimentsSidebarAtom } from "../router";
 import { revisionAtom, templatesAtom } from "../../atoms/common";
 import { TRIANGLE } from "../../const";
 import { bs } from "../../style";
@@ -12,7 +12,7 @@ import { portalIO } from "../../utils/portal";
 
 export const [SidebarInput, SidebarOutput] = portalIO();
 
-const Navigation = styled.nav<{ shouldHideOnMobile?: boolean }>`
+const NavigationContainer = styled.nav<{ shouldHideOnMobile?: boolean }>`
   padding: ${bs()};
   overflow: auto;
   display: flex;
@@ -80,12 +80,12 @@ const SidebarComponent = () => {
   );
 };
 
-export const NavigationSidebar = () => {
+export const Navigation = () => {
   const [routes] = useAtom(routesAtom);
   const location = useLocation();
   const [revision] = useAtom(revisionAtom);
   return (
-    <Navigation>
+    <NavigationContainer>
       <header>
         {routes.map(
           ({ icon, title, path, showInSidebar }) =>
@@ -103,6 +103,6 @@ export const NavigationSidebar = () => {
       <Footer>
         © ∞ {TRIANGLE} {revision}
       </Footer>
-    </Navigation>
+    </NavigationContainer>
   );
 };

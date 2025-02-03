@@ -4,8 +4,8 @@ import type { AriaListBoxOptions } from "@react-aria/listbox";
 import type { Node } from "@react-types/shared";
 import type { ListState } from "react-stately";
 import { useListBox, useOption } from "react-aria";
-import { TRIANGLE } from "../const";
-import { Palette } from "../style/palette";
+import { Palette } from "../../style/palette";
+import { TRIANGLE } from "../../const";
 
 interface ListBoxProps extends AriaListBoxOptions<unknown> {
   listBoxRef?: React.RefObject<HTMLUListElement>;

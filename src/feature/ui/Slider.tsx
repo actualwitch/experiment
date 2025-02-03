@@ -1,16 +1,16 @@
-import { type SliderProps, useSliderState } from "react-stately";
+import { useSliderState } from "react-stately";
 
 import { css } from "@emotion/react";
 import styled from "@emotion/styled";
 import { useRef } from "react";
 import { VisuallyHidden, mergeProps, useFocusRing, useNumberFormatter, useSlider, useSliderThumb } from "react-aria";
-import { TRIANGLE } from "../const";
-import { InputContainer } from "./shared";
-import { Palette } from "../style/palette";
-import { bs } from "../style";
-import { withDarkMode, type WithDarkMode } from "../style/darkMode";
 import { useAtomValue } from "jotai";
-import { isDarkModeAtom } from "../atoms/common";
+import { Palette } from "../../style/palette";
+import { withDarkMode } from "../../style/darkMode";
+import { TRIANGLE } from "../../const";
+import { bs } from "../../style";
+import { InputContainer } from "./shared";
+import { isDarkModeAtom } from "../../atoms/common";
 
 const Container = styled(InputContainer)<{ orientation: "horizontal" | "vertical" }>`
   ${(p) => (p.orientation === "horizontal" ? "flex-direction: column;" : "height: 150px;")}
@@ -78,7 +78,7 @@ const ThumbComponent = styled.div<{ isFocusVisible?: boolean; isDragging?: boole
 `;
 
 export function Slider(
-  props: SliderProps & {
+  props: {
     value: number;
     onChange: (value: number) => void;
     label?: string;

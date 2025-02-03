@@ -1,6 +1,7 @@
 import styled from "@emotion/styled";
-import { useAtom } from "jotai";
 import { css } from "@emotion/react";
+import { useAtom } from "jotai";
+import { useEffect, useMemo, type PropsWithChildren } from "react";
 
 import {
   desktopQuery,
@@ -9,13 +10,12 @@ import {
   isNavPanelOpenAtom,
   layoutAtom,
   mobileQuery,
-} from "../atoms/common";
-import { Button, bs } from "../style";
-import { type WithDarkMode, withDarkMode } from "../style/darkMode";
-import { Palette } from "../style/palette";
-import { useEffect, useMemo, type PropsWithChildren } from "react";
-import { iconAtom, effectiveTitleAtom, routeAtom } from "../feature/router";
-import { nopeAtom } from "../atoms/util";
+} from "../../atoms/common";
+import { Button, bs } from "../../style";
+import { type WithDarkMode, withDarkMode } from "../../style/darkMode";
+import { Palette } from "../../style/palette";
+import { iconAtom, effectiveTitleAtom, routeAtom } from "../../feature/router";
+import { nopeAtom } from "../../atoms/util";
 
 export const MobileHeaderContainer = styled.h2<WithDarkMode>`
   position: absolute;

@@ -1,7 +1,7 @@
 import { type Setter, atom, useAtom, useSetAtom } from "jotai";
 import { useParams } from "react-router";
-
 import { useEffect } from "react";
+
 import { navigateAtom, titleOverrideAtom } from ".";
 import {
   type ExperimentCursor,
@@ -11,12 +11,13 @@ import {
   templatesAtom,
 } from "../../atoms/common";
 import { type Config, ConfigRenderer } from "../../components/ConfigRenderer";
-import { ExperimentPreview } from "../../components/ExperimentPreview";
-import { DesktopOnly } from "../../components/Mobile";
-import { selectionAtom } from "../../components/chat";
 import type { Experiment } from "../../types";
 import { entangledAtom } from "../../utils/entanglement";
-import { Actions, Page } from "./_page";
+import { ExperimentPreview } from "../chat/ExperimentPreview";
+import { selectionAtom } from "../chat/chat";
+import { Actions } from "../ui/Actions";
+import { DesktopOnly } from "../ui/Mobile";
+import { Page } from "../ui/Page";
 
 const cursorAtom = entangledAtom("cursor", atom<ExperimentCursor | null>(null));
 const selectedExperimentAtom = entangledAtom(

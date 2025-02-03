@@ -3,7 +3,7 @@ import { Provider, useAtom, useSetAtom } from "jotai";
 import { Suspense, useEffect, useState, type PropsWithChildren } from "react";
 import { useLocation, useNavigate } from "react-router";
 
-import { NavigationSidebar } from "./feature/router/navigation";
+import { Navigation } from "./feature/ui/Navigation";
 import { descriptionAtom, iconAtom, navigateAtom, pageTitleAtom, Router } from "./feature/router";
 import { subscriptionAtom, trackVisibleAtom } from "./atoms/focus";
 import { store } from "./store";
@@ -12,7 +12,7 @@ import { Hydration } from "./utils/hydration";
 import { FavIcon } from "./components/FavIcon";
 import { getRealm } from "./utils/realm";
 import { clientFile } from "./const";
-import { ErrorBoundary } from "./components/error";
+import { ErrorBoundary } from "./feature/ui/error";
 import {
   isActionPanelOpenAtom,
   isDarkModeAtom,
@@ -20,7 +20,7 @@ import {
   layoutAtom,
   layoutTrackerAtom,
 } from "./atoms/common";
-import { DesktopOnly, MobileHeader, MobileOnly } from "./components/Mobile";
+import { DesktopOnly, MobileHeader, MobileOnly } from "./feature/ui/Mobile";
 import type { Nullish } from "./types";
 
 const Meta = () => {
@@ -59,14 +59,14 @@ const App = () => {
     <Suspense fallback={null}>
       <Container layout={layout}>
         <DesktopOnly>
-          <NavigationSidebar />
+          <Navigation />
         </DesktopOnly>
         <MobileOnly>
           <MobileHeader />
         </MobileOnly>
         <MobileOnly>
           <Slideover isOpen={isNavPanelOpen} isDarkMode={isDarkMode} from="right">
-            <NavigationSidebar />
+            <Navigation />
           </Slideover>
         </MobileOnly>
         <Router />

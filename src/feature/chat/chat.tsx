@@ -2,17 +2,17 @@ import { type SerializedStyles, css } from "@emotion/react";
 import styled from "@emotion/styled";
 import { atom, useAtom, useAtomValue } from "jotai";
 import { type CSSProperties, type ReactNode, useEffect, useMemo, useRef } from "react";
-import { TRIANGLE } from "../const";
-import { type Store, experimentLayoutAtom, isDarkModeAtom, templatesAtom } from "../atoms/common";
-import { isRunningAtom } from "../feature/inference/atoms";
-import { bs } from "../style";
-import type { WithDarkMode } from "../style/darkMode";
-import { Palette } from "../style/palette";
-import { deepEqual } from "../utils";
-import { useHandlers } from "../utils/keyboard";
-import { useScrollToTop } from "../utils/scroll";
-import { View, collapsedAtom } from "./view";
-import type { _Message, Experiment, ExperimentWithMeta, Message } from "../types";
+import { TRIANGLE } from "../../const";
+import { type Store, experimentLayoutAtom, isDarkModeAtom, templatesAtom } from "../../atoms/common";
+import { isRunningAtom } from "../inference/atoms";
+import { bs } from "../../style";
+import type { WithDarkMode } from "../../style/darkMode";
+import { Palette } from "../../style/palette";
+import { deepEqual } from "../../utils";
+import { useHandlers } from "../../utils/keyboard";
+import { useScrollToTop } from "../../utils/scroll";
+import { View, collapsedAtom } from "../../components/view";
+import type { _Message, Experiment, ExperimentWithMeta, Message } from "../../types";
 
 const baseHeight = bs(6);
 export const ChatContainer = styled.div<WithDarkMode>`
@@ -21,9 +21,12 @@ export const ChatContainer = styled.div<WithDarkMode>`
   flex-direction: column-reverse;
 
   code {
-    padding: 0 ${bs(1 / 10)};
     background-color: ${(p) => (p.isDarkMode ? Palette.white + "50" : Palette.black + "20")};
     border-radius: ${bs(1 / 8)};
+  }
+
+  *:not(pre) > code {
+    padding: 0 ${bs(1 / 10)};
   }
 
   pre {

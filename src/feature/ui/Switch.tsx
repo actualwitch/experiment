@@ -1,6 +1,6 @@
 import styled from "@emotion/styled";
 import { ellipsis } from "polished";
-import { Button } from "../style";
+import { Button } from "../../style";
 
 export type SwitchValue = boolean | undefined;
 

@@ -1,11 +1,11 @@
-import { useAtom, useSetAtom, type PrimitiveAtom, type Setter } from "jotai";
-import { createElement, Fragment, useId, type PropsWithChildren } from "react";
-import { Button } from "../style";
-import { Slider } from "./Slider";
-import { Select } from "./Select";
+import { type PrimitiveAtom, type Setter, useAtom, useSetAtom } from "jotai";
+import { Fragment, createElement, useId } from "react";
 import { Item } from "react-stately";
-import { store } from "../store";
 import { processCsvAtom } from "../atoms/client";
+import { Select } from "../feature/ui/Select";
+import { Slider } from "../feature/ui/Slider";
+import { store } from "../store";
+import { Button } from "../style";
 
 export type LeafWithOptions<T extends string = string> = {
   label: string;

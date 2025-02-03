@@ -2,8 +2,8 @@ import { useRef } from "react";
 import type { AriaTextFieldProps } from "react-aria";
 import { useTextField } from "react-aria";
 import styled from "@emotion/styled";
-import { withFormStyling, type FormProps } from "../style/form";
 import { InputContainer } from "./shared";
+import { withFormStyling, type FormProps } from "../../style/form";
 
 const Input = styled.input<FormProps>(withFormStyling);
 

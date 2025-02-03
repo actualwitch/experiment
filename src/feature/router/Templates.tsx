@@ -1,10 +1,11 @@
 import { atom, useAtom, type Setter } from "jotai";
 
 import { View } from "../../components/view";
-import { SidebarInput } from "./navigation";
+import { SidebarInput } from "../ui/Navigation";
 import { templatesAtom } from "../../atoms/common";
-import { Actions, Page } from "./_page";
 import { ConfigRenderer, type Config } from "../../components/ConfigRenderer";
+import { Page } from "../ui/Page";
+import { Actions } from "../ui/Actions";
 
 const selectedTemplateAtom = atom<string | null>(null);
 

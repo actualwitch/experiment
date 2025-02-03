@@ -3,7 +3,7 @@ import type { AriaPopoverProps } from "@react-aria/overlays";
 import styled from "@emotion/styled";
 import * as React from "react";
 import { usePopover, DismissButton, Overlay } from "@react-aria/overlays";
-import { Palette } from "../style/palette";
+import { Palette } from "../../style/palette";
 
 interface PopoverProps extends Omit<AriaPopoverProps, "popoverRef"> {
   children: React.ReactNode;

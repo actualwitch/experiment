@@ -2,10 +2,12 @@ import { atom, useAtom } from "jotai";
 import { useMemo } from "react";
 import { Temporal } from "temporal-polyfill";
 
-import type { Experiment } from "../types";
-import { entangledAtom } from "../utils/entanglement";
+import { View } from "../../components/view";
+import type { Experiment } from "../../types";
+import { entangledAtom } from "../../utils/entanglement";
 import { ChatPreview } from "./chat";
-import { View } from "./view";
+
+
 
 const timezoneAtom = entangledAtom(
   "tz",

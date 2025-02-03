@@ -4,8 +4,6 @@ import { type Setter, atom, useAtom, useSetAtom } from "jotai";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { NavLink } from "react-router";
 
-import { type Config, ConfigRenderer } from "../../components/ConfigRenderer";
-import { ChatPreview, selectionAtom } from "../../components/chat";
 import {
   experimentAtom,
   isActionPanelOpenAtom,
@@ -15,6 +13,14 @@ import {
   selectedProviderAtom,
   templatesAtom,
 } from "../../atoms/common";
+import { type Config, ConfigRenderer } from "../../components/ConfigRenderer";
+import { name } from "../../const";
+import { bs } from "../../style";
+import { type WithDarkMode, withDarkMode } from "../../style/darkMode";
+import { Palette } from "../../style/palette";
+import type { Message, Role } from "../../types";
+import { useHandlers } from "../../utils/keyboard";
+import { ChatPreview, selectionAtom } from "../chat/chat";
 import {
   availableProviderOptionsAtom,
   isRunningAtom,
@@ -23,15 +29,10 @@ import {
   runInferenceAtom,
   tempAtom,
 } from "../inference/atoms";
-import { bs } from "../../style";
-import { withDarkMode, type WithDarkMode } from "../../style/darkMode";
-import { Palette } from "../../style/palette";
-import { useHandlers } from "../../utils/keyboard";
-import { Actions, Page } from "./_page";
-import type { Role, Message } from "../../types";
 import { modelOptions } from "../inference/types";
+import { Actions } from "../ui/Actions";
+import { Page } from "../ui/Page";
 import { TextArea } from "../ui/TextArea";
-import { name } from "../../const";
 
 const baseRadius = 3 / 4;
 const baseMargin = 1 / 2;

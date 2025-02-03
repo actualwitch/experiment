@@ -7,7 +7,7 @@ import { useSelectState } from "react-stately";
 import { ListBox } from "./ListBox";
 import { Popover } from "./Popover";
 import { Label, InputContainer } from "./shared";
-import { TRIANGLE } from "../const";
+import { TRIANGLE } from "../../const";
 
 interface ButtonProps {
   isOpen?: boolean;

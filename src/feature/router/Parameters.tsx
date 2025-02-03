@@ -4,9 +4,7 @@ import { useAtom } from "jotai";
 import { type PropsWithChildren, useState } from "react";
 import { Item } from "react-stately";
 
-import { Select } from "../../components/Select";
-import { TextField } from "../../components/TextField";
-import { Switch } from "../../components/switch";
+import { Select } from "../ui/Select";
 import {
   experimentLayoutAtom,
   fontStackAtom,
@@ -20,7 +18,9 @@ import { type WithDarkMode, withDarkMode } from "../../style/darkMode";
 import { Palette } from "../../style/palette";
 import { hasBackend } from "../../utils/realm";
 import { providerLabels, providers, providerTypes, withIds, type ProviderType } from "../inference/types";
-import { Page } from "./_page";
+import { Page } from "../ui/Page";
+import { TextField } from "../ui/TextField";
+import { Switch } from "../ui/Switch";
 
 const StyledForm = styled.form`
   display: flex;
