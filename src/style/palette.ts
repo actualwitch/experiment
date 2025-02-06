@@ -22,4 +22,8 @@ export const Palette = {
   green: "lightgreen",
   pink: "color(display-p3 0.9 0.66 0.81)",
   red: "red",
+  teal: "rgb(0, 255, 231)",
+  baseRadius: 3 / 4,
+  borderCode: 1 / 3,
+  borderSpan: 1 / 8,
 } as const;

@@ -6,7 +6,7 @@ import { useRef } from "react";
 import { VisuallyHidden, mergeProps, useFocusRing, useNumberFormatter, useSlider, useSliderThumb } from "react-aria";
 import { useAtomValue } from "jotai";
 import { Palette } from "../../style/palette";
-import { withDarkMode } from "../../style/darkMode";
+import { withDarkMode, type WithDarkMode } from "../../style/darkMode";
 import { TRIANGLE } from "../../const";
 import { bs } from "../../style";
 import { InputContainer } from "./shared";
@@ -19,6 +19,7 @@ const Container = styled(InputContainer)<{ orientation: "horizontal" | "vertical
 const LabelContainer = styled.div`
   display: flex;
   justify-content: space-between;
+  margin-bottom: ${bs(1 / 3)};
 `;
 
 const Track = styled.div<{ orientation: "horizontal" | "vertical"; disabled?: boolean } & WithDarkMode>(

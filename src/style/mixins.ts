@@ -1,5 +1,9 @@
 import { css } from "@emotion/react";
 
+export const interactive = css`
+  cursor: pointer;
+`;
+
 export const nonInteractive = css`
   pointer-events: none;
   user-select: none;

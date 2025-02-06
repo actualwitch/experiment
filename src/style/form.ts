@@ -9,7 +9,7 @@ type FormProps = { _type?: "success" };
 const shared = css`
   padding: ${bs(1 / 5)} ${bs(1 / 2)};
   border: none;
-  border-radius: 4px;
+  border-radius: ${Palette.borderCode};
 `;
 const success = css`
   background-color: ${Palette.successGreen};

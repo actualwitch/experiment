@@ -12,7 +12,7 @@ import { deepEqual } from "../../utils";
 import { useHandlers } from "../../utils/keyboard";
 import { useScrollToTop } from "../../utils/scroll";
 import { View, collapsedAtom } from "../ui/view";
-import type { _Message, Experiment, ExperimentWithMeta, Message } from "../../types";
+import type { _Message, Experiment, ExperimentWithMeta, Message, Role } from "../../types";
 
 const baseHeight = bs(6);
 export const ChatContainer = styled.div<WithDarkMode>`
@@ -22,7 +22,7 @@ export const ChatContainer = styled.div<WithDarkMode>`
 
   code {
     background-color: ${(p) => (p.isDarkMode ? Palette.white + "50" : Palette.black + "20")};
-    border-radius: ${bs(1 / 8)};
+    border-radius: ${bs(Palette.borderSpan)};
   }
 
   *:not(pre) > code {
@@ -59,7 +59,7 @@ const getAlign = (fromServer: boolean, experimentLayout: Store["experimentLayout
 };
 
 export const MessageComponent = styled.article<{
-  role: "assistant" | "developer" | "info" | "error" | "system" | "tool" | "user";
+  role: Role;
   contentType?: string;
   ioType?: "input" | "output";
   isSelected?: boolean;
@@ -159,6 +159,11 @@ export const MessageComponent = styled.article<{
   if (role === "error") {
     styles.push(css`
       border-color: ${Palette.red};
+    `);
+  }
+  if (role === "context") {
+    styles.push(css`
+      border-color: ${Palette.teal};
     `);
   }
   if (isSelected) {

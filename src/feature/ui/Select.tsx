@@ -8,27 +8,28 @@ import { ListBox } from "./ListBox";
 import { Popover } from "./Popover";
 import { Label, InputContainer } from "./shared";
 import { TRIANGLE } from "../../const";
+import { interactive } from "../../style/mixins";
+import { bevelStyle, iSawTheButtonGlow } from "../../style";
+import { withDarkMode, type WithDarkMode } from "../../style/darkMode";
+import { useAtom } from "jotai";
+import { isDarkModeAtom } from "../../atoms/common";
 
-interface ButtonProps {
+type ButtonProps = {
   isOpen?: boolean;
   isFocusVisible?: boolean;
-}
+} & WithDarkMode;
 
 const Button = styled.button<ButtonProps>`
   appearance: none;
-  background: ${(props) => (props.isOpen ? "#eee" : "white")};
-  border: 1px solid;
-  padding: 6px 2px 6px 8px;
   outline: none;
-  border-color: ${(props) => (props.isFocusVisible ? "seagreen" : "lightgray")};
-  border-radius: 4px;
   display: inline-flex;
   align-items: center;
   justify-content: space-between;
   width: 200px;
   text-align: left;
-  font-size: 14px;
-  color: black;
+  ${interactive}
+  ${bevelStyle}
+  ${(p) => withDarkMode(p.isDarkMode, iSawTheButtonGlow)}
 `;
 
 const Value = styled.span`
@@ -48,6 +49,7 @@ export function Select<T extends object>(props: AriaSelectProps<T>) {
   const { buttonProps } = useButton(triggerProps, ref);
 
   const { focusProps, isFocusVisible } = useFocusRing();
+  const [isDarkMode] = useAtom(isDarkModeAtom);
 
   return (
     <InputContainer>
@@ -55,9 +57,15 @@ export function Select<T extends object>(props: AriaSelectProps<T>) {
         <Label {...labelProps}>{props.label}</Label>
       : null}
       <HiddenSelect state={state} triggerRef={ref} label={props.label} name={props.name} />
-      <Button {...mergeProps(buttonProps, focusProps)} ref={ref} isOpen={state.isOpen} isFocusVisible={isFocusVisible}>
+      <Button
+        isDarkMode={isDarkMode}
+        {...mergeProps(buttonProps, focusProps)}
+        ref={ref}
+        isOpen={state.isOpen}
+        isFocusVisible={isFocusVisible}
+      >
         <Value {...valueProps}>{state.selectedItem ? state.selectedItem.rendered : "Select an option"}</Value>
-        {/* <span>{TRIANGLE}</span> */}
+        <span>{TRIANGLE}</span>
       </Button>
       {state.isOpen && (
         <Popover state={state} triggerRef={ref} placement="bottom start">

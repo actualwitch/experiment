@@ -168,7 +168,7 @@ export const runExperimentAsAnthropic = entangledAtom(
       return;
     }
 
-    const { stream, ...experimentAsAnthropic } = experimentToAnthropic(experiment);
+    const { stream, ...experimentAsAnthropic } = await experimentToAnthropic(experiment);
 
     const anthropic = new Anthropic({
       apiKey: resolvedToken,

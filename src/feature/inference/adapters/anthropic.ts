@@ -6,11 +6,12 @@ import type {
 } from "@anthropic-ai/sdk/resources/index.mjs";
 import type { Message } from "../../../types";
 import { tokenLimit } from "../../../const";
+import { createContextFromFiles, iterateDir } from "../../router/Explore";
 
-export const experimentToAnthropic = (
+export async function experimentToAnthropic(
   experiment: Message[],
   { max_tokens = tokenLimit }: { max_tokens?: number } = {},
-): MessageCreateParams | MessageCreateParamsNonStreaming => {
+): Promise<MessageCreateParams | MessageCreateParamsNonStreaming> {
   let system = "";
   const messages: MessageParam[] = [];
   const tools: Tool[] = [];
@@ -18,6 +19,7 @@ export const experimentToAnthropic = (
     if (role === "system") {
       system += `${content}
 `;
+      continue;
     }
     if (role === "user" || role === "assistant") {
       if (typeof content === "object") {
@@ -26,6 +28,13 @@ export const experimentToAnthropic = (
       if (typeof content === "string") {
         messages.push({ role, content });
       }
+      continue;
+    }
+    if (role === "context") {
+      const directory = content.directory as string;
+      const files = await iterateDir(directory);
+      const context = await createContextFromFiles(files, directory);
+      messages.push({ role: "user", content: context });
     }
     if (role === "tool" && !fromServer) {
       if (typeof content === "object") {
@@ -49,4 +58,4 @@ export const experimentToAnthropic = (
     max_tokens,
     stream: true,
   };
-};
+}

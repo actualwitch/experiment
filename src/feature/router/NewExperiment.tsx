@@ -33,15 +33,16 @@ import { modelOptions } from "../inference/types";
 import { Actions } from "../ui/Actions";
 import { Page } from "../ui/Page";
 import { TextArea } from "../ui/TextArea";
+import { currentDirAtom } from "./Explore";
+import { hasBackend } from "../../utils/realm";
 
-const baseRadius = 3 / 4;
 const baseMargin = 1 / 2;
 
 export const Block = styled.div<WithDarkMode>`
   display: flex;
   flex-direction: column;
 
-  border-radius: ${bs(baseRadius)};
+  border-radius: ${bs(Palette.baseRadius)};
   position: sticky;
   bottom: 0;
   overflow: clip;
@@ -64,8 +65,8 @@ export const Block = styled.div<WithDarkMode>`
   textarea {
     padding: 0 ${bs(baseMargin)} ${bs(baseMargin)};
     resize: none;
-    border-bottom-left-radius: ${bs(baseRadius)};
-    border-bottom-right-radius: ${bs(baseRadius)};
+    border-bottom-left-radius: ${bs(Palette.baseRadius)};
+    border-bottom-right-radius: ${bs(Palette.baseRadius)};
     &:focus {
       outline: none;
     }
@@ -112,13 +113,13 @@ export const Block = styled.div<WithDarkMode>`
 
 const ActionRow = styled.div`
   display: flex;
-  border-top-left-radius: ${bs(baseRadius)};
-  border-top-right-radius: ${bs(baseRadius)};
+  border-top-left-radius: ${bs(Palette.baseRadius)};
+  border-top-right-radius: ${bs(Palette.baseRadius)};
   select {
-    border-top-left-radius: ${bs(baseRadius)};
+    border-top-left-radius: ${bs(Palette.baseRadius)};
   }
   button {
-    border-top-right-radius: ${bs(baseRadius)};
+    border-top-right-radius: ${bs(Palette.baseRadius)};
   }
 `;
 
@@ -226,6 +227,22 @@ export const actionsAtom = atom((get) => {
       });
       counter++;
     }
+  }
+  if (hasBackend()){
+    config.Actions.push({
+      Special: {
+        buttons: [
+          {
+            label: "Add Context",
+            action: (set: Setter) => {
+              const dir = get(currentDirAtom);
+              set(experimentAtom, [...experiment, { role: "context", content: {directory: dir} }])
+            },
+          },
+        ],
+      },
+    });
+    counter++;
   }
   return { config, counter };
 });

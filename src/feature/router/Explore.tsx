@@ -1,41 +1,33 @@
-import { type Setter, atom, useAtom } from "jotai";
-import { useEffect } from "react";
+import { atom, useAtom } from "jotai";
+import { readFile, readdir } from "node:fs/promises";
 import path from "node:path";
-import { readdir, readFile } from "node:fs/promises";
+import { useEffect } from "react";
 
-import { navigateAtom, titleOverrideAtom } from ".";
-import templates from "../../../fixtures/templates.json";
-import { filenames, importsRegistry, selectedChat } from "../../atoms/client";
-import { experimentAtom, isNavPanelOpenAtom, layoutAtom, templatesAtom } from "../../atoms/common";
-import { type Config, ConfigRenderer } from "../ui/ConfigRenderer";
-import { collapsedAtom, View } from "../ui/view";
-import type { ExperimentWithMeta } from "../../types";
-import { ExperimentPreview } from "../chat/ExperimentPreview";
-import { selectionAtom } from "../chat/chat";
-import { Actions } from "../ui/Actions";
-import { DesktopOnly } from "../ui/Mobile";
+import { Maybe } from "true-myth";
+import { titleOverrideAtom } from ".";
+import { nopeAtom } from "../../atoms/util";
+import { store } from "../../store";
+import { entangledAtom } from "../../utils/entanglement";
+import { getRealm } from "../../utils/realm";
 import { SidebarInput } from "../ui/Navigation";
 import { Page } from "../ui/Page";
-import { getRealm } from "../../utils/realm";
-import { entangledAtom } from "../../utils/entanglement";
-import { nopeAtom } from "../../atoms/util";
-import { Maybe } from "true-myth";
+import { View, collapsedAtom } from "../ui/view";
 
-const pwdAtom = getRealm() === "server" ? atom(Bun.env.PWD) : nopeAtom;
+export const pwdAtom = getRealm() === "server" ? atom(Bun.env.PWD) : nopeAtom;
 
 const dirOverrideAtom = atom<string | null>(null);
 
-const currentDirAtom = atom((get) => {
+export const currentDirAtom = entangledAtom("cwd", atom((get) => {
   const override = get(dirOverrideAtom);
   return override ?? get(pwdAtom);
-});
+}));
 
 const goToAtom = entangledAtom(
   "gotodir",
   atom(null, (get, set, dir: string) => {
     if (getRealm() !== "server") return;
     const currentDir = Maybe.of(get(currentDirAtom));
-    const newPath = currentDir.map(currentDir => path.join(currentDir, dir));
+    const newPath = currentDir.map((currentDir) => path.join(currentDir, dir));
     if (newPath.isJust) {
       set(dirOverrideAtom, newPath.value);
     }
@@ -64,6 +56,7 @@ export async function filesInDir(thisPath: string) {
   return files;
 }
 
+const includeExtensions = ["ts", "tsx", "md", "json", "yml"];
 export async function iterateDir(dir: string, ignore: string[] = [".git"]) {
   const thisIgnores = [...ignore];
   const entries = await readdir(dir, { withFileTypes: true });
@@ -82,38 +75,74 @@ export async function iterateDir(dir: string, ignore: string[] = [".git"]) {
   for (const entry of entries) {
     if (thisIgnores.some((ignore) => entry.name === ignore)) continue;
     if (entry.isDirectory()) {
+      if (entry.name === "fixtures") continue;
       directories.push(entry.name);
     } else {
-      files.push(`${entry.parentPath}${path.sep}${entry.name}`);
+      const parts = entry.name.split(".");
+      const ext = parts[parts.length - 1];
+      if (entry.isFile() && includeExtensions.includes(ext)) {
+        files.push(`${entry.parentPath}${path.sep}${entry.name}`);
+      }
     }
   }
   directories.sort();
-  files.sort();
   for (const directory of directories) {
     files = [...(await iterateDir(path.join(dir, directory), thisIgnores)), ...files];
   }
+  files.sort();
   return files;
 }
 
-const currentDirNameAtom = entangledAtom(
-  "cwd",
+const currentDirContentAtom = entangledAtom(
+  "cwd-content",
   atom(async (get) => {
     const currentDir = get(currentDirAtom);
     if (currentDir) {
-      const foo = await iterateDir(currentDir);
-      for (const url of foo) {
-        console.log(url.slice(currentDir.length));
+      try {
+        const files = await filesInDir(currentDir);
+        const entry = path.parse(currentDir);
+        return { [entry.name]: Object.fromEntries(files.map((file) => [file.name, {}])) };
+      } catch {
+        store.set(dirOverrideAtom, null);
       }
-      const files = await filesInDir(currentDir);
-      const entry = path.parse(currentDir);
-      return { [entry.name]: Object.fromEntries(files.map((file) => [file.name, {}])) };
     }
     return null;
   }),
 );
 
+export const createContextFromFiles = async (files: string[], basePath: string) => {
+  let context = "";
+  let index = 1;
+  for (const url of files) {
+    const relUrl = url.slice(basePath.length);
+    const content = await readFile(url, "utf-8");
+    const thisDoc = `
+      <document index="${index}">
+        <source>${relUrl}</source>
+        <document_content>
+        ${content}
+        </document_content>
+      </document>
+    `;
+    context += thisDoc;
+    index += 1;
+  }
+  return `<documents>\n${context}\n</documents>`;
+};
+
+export const currentDirContextAtom = entangledAtom(
+  "currentdircontext",
+  atom(async (get) => {
+    const currentDir = Maybe.of(get(currentDirAtom)).map(async (currentDir) => {
+      const files = await iterateDir(currentDir);
+      return await createContextFromFiles(files, currentDir);
+    });
+    return await currentDir.unwrapOr(async () => null);
+  }),
+);
+
 const SidebarContents = () => {
-  const [currentDir] = useAtom(currentDirNameAtom);
+  const [currentDir] = useAtom(currentDirContentAtom);
   const [_, goToDir] = useAtom(goToAtom);
   const [collapsed, setCollapsed] = useAtom(collapsedAtom);
   if (!currentDir) {

@@ -10,6 +10,7 @@ import { Palette } from "./palette";
 import { reset } from "./reset";
 import { cover, fontFace } from "polished";
 import { withOnMobile } from "./layout";
+import { interactive } from "./mixins";
 
 const config: {
   fontScale: "majorSecond" | "minorThird" | "majorThird" | "perfectFourth" | "augmentedFourth";
@@ -51,7 +52,7 @@ const shevyStyle = css({
   "p, ol, ul, pre": content,
 });
 
-const internalDarkModeButton = css`
+export const iSawTheButtonGlow = css`
   &:not(:disabled) {
     box-shadow: 2px 2px 8px ${Palette.buttonShadowDark}21;
     :hover {
@@ -60,7 +61,7 @@ const internalDarkModeButton = css`
   }
 `;
 
-const InternalButton = styled.button<{ isDarkMode: boolean | undefined }>`
+export const bevelStyle = css`
   &:not(:disabled) {
     box-shadow: 2px 2px 8px ${Palette.black}20;
     text-shadow:
@@ -73,8 +74,11 @@ const InternalButton = styled.button<{ isDarkMode: boolean | undefined }>`
       transform: translate(0px, 1px);
     }
   }
-  ${(p) => withDarkMode(p.isDarkMode, internalDarkModeButton)}
 `;
+
+const InternalButton = styled.button<{ isDarkMode: boolean | undefined }>(bevelStyle, (p) =>
+  withDarkMode(p.isDarkMode, iSawTheButtonGlow),
+);
 
 // function injectAtoms<T extends Record<string, unknown>, P extends {}>(atoms: T) {
 //   const newProps = {} as Record<string, unknown>;
@@ -115,14 +119,15 @@ const button = css`
     ${content}
     padding: 4px 13px;
     margin: 0;
+    outline: 0;
     transition:
       background-color 0.1s ease-out,
       box-shadow 0.1s ease-out,
       transform 0.1s cubic-bezier(0.18, 0.89, 0.32, 1.28);
     border: 1px solid transparent;
     color: ${Palette.black};
-    border-radius: 6px;
-    cursor: pointer;
+    border-radius: ${bs(Palette.borderCode)};
+    ${interactive}
     transform: translate(0px, 0px);
     &[disabled] {
       background-color: ${Palette.buttonDisabledBackground};
@@ -193,7 +198,7 @@ export const Sidebar = styled.aside`
   padding: ${bs()};
   overflow: auto;
   & > div {
-    margin-bottom: ${bs(1/2)};
+    margin-bottom: ${bs(1 / 2)};
   }
 `;
 
@@ -260,7 +265,7 @@ export const appStyle = [
         font-size: 0.75em;
         background-color: ${Palette.black}10;
         padding: ${bs(1 / 3)} ${bs(1 / 2)};
-        border-radius: ${bs(1 / 3)};
+        border-radius: ${bs(Palette.borderCode)};
         overflow-x: scroll;
       }
 
@@ -291,6 +296,11 @@ export const appStyle = [
 
     ${button}
     ${input}
+
+    blockquote {
+        border-left: 2px solid currentColor;
+        padding-left: ${bs(1 / 4)};
+    }
   `,
 ];
 

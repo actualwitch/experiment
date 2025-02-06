@@ -40,7 +40,6 @@ const ListItem = styled.li<ListItemProps>`
     props.isFocused ? "white"
     : props.isSelected ? Palette.black
     : "#333"};
-  font-size: 14px;
   font-weight: ${(props) => (props.isSelected ? "600" : "normal")};
   padding: 8px;
   display: flex;

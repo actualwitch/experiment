@@ -4,6 +4,7 @@ import styled from "@emotion/styled";
 import * as React from "react";
 import { usePopover, DismissButton, Overlay } from "@react-aria/overlays";
 import { Palette } from "../../style/palette";
+import { bs } from "../../style";
 
 interface PopoverProps extends Omit<AriaPopoverProps, "popoverRef"> {
   children: React.ReactNode;
@@ -16,9 +17,9 @@ const Wrapper = styled.div`
   top: 100%;
   z-index: 1;
   width: 200px;
-  border: 1px solid lightgray;
-  border-radius: 4px;
-  margin-top: 6px;
+  overflow: hidden;
+  border-radius: ${bs(Palette.borderCode)};
+  margin-top: ${bs(1 / 2)};
   box-shadow: 2px 2px 8px ${Palette.buttonShadowDark}21;
   background: ${Palette.actionableBackground};
 `;
