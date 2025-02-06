@@ -1,11 +1,11 @@
 import { type PrimitiveAtom, type Setter, useAtom, useSetAtom } from "jotai";
 import { Fragment, createElement, useId } from "react";
 import { Item } from "react-stately";
-import { processCsvAtom } from "../atoms/client";
-import { Select } from "../feature/ui/Select";
-import { Slider } from "../feature/ui/Slider";
-import { store } from "../store";
-import { Button } from "../style";
+import { processCsvAtom } from "../../atoms/client";
+import { Select } from "./Select";
+import { Slider } from "./Slider";
+import { store } from "../../store";
+import { Button } from "../../style";
 
 export type LeafWithOptions<T extends string = string> = {
   label: string;

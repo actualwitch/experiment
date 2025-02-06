@@ -3,10 +3,12 @@ import styled from "@emotion/styled";
 import DOMPurify from "isomorphic-dompurify";
 import { atom, useAtom } from "jotai";
 import { marked } from "marked";
-import { bs } from "../style";
-import { createElement, memo, useMemo } from "react";
-import { TRIANGLE } from "../const";
-import { rendererModeAtom } from "../atoms/common";
+import { bs } from "../../style";
+import { createElement, memo, useMemo, type JSX, type MouseEventHandler } from "react";
+import { TRIANGLE } from "../../const";
+import { rendererModeAtom } from "../../atoms/common";
+import { increaseSpecificity } from "../../style/utils";
+import { nonInteractive } from "../../style/mixins";
 
 type Primitive = string | number | boolean | null | undefined;
 
@@ -19,6 +21,7 @@ type TreeOptions = {
   separator?: string;
   path?: string[];
   shouldBeCollapsed?: (path: string[]) => boolean;
+  disableSorting?: boolean;
 };
 
 const interactive = css`
@@ -29,7 +32,7 @@ const interactive = css`
   }
 `;
 
-const Emphasis = styled.em<{ isCollapsed?: boolean }>(
+const Emphasis = styled.em<{ isCollapsed?: boolean; isDisabled?: boolean }>(
   css`
     font-weight: italic;
     opacity: 0.7;
@@ -47,7 +50,7 @@ const Emphasis = styled.em<{ isCollapsed?: boolean }>(
       }
     `;
   },
-  interactive,
+  ({ isDisabled }) => isDisabled ? nonInteractive : interactive,
 );
 
 export const collapsedAtom = atom<string[]>([]);
@@ -55,7 +58,7 @@ export const collapsedAtom = atom<string[]>([]);
 function asTreeNodes(
   input: unknown,
   title?: Primitive,
-  { separator = ".", onClick, onTitleClick, path = [], shouldBeCollapsed }: TreeOptions = {},
+  { separator = ".", onClick, onTitleClick, path = [], shouldBeCollapsed, disableSorting }: TreeOptions = {},
 ): JSX.Element | null {
   // unwrap JSON strings
   if (typeof input === "string" && input[0] === "{" && input[input.length - 1] === "}") {
@@ -71,16 +74,21 @@ function asTreeNodes(
     } catch {}
   }
   const prefix = isNullish(title) || (Array.isArray(input) && input.length === 0) ? "" : title;
+  const interactiveProps =
+    onTitleClick ?
+      ({
+        onClick(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          onTitleClick?.(prefix, undefined, path);
+        },
+      } as {
+        onClick: MouseEventHandler<HTMLElement>;
+      })
+    : { isDisabled: true };
   if (shouldBeCollapsed?.(path)) {
     return prefix ?
-        <Emphasis
-          isCollapsed
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            onTitleClick?.(prefix, undefined, path);
-          }}
-        >
+        <Emphasis isCollapsed {...interactiveProps}>
           {prefix}
         </Emphasis>
       : null;
@@ -101,22 +109,9 @@ function asTreeNodes(
         path: [...path, "key"],
       });
     }
-    const keys = Object.keys(input);
-    // inline objects with a single key
-    if (keys.length === 1) {
-      const [key] = keys;
-      const newTitle = isNullish(title) ? [key] : [title, key];
-      return asTreeNodes(input[key as keyof typeof input], newTitle.join(separator), {
-        separator,
-        onClick,
-        onTitleClick,
-        shouldBeCollapsed,
-        path: [...path, ...newTitle.map((key) => key.toString())],
-      });
-    }
     const entries = Object.entries(input);
     // sort objects by key, with nested objects at the end
-    if (!Array.isArray(input)) {
+    if (!disableSorting && !Array.isArray(input)) {
       entries.sort(([aKey, aValue], [bKey, bValue]) => {
         if (typeof aValue === "object" && typeof bValue !== "object") return 1;
         if (typeof aValue !== "object" && typeof bValue === "object") return -1;
@@ -150,11 +145,7 @@ function asTreeNodes(
       {prefix && (
         <Emphasis
           isCollapsed={false}
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            onTitleClick?.(prefix, undefined, path);
-          }}
+          {...interactiveProps}
         >
           {prefix}
         </Emphasis>
@@ -190,9 +181,11 @@ function* asTextTreeNodes(input: string) {
 }
 
 const ViewContainer = styled.div<{ markdownMode?: true }>`
-  & > * {
-    margin-bottom: ${bs(1 / 3)};
-    word-wrap: anywhere;
+  word-wrap: anywhere;
+  ${increaseSpecificity()} {
+    & > * {
+      margin-bottom: ${bs(1 / 3)};
+    }
   }
   li p {
     margin-bottom: ${bs(1 / 3)};
@@ -239,11 +232,12 @@ export function ViewComponent({
   onTitleClick,
   shouldBeCollapsed,
   renderMode,
+  disableSorting
 }: {
   children: unknown;
   style?: React.CSSProperties;
   renderMode?: "markdown" | "text";
-} & Pick<TreeOptions, "onClick" | "onTitleClick" | "shouldBeCollapsed">) {
+} & Pick<TreeOptions, "onClick" | "onTitleClick" | "shouldBeCollapsed" | "disableSorting">) {
   const [rendererMode, setRendererMode] = useAtom(rendererModeAtom);
   const mode = renderMode ?? rendererMode;
   if (typeof children === "string") {
@@ -257,6 +251,7 @@ export function ViewComponent({
     onClick,
     onTitleClick,
     shouldBeCollapsed,
+    disableSorting,
   });
   return <ViewContainer style={style}>{content}</ViewContainer>;
 }

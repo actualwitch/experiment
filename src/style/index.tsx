@@ -237,7 +237,7 @@ export const appStyle = [
       ul,
       ol {
         margin-bottom: ${bs(1 / 6)};
-        padding-left: ${bs(3 / 2)};
+        padding-left: ${bs()};
       }
 
       table {

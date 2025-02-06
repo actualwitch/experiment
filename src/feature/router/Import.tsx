@@ -3,10 +3,11 @@ import { useEffect } from "react";
 
 import { navigateAtom, titleOverrideAtom } from ".";
 import templates from "../../../fixtures/templates.json";
+import testing from "../../../fixtures/testing.json";
 import { filenames, importsRegistry, selectedChat } from "../../atoms/client";
-import { experimentAtom, isNavPanelOpenAtom, layoutAtom, templatesAtom } from "../../atoms/common";
-import { type Config, ConfigRenderer } from "../../components/ConfigRenderer";
-import { View } from "../../components/view";
+import { debugAtom, experimentAtom, isNavPanelOpenAtom, layoutAtom, templatesAtom } from "../../atoms/common";
+import { type Config, ConfigRenderer } from "../ui/ConfigRenderer";
+import { View } from "../ui/view";
 import type { ExperimentWithMeta } from "../../types";
 import { ExperimentPreview } from "../chat/ExperimentPreview";
 import { selectionAtom } from "../chat/chat";
@@ -28,6 +29,7 @@ const SidebarContents = () => {
   }
   return (
     <View
+      disableSorting
       onClick={(value, key, path) => {
         const [parent] = path;
         setSelectedChat([parent, key!]);
@@ -130,6 +132,29 @@ export default function () {
 
   const [{ config, counter }] = useAtom(actionsAtom);
 
+  const [debug] = useAtom(debugAtom);
+
+  const addSamples = () => {
+    let { Samples: _, ...newRegistry } = registry;
+    const samples = Object.entries(templates).reduce<ExperimentWithMeta[]>((acc, [name, experiment]) => {
+      acc.push({ ...experiment, id: name });
+      return acc;
+    }, []);
+    if (debug) {
+      samples.push(
+        ...Object.entries(testing).reduce<ExperimentWithMeta[]>((acc, [name, experiment]) => {
+          acc.push({ ...experiment, id: name });
+          return acc;
+        }, []),
+      );
+    }
+    newRegistry = { Samples: samples, ...newRegistry };
+    setRegistry(newRegistry);
+    if (layout === "mobile") {
+      setIsNavPanelOpen(true);
+    }
+  };
+
   return (
     <>
       <Page>
@@ -140,24 +165,7 @@ export default function () {
               <h2>{title}</h2>
             </DesktopOnly>
             <p>
-              Import and explore previous completions from CSV files, or{" "}
-              <a
-                onClick={() => {
-                  const samples = Object.entries(templates).reduce<ExperimentWithMeta[]>((acc, [name, experiment]) => {
-                    return [...acc, { ...experiment, id: name }];
-                  }, []);
-                  setRegistry({
-                    ...registry,
-                    Samples: samples,
-                  });
-                  if (layout === "mobile") {
-                    setIsNavPanelOpen(true);
-                  }
-                }}
-              >
-                see some examples
-              </a>
-              .
+              Import and explore previous completions from CSV files, or <a onClick={addSamples}>see some examples</a>.
             </p>
           </>
         }

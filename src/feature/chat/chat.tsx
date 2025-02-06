@@ -11,7 +11,7 @@ import { Palette } from "../../style/palette";
 import { deepEqual } from "../../utils";
 import { useHandlers } from "../../utils/keyboard";
 import { useScrollToTop } from "../../utils/scroll";
-import { View, collapsedAtom } from "../../components/view";
+import { View, collapsedAtom } from "../ui/view";
 import type { _Message, Experiment, ExperimentWithMeta, Message } from "../../types";
 
 const baseHeight = bs(6);

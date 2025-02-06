@@ -3,7 +3,7 @@ import type { JSX, PropsWithChildren } from "react";
 import { Route, Routes, useLocation } from "react-router";
 
 import { experimentIdsAtom } from "../../atoms/common";
-import type { Config } from "../../components/ConfigRenderer";
+import type { Config } from "../ui/ConfigRenderer";
 import { TRIANGLE, description, name } from "../../const";
 import Experiment, { actionsAtom as experimentActionsAtom } from "./Experiment";
 import Import, { actionsAtom as importActionsAtom } from "./Import";
@@ -67,7 +67,7 @@ export const ROUTES: AppRoute[] = [
   {
     icon: "🌍",
     title: "Explore",
-    showInSidebar: false,
+    showInSidebar: true,
     path: "/explore",
     component: Explore,
   },

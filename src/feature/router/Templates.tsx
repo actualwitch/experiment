@@ -1,9 +1,9 @@
 import { atom, useAtom, type Setter } from "jotai";
 
-import { View } from "../../components/view";
+import { View } from "../ui/view";
 import { SidebarInput } from "../ui/Navigation";
 import { templatesAtom } from "../../atoms/common";
-import { ConfigRenderer, type Config } from "../../components/ConfigRenderer";
+import { ConfigRenderer, type Config } from "../ui/ConfigRenderer";
 import { Page } from "../ui/Page";
 import { Actions } from "../ui/Actions";
 

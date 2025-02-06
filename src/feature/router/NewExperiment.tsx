@@ -13,7 +13,7 @@ import {
   selectedProviderAtom,
   templatesAtom,
 } from "../../atoms/common";
-import { type Config, ConfigRenderer } from "../../components/ConfigRenderer";
+import { type Config, ConfigRenderer } from "../ui/ConfigRenderer";
 import { name } from "../../const";
 import { bs } from "../../style";
 import { type WithDarkMode, withDarkMode } from "../../style/darkMode";
@@ -269,7 +269,8 @@ export default function () {
         if (object.type !== "function") throw new Error("Not a function");
         setObject(object);
         setRole("tool");
-      } catch {
+      } catch (e) {
+        console.error(e);
         setObject(null);
       }
     }, 100);

@@ -93,9 +93,9 @@ export const processCsvAtom = atom(null, (get, set, file?: File) => {
         experiments.push(exp);
       }
     }
-    set(importsRegistry, (prev) => ({
-      ...prev,
+    set(importsRegistry, ({ [fileName]: _, ...prev }) => ({
       [fileName]: experiments,
+      ...prev,
     }));
   };
   reader.readAsText(file);

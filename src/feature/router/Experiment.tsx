@@ -10,7 +10,7 @@ import {
   parentAtom,
   templatesAtom,
 } from "../../atoms/common";
-import { type Config, ConfigRenderer } from "../../components/ConfigRenderer";
+import { type Config, ConfigRenderer } from "../ui/ConfigRenderer";
 import type { Experiment } from "../../types";
 import { entangledAtom } from "../../utils/entanglement";
 import { ExperimentPreview } from "../chat/ExperimentPreview";

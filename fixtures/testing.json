@@ -1,0 +1,51 @@
+{
+  "View cases": {
+    "messages": [
+      {
+        "role": "tool",
+        "content": {
+          "function": {
+            "name": "bio",
+            "description": "The `bio` tool allows you to persist information across conversations. The information will appear in the model set context below in future conversations.",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "memory": {
+                  "type": "string",
+                  "description": "The information you want to persist across conversations."
+                }
+              },
+              "required": ["memory"]
+            }
+          }
+        }
+      },
+      {
+        "role": "tool",
+        "content": {
+          "array": [
+            "array",
+            "of",
+            "strings"
+          ]
+        }
+      },
+      {
+        "role": "tool",
+        "content": {
+          "array": [
+            "array",
+            "of",
+            "strings"
+          ],
+          "fields": {
+            "multiple": {},
+            "fields": {},
+            "of": {},
+            "objects": {}
+          }
+        }
+      }
+    ]
+  }
+}

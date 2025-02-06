@@ -9,7 +9,7 @@ import { subscriptionAtom, trackVisibleAtom } from "./atoms/focus";
 import { store } from "./store";
 import { Container, Slideover, stylesAtom } from "./style";
 import { Hydration } from "./utils/hydration";
-import { FavIcon } from "./components/FavIcon";
+import { FavIcon } from "./feature/ui/FavIcon";
 import { getRealm } from "./utils/realm";
 import { clientFile } from "./const";
 import { ErrorBoundary } from "./feature/ui/error";
