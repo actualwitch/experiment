@@ -3,7 +3,7 @@
   "description": "🔬 Experiment is a feature-rich chat interface for Large Language Models (LLMs) like Anthropic, OpenAI, and Mistral.",
   "keywords": ["inference", "experiment-tracking", "llm"],
   "repository": "github:actualwitch/experiment",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "author": "Ade あで Fisher",
   "license": "MIT",
   "private": true,
