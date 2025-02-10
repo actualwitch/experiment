@@ -228,7 +228,7 @@ export const actionsAtom = atom((get) => {
       counter++;
     }
   }
-  if (hasBackend()){
+  if (hasBackend()) {
     config.Actions.push({
       Special: {
         buttons: [
@@ -236,7 +236,7 @@ export const actionsAtom = atom((get) => {
             label: "Add Context",
             action: (set: Setter) => {
               const dir = get(currentDirAtom);
-              set(experimentAtom, [...experiment, { role: "context", content: {directory: dir} }])
+              set(experimentAtom, [...experiment, { role: "context", content: { directory: dir } }]);
             },
           },
         ],

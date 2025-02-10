@@ -298,8 +298,8 @@ export const appStyle = [
     ${input}
 
     blockquote {
-        border-left: 2px solid currentColor;
-        padding-left: ${bs(1 / 4)};
+      border-left: 2px solid currentColor;
+      padding-left: ${bs(1 / 4)};
     }
   `,
 ];

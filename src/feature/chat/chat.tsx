@@ -65,7 +65,7 @@ export const MessageComponent = styled.article<{
   isSelected?: boolean;
   isDarkMode?: boolean;
   experimentLayout: Store["experimentLayout"];
-  name?: string
+  name?: string;
 }>(({ name, role, ioType, contentType, isSelected, isDarkMode, experimentLayout }) => {
   const fromServer = ioType === "output";
   const align = getAlign(fromServer, experimentLayout);
@@ -184,7 +184,7 @@ export const MessageComponent = styled.article<{
 type Path = [number] | [number, "content"];
 export const selectionAtom = atom<Path | null>(null);
 
-function hasMessages(obj: _Message | ExperimentWithMeta): obj is ExperimentWithMeta{
+function hasMessages(obj: _Message | ExperimentWithMeta): obj is ExperimentWithMeta {
   return Object.hasOwn(obj, "messages");
 }
 
@@ -323,7 +323,7 @@ const Banner = styled.div`
 export function ChatPreview({
   experiment,
   autoScroll,
-  autoScrollAnchor = "first"
+  autoScrollAnchor = "first",
 }: {
   experiment: Experiment;
   autoScroll?: boolean;

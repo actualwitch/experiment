@@ -231,14 +231,14 @@ export default function Parameters() {
           : <Button onClick={() => setIsAdding(true)}>Add</Button>}
         </Row>
         {selectedProvider && (
-            <TextField
-              type="password"
-              placeholder={hasBackend() ? "Token or 1password reference" : "Token"}
-              onChange={(value) => setToken(value)}
-              onBlur={() => {
-                submit();
-              }}
-            />
+          <TextField
+            type="password"
+            placeholder={hasBackend() ? "Token or 1password reference" : "Token"}
+            onChange={(value) => setToken(value)}
+            onBlur={() => {
+              submit();
+            }}
+          />
         )}
         {(Object.keys(tokens) as Array<keyof typeof tokens>).map((provider) => (
           <Row key={provider}>

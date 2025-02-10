@@ -4,13 +4,7 @@ import { resolve, spawn } from "../utils";
 import { clientFile, staticDir } from "../const";
 
 export const clientScriptAtom = atom(async () => {
-  const result = await spawn("bun", [
-    "build",
-    "./src/entry/client.tsx",
-    "--outdir",
-    `./${staticDir}`,
-    "--minify",
-  ]);
+  const result = await spawn("bun", ["build", "./src/entry/client.tsx", "--outdir", `./${staticDir}`, "--minify"]);
   if (result.isErr) {
     console.error(result.error);
     return Maybe.nothing();

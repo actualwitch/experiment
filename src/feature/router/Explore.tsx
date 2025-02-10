@@ -17,10 +17,13 @@ export const pwdAtom = getRealm() === "server" ? atom(Bun.env.PWD) : nopeAtom;
 
 const dirOverrideAtom = atom<string | null>(null);
 
-export const currentDirAtom = entangledAtom("cwd", atom((get) => {
-  const override = get(dirOverrideAtom);
-  return override ?? get(pwdAtom);
-}));
+export const currentDirAtom = entangledAtom(
+  "cwd",
+  atom((get) => {
+    const override = get(dirOverrideAtom);
+    return override ?? get(pwdAtom);
+  }),
+);
 
 const goToAtom = entangledAtom(
   "gotodir",
@@ -56,7 +59,7 @@ export async function filesInDir(thisPath: string) {
   return files;
 }
 
-const includeExtensions = ["ts", "tsx", "md", "json", "yml"];
+const includeExtensions = ["ts", "tsx", "md", "json", "yml", ".gitignore"];
 export async function iterateDir(dir: string, ignore: string[] = [".git"]) {
   const thisIgnores = [...ignore];
   const entries = await readdir(dir, { withFileTypes: true });

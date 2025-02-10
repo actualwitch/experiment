@@ -21,7 +21,7 @@ export type LeafWithSlider = {
 export type LeafWithCSVImport = {
   label: string;
   type: "csv";
-}
+};
 
 export type LeafWithAction = {
   label: string;
@@ -77,7 +77,6 @@ const RenderWithAtom = ({ children }: { children: LeafWithSlider | LeafWithOptio
     );
   }
 };
-
 
 const CsvInput = () => {
   const processFile = useSetAtom(processCsvAtom);

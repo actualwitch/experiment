@@ -28,12 +28,9 @@ export default {
       isFixture(fixture) ?
         [createHydrationScript(FIXTURES[fixture]), assignToWindow("REALM", `"TESTING"`)]
       : [assignToWindow("REALM", `"SPA"`)],
-    )
-    return new Response(
-      html,
-      {
-        headers: { "Content-Type": "text/html" },
-      },
     );
+    return new Response(html, {
+      headers: { "Content-Type": "text/html" },
+    });
   },
 } satisfies Serve;

@@ -50,7 +50,7 @@ const Emphasis = styled.em<{ isCollapsed?: boolean; isDisabled?: boolean }>(
       }
     `;
   },
-  ({ isDisabled }) => isDisabled ? nonInteractive : interactive,
+  ({ isDisabled }) => (isDisabled ? nonInteractive : interactive),
 );
 
 export const collapsedAtom = atom<string[]>([]);
@@ -143,10 +143,7 @@ function asTreeNodes(
   return (
     <>
       {prefix && (
-        <Emphasis
-          isCollapsed={false}
-          {...interactiveProps}
-        >
+        <Emphasis isCollapsed={false} {...interactiveProps}>
           {prefix}
         </Emphasis>
       )}
@@ -232,7 +229,7 @@ export function ViewComponent({
   onTitleClick,
   shouldBeCollapsed,
   renderMode,
-  disableSorting
+  disableSorting,
 }: {
   children: unknown;
   style?: React.CSSProperties;
