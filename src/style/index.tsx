@@ -259,14 +259,15 @@ export const appStyle = [
       }
 
       pre {
-        code {
-          background: none;
-        }
         font-size: 0.75em;
         background-color: ${Palette.black}10;
         padding: ${bs(1 / 3)} ${bs(1 / 2)};
         border-radius: ${bs(Palette.borderCode)};
         overflow-x: scroll;
+        position: relative;
+        code {
+          background: none;
+        }
       }
 
       style {
@@ -294,6 +295,10 @@ export const appStyle = [
       overflow-x: hidden;
     }
 
+    code {
+      font-family: ${FONT_STACKS["Monospace Code"]};
+    }
+
     ${button}
     ${input}
 
@@ -311,7 +316,7 @@ export const stylesAtom = atom((get) => {
   const fontStack = get(fontStackAtom) ?? "Transitional";
   styleSet.push(darkModeStyle);
   styleSet.push(css`
-    :root {
+    :root, pre {
       font-family: ${FONT_STACKS[fontStack]}${withEmoji};
     }
   `);

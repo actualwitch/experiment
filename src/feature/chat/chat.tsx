@@ -261,7 +261,6 @@ export const ChatMessage = ({ message: _message, index }: { message: Message; in
       </div>
     );
   } else if (["string", "object"].includes(typeof message.content)) {
-    contentType = typeof message.content;
     innerContent ??= (
       <View
         onClick={(value, key, path) => {

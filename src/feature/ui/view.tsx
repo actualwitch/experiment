@@ -1,14 +1,24 @@
 import { css } from "@emotion/react";
 import styled from "@emotion/styled";
-import DOMPurify from "isomorphic-dompurify";
-import { atom, useAtom } from "jotai";
-import { marked } from "marked";
-import { bs } from "../../style";
-import { createElement, memo, useMemo, type JSX, type MouseEventHandler } from "react";
-import { TRIANGLE } from "../../const";
+import { atom, useAtom, useSetAtom } from "jotai";
+import Markdown, { type ReactRenderer } from "marked-react";
+import {
+  type JSX,
+  type MouseEventHandler,
+  type PropsWithChildren,
+  type ReactNode,
+  createElement,
+  memo,
+  useMemo,
+} from "react";
 import { rendererModeAtom } from "../../atoms/common";
-import { increaseSpecificity } from "../../style/utils";
+import { TRIANGLE } from "../../const";
+import { bs, Button } from "../../style";
 import { nonInteractive } from "../../style/mixins";
+import { increaseSpecificity } from "../../style/utils";
+import { inlineButtonModifier } from "../router/NewExperiment";
+import { hasBackend } from "../../utils/realm";
+import { applyDiffAtom } from "../../atoms/diff";
 
 type Primitive = string | number | boolean | null | undefined;
 
@@ -177,7 +187,7 @@ function* asTextTreeNodes(input: string) {
   }
 }
 
-const ViewContainer = styled.div<{ markdownMode?: true }>`
+const ViewContainer = styled.div<PropsWithChildren<{ markdownMode?: true }>>`
   word-wrap: anywhere;
   ${increaseSpecificity()} {
     & > * {
@@ -192,6 +202,9 @@ const ViewContainer = styled.div<{ markdownMode?: true }>`
   }
   ul ul ::marker {
     content: "${TRIANGLE} ";
+  }
+  pre {
+    overflow: hidden;
   }
   ${(p) =>
     !p.markdownMode &&
@@ -212,14 +225,83 @@ const ViewContainer = styled.div<{ markdownMode?: true }>`
   }
 `;
 
-const Markdown = ({ children, style }: { children: string; style?: React.CSSProperties }) => {
-  // images are common attack vectors
-  const html = useMemo(() => {
-    return DOMPurify.sanitize(marked.parse(children, { async: false }), {
-      FORBID_TAGS: ["img"],
-    });
-  }, [children]);
-  return <ViewContainer markdownMode style={style} dangerouslySetInnerHTML={{ __html: html }} />;
+const ActionRow = styled.div`
+  button {
+    ${inlineButtonModifier}
+  }
+`;
+
+const widen = (align: string, length: string) => `
+padding-${align}: ${length};
+margin-${align}: -${length};
+`;
+
+const newLine = `
+`;
+
+const Container = styled.div`
+  overflow-x: scroll;
+  scrollbar-width: none;
+  ${["left", "right", "bottom"].map((align) => widen(align, bs(1 / 2))).join(newLine)}
+`;
+
+export function Code({ language, value }: { language?: string; value?: ReactNode }) {
+  const applyDiff = useSetAtom(applyDiffAtom);
+  if (language === "diff") {
+    return (
+      <>
+        <pre>
+          {hasBackend() ?
+            <>
+              <ActionRow>
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    applyDiff(value);
+                  }}
+                >
+                  Apply
+                </button>
+              </ActionRow>
+              <hr />
+            </>
+          : null}
+          <Container>
+            <code>{value}</code>
+          </Container>
+        </pre>
+      </>
+    );
+  }
+  return (
+    <pre>
+      <code>{value}</code>
+    </pre>
+  );
+}
+
+// export function Paragraph({ children }: { children?: string }) {
+//   const parsedContent = useMemo(() => {
+//     try {
+//       if (children) return JSON.parse(children);
+//     } finally {
+//       return children;
+//     }
+//   }, [children]);
+// }
+
+const renderer: Partial<ReactRenderer> = {
+  code(snippet, lang) {
+    return <Code key={this.elementId} language={lang} value={snippet} />;
+  },
+};
+
+const MarkdownComponent = ({ children, style }: { children: string; style?: React.CSSProperties }) => {
+  return (
+    <ViewContainer markdownMode style={style}>
+      <Markdown value={children} renderer={renderer} />
+    </ViewContainer>
+  );
 };
 
 export function ViewComponent({
@@ -239,7 +321,7 @@ export function ViewComponent({
   const mode = renderMode ?? rendererMode;
   if (typeof children === "string") {
     if (mode === "markdown") {
-      return <Markdown style={{ ...style, width: undefined }}>{children}</Markdown>;
+      return <MarkdownComponent style={{ ...style, width: undefined }}>{children}</MarkdownComponent>;
     }
     return <ViewContainer style={style}>{Array.from(asTextTreeNodes(children))}</ViewContainer>;
   }

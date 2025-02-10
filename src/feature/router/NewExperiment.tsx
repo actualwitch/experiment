@@ -38,6 +38,16 @@ import { hasBackend } from "../../utils/realm";
 
 const baseMargin = 1 / 2;
 
+export const inlineButtonModifier = css`
+background: transparent;
+color: inherit;
+padding-top: 0;
+padding-bottom: 0;
+:hover {
+  background-color: ${Palette.black}20;
+}
+`;
+
 export const Block = styled.div<WithDarkMode>`
   display: flex;
   flex-direction: column;
@@ -77,13 +87,7 @@ export const Block = styled.div<WithDarkMode>`
     background: transparent;
   }
   button {
-    background: transparent;
-    color: inherit;
-    padding-top: 0;
-    padding-bottom: 0;
-    :hover {
-      background-color: ${Palette.black}20;
-    }
+    ${inlineButtonModifier}
   }
   select,
   button {

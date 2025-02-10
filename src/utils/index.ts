@@ -133,6 +133,7 @@ export async function spawn(command: string, args: string[], options?: any): Pro
       });
 
       handle.stderr.on("data", (data: unknown) => {
+        console.error(data);
         ko(new Error(String(data)));
       });
 
@@ -140,6 +141,17 @@ export async function spawn(command: string, args: string[], options?: any): Pro
         ok("");
       });
     });
+  }
+  return Result.err(new Error("Cannot spawn processes in the browser"));
+}
+
+
+export async function exec(command: string, options?: any): Promise<Result<string, Error>> {
+  const maybeModule = await resolve("child_process");
+
+  if (maybeModule.isOk) {
+    const module = maybeModule.value;
+    return module.execSync(command, options);
   }
   return Result.err(new Error("Cannot spawn processes in the browser"));
 }
