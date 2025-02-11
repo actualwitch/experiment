@@ -10,7 +10,7 @@ import {
   fontStackAtom,
   isBoldTextAtom,
   isDarkModeAtom,
-  rendererModeAtom,
+  isTransRightsAtom,
   tokensAtom,
 } from "../../atoms/common";
 import { Button, FONT_STACKS, bs } from "../../style";
@@ -24,6 +24,7 @@ import { Switch } from "../ui/Switch";
 
 const StyledForm = styled.form`
   display: flex;
+  max-width: 80ch;
   flex-direction: column;
   input[type="text"] {
     flex: 1;
@@ -131,11 +132,13 @@ const ModalContent = ({ children, close }: PropsWithChildren<{ close: () => void
 };
 
 export default function Parameters() {
-  const [isBoldText, setIsBoldText] = useAtom(isBoldTextAtom);
   const [isDarkMode, setIsDarkMode] = useAtom(isDarkModeAtom);
+  const [isBoldText, setIsBoldText] = useAtom(isBoldTextAtom);
   const [fontStack, setFontStack] = useAtom(fontStackAtom);
   const [experimentLayout, setExperimentLayout] = useAtom(experimentLayoutAtom);
-  const [rendererMode, setRendererMode] = useAtom(rendererModeAtom);
+
+  const [isTransRights, setIsTransRights] = useAtom(isTransRightsAtom)
+
   const [tokens, setTokens] = useAtom(tokensAtom);
   const [isAdding, setIsAdding] = useState(false);
 
@@ -207,12 +210,13 @@ export default function Parameters() {
             ]}
           </Switch>
         </Row>
+        <h3>Semantic</h3>
         <Row>
-          <header>Renderer</header>
-          <Switch value={rendererMode} onChange={setRendererMode}>
+          <header>🏳️‍⚧️ Trans rights</header>
+          <Switch value={isTransRights} onChange={setIsTransRights}>
             {[
-              { value: "markdown", name: "Markdown", isDefault: true },
-              { value: "text+json", name: "Text + JSON" },
+              { value: false, name: "Off" },
+              { value: undefined, name: "On", isDefault: true },
             ]}
           </Switch>
         </Row>

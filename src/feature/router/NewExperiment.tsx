@@ -1,9 +1,10 @@
 import { css } from "@emotion/react";
 import styled from "@emotion/styled";
 import { type Setter, atom, useAtom, useSetAtom } from "jotai";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { NavLink } from "react-router";
 
+import { Ban, Disc3, MessageCircleDashed, Play, Pyramid, Rewind, Trash2 } from "lucide-react";
 import {
   experimentAtom,
   isActionPanelOpenAtom,
@@ -12,15 +13,16 @@ import {
   parentAtom,
   selectedProviderAtom,
   templatesAtom,
+  type Store,
 } from "../../atoms/common";
-import { type Config, ConfigRenderer } from "../ui/ConfigRenderer";
 import { name } from "../../const";
 import { bs } from "../../style";
 import { type WithDarkMode, withDarkMode } from "../../style/darkMode";
 import { Palette } from "../../style/palette";
 import type { Message, Role } from "../../types";
 import { useHandlers } from "../../utils/keyboard";
-import { ChatPreview, selectionAtom } from "../chat/chat";
+import { hasBackend } from "../../utils/realm";
+import { ChatPreview, selectionAtom, type Path } from "../chat/chat";
 import {
   availableProviderOptionsAtom,
   isRunningAtom,
@@ -31,21 +33,22 @@ import {
 } from "../inference/atoms";
 import { modelOptions } from "../inference/types";
 import { Actions } from "../ui/Actions";
+import { type Config, ConfigRenderer } from "../ui/ConfigRenderer";
 import { Page } from "../ui/Page";
 import { TextArea } from "../ui/TextArea";
 import { currentDirAtom } from "./Explore";
-import { hasBackend } from "../../utils/realm";
+import { createCancelEditingButton, createSelectionEditButtons, createTemplateButton } from "../ui/ConfigRenderer/buttonCreators";
 
 const baseMargin = 1 / 2;
 
 export const inlineButtonModifier = css`
-background: transparent;
-color: inherit;
-padding-top: 0;
-padding-bottom: 0;
-:hover {
-  background-color: ${Palette.black}20;
-}
+  background: transparent;
+  color: inherit;
+  padding-top: 0;
+  padding-bottom: 0;
+  :hover {
+    background-color: ${Palette.black}20;
+  }
 `;
 
 export const Block = styled.div<WithDarkMode>`
@@ -138,6 +141,7 @@ export const actionsAtom = atom((get) => {
   const isRunning = get(isRunningAtom);
   const experiment = get(experimentAtom);
   const selection = get(selectionAtom);
+  const templates = get(templatesAtom);
   let counter = 0;
   const config: Config = {
     Actions: [],
@@ -173,11 +177,13 @@ export const actionsAtom = atom((get) => {
       buttons: [
         {
           label: "Start Experiment",
+          icon: Play,
           action: (set: Setter) => set(runInferenceAtom),
           disabled: isRunning || experiment.length === 0,
         },
         {
           label: "Reset",
+          icon: Rewind,
           action: (set: Setter) => {
             set(experimentAtom, []);
             set(parentAtom, undefined);
@@ -196,37 +202,27 @@ export const actionsAtom = atom((get) => {
           buttons: [
             {
               label: "Edit",
+              icon: MessageCircleDashed,
               action: (set: Setter) => set(selectionAtom, [selection[0], "content"]),
             },
             {
               label: "Delete",
+              icon: Trash2,
               action: (set: Setter) =>
                 set(
                   experimentAtom,
                   get(experimentAtom).filter((_, i) => i !== selection[0]),
                 ),
             },
-            {
-              label: "Template",
-              action: async (set: Setter) => {
-                const name = prompt("Name of the template");
-                if (!name) return;
-                set(templatesAtom, { ...get(templatesAtom), [name]: get(experimentAtom)[selection[0]] });
-              },
-            },
+            ...createSelectionEditButtons(templates, experiment[selection[0]])
           ],
         },
       });
       counter += 3;
     } else if (selection.length === 2) {
       config.Actions.push({
-        Selection: {
-          buttons: [
-            {
-              label: "Cancel",
-              action: (set: Setter) => set(selectionAtom, [selection[0]]),
-            },
-          ],
+        Editing: {
+          buttons: [createCancelEditingButton([selection[0]])],
         },
       });
       counter++;
@@ -237,7 +233,8 @@ export const actionsAtom = atom((get) => {
       Special: {
         buttons: [
           {
-            label: "Add Context",
+            label: "Context",
+            icon: Pyramid,
             action: (set: Setter) => {
               const dir = get(currentDirAtom);
               set(experimentAtom, [...experiment, { role: "context", content: { directory: dir } }]);

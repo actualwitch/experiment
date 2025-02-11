@@ -52,11 +52,11 @@ export const isNavPanelOpenAtom = atom(
 );
 
 export type Store = {
-  isBoldText?: boolean;
   isDarkMode?: boolean;
+  isBoldText?: boolean;
   fontStack?: keyof typeof FONT_STACKS;
   experimentLayout?: "left" | "chat" | "chat-reverse";
-  rendererMode?: "markdown" | "text+json";
+  isTransRights?: boolean;
   selectedProvider?: ProviderType;
   selectedModel?: string;
   experiments?: Record<string, SerialExperiment>;
@@ -164,6 +164,11 @@ export const isDarkModeAtom = entangledAtom(
   focusAtom(storeAtom, (o) => o.prop("isDarkMode")),
 );
 
+export const isTransRightsAtom = entangledAtom(
+  "isTransRights",
+  focusAtom(storeAtom, (o) => o.prop("isTransRights")),
+);
+
 export type ExperimentCursor = { id: string; runId: string };
 
 export const createExperiment = atom(
@@ -210,11 +215,6 @@ export const experimentLayoutAtom = entangledAtom(
 );
 
 export const parentAtom = entangledAtom("parent", atom<string | undefined>(undefined));
-
-export const rendererModeAtom = entangledAtom(
-  "rendererMode",
-  focusAtom(storeAtom, (o) => o.prop("rendererMode").valueOr("markdown")),
-);
 
 export const hasOpensslAtom = atom(async () => {
   const result = await spawn("which", ["openssl"]);

@@ -15,6 +15,7 @@ import { Actions } from "../ui/Actions";
 import { DesktopOnly } from "../ui/Mobile";
 import { SidebarInput } from "../ui/Navigation";
 import { Page } from "../ui/Page";
+import { createRemixButtons, createSelectionEditButtons } from "../ui/ConfigRenderer/buttonCreators";
 
 const SidebarContents = () => {
   const [chats] = useAtom(filenames);
@@ -49,6 +50,7 @@ export const actionsAtom = atom((get) => {
   const selection = get(selectionAtom);
   const experiment = get(selectedExperimentAtom);
   const navigate = get(navigateAtom);
+  const templates = get(templatesAtom);
   let counter = 0;
   const config: Config = {
     Actions: [],
@@ -59,47 +61,23 @@ export const actionsAtom = atom((get) => {
   });
   counter += 1;
   if (experiment) {
+    const buttons = createRemixButtons(experiment, undefined, navigate);
     config.Actions.push({
-      buttons: [
-        {
-          label: "Fork",
-          action: (set: Setter) => {
-            if (!experiment) return;
-            const messages = Array.isArray(experiment) ? experiment : experiment.messages;
-            set(experimentAtom, messages);
-            navigate?.("/");
-          },
-        },
-        {
-          label: "Copy",
-          action: (set: Setter) => void navigator.clipboard.writeText(JSON.stringify(experiment)),
-        },
-      ],
+      buttons,
     });
-    counter += 2;
+    counter += buttons.length;
   }
   if (selection !== null) {
+    const buttons = createSelectionEditButtons(
+      templates,
+      (Array.isArray(experiment) ? experiment : experiment.messages)[selection[0]],
+    );
     config.Actions.push({
       Selection: {
-        buttons: [
-          {
-            label: "Unselect",
-            action: (set: Setter) => set(selectionAtom, null),
-          },
-          {
-            label: "Template",
-            action: async (set: Setter) => {
-              const name = prompt("Name of the template");
-              if (!name) return;
-              const templates = get(templatesAtom);
-              const experiment = get(selectedExperimentAtom);
-              set(templatesAtom, { ...templates, [name]: experiment[selection[0]] });
-            },
-          },
-        ],
+        buttons,
       },
     });
-    counter++;
+    counter += buttons.length;
   }
   return { config, counter };
 });

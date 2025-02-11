@@ -103,6 +103,14 @@ export const Button = ({ onClick, ...props }: HTMLProps<HTMLButtonElement>) => {
 // export const Button = injectAtoms({ isDarkMode: isDarkModeAtom })(InternalButton);
 
 const button = css`
+  button {
+    display: flex;
+    align-items: end;
+    gap: 6px;
+    svg {
+      margin-bottom: 5px;
+    }
+  }
   button:not(:disabled) {
     background-color: ${Palette.actionableBackground};
     :hover {
@@ -136,9 +144,6 @@ const button = css`
       border-color: ${Palette.buttonDisabledBorder};
     }
   }
-  button + button {
-    margin-left: ${bs(1 / 4)};
-  }
 `;
 
 const buttonDarkMode = css`
@@ -170,14 +175,13 @@ const inputDarkMode = css`
   }
 `;
 
-const sidebarWidth = "320px";
+export const sidebarWidth = "320px";
 
 export const Container = styled.div<WithLayout>(
   content,
   css`
     margin-bottom: 0;
-    display: grid;
-    grid-template-columns: ${sidebarWidth} 1fr ${sidebarWidth};
+    display: flex;
     height: 100svh;
   `,
   (p) =>
@@ -194,11 +198,21 @@ export const Container = styled.div<WithLayout>(
 export const Sidebar = styled.aside`
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
   padding: ${bs()};
   overflow: auto;
+  flex: 0 ${sidebarWidth};
+  & > * {
+    display: flex;
+    flex-wrap: wrap;
+  }
   & > div {
     margin-bottom: ${bs(1 / 2)};
+  }
+  & > p {
+    gap: ${bs(1 / 4)};
+  }
+  div + p {
+    margin-top: ${bs(1 / 2)};
   }
 `;
 
@@ -316,7 +330,8 @@ export const stylesAtom = atom((get) => {
   const fontStack = get(fontStackAtom) ?? "Transitional";
   styleSet.push(darkModeStyle);
   styleSet.push(css`
-    :root, pre {
+    :root,
+    pre {
       font-family: ${FONT_STACKS[fontStack]}${withEmoji};
     }
   `);

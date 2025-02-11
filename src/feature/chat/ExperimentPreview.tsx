@@ -7,7 +7,7 @@ import type { Experiment } from "../../types";
 import { entangledAtom } from "../../utils/entanglement";
 import { ChatPreview } from "./chat";
 
-const timezoneAtom = entangledAtom(
+export const timezoneAtom = entangledAtom(
   "tz",
   atom(() => {
     return Intl.DateTimeFormat().resolvedOptions().timeZone;

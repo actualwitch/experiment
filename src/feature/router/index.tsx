@@ -8,6 +8,7 @@ import { TRIANGLE, description, name } from "../../const";
 import Experiment, { actionsAtom as experimentActionsAtom } from "./Experiment";
 import Import, { actionsAtom as importActionsAtom } from "./Import";
 import Explore from "./Explore";
+import Calendar from "./Calendar";
 import NewExperiment, { actionsAtom as newExperimentActionsAtom } from "./NewExperiment";
 import Parameters from "./Parameters";
 import Templates, { actionsAtom as templateActionsAtom } from "./Templates";
@@ -70,6 +71,13 @@ export const ROUTES: AppRoute[] = [
     showInSidebar: true,
     path: "/explore",
     component: Explore,
+  },
+  {
+    icon: "📅",
+    title: "Calendar",
+    showInSidebar: true,
+    path: "/calendar",
+    component: Calendar,
   },
   { icon: "🛠️", title: "Parameters", showInSidebar: true, path: "/parameters", component: Parameters },
 ];

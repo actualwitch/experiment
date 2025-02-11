@@ -1,11 +1,11 @@
 import { type PrimitiveAtom, type Setter, useAtom, useSetAtom } from "jotai";
-import { Fragment, createElement, useId } from "react";
+import { Fragment, createElement, useId, type ReactNode } from "react";
 import { Item } from "react-stately";
-import { processCsvAtom } from "../../atoms/client";
-import { Select } from "./Select";
-import { Slider } from "./Slider";
-import { store } from "../../store";
-import { Button } from "../../style";
+import { processCsvAtom } from "../../../atoms/client";
+import { Select } from "../Select";
+import { Slider } from "../Slider";
+import { store } from "../../../store";
+import { Button } from "../../../style";
 
 export type LeafWithOptions<T extends string = string> = {
   label: string;
@@ -25,16 +25,13 @@ export type LeafWithCSVImport = {
 
 export type LeafWithAction = {
   label: string;
+  icon?: (props: { size?: number }) => ReactNode;
   action: (set: Setter) => void;
   disabled?: boolean;
 };
 
 export type LeafWithButtons = {
-  buttons: Array<{
-    label: string;
-    action: (set: Setter) => void;
-    disabled?: boolean;
-  }>;
+  buttons: Array<LeafWithAction>;
 };
 
 export type Leaf = LeafWithOptions | LeafWithSlider | LeafWithAction | LeafWithButtons;
@@ -112,18 +109,21 @@ export const ConfigRenderer = ({ children, level = 3 }: { children: Config | boo
     if (children.buttons) {
       return (
         <p>
-          {children.buttons.map((button, index) => (
-            <Button
-              key={`${id}-${index}`}
-              type="submit"
-              disabled={button.disabled}
-              onClick={() => {
-                button.action(store.set);
-              }}
-            >
-              {button.label}
-            </Button>
-          ))}
+          {children.buttons.map((button, index) => {
+            const Icon = button?.icon;
+            return (
+              <Button
+                key={`${id}-${index}`}
+                type="submit"
+                disabled={button.disabled}
+                onClick={() => {
+                  button.action(store.set);
+                }}
+              >
+                {Icon && <Icon size={12} />} {button.label}
+              </Button>
+            );
+          })}
         </p>
       );
     }
@@ -132,6 +132,7 @@ export const ConfigRenderer = ({ children, level = 3 }: { children: Config | boo
         return <CsvInput />;
       }
       if (children.action) {
+        const Icon = children?.icon;
         return (
           <Button
             type="submit"
@@ -140,7 +141,7 @@ export const ConfigRenderer = ({ children, level = 3 }: { children: Config | boo
               children.action(store.set);
             }}
           >
-            {children.label}
+            {Icon && <Icon size={12} />} {children.label}
           </Button>
         );
       }

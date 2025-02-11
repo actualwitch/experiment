@@ -2,6 +2,7 @@ import { Global } from "@emotion/react";
 import { Provider, useAtom, useSetAtom } from "jotai";
 import { Suspense, useEffect, useState, type PropsWithChildren } from "react";
 import { useLocation, useNavigate } from "react-router";
+import styled from "@emotion/styled";
 
 import { Navigation } from "./feature/ui/Navigation";
 import { descriptionAtom, iconAtom, navigateAtom, pageTitleAtom, Router } from "./feature/router";
@@ -11,17 +12,19 @@ import { Container, Slideover, stylesAtom } from "./style";
 import { Hydration } from "./utils/hydration";
 import { FavIcon } from "./feature/ui/FavIcon";
 import { getRealm } from "./utils/realm";
-import { clientFile } from "./const";
+import { clientFile, name } from "./const";
 import { ErrorBoundary } from "./feature/ui/error";
 import {
   isActionPanelOpenAtom,
   isDarkModeAtom,
   isNavPanelOpenAtom,
+  isTransRightsAtom,
   layoutAtom,
   layoutTrackerAtom,
 } from "./atoms/common";
 import { DesktopOnly, MobileHeader, MobileOnly } from "./feature/ui/Mobile";
 import type { Nullish } from "./types";
+import { Page } from "./feature/ui/Page";
 
 const Meta = () => {
   const [title] = useAtom(pageTitleAtom);
@@ -36,6 +39,10 @@ const Meta = () => {
   );
 };
 
+const Paragraph = styled.p`
+  max-width: 64ch;
+`;
+
 const App = () => {
   const [styles] = useAtom(stylesAtom);
   useAtom(trackVisibleAtom);
@@ -43,6 +50,7 @@ const App = () => {
   useAtom(layoutTrackerAtom);
   const [layout] = useAtom(layoutAtom);
   const [isDarkMode] = useAtom(isDarkModeAtom);
+  const [isTransRights] = useAtom(isTransRightsAtom);
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const setNavigate = useSetAtom(navigateAtom);
@@ -58,18 +66,32 @@ const App = () => {
   return (
     <Suspense fallback={null}>
       <Container layout={layout}>
-        <DesktopOnly>
-          <Navigation />
-        </DesktopOnly>
-        <MobileOnly>
-          <MobileHeader />
-        </MobileOnly>
-        <MobileOnly>
-          <Slideover isOpen={isNavPanelOpen} isDarkMode={isDarkMode} from="right">
-            <Navigation />
-          </Slideover>
-        </MobileOnly>
-        <Router />
+        {isTransRights === false ?
+          <Page>
+            <h2>
+              🏳️‍⚧️ Trans rights <i>are</i> human rights
+            </h2>
+            <Paragraph>
+              Much of hardware and software forming foundation of digital experiences you participate in every day,
+              wouldn't be possible without contributions from queer people. That includes {name}, too. By refusing our
+              rights you not only forfeit your humanity, you erase wonderful contribution that could have existed.
+            </Paragraph>
+          </Page>
+        : <>
+            <DesktopOnly>
+              <Navigation />
+            </DesktopOnly>
+            <MobileOnly>
+              <MobileHeader />
+            </MobileOnly>
+            <MobileOnly>
+              <Slideover isOpen={isNavPanelOpen} isDarkMode={isDarkMode} from="right">
+                <Navigation />
+              </Slideover>
+            </MobileOnly>
+            <Router />
+          </>
+        }
         <Global styles={styles} />
       </Container>
     </Suspense>

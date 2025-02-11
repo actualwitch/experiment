@@ -11,7 +11,6 @@ import {
   memo,
   useMemo,
 } from "react";
-import { rendererModeAtom } from "../../atoms/common";
 import { TRIANGLE } from "../../const";
 import { bs, Button } from "../../style";
 import { nonInteractive } from "../../style/mixins";
@@ -275,6 +274,18 @@ export function Code({ language, value }: { language?: string; value?: ReactNode
   }
   return (
     <pre>
+      <ActionRow>
+        <button
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            navigator.clipboard.writeText(value);
+          }}
+        >
+          Copy
+        </button>
+      </ActionRow>
+      <hr />
       <Container>
         <code>{value}</code>
       </Container>
@@ -282,19 +293,25 @@ export function Code({ language, value }: { language?: string; value?: ReactNode
   );
 }
 
-// export function Paragraph({ children }: { children?: string }) {
-//   const parsedContent = useMemo(() => {
-//     try {
-//       if (children) return JSON.parse(children);
-//     } finally {
-//       return children;
-//     }
-//   }, [children]);
-// }
+export function Paragraph({ children }: { children?: ReactNode }) {
+  const parsedContent = useMemo(() => {
+    try {
+      if (Array.isArray(children) && children.length === 1 && typeof children[0] === "string")
+        return JSON.parse(children[0]);
+    } catch (e) {
+      return null;
+    }
+  }, [children]);
+  if (parsedContent) return <View>{parsedContent}</View>;
+  return <p>{children}</p>;
+}
 
 const renderer: Partial<ReactRenderer> = {
   code(snippet, lang) {
     return <Code key={this.elementId} language={lang} value={snippet} />;
+  },
+  paragraph(children) {
+    return <Paragraph key={this.elementId}>{children}</Paragraph>;
   },
 };
 
@@ -319,8 +336,7 @@ export function ViewComponent({
   style?: React.CSSProperties;
   renderMode?: "markdown" | "text";
 } & Pick<TreeOptions, "onClick" | "onTitleClick" | "shouldBeCollapsed" | "disableSorting">) {
-  const [rendererMode, setRendererMode] = useAtom(rendererModeAtom);
-  const mode = renderMode ?? rendererMode;
+  const mode = renderMode ?? "markdown";
   if (typeof children === "string") {
     if (mode === "markdown") {
       return <MarkdownComponent style={{ ...style, width: undefined }}>{children}</MarkdownComponent>;

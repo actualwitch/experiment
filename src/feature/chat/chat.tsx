@@ -181,7 +181,7 @@ export const MessageComponent = styled.article<{
   return styles;
 });
 
-type Path = [number] | [number, "content"];
+export type Path = [number] | [number, "content"];
 export const selectionAtom = atom<Path | null>(null);
 
 function hasMessages(obj: _Message | ExperimentWithMeta): obj is ExperimentWithMeta {

@@ -5,7 +5,7 @@ import { NavLink, useLocation } from "react-router";
 import { ROUTES, experimentsSidebarAtom } from "../router";
 import { revisionAtom, templatesAtom } from "../../atoms/common";
 import { TRIANGLE } from "../../const";
-import { bs } from "../../style";
+import { bs, sidebarWidth } from "../../style";
 import { nonInteractive, widthAvailable } from "../../style/mixins";
 import { increaseSpecificity } from "../../style/utils";
 import { portalIO } from "../../utils/portal";
@@ -18,6 +18,7 @@ const NavigationContainer = styled.nav<{ shouldHideOnMobile?: boolean }>`
   display: flex;
   flex-direction: column;
   height: 100%;
+  flex: 0 ${sidebarWidth};
   ul {
     list-style: none;
     padding: 0;
