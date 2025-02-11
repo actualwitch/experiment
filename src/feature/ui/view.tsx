@@ -275,7 +275,9 @@ export function Code({ language, value }: { language?: string; value?: ReactNode
   }
   return (
     <pre>
-      <code>{value}</code>
+      <Container>
+        <code>{value}</code>
+      </Container>
     </pre>
   );
 }
