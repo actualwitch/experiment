@@ -15,7 +15,6 @@ jobs:
       - name: Setup bun
         uses: oven-sh/setup-bun@v2
       - run: bun install
-      - run: bun ./scripts/fix.bun.ts
       - run: bun run build:bin
       # - name: Upload
       #   if: github.ref != 'refs/tags/v*.*.*'
