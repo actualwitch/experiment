@@ -1,7 +1,7 @@
 import { $ } from "bun";
 import { store } from "../src/store";
 import { localCertAndKeyAtom } from "../src/atoms/common";
-import { isMac } from "../src/utils/platform";
+import { isMac } from "../src/utils/realm";
 import { hostname, port } from "../src/const";
 
 const certAndKey = await store.get(localCertAndKeyAtom);

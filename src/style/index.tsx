@@ -309,7 +309,7 @@ export const appStyle = [
       overflow-x: hidden;
     }
 
-    code {
+    pre code {
       font-family: ${FONT_STACKS["Monospace Code"]};
     }
 
@@ -352,8 +352,9 @@ export const Slideover = styled.aside<{ isOpen: boolean; from?: "left" | "right"
   z-index: 2;
   transition: transform 100ms ease-out;
   display: flex;
+  flex-direction: column;
   & > * {
-    width: 100%;
+    flex: 1;
   }
   ${(p) =>
     withDarkMode(

@@ -1,4 +1,3 @@
-import { atom, type WritableAtom } from "jotai";
 import { useState } from "react";
 
 export function ColorPicker() {
@@ -56,19 +55,4 @@ export function ColorPicker() {
       </div>
     </>
   );
-}
-
-export function tracingAtom(originalAtom: WritableAtom<any, any, void>) {
-  const thisAtom = atom(
-    (get) => {
-      const value = get(originalAtom);
-      console.log("get", value);
-      return value;
-    },
-    (get, set, update) => {
-      console.log("set", update);
-      set(originalAtom, update);
-    },
-  );
-  return thisAtom;
 }

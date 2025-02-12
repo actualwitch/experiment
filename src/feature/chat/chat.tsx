@@ -25,7 +25,7 @@ export const ChatContainer = styled.div<WithDarkMode>`
     border-radius: ${bs(Palette.borderSpan)};
   }
 
-  *:not(pre) > code {
+  *:not(pre) > div > code {
     padding: 0 ${bs(1 / 10)};
   }
 
@@ -111,6 +111,10 @@ export const MessageComponent = styled.article<{
         border: 0;
         border-bottom: 1px solid currentColor;
       }
+
+      pre > hr {
+        margin-bottom: ${bs(1 / 4)}
+      }
     `,
   ];
   if (align === "right" && contentType === "object") {
@@ -187,6 +191,8 @@ export const selectionAtom = atom<Path | null>(null);
 function hasMessages(obj: _Message | ExperimentWithMeta): obj is ExperimentWithMeta {
   return Object.hasOwn(obj, "messages");
 }
+
+export type Coords = [x: number, y: number];
 
 export const ChatMessage = ({ message: _message, index }: { message: Message; index: number }) => {
   const ref = useRef<null | HTMLElement>(null);
@@ -284,6 +290,8 @@ export const ChatMessage = ({ message: _message, index }: { message: Message; in
     );
   }
 
+  const hitRef = useRef<Coords | null>(null);
+
   return (
     <MessageComponent
       // contentEditable={isSelected && selection?.[1] === "content"}
@@ -297,9 +305,22 @@ export const ChatMessage = ({ message: _message, index }: { message: Message; in
       isSelected={isSelected}
       isDarkMode={isDarkMode}
       experimentLayout={experimentLayout}
-      onMouseUp={() => {
+      onMouseDown={(e) => {
+        hitRef.current = [e.screenX, e.screenY];
+      }}
+      onMouseUp={(e) => {
         if (selection?.length === 2) return;
         if (isSelected) return;
+        if (hitRef.current) {
+          const [x, y] = hitRef.current;
+          hitRef.current = null;
+          const dist = Math.hypot(e.screenX - x, e.screenY - y);
+          if (dist > 5) {
+            e.preventDefault();
+            e.stopPropagation();
+            return;
+          }
+        }
         setSelection([selector[0]]);
       }}
       onDoubleClick={() => {
