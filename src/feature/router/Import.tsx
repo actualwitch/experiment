@@ -67,11 +67,9 @@ export const actionsAtom = atom((get) => {
     });
     counter += buttons.length;
   }
-  if (selection !== null) {
-    const buttons = createSelectionEditButtons(
-      templates,
-      (Array.isArray(experiment) ? experiment : experiment.messages)[selection[0]],
-    );
+  if (selection !== null && experiment) {
+    const messages = Array.isArray(experiment) ? experiment : experiment.messages;
+    const buttons = createSelectionEditButtons(templates, messages[selection[0]]);
     config.Actions.push({
       Selection: {
         buttons,
