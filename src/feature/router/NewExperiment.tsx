@@ -343,6 +343,10 @@ export default function () {
   }, [experiment, parent]);
 
   useEffect(() => {
+    setSelection(null);
+  }, [experiment]);
+
+  useEffect(() => {
     if (selection && selection[0] >= experiment.length) {
       setSelection(null);
     }
@@ -368,11 +372,12 @@ export default function () {
           return item;
         }),
       );
+      setMessage("");
       return;
     }
     if (message) {
-      setMessage("");
       setExperiment([...experiment, { role, content: object || message }]);
+      setMessage("");
       return;
     }
     if (experiment.length) {
