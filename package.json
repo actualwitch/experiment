@@ -9,6 +9,9 @@
   "repository": "github:actualwitch/experiment",
   "version": "0.7.1",
   "author": "Ade あで Fisher",
+  "contributors": [
+    "Claude (AI Assistant)"
+  ],
   "license": "MIT",
   "private": true,
   "module": "src/entry/server.tsx",

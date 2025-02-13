@@ -38,3 +38,10 @@ export type SerialExperiment = {
 };
 
 export type Nullish = null | undefined;
+
+export type Persona = {
+  id: string;
+  role: string;
+  context: Record<string, unknown>;
+  systemMessage: string;
+};
