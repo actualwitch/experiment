@@ -25,7 +25,7 @@ export const ChatContainer = styled.div<WithDarkMode>`
     border-radius: ${bs(Palette.borderSpan)};
   }
 
-  *:not(pre) > div > code {
+  *:not(pre) code {
     padding: 0 ${bs(1 / 10)};
   }
 

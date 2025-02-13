@@ -1,7 +1,7 @@
 import { css } from "@emotion/react";
 import styled from "@emotion/styled";
 import { type Setter, atom, useAtom, useSetAtom } from "jotai";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { NavLink } from "react-router";
 
 import { Ban, Disc3, MessageCircleDashed, Play, Pyramid, Rewind, Trash2 } from "lucide-react";
@@ -37,7 +37,11 @@ import { type Config, ConfigRenderer } from "../ui/ConfigRenderer";
 import { Page } from "../ui/Page";
 import { TextArea } from "../ui/TextArea";
 import { currentDirAtom } from "./Explore";
-import { createCancelEditingButton, createSelectionEditButtons, createTemplateButton } from "../ui/ConfigRenderer/buttonCreators";
+import {
+  createCancelEditingButton,
+  createSelectionEditButtons,
+  createTemplateButton,
+} from "../ui/ConfigRenderer/buttonCreators";
 
 const baseMargin = 1 / 2;
 
@@ -214,7 +218,7 @@ export const actionsAtom = atom((get) => {
                   get(experimentAtom).filter((_, i) => i !== selection[0]),
                 ),
             },
-            ...createSelectionEditButtons(templates, experiment[selection[0]])
+            ...createSelectionEditButtons(templates, experiment[selection[0]]),
           ],
         },
       });
@@ -248,11 +252,13 @@ export const actionsAtom = atom((get) => {
   return { config, counter };
 });
 
+const messageAtom = atom("");
+
 export default function () {
   const [isDarkMode] = useAtom(isDarkModeAtom);
   const [experiment, setExperiment] = useAtom(experimentAtom);
   const [selection, setSelection] = useAtom(selectionAtom);
-  const [message, setMessage] = useState("");
+  const [message, setMessage] = useAtom(messageAtom);
   const [role, setRole] = useState<Role>("user");
 
   const [providerOptions] = useAtom(availableProviderOptionsAtom);
@@ -299,8 +305,10 @@ export default function () {
 
   const isDisabled = role === "tool" && !object;
 
+  const isFocusedRef = useRef(false);
+
   const deleteSelection = () => {
-    if (selection && selection.length === 1) {
+    if (!isFocusedRef.current && selection && selection.length === 1) {
       const newExperiment = experiment.filter((_, i) => i !== selection[0]);
       setExperiment(newExperiment);
       setSelection(null);
@@ -323,9 +331,6 @@ export default function () {
           setRole("tool");
         }
       } catch {}
-    } else {
-      setMessage("");
-      setRole("user");
     }
   }, [experiment, selection, isEditing]);
 
@@ -434,6 +439,12 @@ export default function () {
               } catch {}
             }}
             autoFocus
+            onFocus={() => {
+              isFocusedRef.current = true;
+            }}
+            onBlur={() => {
+              isFocusedRef.current = false;
+            }}
           />
         </Block>
       </Page>;
