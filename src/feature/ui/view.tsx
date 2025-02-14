@@ -243,7 +243,7 @@ const Container = styled.div`
   scrollbar-width: none;
   ${["left", "right", "bottom"].map((align) => widen(align, bs(1 / 2))).join(newLine)}
 
-  pre {
+  code {
     padding: 0;
   }
 `;

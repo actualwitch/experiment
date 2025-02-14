@@ -1,16 +1,16 @@
 import { css } from "@emotion/react";
 import styled from "@emotion/styled";
 import { atom, useAtom } from "jotai";
+import { cover } from "polished";
 import { type HTMLProps, useRef } from "react";
 import { useButton } from "react-aria";
 import Shevy from "shevyjs";
-import { fontStackAtom, isBoldTextAtom, isDarkModeAtom, mobileQuery, type WithLayout } from "../atoms/common";
-import { withDarkMode, type WithDarkMode } from "./darkMode";
-import { Palette } from "./palette";
-import { reset } from "./reset";
-import { cover, fontFace } from "polished";
+import { type WithLayout, fontStackAtom, isBoldTextAtom, isDarkModeAtom } from "../atoms/common";
+import { type WithDarkMode, withDarkMode } from "./darkMode";
 import { withOnMobile } from "./layout";
 import { interactive } from "./mixins";
+import { Palette } from "./palette";
+import { reset } from "./reset";
 
 const config: {
   fontScale: "majorSecond" | "minorThird" | "majorThird" | "perfectFourth" | "augmentedFourth";
@@ -52,6 +52,15 @@ const shevyStyle = css({
   "p, ol, ul, pre": content,
 });
 
+export const iSawTheButtonsGlowLightMode = css`
+  &:not(:disabled) {
+    box-shadow: 2px 2px 8px ${Palette.black}20;
+    :hover {
+      box-shadow: 0px 1px 8px 2px ${Palette.buttonHoverDark}24;
+    }
+  }
+`;
+
 export const iSawTheButtonGlow = css`
   &:not(:disabled) {
     box-shadow: 2px 2px 8px ${Palette.buttonShadowDark}21;
@@ -63,20 +72,20 @@ export const iSawTheButtonGlow = css`
 
 export const bevelStyle = css`
   &:not(:disabled) {
-    box-shadow: 2px 2px 8px ${Palette.black}20;
     text-shadow:
       1px 0px 1px ${Palette.black}24,
       -1px 0px 1px ${Palette.white}b8;
-    :hover {
-      box-shadow: 0px 1px 8px 2px ${Palette.buttonHoverDark}24;
-    }
-    :active {
-      transform: translate(0px, 1px);
-    }
   }
 `;
 
-const InternalButton = styled.button<{ isDarkMode: boolean | undefined }>(bevelStyle, (p) =>
+export const buttonPopModifier = css`
+  transform: translate(0px, 0px);
+  :active {
+    transform: translate(0px, 1px);
+  }
+`;
+
+const InternalButton = styled.button<WithDarkMode>(iSawTheButtonsGlowLightMode,  (p) =>
   withDarkMode(p.isDarkMode, iSawTheButtonGlow),
 );
 
@@ -136,7 +145,9 @@ const button = css`
     color: ${Palette.black};
     border-radius: ${bs(Palette.borderCode)};
     ${interactive}
-    transform: translate(0px, 0px);
+    ${buttonPopModifier}
+    ${iSawTheButtonsGlowLightMode}
+    ${bevelStyle}
     &[disabled] {
       background-color: ${Palette.buttonDisabledBackground};
       color: ${Palette.buttonDisabledForeground};

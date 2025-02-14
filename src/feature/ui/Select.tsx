@@ -9,10 +9,11 @@ import { Popover } from "./Popover";
 import { Label, InputContainer } from "./shared";
 import { TRIANGLE } from "../../const";
 import { interactive } from "../../style/mixins";
-import { bevelStyle, iSawTheButtonGlow } from "../../style";
+import { bevelStyle, buttonPopModifier, iSawTheButtonGlow, iSawTheButtonsGlowLightMode } from "../../style";
 import { withDarkMode, type WithDarkMode } from "../../style/darkMode";
 import { useAtom } from "jotai";
 import { isDarkModeAtom } from "../../atoms/common";
+import { UnfoldVertical } from "lucide-react";
 
 type ButtonProps = {
   isOpen?: boolean;
@@ -23,12 +24,14 @@ const Button = styled.button<ButtonProps>`
   appearance: none;
   outline: none;
   display: inline-flex;
-  align-items: center;
+  align-items: end;
   justify-content: space-between;
   width: 200px;
   text-align: left;
   ${interactive}
   ${bevelStyle}
+  ${buttonPopModifier}
+  ${iSawTheButtonsGlowLightMode}
   ${(p) => withDarkMode(p.isDarkMode, iSawTheButtonGlow)}
 `;
 
@@ -64,8 +67,10 @@ export function Select<T extends object>(props: AriaSelectProps<T>) {
         isOpen={state.isOpen}
         isFocusVisible={isFocusVisible}
       >
-        <Value {...valueProps}>{state.selectedItem ? state.selectedItem.rendered : "Select an option"}</Value>
-        <span>{TRIANGLE}</span>
+        <Value {...valueProps}>
+          {state.selectedItem ? state.selectedItem.rendered : (props.placeholder ?? "Select an option")}
+        </Value>
+        <UnfoldVertical size={12} />
       </Button>
       {state.isOpen && (
         <Popover state={state} triggerRef={ref} placement="bottom start">

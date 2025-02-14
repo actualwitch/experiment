@@ -1,11 +1,12 @@
-import * as React from "react";
 import styled from "@emotion/styled";
 import type { AriaListBoxOptions } from "@react-aria/listbox";
 import type { Node } from "@react-types/shared";
-import type { ListState } from "react-stately";
+import { Check } from "lucide-react";
+import * as React from "react";
 import { useListBox, useOption } from "react-aria";
+import type { ListState } from "react-stately";
+import { interactive } from "../../style/mixins";
 import { Palette } from "../../style/palette";
-import { TRIANGLE } from "../../const";
 
 interface ListBoxProps extends AriaListBoxOptions<unknown> {
   listBoxRef?: React.RefObject<HTMLUListElement>;
@@ -35,23 +36,26 @@ interface ListItemProps {
 }
 
 const ListItem = styled.li<ListItemProps>`
-  background: ${(props) => (props.isFocused ? Palette.buttonHoverBackground : Palette.actionableBackground)};
-  color: ${(props) =>
-    props.isFocused ? "white"
-    : props.isSelected ? Palette.black
-    : "#333"};
-  font-weight: ${(props) => (props.isSelected ? "600" : "normal")};
-  padding: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  cursor: default;
   outline: none;
+  ${interactive}
+  padding: 3px 8px;
+
+  & > div {
+    background: ${(props) => (props.isFocused ? Palette.buttonHoverBackground : Palette.actionableBackground)};
+    color: ${(props) =>
+      props.isFocused ? "white"
+      : props.isSelected ? Palette.black
+      : "#333"};
+    flex: 1;
+    padding: 0 6px;
+    border-radius: 5px;
+  }
 `;
 
 const ItemContent = styled.div`
   display: flex;
   align-items: center;
+  justify-content: space-between;
 `;
 
 export function ListBox(props: ListBoxProps) {
@@ -92,8 +96,10 @@ function Option({ item, state }: OptionProps) {
     <ListItem {...optionProps} ref={ref} isFocused={isFocused} isSelected={isSelected}>
       <ItemContent>
         <OptionContext.Provider value={{ labelProps, descriptionProps }}>{item.rendered}</OptionContext.Provider>
+        {isSelected ?
+          <Check size={12} />
+        : null}
       </ItemContent>
-      {isSelected && TRIANGLE}
     </ListItem>
   );
 }
