@@ -15,3 +15,7 @@ export const iconResolutions = [128, 192, 256, 512, 1024];
 export const TRIANGLE = "▴";
 
 export const tokenLimit = 8192;
+
+
+export const newLine = `
+`;

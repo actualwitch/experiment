@@ -14,6 +14,7 @@ export const PageContainer = styled.div<WithDarkMode & WithLayout>`
   display: flex;
   flex-direction: column;
   padding: ${bs()};
+  position: relative;
   flex: 1;
   ${increaseSpecificity()} {
     overflow-x: hidden;

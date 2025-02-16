@@ -39,6 +39,12 @@ export const doStatic = async (request: Request) => {
   if (url.pathname === "/favicon.ico") {
     response ??= new Response("KO", { status: 404 });
   }
+  if (url.pathname === "/client.css") {
+    const file = Bun.file("./static/client.css");
+    if (file) {
+      response ??= new Response(file, { headers: { "Content-Type": "text/css" } });
+    }
+  }
   if (url.pathname === "/manifest.json") {
     response ??= new Response(JSON.stringify(getManifest(name, description, iconResolutions)), {
       headers: {

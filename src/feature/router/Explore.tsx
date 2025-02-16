@@ -12,6 +12,7 @@ import { getRealm } from "../../utils/realm";
 import { SidebarInput } from "../ui/Navigation";
 import { Page } from "../ui/Page";
 import { View, collapsedAtom } from "../ui/view";
+import { Editor } from "../editor/Editor";
 
 export const pwdAtom = getRealm() === "server" ? atom(Bun.env.PWD) : nopeAtom;
 
@@ -177,7 +178,9 @@ export default function () {
 
   return (
     <>
-      <Page></Page>
+      <Page>
+        <Editor />
+      </Page>
       {/* <Actions>
         <ConfigRenderer>{config}</ConfigRenderer>
       </Actions> */}

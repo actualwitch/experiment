@@ -11,7 +11,7 @@ import {
   memo,
   useMemo,
 } from "react";
-import { TRIANGLE } from "../../const";
+import { newLine, TRIANGLE } from "../../const";
 import { bs, Button } from "../../style";
 import { nonInteractive } from "../../style/mixins";
 import { increaseSpecificity } from "../../style/utils";
@@ -233,9 +233,6 @@ const ActionRow = styled.div`
 const widen = (align: string, length: string) => `
 padding-${align}: ${length};
 margin-${align}: -${length};
-`;
-
-const newLine = `
 `;
 
 const Container = styled.div`
