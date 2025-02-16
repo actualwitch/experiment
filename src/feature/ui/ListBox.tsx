@@ -7,6 +7,7 @@ import { useListBox, useOption } from "react-aria";
 import type { ListState } from "react-stately";
 import { interactive } from "../../style/mixins";
 import { Palette } from "../../style/palette";
+import { increaseSpecificity } from "../../style/utils";
 
 interface ListBoxProps extends AriaListBoxOptions<unknown> {
   listBoxRef?: React.RefObject<HTMLUListElement>;
@@ -25,7 +26,7 @@ const List = styled.ul`
   margin: 4px 0;
   outline: none;
   width: 100%;
-  && {
+  ${increaseSpecificity()} {
     padding: 0;
   }
 `;

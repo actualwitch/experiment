@@ -52,20 +52,27 @@ const shevyStyle = css({
   "p, ol, ul, pre": content,
 });
 
+export const shadows = {
+  dark: `2px 2px 8px ${Palette.black}20`,
+  darker: `0px 1px 8px 2px ${Palette.buttonHoverDark}24`,
+  light: `2px 2px 8px ${Palette.buttonShadowDark}21`,
+  lighter: `0px 1px 14px 4px ${Palette.buttonShadowDark}52`,
+}
+
 export const iSawTheButtonsGlowLightMode = css`
   &:not(:disabled) {
-    box-shadow: 2px 2px 8px ${Palette.black}20;
+    box-shadow: ${shadows.dark};
     :hover {
-      box-shadow: 0px 1px 8px 2px ${Palette.buttonHoverDark}24;
+      box-shadow: ${shadows.darker};
     }
   }
 `;
 
 export const iSawTheButtonGlow = css`
   &:not(:disabled) {
-    box-shadow: 2px 2px 8px ${Palette.buttonShadowDark}21;
+    box-shadow: ${shadows.light};
     :hover {
-      box-shadow: 0px 1px 14px 4px ${Palette.buttonShadowDark}52;
+      box-shadow: ${shadows.lighter};
     }
   }
 `;
@@ -221,9 +228,6 @@ export const Sidebar = styled.aside`
   }
   & > p {
     gap: ${bs(1 / 4)};
-  }
-  div + p {
-    margin-top: ${bs(1 / 2)};
   }
 `;
 
