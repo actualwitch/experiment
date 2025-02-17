@@ -60,6 +60,7 @@ export type Store = {
   selectedProvider?: ProviderType;
   selectedModel?: string;
   experiments?: Record<string, SerialExperiment>;
+  personas?: Record<string, Persona>;
   templates?: Record<string, _Message | ExperimentWithMeta>;
   tokens: {
     anthropic?: string;

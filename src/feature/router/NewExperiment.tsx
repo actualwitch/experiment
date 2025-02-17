@@ -42,6 +42,7 @@ import {
   createSelectionEditButtons,
   createTemplateButton,
 } from "../ui/ConfigRenderer/buttonCreators";
+import { activePersonaAtom, personasAtom } from "../../atoms/persona";
 
 const baseMargin = 1 / 2;
 
@@ -146,6 +147,7 @@ export const actionsAtom = atom((get) => {
   const experiment = get(experimentAtom);
   const selection = get(selectionAtom);
   const templates = get(templatesAtom);
+  const personas = get(personasAtom);
   let counter = 0;
   const config: Config = {
     Actions: [],
@@ -176,6 +178,16 @@ export const actionsAtom = atom((get) => {
     });
     counter++;
   }
+  // if (personas && Object.keys(personas).length > 0) {
+  //   config.Actions.push({
+  //     label: "Persona",
+  //     atom: activePersonaAtom,
+  //     options: Object.entries(personas).map(([id, persona]) => ({
+  //       id,
+  //       name: persona.role,
+  //     })),
+  //   });
+  // }
   {
     config.Actions.push({
       buttons: [
