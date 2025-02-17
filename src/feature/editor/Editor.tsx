@@ -2,14 +2,16 @@ import { useAtom } from "jotai";
 import { atomEffect } from "jotai-effect";
 import { useEffect, useMemo, useRef } from "react";
 import { isDarkModeAtom } from "../../atoms/common";
+import type { Language } from ".";
 
 export type EditorProps = {
   children?: string | object;
   minHeight?: string;
   setValue?: (value: string) => void;
+  language?: Language;
 };
 
-export const Editor = ({ children = "", minHeight = "100%", setValue }: EditorProps) => {
+export const Editor = ({ children = "", minHeight = "100%", setValue, language }: EditorProps) => {
   const monacoEl = useRef<HTMLDivElement | null>(null);
   const [isDarkMode] = useAtom(isDarkModeAtom);
   useEffect(() => {
@@ -28,8 +30,8 @@ export const Editor = ({ children = "", minHeight = "100%", setValue }: EditorPr
     const promise = import("monaco-editor").then((monaco) => {
       const newEditor = monaco.editor.create(monacoEl.current!, {
         value,
-        language: "markdown",
-        theme: "vs-dark",
+        language,
+        theme: isDarkMode ? "vs-dark" : "vs-light",
         automaticLayout: true,
         lineNumbers: "off",
         scrollBeyondLastLine: false,
@@ -66,7 +68,7 @@ export const Editor = ({ children = "", minHeight = "100%", setValue }: EditorPr
       return newEditor;
     });
     return () => promise.then((editor) => editor.dispose());
-  }, [children, isDarkMode, setValue]);
+  }, [children, isDarkMode, setValue, language]);
 
   return <div ref={monacoEl} style={{ minHeight }}></div>;
 };

@@ -7,8 +7,8 @@ import { Result } from "true-myth";
 import { createFileStorage, getStoragePath, resolve, spawn } from "../utils";
 import { divergentAtom, entangledAtom } from "../utils/entanglement";
 import { getRealm, hasBackend } from "../utils/realm";
-import { author, version } from "../const";
-import type { _Message, SerialExperiment, ExperimentWithMeta, Message } from "../types";
+import { author, newLine, version } from "../const";
+import type { _Message, SerialExperiment, ExperimentWithMeta, Message, Persona } from "../types";
 import { modelLabels, type ProviderType } from "../feature/inference/types";
 import type { FONT_STACKS } from "../style";
 
@@ -239,7 +239,7 @@ export const localCertAndKeyAtom = atom(async () => {
     if (result.isErr) {
       return Result.err(new Error("Failed to generate private key"));
     }
-    await writeFile(`${getStoragePath()}/cert.key`, result.value);
+    await writeFile(`${getStoragePath()}/cert.key`, result.value + newLine);
   }
   const hasCert = await exists(`${getStoragePath()}/key.cert`);
   if (!hasCert) {

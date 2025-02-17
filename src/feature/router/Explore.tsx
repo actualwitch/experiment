@@ -13,6 +13,7 @@ import { SidebarInput } from "../ui/Navigation";
 import { Page } from "../ui/Page";
 import { View, collapsedAtom } from "../ui/view";
 import { Editor } from "../editor/Editor";
+import type { Language } from "../editor";
 
 export const pwdAtom = getRealm() === "server" ? atom(Bun.env.PWD) : nopeAtom;
 
@@ -26,15 +27,64 @@ export const currentDirAtom = entangledAtom(
   }),
 );
 
+const currentDirContentAtom = entangledAtom(
+  "cwd-content",
+  atom(async (get) => {
+    const currentDir = get(currentDirAtom);
+    if (currentDir) {
+      try {
+        const files = await filesInDir(currentDir);
+        const entry = path.parse(currentDir);
+        return { [entry.name]: Object.fromEntries(files.map((file) => [file.name, {}])) };
+      } catch {
+        store.set(dirOverrideAtom, null);
+      }
+    }
+    return null;
+  }),
+);
+
+export const selectedFileAtom = entangledAtom("selectedFile", atom<null | string>());
+export const selectedFileExtension = entangledAtom(
+  "selectedFileExtension",
+  atom<null | Language>((get) => {
+    const selectedFile = get(selectedFileAtom);
+    if (!selectedFile) return null;
+    if (selectedFile.endsWith(".json")) return "json";
+    if (selectedFile.endsWith(".ts") || selectedFile.endsWith(".tsx")) return "typescript";
+    if (selectedFile.endsWith(".yaml") || selectedFile.endsWith(".yml")) return "yaml";
+    if (selectedFile.endsWith(".md")) return "markdown";
+    if (selectedFile.endsWith(".sh")) return "shell";
+    return null;
+  }),
+);
+export const selectedFileContentsAtom = entangledAtom(
+  "selectedFileContents",
+  atom(async (get) => {
+    const selectedFile = get(selectedFileAtom);
+    if (selectedFile) {
+      const content = await readFile(selectedFile, "utf-8");
+      return content;
+    }
+    return null;
+  }),
+);
+
 const goToAtom = entangledAtom(
   "gotodir",
-  atom(null, (get, set, dir: string) => {
+  atom(null, async (get, set, dir: string) => {
     if (getRealm() !== "server") return;
-    const currentDir = Maybe.of(get(currentDirAtom));
-    const newPath = currentDir.map((currentDir) => path.join(currentDir, dir));
-    if (newPath.isJust) {
-      set(dirOverrideAtom, newPath.value);
+    const currentDir = get(currentDirAtom);
+    if (!currentDir) return;
+    const files = await readdir(currentDir, { withFileTypes: true });
+    if (dir !== "..") {
+      const entry = files.find((ent) => ent.name === dir);
+      if (entry?.isFile()) {
+        set(selectedFileAtom, path.join(currentDir, entry.name));
+        return;
+      }
     }
+    set(dirOverrideAtom, path.join(currentDir, dir));
   }),
 );
 
@@ -97,23 +147,6 @@ export async function iterateDir(dir: string, ignore: string[] = [".git"]) {
   return files;
 }
 
-const currentDirContentAtom = entangledAtom(
-  "cwd-content",
-  atom(async (get) => {
-    const currentDir = get(currentDirAtom);
-    if (currentDir) {
-      try {
-        const files = await filesInDir(currentDir);
-        const entry = path.parse(currentDir);
-        return { [entry.name]: Object.fromEntries(files.map((file) => [file.name, {}])) };
-      } catch {
-        store.set(dirOverrideAtom, null);
-      }
-    }
-    return null;
-  }),
-);
-
 export const createContextFromFiles = async (files: string[], basePath: string) => {
   let context = "";
   let index = 1;
@@ -170,6 +203,8 @@ const SidebarContents = () => {
 export default function () {
   const title = "Explore";
   const [titleOverride, setTitleOverride] = useAtom(titleOverrideAtom);
+  const [selectedFileContents] = useAtom(selectedFileContentsAtom);
+  const [language] = useAtom(selectedFileExtension);
 
   useEffect(() => {
     setTitleOverride(title);
@@ -179,7 +214,7 @@ export default function () {
   return (
     <>
       <Page>
-        <Editor />
+        <Editor language={language ?? undefined}>{selectedFileContents ?? ""}</Editor>
       </Page>
       {/* <Actions>
         <ConfigRenderer>{config}</ConfigRenderer>
