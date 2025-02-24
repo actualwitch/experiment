@@ -25,10 +25,19 @@ export const OpenAIModel = Union(
   Literal("o1-mini"),
   Literal("o3-mini"),
 );
+
+const Claude_3_Opus = Literal("claude-3-opus-20240229");
+const Claude_3_5_Haiku = Literal("claude-3-5-haiku-20241022");
+const Claude_3_5_Sonnet = Literal("claude-3-5-sonnet-20240620");
+const Claude_3_6_Sonnet = Literal("claude-3-5-sonnet-20241022");
+const Claude_3_7_Sonnet = Literal("claude-3-7-sonnet-20250219");
+
 export const AnthropicModel = Union(
-  Literal("claude-3-5-sonnet-latest"),
-  Literal("claude-3-5-haiku-latest"),
-  Literal("claude-3-opus-latest"),
+  Claude_3_Opus,
+  Claude_3_5_Haiku,
+  Claude_3_5_Sonnet,
+  Claude_3_6_Sonnet,
+  Claude_3_7_Sonnet,
 );
 export const MistralModel = Union(
   Literal("mistral-large-latest"),
@@ -53,9 +62,11 @@ export const modelLabels = {
     "o3-mini": "O3 Mini",
   },
   anthropic: {
-    "claude-3-5-sonnet-latest": "Claude 3.5 Sonnet",
-    "claude-3-5-haiku-latest": "Claude 3.5 Haiku",
-    "claude-3-opus-latest": "Claude 3 Opus",
+    [Claude_3_Opus.value]: "Claude 3 Opus",
+    [Claude_3_5_Haiku.value]: "Claude 3.5 Haiku",
+    [Claude_3_5_Sonnet.value]: "Claude 3.5 Sonnet",
+    [Claude_3_6_Sonnet.value]: "Claude 3.6 Sonnet",
+    [Claude_3_7_Sonnet.value]: "Claude 3.7 Sonnet",
   },
   mistral: {
     "mistral-large-latest": "Mistral Large",

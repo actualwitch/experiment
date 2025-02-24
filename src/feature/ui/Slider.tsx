@@ -11,6 +11,7 @@ import { TRIANGLE } from "../../const";
 import { bs } from "../../style";
 import { InputContainer } from "./shared";
 import { isDarkModeAtom } from "../../atoms/common";
+import { triangle } from "polished";
 
 const Container = styled(InputContainer)<{ orientation: "horizontal" | "vertical" }>`
   ${(p) => (p.orientation === "horizontal" ? "flex-direction: column;" : "height: 150px;")}
@@ -50,32 +51,14 @@ const Track = styled.div<{ orientation: "horizontal" | "vertical"; disabled?: bo
     ),
 );
 
-const ThumbComponent = styled.div<{ isFocusVisible?: boolean; isDragging?: boolean }>`
-  width: 20px;
-  height: 20px;
-  :before {
-    content: "${TRIANGLE}";
-    font-size: ${bs(1 / 2)};
-    display: block;
-    position: absolute;
-    bottom: -50%;
-    left: 50%;
-    transform: translate(-50%, -10%) rotate(180deg) scale(2);
-  }
-  ${(p) =>
-    p.isDragging &&
-    css`
-      :before {
-        color: dimgray;
-      }
-    `}
-  ${(p) =>
-    p.isFocusVisible &&
-    css`
-      :before {
-        color: ${Palette.accent};
-      }
-    `}
+const ThumbComponent = styled.div<{ isFocusVisible?: boolean; isDragging?: boolean } & WithDarkMode>`
+  ${({ isDarkMode, isDragging, isFocusVisible }) => {
+    let foregroundColor = isDarkMode ? Palette.white : Palette.black;
+    if (isFocusVisible) foregroundColor = Palette.accent;
+    if (isDragging) foregroundColor = isDarkMode ? "#eee" : Palette.buttonHoverBackground;
+    return triangle({ pointingDirection: "bottom", height: bs(1/3), width: bs(1/2), foregroundColor });
+  }}
+  bottom: 18px;
 `;
 
 export function Slider(props: {
@@ -130,9 +113,10 @@ function Thumb(props) {
     state,
   );
 
+  const isDarkMode = useAtomValue(isDarkModeAtom);
   const { focusProps, isFocusVisible } = useFocusRing();
   return (
-    <ThumbComponent {...thumbProps} isDragging={isDragging} isFocusVisible={isFocusVisible}>
+    <ThumbComponent {...thumbProps} isDragging={isDragging} isFocusVisible={isFocusVisible} isDarkMode={isDarkMode}>
       <VisuallyHidden>
         <input ref={inputRef} {...mergeProps(inputProps, focusProps)} />
       </VisuallyHidden>
