@@ -15,29 +15,30 @@ export const providerLabels = {
   openai: "OpenAI",
 } satisfies { [K in ProviderType]: string };
 
-export const OpenAIModel = Union(
-  Literal("gpt-4o"),
-  Literal("gpt-4o-mini"),
-  Literal("gpt-4"),
-  Literal("gpt-4-turbo"),
-  Literal("o1"),
-  Literal("o1-preview"),
-  Literal("o1-mini"),
-  Literal("o3-mini"),
-);
+const GPT_4_5 = Literal("gpt-4.5-preview");
+const GPT_4o = Literal("gpt-4o");
+const GPT_4o_mini = Literal("gpt-4o-mini");
+const GPT_4 = Literal("gpt-4");
+const GPT_4_turbo = Literal("gpt-4-turbo");
+const o3_mini = Literal("o3-mini");
+const o1 = Literal("o1");
+const o1_preview = Literal("o1-preview");
+const o1_mini = Literal("o1-mini");
 
-const Claude_3_Opus = Literal("claude-3-opus-20240229");
-const Claude_3_5_Haiku = Literal("claude-3-5-haiku-20241022");
-const Claude_3_5_Sonnet = Literal("claude-3-5-sonnet-20240620");
-const Claude_3_6_Sonnet = Literal("claude-3-5-sonnet-20241022");
+export const OpenAIModel = Union(GPT_4_5, GPT_4o, GPT_4o_mini, GPT_4, GPT_4_turbo, o3_mini, o1, o1_preview, o1_mini);
+
 const Claude_3_7_Sonnet = Literal("claude-3-7-sonnet-20250219");
+const Claude_3_6_Sonnet = Literal("claude-3-5-sonnet-20241022");
+const Claude_3_5_Sonnet = Literal("claude-3-5-sonnet-20240620");
+const Claude_3_5_Haiku = Literal("claude-3-5-haiku-20241022");
+const Claude_3_Opus = Literal("claude-3-opus-20240229");
 
 export const AnthropicModel = Union(
-  Claude_3_Opus,
-  Claude_3_5_Haiku,
-  Claude_3_5_Sonnet,
-  Claude_3_6_Sonnet,
   Claude_3_7_Sonnet,
+  Claude_3_6_Sonnet,
+  Claude_3_5_Sonnet,
+  Claude_3_5_Haiku,
+  Claude_3_Opus,
 );
 export const MistralModel = Union(
   Literal("mistral-large-latest"),
@@ -52,14 +53,15 @@ export const modelOptions = {
 };
 export const modelLabels = {
   openai: {
-    "gpt-4o": "GPT-4o",
-    "gpt-4o-mini": "GPT-4o Mini",
-    "gpt-4": "GPT-4",
-    "gpt-4-turbo": "GPT-4 Turbo",
-    "o1": "O1",
-    "o1-preview": "O1 Preview",
-    "o1-mini": "O1 Mini",
-    "o3-mini": "O3 Mini",
+    [GPT_4_5.value]: "GPT-4.5",
+    [GPT_4o.value]: "GPT-4o",
+    [GPT_4o_mini.value]: "GPT-4o Mini",
+    [GPT_4.value]: "GPT-4",
+    [GPT_4_turbo.value]: "GPT-4 Turbo",
+    [o1.value]: "O1",
+    [o1_preview.value]: "O1 Preview",
+    [o1_mini.value]: "O1 Mini",
+    [o3_mini.value]: "O3 Mini",
   },
   anthropic: {
     [Claude_3_Opus.value]: "Claude 3 Opus",
