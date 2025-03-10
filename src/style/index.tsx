@@ -57,7 +57,7 @@ export const shadows = {
   darker: `0px 1px 8px 2px ${Palette.buttonHoverDark}24`,
   light: `2px 2px 8px ${Palette.buttonShadowDark}21`,
   lighter: `0px 1px 14px 4px ${Palette.buttonShadowDark}52`,
-}
+};
 
 export const iSawTheButtonsGlowLightMode = css`
   &:not(:disabled) {
@@ -78,11 +78,9 @@ export const iSawTheButtonGlow = css`
 `;
 
 export const bevelStyle = css`
-  &:not(:disabled) {
-    text-shadow:
-      1px 0px 1px ${Palette.black}24,
-      -1px 0px 1px ${Palette.white}b8;
-  }
+  text-shadow:
+    1px 0px 1px ${Palette.black}24,
+    -1px 0px 1px ${Palette.white}b8;
 `;
 
 export const buttonPopModifier = css`
@@ -92,7 +90,7 @@ export const buttonPopModifier = css`
   }
 `;
 
-const InternalButton = styled.button<WithDarkMode>(iSawTheButtonsGlowLightMode,  (p) =>
+const InternalButton = styled.button<WithDarkMode>(iSawTheButtonsGlowLightMode, (p) =>
   withDarkMode(p.isDarkMode, iSawTheButtonGlow),
 );
 
@@ -137,6 +135,7 @@ const button = css`
     background-color: ${Palette.disabledBackground};
     color: ${Palette.black}54;
     cursor: not-allowed;
+      text-shadow: unset;
   }
   button,
   input[type="file"]::file-selector-button {
@@ -158,7 +157,6 @@ const button = css`
     &[disabled] {
       background-color: ${Palette.buttonDisabledBackground};
       color: ${Palette.buttonDisabledForeground};
-      cursor: not-allowed;
       border-color: ${Palette.buttonDisabledBorder};
     }
   }

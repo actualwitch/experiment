@@ -110,17 +110,21 @@ export async function filesInDir(thisPath: string) {
   return files;
 }
 
-const includeExtensions = ["ts", "tsx", "md", "json", "yml", ".gitignore"];
-export async function iterateDir(dir: string, ignore: string[] = [".git"]) {
+const includeExtensions = ["rs", "sql", "ts", "tsx", "md", "json", "yml", "yaml", "toml", ".gitignore"];
+export async function iterateDir(dir: string, ignore: string[] = [".git", ".sqlx", "package-lock.json"]) {
   const thisIgnores = [...ignore];
   const entries = await readdir(dir, { withFileTypes: true });
   if (entries.some((entry) => entry.isFile() && entry.name === ".gitignore")) {
     const contents = await readFile(path.join(dir, ".gitignore"), "utf-8");
     const newIgnores = contents.split("\n").map((ignore) => {
-      if ([path.sep, "*"].includes(ignore.charAt(0))) {
-        return ignore.slice(1);
+      let newIgnore = ignore.trim();
+      if (newIgnore.includes(path.sep)) {
+        newIgnore = newIgnore.replaceAll(path.sep, "");
       }
-      return ignore;
+      if (["*"].includes(newIgnore.charAt(0))) {
+        newIgnore = newIgnore.slice(1);
+      }
+      return newIgnore;
     });
     thisIgnores.push(...newIgnores);
   }

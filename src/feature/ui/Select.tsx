@@ -33,6 +33,7 @@ const Button = styled.button<ButtonProps>`
   ${buttonPopModifier}
   ${iSawTheButtonsGlowLightMode}
   ${(p) => withDarkMode(p.isDarkMode, iSawTheButtonGlow)}
+  ${(p) => p.isOpen && "transform: translate(0px, 1px);"}
 `;
 
 const Value = styled.span`

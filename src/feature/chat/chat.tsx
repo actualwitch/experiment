@@ -101,6 +101,7 @@ export const MessageComponent = styled.article<{
       li ul,
       li ol {
         padding-${align}: ${bs(1)};
+        padding-${align === "right" ? "left" : "right"}: 0;
       }
 
       hr {
@@ -309,8 +310,7 @@ export const ChatMessage = ({ message: _message, index }: { message: Message; in
         hitRef.current = [e.screenX, e.screenY];
       }}
       onMouseUp={(e) => {
-        if (selection?.length === 2) return;
-        if (isSelected) return;
+        if (selection?.length === 2 || isSelected || e.nativeEvent.target?.nodeName === "EM"|| e.nativeEvent.target?.nodeName === "BUTTON") return;
         if (hitRef.current) {
           const [x, y] = hitRef.current;
           hitRef.current = null;

@@ -50,6 +50,7 @@
     "@emotion/styled": "latest",
     "@mistralai/mistralai": "latest",
     "@tanstack/react-virtual": "latest",
+    "@xterm/xterm": "latest",
     "csvtojson": "latest",
     "jotai": "latest",
     "jotai-effect": "latest",

@@ -21,6 +21,7 @@ import { providerLabels, providers, providerTypes, withIds, type ProviderType } 
 import { Page } from "../ui/Page";
 import { TextField } from "../ui/TextField";
 import { Switch } from "../ui/Switch";
+import { Checkbox } from "../ui/Checkbox";
 
 const StyledForm = styled.form`
   display: flex;
@@ -28,11 +29,6 @@ const StyledForm = styled.form`
   flex-direction: column;
   input[type="text"] {
     flex: 1;
-  }
-  label {
-    display: flex;
-    align-items: baseline;
-    margin-bottom: ${bs(1.5)};
   }
   & > :not(h3) {
     margin-bottom: ${bs()};
@@ -144,6 +140,7 @@ export default function Parameters() {
 
   const [selectedProvider, setSelectedProvider] = useState<ProviderType | null>(null);
   const [token, setToken] = useState("");
+
   const submit = () => {
     if (!selectedProvider || !token) {
       return;
@@ -199,6 +196,7 @@ export default function Parameters() {
               { value: true, name: "On" },
             ]}
           </Switch>
+          {/* <Checkbox /> */}
         </Row>
         <Row>
           <header>Layout</header>

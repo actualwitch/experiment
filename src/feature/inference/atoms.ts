@@ -382,15 +382,31 @@ export const runExperimentAsMistral = entangledAtom(
           continue;
         }
         const choice = chunk.data.choices[0];
-        if (choice.index !== contentChunks.length - 1) {
-          contentChunks.push({
-            role: "assistant",
-            fromServer: true,
-            content: "",
-          });
-        }
-        if (typeof contentChunks[choice.index].content === "string" && typeof choice.delta.content === "string") {
-          contentChunks[choice.index].content += choice.delta.content ?? "";
+        const delta = choice.delta;
+        const content = delta.content;
+        const toolCalls = delta.toolCalls ?? [];
+        if (content) {
+          if (choice.index !== contentChunks.length - 1) {
+            contentChunks.push({
+              role: "assistant",
+              fromServer: true,
+              content: "",
+            });
+          }
+          if (typeof contentChunks[choice.index].content === "string" && typeof choice.delta.content === "string") {
+            contentChunks[choice.index].content += choice.delta.content ?? "";
+          }
+        } else if (toolCalls.length > 0) {
+          for (const toolCall of toolCalls) {
+            if (toolCall.index !== contentChunks.length - 1) {
+              contentChunks.push({
+                role: "tool",
+                fromServer: true,
+                content: "",
+              });
+            }
+            contentChunks[toolCall.index!].content = toolCall.function;
+          }
         }
         set(experimentAtom, [...experiment, ...contentChunks]);
       }
