@@ -22,7 +22,7 @@ import {
   tokensAtom,
 } from "../../atoms/common";
 import type { Message } from "../../types";
-import { modelLabels, modelOptions, providerLabels, type ProviderType } from "./types";
+import { isReasoningModel, modelLabels, modelOptions, providerLabels, type ProviderType } from "./types";
 
 export const availableProviderOptionsAtom = atom((get) => {
   const tokens = get(tokensAtom);
@@ -53,7 +53,7 @@ export const isRunningAtom = entangledAtom("is running", atom(false));
 export const modelSupportsTemperatureAtom = atom((get) => {
   const provider = get(selectedProviderAtom);
   const model = get(modelAtom);
-  if (provider === "openai" && model && ["o1-mini", "o1-preview", "o1"].includes(model)) {
+  if (provider === "openai" && model && isReasoningModel(model)) {
     return false;
   }
   return true;
@@ -255,7 +255,7 @@ export const runExperimentAsOpenAi = entangledAtom(
       return;
     }
 
-    const experimentAsOpenai = experimentToOpenai(experiment);
+    const experimentAsOpenai = await experimentToOpenai(experiment);
 
     const client = new OpenAI({
       apiKey: resolvedToken,
@@ -363,7 +363,7 @@ export const runExperimentAsMistral = entangledAtom(
       return;
     }
 
-    const experimentAsMistral = experimentToMistral(experiment);
+    const experimentAsMistral = await experimentToMistral(experiment);
 
     const client = new Mistral({
       apiKey: resolvedToken,

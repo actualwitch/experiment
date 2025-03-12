@@ -110,7 +110,7 @@ export async function filesInDir(thisPath: string) {
   return files;
 }
 
-const includeExtensions = ["rs", "sql", "ts", "tsx", "md", "json", "yml", "yaml", "toml", ".gitignore"];
+const includeExtensions = ["css", "scss", "rs", "sql", "ts", "tsx", "md", "json", "yml", "yaml", "toml", ".gitignore"];
 export async function iterateDir(dir: string, ignore: string[] = [".git", ".sqlx", "package-lock.json"]) {
   const thisIgnores = [...ignore];
   const entries = await readdir(dir, { withFileTypes: true });

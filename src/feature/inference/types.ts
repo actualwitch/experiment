@@ -76,3 +76,6 @@ export const modelLabels = {
     "mistral-small-latest": "Mistral Small",
   },
 } as const;
+
+export const isReasoningModel = (model: string) =>
+  [o1_mini.value, o1_preview.value, o3_mini.value, o1.value].includes(model);

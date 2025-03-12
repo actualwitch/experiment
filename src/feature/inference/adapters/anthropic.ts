@@ -35,6 +35,7 @@ export async function experimentToAnthropic(
       const files = await iterateDir(directory);
       const context = await createContextFromFiles(files, directory);
       messages.push({ role: "user", content: context });
+      continue;
     }
     if (role === "tool" && !fromServer) {
       if (typeof content === "object") {
