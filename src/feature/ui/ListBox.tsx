@@ -8,6 +8,9 @@ import type { ListState } from "react-stately";
 import { interactive } from "../../style/mixins";
 import { Palette } from "../../style/palette";
 import { increaseSpecificity } from "../../style/utils";
+import type { WithDarkMode } from "../../style/darkMode";
+import { isDarkModeAtom } from "../../atoms/common";
+import { useAtom } from "jotai";
 
 interface ListBoxProps extends AriaListBoxOptions<unknown> {
   listBoxRef?: React.RefObject<HTMLUListElement>;
@@ -36,13 +39,13 @@ interface ListItemProps {
   isSelected?: boolean;
 }
 
-const ListItem = styled.li<ListItemProps>`
+const ListItem = styled.li<ListItemProps & WithDarkMode>`
   outline: none;
   ${interactive}
   padding: 3px 8px;
 
   & > div {
-    background: ${(props) => (props.isFocused ? Palette.buttonHoverBackground : Palette.actionableBackground)};
+    background: ${({isDarkMode, isFocused}) => isFocused ? Palette.buttonHoverBackground : Palette.actionableBackground };
     color: ${(props) =>
       props.isFocused ? "white"
       : props.isSelected ? Palette.black
@@ -85,6 +88,7 @@ const OptionContext = React.createContext<OptionContextValue>({
 
 function Option({ item, state }: OptionProps) {
   const ref = React.useRef<HTMLLIElement>(null);
+  const [isDarkMode] = useAtom(isDarkModeAtom);
   const { optionProps, labelProps, descriptionProps, isSelected, isFocused } = useOption(
     {
       key: item.key,
@@ -94,7 +98,7 @@ function Option({ item, state }: OptionProps) {
   );
 
   return (
-    <ListItem {...optionProps} ref={ref} isFocused={isFocused} isSelected={isSelected}>
+    <ListItem {...optionProps} ref={ref} isFocused={isFocused} isSelected={isSelected} isDarkMode={isDarkMode}>
       <ItemContent>
         <OptionContext.Provider value={{ labelProps, descriptionProps }}>{item.rendered}</OptionContext.Provider>
         {isSelected ?

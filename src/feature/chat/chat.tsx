@@ -192,7 +192,7 @@ export function hasMessages(obj: _Message | ExperimentWithMeta): obj is Experime
 
 export type Coords = [x: number, y: number];
 
-export const ChatMessage = ({ message: _message, index }: { message: Message; index: number }) => {
+export const ChatMessage = ({ message: _message, index, collapseTemplates = true }: { message: Message; index: number, collapseTemplates?: boolean }) => {
   const ref = useRef<null | HTMLElement>(null);
   const selector: Path = [index, "content"];
   const [selection, setSelection] = useAtom(selectionAtom);
@@ -223,7 +223,7 @@ export const ChatMessage = ({ message: _message, index }: { message: Message; in
     width: "initial",
   } satisfies CSSProperties;
 
-  if (message.template) {
+  if (collapseTemplates && message.template) {
     contentType = "tmpl";
     innerContent ??= (
       <View
@@ -341,10 +341,12 @@ export function ChatPreview({
   experiment,
   autoScroll,
   autoScrollAnchor = "first",
+  collapseTemplates = false,
 }: {
   experiment: Experiment;
   autoScroll?: boolean;
   autoScrollAnchor?: "first" | "last";
+  collapseTemplates?: boolean;
 }) {
   const [selection, setSelection] = useAtom(selectionAtom);
   const [isDarkMode] = useAtom(isDarkModeAtom);
@@ -368,10 +370,6 @@ export function ChatPreview({
     },
   });
 
-  useEffect(() => {
-    return () => void setSelection([]);
-  }, []);
-
   if (computedMessages.length === 0) {
     return <Banner>∅</Banner>;
   }
@@ -379,7 +377,7 @@ export function ChatPreview({
     <ChatContainer isDarkMode={isDarkMode}>
       {autoScroll && autoScrollAnchor === "first" && <Anchor />}
       {computedMessages.map?.(({ key, ...message }) => {
-        return <ChatMessage key={key} message={message} index={key} />;
+        return <ChatMessage collapseTemplates={collapseTemplates} key={key} message={message} index={key} />;
       })}
       {autoScroll && autoScrollAnchor === "last" && <Anchor />}
     </ChatContainer>

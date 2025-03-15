@@ -6,7 +6,7 @@ import type {
 } from "@anthropic-ai/sdk/resources/index.mjs";
 import { tokenLimit } from "../../../const";
 import type { Message } from "../../../types";
-import { createContextFromFiles, iterateDir } from "../../../utils/context";
+import { createXMLContextFromFiles, iterateDir } from "../../../utils/context";
 
 export async function experimentToAnthropic(
   experiment: Message[],
@@ -33,7 +33,7 @@ export async function experimentToAnthropic(
     if (role === "context") {
       const directory = content.directory as string;
       const files = await iterateDir(directory);
-      const context = await createContextFromFiles(files, directory);
+      const context = await createXMLContextFromFiles(files, directory);
       messages.push({ role: "user", content: context });
       continue;
     }

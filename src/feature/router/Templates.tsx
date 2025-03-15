@@ -2,16 +2,37 @@ import { atom, useAtom, type Setter } from "jotai";
 
 import { View } from "../ui/view";
 import { SidebarInput } from "../ui/Navigation";
-import { templatesAtom } from "../../atoms/common";
+import { experimentAtom, templatesAtom } from "../../atoms/common";
 import { ConfigRenderer, type Config } from "../ui/ConfigRenderer";
 import { Page } from "../ui/Page";
 import { Actions } from "../ui/Actions";
+import { useMemo } from "react";
+import { ChatPreview, hasMessages } from "../chat/chat";
+import { navigateAtom } from ".";
 
 const selectedTemplateAtom = atom<string | null>(null);
 
-export const actionsAtom = atom((get) => {
+const selectedExperimentAtom = atom(get => {
   const templates = get(templatesAtom);
   const selectedTemplate = get(selectedTemplateAtom);
+  if (templates !== undefined && selectedTemplate !== null) {
+    const template = templates[selectedTemplate];
+    if (template !== undefined) {
+      if (hasMessages(template)) {
+        return template.messages;
+      }
+      return [template];
+    }
+  }
+  return [];
+});
+
+export const actionsAtom = atom((get) => {
+  const experiment = get(experimentAtom);
+  const templates = get(templatesAtom);
+  const selectedTemplate = get(selectedTemplateAtom);
+  const selectedExperiment = get(selectedExperimentAtom);
+  const navigate = get(navigateAtom);
   let counter = 0;
   const config: Config = {
     Actions: [],
@@ -20,6 +41,13 @@ export const actionsAtom = atom((get) => {
   if (templates && selectedTemplate) {
     config.Actions.push({
       buttons: [
+        {
+          label: "Apply",
+          action: (set: Setter) => {
+            set(experimentAtom, [...experiment, ...selectedExperiment]);
+            navigate?.("/");
+          },
+        },
         {
           label: "Delete",
           action: (set: Setter) => {
@@ -42,17 +70,24 @@ export default function Templates() {
   const [templates, setTemplates] = useAtom(templatesAtom);
   const [selectedTemplate, setSelectedTemplate] = useAtom(selectedTemplateAtom);
 
+  const experiment = useMemo(() => {
+    if (selectedTemplate !== null) {
+      const template = templates?.[selectedTemplate];
+      if (template !== undefined) {
+        if (hasMessages(template)) {
+          return template.messages;
+        }
+        return [template];
+      }
+    }
+    return [];
+  }, [templates, selectedTemplate]);
+
   const [{ config, counter }] = useAtom(actionsAtom);
   return (
     <>
       <Page>
-        <View>
-          {templates ?
-            selectedTemplate ?
-              templates[selectedTemplate]
-            : undefined
-          : undefined}
-        </View>
+        <ChatPreview collapseTemplates={false} experiment={experiment} />
       </Page>
       <Actions>
         <ConfigRenderer>{config}</ConfigRenderer>

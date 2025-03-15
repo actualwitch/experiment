@@ -4,7 +4,7 @@ import type {
   ChatCompletionTool,
 } from "openai/resources/index.mjs";
 import { type Message, ObjectOrStringType, StringType } from "../../../types";
-import { createContextFromFiles, iterateDir } from "../../../utils/context";
+import { createXMLContextFromFiles, iterateDir } from "../../../utils/context";
 
 export const experimentToOpenai = async (experiment: Message[]): Promise<ChatCompletionCreateParams> => {
   const messages: ChatCompletionMessageParam[] = [];
@@ -21,7 +21,7 @@ export const experimentToOpenai = async (experiment: Message[]): Promise<ChatCom
     if (role === "context") {
       const directory = content.directory as string;
       const files = await iterateDir(directory);
-      const context = await createContextFromFiles(files, directory);
+      const context = await createXMLContextFromFiles(files, directory);
       messages.push({ role: "user", content: context });
       continue;
     }

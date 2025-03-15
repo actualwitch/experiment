@@ -42,24 +42,45 @@ export async function iterateDir(dir: string, ignore: string[] = [".git", ".sqlx
   return files;
 }
 
+export const createXMLContextFromFiles = async (files: string[], basePath: string, title = "") => {
+  let context = "";
+  let index = 1;
+  for (const url of files) {
+    const relUrl = url.slice(basePath.length);
+    const content = await readFile(url, "utf-8");
+    const thisDoc = `<document index="${index}">
+<source>${relUrl}</source>
+<document_content>
+${content}
+</document_content>
+</document>
+`;
+    context += thisDoc;
+    index += 1;
+  }
+  return `<documents${title ? ` ${title}` : ""}>
+${context}</documents>
+`;
+};
+
 export const createContextFromFiles = async (files: string[], basePath: string, title = "") => {
   let context = "";
   let index = 1;
   for (const url of files) {
     const relUrl = url.slice(basePath.length);
     const content = await readFile(url, "utf-8");
-    const thisDoc = `
-      <document index="${index}">
-        <source>${relUrl}</source>
-        <document_content>
-        ${content}
-        </document_content>
-      </document>
-    `;
+    const thisDoc = `${relUrl}
+---
+${content}
+---
+`;
     context += thisDoc;
     index += 1;
   }
-  return `<documents${title ? ` ${title}` : ""}>\n${context}\n</documents>`;
+  return `${title ? `${title}
+---` : ""}
+${context}
+`;
 };
 
 export async function filesInDir(thisPath: string) {

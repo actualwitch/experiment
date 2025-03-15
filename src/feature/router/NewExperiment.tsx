@@ -4,7 +4,7 @@ import { type Setter, atom, useAtom, useSetAtom } from "jotai";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { NavLink } from "react-router";
 
-import { MessageCircleDashed, Play, Pyramid, Rewind, Trash2 } from "lucide-react";
+import { Disc3, MessageCircleDashed, Play, Pyramid, Rewind, Trash2 } from "lucide-react";
 import {
   experimentAtom,
   isActionPanelOpenAtom,
@@ -224,38 +224,53 @@ export const actionsAtom = atom((get) => {
     });
     counter += 2;
   }
-  if (selection !== null) {
-    if (selection.length === 1) {
-      config.Actions.push({
-        Selection: {
-          buttons: [
-            {
-              label: "Edit",
-              icon: MessageCircleDashed,
-              action: (set: Setter) => set(selectionAtom, [selection[0], "content"]),
+  if (selection.length === 0 && experiment.length) {
+    config.Actions.push({
+      Experiment: {
+        buttons: [
+          {
+            label: "Template",
+            icon: Disc3,
+            action: async (set: Setter) => {
+              const name = prompt("Name of the template");
+              if (!name) return;
+              set(templatesAtom, { ...templates, [name]: { messages: experiment } });
             },
-            {
-              label: "Delete",
-              icon: Trash2,
-              action: (set: Setter) =>
-                set(
-                  experimentAtom,
-                  get(experimentAtom).filter((_, i) => i !== selection[0]),
-                ),
-            },
-            ...createSelectionEditButtons(templates, experiment[selection[0]]),
-          ],
-        },
-      });
-      counter += 3;
-    } else if (selection.length === 2) {
-      config.Actions.push({
-        Editing: {
-          buttons: [createCancelEditingButton([selection[0]])],
-        },
-      });
-      counter++;
-    }
+          },
+        ],
+      },
+    });
+    counter++;
+  } else if (selection.length === 1) {
+    config.Actions.push({
+      Selection: {
+        buttons: [
+          {
+            label: "Edit",
+            icon: MessageCircleDashed,
+            action: (set: Setter) => set(selectionAtom, [selection[0], "content"]),
+          },
+          {
+            label: "Delete",
+            icon: Trash2,
+            action: (set: Setter) =>
+              set(
+                experimentAtom,
+                get(experimentAtom).filter((_, i) => i !== selection[0]),
+              ),
+          },
+          ...createSelectionEditButtons(templates, experiment[selection[0]]),
+        ],
+      },
+    });
+    counter += 3;
+  } else if (selection.length === 2) {
+    config.Actions.push({
+      Editing: {
+        buttons: [createCancelEditingButton([selection[0]])],
+      },
+    });
+    counter++;
   }
   if (hasBackend()) {
     config.Actions.push({
@@ -370,10 +385,6 @@ export default function () {
   }, [experiment, parent]);
 
   useEffect(() => {
-    setSelection([]);
-  }, [experiment]);
-
-  useEffect(() => {
     if (selection && selection[0] >= experiment.length) {
       setSelection([]);
     }
@@ -465,6 +476,11 @@ export default function () {
               const text = e.clipboardData.getData("text");
               try {
                 const object = JSON.parse(text);
+                if (Array.isArray(object)) {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setExperiment([...experiment, ...object]);
+                }
                 if (object.type !== "function") return;
                 setRole("tool");
                 setMessage(text);
