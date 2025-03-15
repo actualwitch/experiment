@@ -4,7 +4,7 @@ import type { ChatCompletionStreamRequest } from "@mistralai/mistralai/models/co
 import { atom } from "jotai";
 import { focusAtom } from "jotai-optics";
 import OpenAI from "openai";
-import type { ChatCompletionCreateParamsStreaming } from "openai/resources/index.mjs";
+import type { ChatCompletionCreateParamsStreaming, ReasoningEffort } from "openai/resources/index.mjs";
 
 import { experimentToAnthropic } from "./adapters/anthropic";
 import { experimentToMistral } from "./adapters/mistral";
@@ -48,15 +48,15 @@ export const modelOptionsAtom = atom((get) => {
 });
 
 export const tempAtom = entangledAtom("temp", atom(0.0));
+export const effortAtom = entangledAtom("effort", atom<ReasoningEffort>("medium"));
 export const isRunningAtom = entangledAtom("is running", atom(false));
 
-export const modelSupportsTemperatureAtom = atom((get) => {
-  const provider = get(selectedProviderAtom);
+export const isReasoningModelAtom = atom((get) => {
   const model = get(modelAtom);
-  if (provider === "openai" && model && isReasoningModel(model)) {
-    return false;
+  if (get(selectedProviderAtom) === "openai" && model && isReasoningModel(model)) {
+    return true;
   }
-  return true;
+  return false;
 });
 
 export const resolveToken = async (token: string) => {
@@ -271,9 +271,9 @@ export const runExperimentAsOpenAi = entangledAtom(
       temperature: get(tempAtom),
       model: get(modelAtom) ?? "gpt-4o",
     };
-    const supportsTemp = get(modelSupportsTemperatureAtom);
-    if (!supportsTemp) {
+    if (get(isReasoningModelAtom)) {
       params.temperature = undefined;
+      params.reasoning_effort = get(effortAtom);
     }
     const stream = await client.chat.completions.create(params);
     const contentChunks: Message[] = [];

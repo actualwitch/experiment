@@ -1,25 +1,17 @@
-import { type Setter, atom, useAtom, useSetAtom } from "jotai";
-import { useParams } from "react-router";
+import { atom, useAtom, useSetAtom } from "jotai";
 import { useEffect } from "react";
-import { Copy, GitBranchPlus } from "lucide-react";
+import { useParams } from "react-router";
 
 import { navigateAtom, titleOverrideAtom } from ".";
-import {
-  type ExperimentCursor,
-  experimentAtom,
-  getExperimentAtom,
-  parentAtom,
-  templatesAtom,
-} from "../../atoms/common";
-import { type Config, ConfigRenderer } from "../ui/ConfigRenderer";
-import type { Experiment, Message } from "../../types";
+import { type ExperimentCursor, getExperimentAtom, selectionAtom, templatesAtom } from "../../atoms/common";
+import type { Experiment } from "../../types";
 import { entangledAtom } from "../../utils/entanglement";
 import { ExperimentPreview } from "../chat/ExperimentPreview";
-import { selectionAtom } from "../chat/chat";
 import { Actions } from "../ui/Actions";
+import { type Config, ConfigRenderer } from "../ui/ConfigRenderer";
+import { createRemixButtons, createSelectionEditButtons } from "../ui/ConfigRenderer/buttonCreators";
 import { DesktopOnly } from "../ui/Mobile";
 import { Page } from "../ui/Page";
-import { createRemixButtons, createSelectionEditButtons } from "../ui/ConfigRenderer/buttonCreators";
 
 const cursorAtom = entangledAtom("cursor", atom<ExperimentCursor | null>(null));
 const selectedExperimentAtom = entangledAtom(

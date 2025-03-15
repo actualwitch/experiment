@@ -4,7 +4,7 @@ import { type Setter, atom, useAtom, useSetAtom } from "jotai";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { NavLink } from "react-router";
 
-import { Ban, Disc3, MessageCircleDashed, Play, Pyramid, Rewind, Trash2 } from "lucide-react";
+import { MessageCircleDashed, Play, Pyramid, Rewind, Trash2 } from "lucide-react";
 import {
   experimentAtom,
   isActionPanelOpenAtom,
@@ -12,9 +12,10 @@ import {
   modelAtom,
   parentAtom,
   selectedProviderAtom,
+  selectionAtom,
   templatesAtom,
-  type Store,
 } from "../../atoms/common";
+import { personasAtom } from "../../atoms/persona";
 import { name } from "../../const";
 import { bs } from "../../style";
 import { type WithDarkMode, withDarkMode } from "../../style/darkMode";
@@ -22,27 +23,23 @@ import { Palette } from "../../style/palette";
 import type { Message, Role } from "../../types";
 import { useHandlers } from "../../utils/keyboard";
 import { hasBackend } from "../../utils/realm";
-import { ChatPreview, selectionAtom, type Path } from "../chat/chat";
+import { ChatPreview } from "../chat/chat";
 import {
   availableProviderOptionsAtom,
+  effortAtom,
+  isReasoningModelAtom,
   isRunningAtom,
   modelOptionsAtom,
-  modelSupportsTemperatureAtom,
   runInferenceAtom,
   tempAtom,
 } from "../inference/atoms";
 import { modelOptions } from "../inference/types";
 import { Actions } from "../ui/Actions";
 import { type Config, ConfigRenderer } from "../ui/ConfigRenderer";
+import { createCancelEditingButton, createSelectionEditButtons } from "../ui/ConfigRenderer/buttonCreators";
 import { Page } from "../ui/Page";
 import { TextArea } from "../ui/TextArea";
-import { currentDirAtom } from "./Explore";
-import {
-  createCancelEditingButton,
-  createSelectionEditButtons,
-  createTemplateButton,
-} from "../ui/ConfigRenderer/buttonCreators";
-import { activePersonaAtom, personasAtom } from "../../atoms/persona";
+import { pwdAtom } from "../../atoms/server";
 
 const baseMargin = 1 / 2;
 
@@ -142,7 +139,7 @@ export const Underline = styled.span`
 export const actionsAtom = atom((get) => {
   const providerOptions = get(availableProviderOptionsAtom);
   const modelOptions = get(modelOptionsAtom);
-  const supportsTemp = get(modelSupportsTemperatureAtom);
+  const isReasoningModel = get(isReasoningModelAtom);
   const isRunning = get(isRunningAtom);
   const experiment = get(experimentAtom);
   const selection = get(selectionAtom);
@@ -157,6 +154,7 @@ export const actionsAtom = atom((get) => {
   }
   if (providerOptions.length > 1) {
     config.Actions.push({
+      type: "select",
       label: "Provider",
       atom: selectedProviderAtom,
       options: providerOptions,
@@ -165,18 +163,33 @@ export const actionsAtom = atom((get) => {
   }
   if (modelOptions.length > 1) {
     config.Actions.push({
+      type: "select",
       label: "Model",
       atom: modelAtom,
       options: modelOptions,
     });
     counter++;
   }
-  if (supportsTemp) {
+  if (isReasoningModel) {
     config.Actions.push({
+      type: "select",
+      label: "Effort",
+      atom: effortAtom,
+      options: [
+        { id: "low", name: "Low" },
+        { id: "medium", name: "Medium" },
+        // just like me fr fr
+        { id: "high", name: "High" },
+      ],
+    });
+    counter += 1;
+  } else {
+    config.Actions.push({
+      type: "number",
       label: "Temperature",
       atom: tempAtom,
     });
-    counter++;
+    counter += 1;
   }
   // if (personas && Object.keys(personas).length > 0) {
   //   config.Actions.push({
@@ -203,7 +216,7 @@ export const actionsAtom = atom((get) => {
           action: (set: Setter) => {
             set(experimentAtom, []);
             set(parentAtom, undefined);
-            set(selectionAtom, null);
+            set(selectionAtom, []);
           },
           disabled: isRunning || experiment.length === 0,
         },
@@ -252,8 +265,10 @@ export const actionsAtom = atom((get) => {
             label: "Context",
             icon: Pyramid,
             action: (set: Setter) => {
-              const dir = get(currentDirAtom);
-              set(experimentAtom, [...experiment, { role: "context", content: { directory: dir } }]);
+              const dir = get(pwdAtom);
+              if (dir) {
+                set(experimentAtom, [...experiment, { role: "context", content: { directory: dir } }]);
+              }
             },
           },
         ],
@@ -323,7 +338,7 @@ export default function () {
     if (!isFocusedRef.current && selection && selection.length === 1) {
       const newExperiment = experiment.filter((_, i) => i !== selection[0]);
       setExperiment(newExperiment);
-      setSelection(null);
+      setSelection([]);
     }
   };
 
@@ -355,12 +370,12 @@ export default function () {
   }, [experiment, parent]);
 
   useEffect(() => {
-    setSelection(null);
+    setSelection([]);
   }, [experiment]);
 
   useEffect(() => {
     if (selection && selection[0] >= experiment.length) {
-      setSelection(null);
+      setSelection([]);
     }
   }, [experiment, selection]);
 
@@ -374,7 +389,7 @@ export default function () {
 
   const submit = () => {
     if (isEditing) {
-      setSelection(null);
+      setSelection([]);
       setExperiment(
         experiment.map((item, i) => {
           if (i === selection[0]) {

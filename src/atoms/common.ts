@@ -17,6 +17,18 @@ export const layoutAtom = atom<LayoutType>();
 export const mobileQuery = "(max-width: 920px)";
 export const desktopQuery = "(min-width: 921px)";
 
+export const tracingAtom = (a: any) => atom(get => {
+  const value = get(a);
+  console.log("getting ", JSON.stringify(value));
+  return value;
+}, (get, set, ...value) => {
+  console.log("setting ", JSON.stringify(value));
+  set(a, ...value);
+})
+
+export type Path = [number] | [number, "content"];
+export const selectionAtom = entangledAtom("selection", atom<Path | []>([]));
+
 export const layoutTrackerAtom = atomEffect((get, set) => {
   const mql = window.matchMedia(mobileQuery);
   const listener = (mql: MediaQueryList | MediaQueryListEvent) => {
@@ -283,3 +295,5 @@ export const debugAtom = entangledAtom(
     return process.env.DEBUG === "true";
   }),
 );
+
+export const nopeAtom = atom((get) => null);

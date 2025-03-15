@@ -1,14 +1,20 @@
 import styled from "@emotion/styled";
 import { atom, useAtom } from "jotai";
+import { Maybe } from "true-myth";
 import { NavLink, useLocation } from "react-router";
+import path from "node:path";
 
 import { ROUTES, experimentsSidebarAtom } from "../router";
-import { revisionAtom, templatesAtom } from "../../atoms/common";
+import { experimentAtom, revisionAtom, selectionAtom, templatesAtom } from "../../atoms/common";
 import { TRIANGLE } from "../../const";
 import { bs, sidebarWidth } from "../../style";
 import { nonInteractive, widthAvailable } from "../../style/mixins";
 import { increaseSpecificity } from "../../style/utils";
 import { portalIO } from "../../utils/portal";
+import { View } from "./view";
+import { entangledAtom } from "../../utils/entanglement";
+import { getRealm } from "../../utils/realm";
+import { filesInDir } from "../../utils/context";
 
 export const [SidebarInput, SidebarOutput] = portalIO();
 
@@ -64,8 +70,82 @@ const Header = styled.h3`
   user-select: none;
 `;
 
+export const selectedContextPath = atom(
+  (get) => {
+    const selection = get(selectionAtom);
+    const experiment = get(experimentAtom);
+    return Maybe.of(selection[0])
+      .map((idx) => experiment[idx])
+      .map((msg) => msg.content.directory)
+      .unwrapOr(null);
+  },
+  (get, set, value: string) => {
+    const selection = get(selectionAtom);
+    const experiment = get(experimentAtom);
+    const selectedIdx = selection[0];
+    if (selectedIdx !== undefined) {
+      const selectedMessage = experiment[selectedIdx];
+      if (selectedMessage.role === "context") {
+        selectedMessage.content = { directory: value };
+
+        set(experimentAtom, [...experiment]);
+      }
+    }
+  },
+);
+
+export const selectedContextContent = entangledAtom(
+  "selected-ctx",
+  atom(async (get) => {
+    if (getRealm() !== "server") return;
+    try {
+      const currentDir = get(selectedContextPath);
+      if (currentDir) {
+        try {
+          const files = await filesInDir(currentDir);
+          const entry = path.parse(currentDir);
+          return { [entry.name]: Object.fromEntries(files.map((file) => [file.name, {}])) };
+        } catch (e) {
+          console.log(e);
+        }
+      }
+      return null;
+    } catch (e) {
+      console.log(e);
+    }
+  }),
+);
+
+export const goToAtom = entangledAtom(
+  "gotodir",
+  atom(null, async (get, set, dir: string) => {
+    if (getRealm() !== "server") return;
+    const currentDir = get(selectedContextPath);
+    if (!currentDir) return;
+    set(selectedContextPath, path.join(currentDir, dir));
+  }),
+);
+
 const SidebarComponent = () => {
   const [data] = useAtom(experimentsSidebarAtom);
+  const [selectedContext] = useAtom(selectedContextContent);
+  const [_, goToDir] = useAtom(goToAtom);
+  if (selectedContext) {
+    return (
+      <View
+        disableSorting
+        onTitleClick={(value, key, path) => {
+          if (path.length < 2) {
+            goToDir("..");
+            return;
+          }
+          goToDir(path[path.length - 1]);
+        }}
+      >
+        {selectedContext}
+      </View>
+    );
+  }
   if (!data.length) return null;
   return (
     <>

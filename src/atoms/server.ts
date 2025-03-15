@@ -1,7 +1,10 @@
 import { atom } from "jotai";
 import { Maybe } from "true-myth";
-import { resolve, spawn } from "../utils";
 import { clientFile, staticDir } from "../const";
+import { resolve, spawn } from "../utils";
+import { getRealm } from "../utils/realm";
+import { nopeAtom } from "./common";
+import { entangledAtom } from "../utils/entanglement";
 
 export const clientScriptAtom = atom(async () => {
   const result = await spawn("bun", ["build", "./src/entry/client.tsx", "--outdir", `./${staticDir}`, "--minify"]);
@@ -18,3 +21,5 @@ export const clientScriptAtom = atom(async () => {
   const file = await readFile.value(`./${staticDir}/${clientFile}`, "utf8");
   return Maybe.just(file);
 });
+
+export const pwdAtom = entangledAtom("pwd", getRealm() === "server" ? atom(Bun.env.PWD) : nopeAtom);

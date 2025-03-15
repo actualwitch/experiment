@@ -1,6 +1,6 @@
 import { type PrimitiveAtom, type Setter, useAtom, useSetAtom } from "jotai";
 import { Fragment, createElement, useId, type ReactNode } from "react";
-import { Item } from "react-stately";
+import { Item, type Key } from "react-stately";
 import { processCsvAtom } from "../../../atoms/client";
 import { Select } from "../Select";
 import { Slider } from "../Slider";
@@ -8,19 +8,28 @@ import { store } from "../../../store";
 import { Button } from "../../../style";
 
 export type LeafWithOptions<T extends string = string> = {
+  type: "select";
   label: string;
   atom: PrimitiveAtom<T>;
   options: Array<{ id: string; name: string }>;
+  defaultKey?: Key
 };
 
 export type LeafWithSlider = {
+  type: "number";
   label: string;
   atom: PrimitiveAtom<number>;
+  config?: Partial<{
+    min: number;
+    max: number;
+    step: number;
+    formatOptions: Intl.NumberFormatOptions;
+  }>;
 };
 
 export type LeafWithCSVImport = {
-  label: string;
   type: "csv";
+  label: string;
 };
 
 export type LeafWithAction = {
@@ -44,25 +53,26 @@ export type Config =
 
 const RenderWithAtom = ({ children }: { children: LeafWithSlider | LeafWithOptions }) => {
   const [value, setValue] = useAtom(children.atom);
-  if (typeof value === "number") {
+  if (children.type === "number") {
+    const { min = 0, max = 1, step = 0.01, formatOptions = { minimumFractionDigits: 2 } } = children.config ?? {};
     return (
       <Slider
         value={value}
         onChange={(value) => setValue(value)}
         label={children.label}
-        minValue={0}
-        maxValue={1}
-        step={0.01}
-        formatOptions={{ minimumFractionDigits: 2 }}
+        minValue={min}
+        maxValue={max}
+        step={step}
+        formatOptions={formatOptions}
       />
     );
   }
-  if (children.options) {
+  if (children.type === "select") {
     return (
       <Select
         label={children.label}
         items={children.options}
-        selectedKey={value}
+        selectedKey={value ?? children.defaultKey}
         onSelectionChange={(value) => setValue(value)}
       >
         {(item) => (

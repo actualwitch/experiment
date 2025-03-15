@@ -1,7 +1,7 @@
 import type { ChatCompletionStreamRequest } from "@mistralai/mistralai/models/components";
-import { type Message, ObjectOrStringType, StringType } from "../../../types";
 import { tokenLimit } from "../../../const";
-import { createContextFromFiles, iterateDir } from "../../router/Explore";
+import { type Message, ObjectOrStringType, StringType } from "../../../types";
+import { createContextFromFiles, iterateDir } from "../../../utils/context";
 
 export const experimentToMistral = async (
   experiment: Message[],

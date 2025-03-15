@@ -221,8 +221,11 @@ export const Sidebar = styled.aside`
     display: flex;
     flex-wrap: wrap;
   }
-  & > div {
-    margin-bottom: ${bs(1 / 2)};
+  & > div + div {
+    margin-top: ${bs(1 / 2)};
+  }
+  & > div + p {
+    margin-top: ${bs(1.2)};
   }
   & > p {
     gap: ${bs(1 / 4)};

@@ -1,7 +1,7 @@
-import styled from "@emotion/styled";
 import { css } from "@emotion/react";
+import styled from "@emotion/styled";
 import { useAtom } from "jotai";
-import { useEffect, useMemo, type PropsWithChildren } from "react";
+import { type PropsWithChildren, useEffect } from "react";
 
 import {
   desktopQuery,
@@ -10,12 +10,12 @@ import {
   isNavPanelOpenAtom,
   layoutAtom,
   mobileQuery,
+  nopeAtom,
 } from "../../atoms/common";
+import { effectiveTitleAtom, iconAtom, routeAtom } from "../../feature/router";
 import { Button, bs } from "../../style";
 import { type WithDarkMode, withDarkMode } from "../../style/darkMode";
 import { Palette } from "../../style/palette";
-import { iconAtom, effectiveTitleAtom, routeAtom } from "../../feature/router";
-import { nopeAtom } from "../../atoms/util";
 
 export const MobileHeaderContainer = styled.h2<WithDarkMode>`
   position: absolute;

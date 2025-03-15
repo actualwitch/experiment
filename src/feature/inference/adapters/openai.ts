@@ -4,7 +4,7 @@ import type {
   ChatCompletionTool,
 } from "openai/resources/index.mjs";
 import { type Message, ObjectOrStringType, StringType } from "../../../types";
-import { createContextFromFiles, iterateDir } from "../../router/Explore";
+import { createContextFromFiles, iterateDir } from "../../../utils/context";
 
 export const experimentToOpenai = async (experiment: Message[]): Promise<ChatCompletionCreateParams> => {
   const messages: ChatCompletionMessageParam[] = [];

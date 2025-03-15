@@ -4,9 +4,9 @@ import type {
   MessageParam,
   Tool,
 } from "@anthropic-ai/sdk/resources/index.mjs";
-import type { Message } from "../../../types";
 import { tokenLimit } from "../../../const";
-import { createContextFromFiles, iterateDir } from "../../router/Explore";
+import type { Message } from "../../../types";
+import { createContextFromFiles, iterateDir } from "../../../utils/context";
 
 export async function experimentToAnthropic(
   experiment: Message[],

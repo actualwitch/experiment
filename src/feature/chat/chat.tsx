@@ -3,7 +3,7 @@ import styled from "@emotion/styled";
 import { atom, useAtom, useAtomValue } from "jotai";
 import { type CSSProperties, type ReactNode, useEffect, useMemo, useRef } from "react";
 import { TRIANGLE } from "../../const";
-import { type Store, experimentLayoutAtom, isDarkModeAtom, templatesAtom } from "../../atoms/common";
+import { type Path, type Store, experimentLayoutAtom, isDarkModeAtom, selectionAtom, templatesAtom } from "../../atoms/common";
 import { isRunningAtom } from "../inference/atoms";
 import { bs } from "../../style";
 import type { WithDarkMode } from "../../style/darkMode";
@@ -186,10 +186,7 @@ export const MessageComponent = styled.article<{
   return styles;
 });
 
-export type Path = [number] | [number, "content"];
-export const selectionAtom = atom<Path | null>(null);
-
-function hasMessages(obj: _Message | ExperimentWithMeta): obj is ExperimentWithMeta {
+export function hasMessages(obj: _Message | ExperimentWithMeta): obj is ExperimentWithMeta {
   return Object.hasOwn(obj, "messages");
 }
 
@@ -367,12 +364,12 @@ export function ChatPreview({
 
   useHandlers({
     Escape: () => {
-      setSelection(null);
+      setSelection([]);
     },
   });
 
   useEffect(() => {
-    return () => void setSelection(null);
+    return () => void setSelection([]);
   }, []);
 
   if (computedMessages.length === 0) {

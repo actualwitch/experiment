@@ -7,7 +7,7 @@ import type { Config } from "../ui/ConfigRenderer";
 import { TRIANGLE, description, name } from "../../const";
 import Experiment, { actionsAtom as experimentActionsAtom } from "./Experiment";
 import Import, { actionsAtom as importActionsAtom } from "./Import";
-import Explore from "./Explore";
+// import Explore from "./Explore";
 import Calendar from "./Calendar";
 import NewExperiment, { actionsAtom as newExperimentActionsAtom } from "./NewExperiment";
 import Parameters from "./Parameters";
@@ -65,13 +65,13 @@ export const ROUTES: AppRoute[] = [
     component: Templates,
     sidebar: { atom: templateActionsAtom, title: "Actions" },
   },
-  {
-    icon: "🌍",
-    title: "Explore",
-    showInSidebar: true,
-    path: "/explore",
-    component: Explore,
-  },
+  // {
+  //   icon: "🌍",
+  //   title: "Explore",
+  //   showInSidebar: true,
+  //   path: "/explore",
+  //   component: Explore,
+  // },
   {
     icon: "📅",
     title: "Calendar",

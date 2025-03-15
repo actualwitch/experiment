@@ -15,7 +15,7 @@ export const subscribe = (listener: (update: Update) => void) => {
 };
 
 export const publish = (update: { id: string; value: unknown }) => {
-  log(`publishing ${update.id} update`);
+  log(`publishing ${JSON.stringify(update, null, 2)}`);
   for (const listener of listeners) {
     listener(update);
   }
