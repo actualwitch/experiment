@@ -1,4 +1,4 @@
-import {, type CSSProperties, useState, useCallback, useEffect, useMemo } from "react";
+import { type CSSProperties, useState, useCallback, useEffect, useMemo } from "react";
 import type { Key, TransitionState } from ".";
 
 type MoveContext = {

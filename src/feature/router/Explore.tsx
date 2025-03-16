@@ -48,7 +48,7 @@ export const currentDirContentAtom = entangledAtom(
           const files = await filesInDir(currentDir);
           const entry = path.parse(currentDir);
           return { [entry.name]: Object.fromEntries(files.map((file) => [file.name, {}])) };
-        } catch (e){
+        } catch (e) {
           // store.set(dirOverrideAtom, null);
           console.log(e);
         }

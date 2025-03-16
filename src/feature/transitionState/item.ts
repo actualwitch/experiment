@@ -7,7 +7,10 @@ export function useItemTransition<T = { [key: string]: unknown }, I = null | T |
 ) {
   const ref = useRef<I | undefined>(typeof item !== "boolean" && item !== null ? item : undefined);
   useEffect(() => {
-    ref.current = typeof item === "boolean" ? undefined : item === null ? undefined : item;
+    ref.current =
+      typeof item === "boolean" ? undefined
+      : item === null ? undefined
+      : item;
   }, [item]);
 
   const [isActive, setIsActive] = useState(Boolean(item));

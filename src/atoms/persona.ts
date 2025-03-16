@@ -6,13 +6,10 @@ import { storeAtom } from "./common";
 // Personas stored in the main Store
 export const personasAtom = entangledAtom(
   "personas",
-  focusAtom(storeAtom, (o) => o.prop("personas"))
+  focusAtom(storeAtom, (o) => o.prop("personas")),
 );
 
-export const activePersonaAtom = entangledAtom(
-  "active-persona",
-  atom<string | null>(null)
-);
+export const activePersonaAtom = entangledAtom("active-persona", atom<string | null>(null));
 
 export const currentPersonaContextAtom = atom((get) => {
   const personas = get(personasAtom);

@@ -21,6 +21,7 @@ import {
   isTransRightsAtom,
   layoutAtom,
   layoutTrackerAtom,
+  selectionAtom,
 } from "./atoms/common";
 import { DesktopOnly, MobileHeader, MobileOnly } from "./feature/ui/Mobile";
 import type { Nullish } from "./types";
@@ -59,9 +60,11 @@ const App = () => {
   }, [navigate]);
   const [isNavPanelOpen, setIsNavPanelOpen] = useAtom(isNavPanelOpenAtom);
   const [isActionPanelOpen, setIsActionPanelOpen] = useAtom(isActionPanelOpenAtom);
+  const setSelection = useSetAtom(selectionAtom);
   useEffect(() => {
     setIsNavPanelOpen(false);
     setIsActionPanelOpen(false);
+    setSelection([]);
   }, [pathname]);
   return (
     <Suspense fallback={null}>

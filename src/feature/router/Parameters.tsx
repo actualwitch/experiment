@@ -133,7 +133,7 @@ export default function Parameters() {
   const [fontStack, setFontStack] = useAtom(fontStackAtom);
   const [experimentLayout, setExperimentLayout] = useAtom(experimentLayoutAtom);
 
-  const [isTransRights, setIsTransRights] = useAtom(isTransRightsAtom)
+  const [isTransRights, setIsTransRights] = useAtom(isTransRightsAtom);
 
   const [tokens, setTokens] = useAtom(tokensAtom);
   const [isAdding, setIsAdding] = useState(false);

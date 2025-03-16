@@ -12,7 +12,7 @@ export type LeafWithOptions<T extends string = string> = {
   label: string;
   atom: PrimitiveAtom<T>;
   options: Array<{ id: string; name: string }>;
-  defaultKey?: Key
+  defaultKey?: Key;
 };
 
 export type LeafWithSlider = {

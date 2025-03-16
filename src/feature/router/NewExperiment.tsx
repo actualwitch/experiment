@@ -16,13 +16,15 @@ import {
   templatesAtom,
 } from "../../atoms/common";
 import { personasAtom } from "../../atoms/persona";
+import { pwdAtom } from "../../atoms/server";
 import { name } from "../../const";
 import { bs } from "../../style";
 import { type WithDarkMode, withDarkMode } from "../../style/darkMode";
 import { Palette } from "../../style/palette";
-import type { Message, Role } from "../../types";
+import { type Message, PossibleObjectType, type Role, RoleOptions } from "../../types";
 import { useHandlers } from "../../utils/keyboard";
 import { hasBackend } from "../../utils/realm";
+import { useScrollToBottomRef } from "../../utils/scroll";
 import { ChatPreview } from "../chat/chat";
 import {
   availableProviderOptionsAtom,
@@ -33,13 +35,13 @@ import {
   runInferenceAtom,
   tempAtom,
 } from "../inference/atoms";
+import { tryParseFunctionSchema } from "../inference/function";
 import { modelOptions } from "../inference/types";
 import { Actions } from "../ui/Actions";
 import { type Config, ConfigRenderer } from "../ui/ConfigRenderer";
 import { createCancelEditingButton, createSelectionEditButtons } from "../ui/ConfigRenderer/buttonCreators";
 import { Page } from "../ui/Page";
 import { TextArea } from "../ui/TextArea";
-import { pwdAtom } from "../../atoms/server";
 
 const baseMargin = 1 / 2;
 
@@ -327,25 +329,7 @@ export default function () {
     }
   }, [provider, models, model]);
 
-  const [object, setObject] = useState<null | object>(null);
-  useEffect(() => {
-    const id = setTimeout(() => {
-      try {
-        const object = JSON.parse(message);
-        if (object.type !== "function") throw new Error("Not a function");
-        setObject(object);
-        setRole("tool");
-      } catch (e) {
-        console.error(e);
-        setObject(null);
-      }
-    }, 100);
-    return () => clearTimeout(id);
-  }, [message]);
-
   const isEditing = selection?.length === 2 && selection[1] === "content";
-
-  const isDisabled = role === "tool" && !object;
 
   const isFocusedRef = useRef(false);
 
@@ -365,13 +349,9 @@ export default function () {
     if (isEditing) {
       try {
         const { content, role } = experiment[selection[0]];
-        if (typeof content === "string") {
-          setMessage(content);
-          setRole(role);
-        } else if (typeof content === "object") {
-          setMessage(JSON.stringify(content, null, 2));
-          setRole("tool");
-        }
+        const textContent = typeof content === "string" ? content : JSON.stringify(content, null, 2);
+        setMessage(textContent);
+        setRole(role);
       } catch {}
     }
   }, [experiment, selection, isEditing]);
@@ -399,6 +379,10 @@ export default function () {
   }, [experiment, isRunning, isEditing, selection]);
 
   const submit = () => {
+    let object: object | undefined;
+    try {
+      object = JSON.parse(message);
+    } catch {}
     if (isEditing) {
       setSelection([]);
       setExperiment(
@@ -411,17 +395,29 @@ export default function () {
         }),
       );
       setMessage("");
+      setRole("user");
+      return;
+    }
+    if (object && PossibleObjectType.guard(role)) {
+      setExperiment([...experiment, { role, content: object }]);
+      setMessage("");
+      setRole("user");
       return;
     }
     if (message) {
-      setExperiment([...experiment, { role, content: object || message }]);
+      setExperiment([...experiment, { role, content: message }]);
       setMessage("");
+      setRole("user");
       return;
     }
     if (experiment.length) {
       startExperiment();
     }
   };
+
+  const isDisabled = false;
+
+  const pageRef = useScrollToBottomRef([experiment.length]);
 
   const page =
     providerOptions.length === 0 ?
@@ -434,16 +430,15 @@ export default function () {
           .csv file on the <NavLink to="/import">Import</NavLink> page.
         </p>
       </Page>
-    : <Page>
+    : <Page ref={pageRef}>
         <ChatPreview experiment={experiment} autoScroll />
         <Block isDarkMode={isDarkMode}>
           <ActionRow>
             <select value={role} onChange={(e) => setRole(e.target.value as Role)} style={{ flex: 1 }}>
-              <option>system</option>
-              <option>developer</option>
-              <option>user</option>
-              <option>assistant</option>
-              <option>tool</option>
+              {RoleOptions.alternatives.map((role) => {
+                const text = role.value;
+                return <option key={text}>{text}</option>;
+              })}
             </select>
             {isEditing ?
               <button type="button" disabled={isDisabled} onClick={submit}>
@@ -464,7 +459,7 @@ export default function () {
           <TextArea
             placeholder={`${role === "tool" ? "Paste JSONSchema" : "Type a message and press Enter to append"}…`}
             value={message}
-            spellCheck={object === null}
+            spellCheck={role === "tool"}
             onChange={(e) => setMessage(e.target.value)}
             onKeyDown={(e) => {
               if (!isDisabled && e.key === "Enter" && !e.shiftKey) {
@@ -480,10 +475,16 @@ export default function () {
                   e.preventDefault();
                   e.stopPropagation();
                   setExperiment([...experiment, ...object]);
+                  return;
                 }
-                if (object.type !== "function") return;
-                setRole("tool");
-                setMessage(text);
+                const parsed = tryParseFunctionSchema(object);
+                if (parsed.isJust) {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setExperiment([...experiment, { role: "tool", content: parsed.value }]);
+                  return;
+                }
+                setRole("context");
               } catch {}
             }}
             autoFocus

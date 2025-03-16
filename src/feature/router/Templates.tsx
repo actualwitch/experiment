@@ -1,18 +1,16 @@
-import { atom, useAtom, type Setter } from "jotai";
+import { type Setter, atom, useAtom } from "jotai";
 
-import { View } from "../ui/view";
-import { SidebarInput } from "../ui/Navigation";
-import { experimentAtom, templatesAtom } from "../../atoms/common";
-import { ConfigRenderer, type Config } from "../ui/ConfigRenderer";
-import { Page } from "../ui/Page";
-import { Actions } from "../ui/Actions";
-import { useMemo } from "react";
-import { ChatPreview, hasMessages } from "../chat/chat";
 import { navigateAtom } from ".";
+import { experimentAtom, templatesAtom } from "../../atoms/common";
+import { ChatPreview, hasMessages } from "../chat/chat";
+import { Actions } from "../ui/Actions";
+import { type Config, ConfigRenderer } from "../ui/ConfigRenderer";
+import { SidebarInput } from "../ui/Navigation";
+import { Page } from "../ui/Page";
 
 const selectedTemplateAtom = atom<string | null>(null);
 
-const selectedExperimentAtom = atom(get => {
+const selectedExperimentAtom = atom((get) => {
   const templates = get(templatesAtom);
   const selectedTemplate = get(selectedTemplateAtom);
   if (templates !== undefined && selectedTemplate !== null) {
@@ -70,18 +68,7 @@ export default function Templates() {
   const [templates, setTemplates] = useAtom(templatesAtom);
   const [selectedTemplate, setSelectedTemplate] = useAtom(selectedTemplateAtom);
 
-  const experiment = useMemo(() => {
-    if (selectedTemplate !== null) {
-      const template = templates?.[selectedTemplate];
-      if (template !== undefined) {
-        if (hasMessages(template)) {
-          return template.messages;
-        }
-        return [template];
-      }
-    }
-    return [];
-  }, [templates, selectedTemplate]);
+  const [experiment] = useAtom(selectedExperimentAtom);
 
   const [{ config, counter }] = useAtom(actionsAtom);
   return (

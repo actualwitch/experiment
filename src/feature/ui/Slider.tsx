@@ -56,7 +56,7 @@ const ThumbComponent = styled.div<{ isFocusVisible?: boolean; isDragging?: boole
     let foregroundColor = isDarkMode ? Palette.white : Palette.black;
     if (isFocusVisible) foregroundColor = Palette.accent;
     if (isDragging) foregroundColor = isDarkMode ? "#eee" : Palette.buttonHoverBackground;
-    return triangle({ pointingDirection: "bottom", height: bs(1/3), width: bs(1/2), foregroundColor });
+    return triangle({ pointingDirection: "bottom", height: bs(1 / 3), width: bs(1 / 2), foregroundColor });
   }}
   bottom: 18px;
 `;

@@ -1,9 +1,16 @@
 import { type SerializedStyles, css } from "@emotion/react";
 import styled from "@emotion/styled";
 import { atom, useAtom, useAtomValue } from "jotai";
-import { type CSSProperties, type ReactNode, useEffect, useMemo, useRef } from "react";
+import { type CSSProperties, type ReactNode, type Ref, useEffect, useMemo, useRef } from "react";
 import { TRIANGLE } from "../../const";
-import { type Path, type Store, experimentLayoutAtom, isDarkModeAtom, selectionAtom, templatesAtom } from "../../atoms/common";
+import {
+  type Path,
+  type Store,
+  experimentLayoutAtom,
+  isDarkModeAtom,
+  selectionAtom,
+  templatesAtom,
+} from "../../atoms/common";
 import { isRunningAtom } from "../inference/atoms";
 import { bs } from "../../style";
 import type { WithDarkMode } from "../../style/darkMode";
@@ -18,7 +25,8 @@ const baseHeight = bs(6);
 export const ChatContainer = styled.div<WithDarkMode>`
   flex: 1;
   display: flex;
-  flex-direction: column-reverse;
+  flex-direction: column;
+  justify-content: end;
 
   code {
     background-color: ${(p) => (p.isDarkMode ? Palette.white + "50" : Palette.black + "20")};
@@ -192,7 +200,15 @@ export function hasMessages(obj: _Message | ExperimentWithMeta): obj is Experime
 
 export type Coords = [x: number, y: number];
 
-export const ChatMessage = ({ message: _message, index, collapseTemplates = true }: { message: Message; index: number, collapseTemplates?: boolean }) => {
+export const ChatMessage = ({
+  message: _message,
+  index,
+  collapseTemplates = true,
+}: {
+  message: Message;
+  index: number;
+  collapseTemplates?: boolean;
+}) => {
   const ref = useRef<null | HTMLElement>(null);
   const selector: Path = [index, "content"];
   const [selection, setSelection] = useAtom(selectionAtom);
@@ -307,7 +323,13 @@ export const ChatMessage = ({ message: _message, index, collapseTemplates = true
         hitRef.current = [e.screenX, e.screenY];
       }}
       onMouseUp={(e) => {
-        if (selection?.length === 2 || isSelected || e.nativeEvent.target?.nodeName === "EM"|| e.nativeEvent.target?.nodeName === "BUTTON") return;
+        if (
+          selection?.length === 2 ||
+          isSelected ||
+          e.nativeEvent.target?.nodeName === "EM" ||
+          e.nativeEvent.target?.nodeName === "BUTTON"
+        )
+          return;
         if (hitRef.current) {
           const [x, y] = hitRef.current;
           hitRef.current = null;
@@ -339,14 +361,14 @@ const Banner = styled.div`
 
 export function ChatPreview({
   experiment,
-  autoScroll,
-  autoScrollAnchor = "first",
   collapseTemplates = false,
+  empty = <Banner>∅</Banner>,
 }: {
   experiment: Experiment;
   autoScroll?: boolean;
   autoScrollAnchor?: "first" | "last";
   collapseTemplates?: boolean;
+  empty?: ReactNode;
 }) {
   const [selection, setSelection] = useAtom(selectionAtom);
   const [isDarkMode] = useAtom(isDarkModeAtom);
@@ -356,14 +378,11 @@ export function ChatPreview({
     const keyed = messages.map((message, index) => {
       return { ...message, key: index };
     });
-    const reversed = [...keyed].reverse();
-    if (isRunning && !reversed[0].fromServer) {
-      reversed.unshift({ role: "assistant", content: "...", fromServer: true, key: -1 });
+    if (isRunning && !keyed[0].fromServer) {
+      keyed.push({ role: "assistant", content: "...", fromServer: true, key: -1 });
     }
-    return reversed;
+    return keyed;
   }, [experiment, isRunning]);
-  const Anchor = useScrollToTop("top", [computedMessages.length, autoScroll, autoScrollAnchor]);
-
   useHandlers({
     Escape: () => {
       setSelection([]);
@@ -371,15 +390,13 @@ export function ChatPreview({
   });
 
   if (computedMessages.length === 0) {
-    return <Banner>∅</Banner>;
+    return empty;
   }
   return (
     <ChatContainer isDarkMode={isDarkMode}>
-      {autoScroll && autoScrollAnchor === "first" && <Anchor />}
       {computedMessages.map?.(({ key, ...message }) => {
         return <ChatMessage collapseTemplates={collapseTemplates} key={key} message={message} index={key} />;
       })}
-      {autoScroll && autoScrollAnchor === "last" && <Anchor />}
     </ChatContainer>
   );
 }

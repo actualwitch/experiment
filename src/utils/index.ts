@@ -145,7 +145,6 @@ export async function spawn(command: string, args: string[], options?: any): Pro
   return Result.err(new Error("Cannot spawn processes in the browser"));
 }
 
-
 export async function exec(command: string, options?: any): Promise<Result<string, Error>> {
   const maybeModule = await resolve("child_process");
 

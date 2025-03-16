@@ -549,7 +549,7 @@
 
     "turbo-stream": ["turbo-stream@2.4.0", "", {}, "sha512-FHncC10WpBd2eOmGwpmQsWLDoK4cqsA/UT/GqNoaKOQnT8uzhtCbg3EoUDMvqpOSAI0S26mr0rkjzbOO6S3v1g=="],
 
-    "typescript": ["typescript@5.9.0-dev.20250315", "", { "bin": { "tsc": "bin/tsc", "tsserver": "bin/tsserver" } }, "sha512-sSVWMHsHReoq9HHif4xQMoRt2l9z65dssRplQJciY1rgDb1mv/Ql817xf5FC14qHZkbSlLrs30NtEBCdHdRdrA=="],
+    "typescript": ["typescript@5.9.0-dev.20250316", "", { "bin": { "tsc": "bin/tsc", "tsserver": "bin/tsserver" } }, "sha512-UmfN0N0+BNaF43agcV7pJdXkGofnGu7MDdoB6wANOPJyBjc9t6AUSiM7Ud4yj4ftGhpJwsF5NygXyy2U3kXdFQ=="],
 
     "undici-types": ["undici-types@6.20.0", "", {}, "sha512-Ny6QZ2Nju20vw1SRHe3d9jVu6gJ+4e3+MMpqu7pqE5HT6WsTSlce++GQmK5UXS8mzV8DSYHrQH+Xrf2jVcuKNg=="],
 

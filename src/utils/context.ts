@@ -77,8 +77,12 @@ ${content}
     context += thisDoc;
     index += 1;
   }
-  return `${title ? `${title}
----` : ""}
+  return `${
+    title ?
+      `${title}
+---`
+    : ""
+  }
 ${context}
 `;
 };

@@ -5,8 +5,9 @@ import type {
   Tool,
 } from "@anthropic-ai/sdk/resources/index.mjs";
 import { tokenLimit } from "../../../const";
-import type { Message } from "../../../types";
+import type { ExperimentFunction, Message } from "../../../types";
 import { createXMLContextFromFiles, iterateDir } from "../../../utils/context";
+import { experimentFunctionToAnthropicTool, tryParseFunctionSchema } from "../function";
 
 export async function experimentToAnthropic(
   experiment: Message[],
@@ -38,13 +39,9 @@ export async function experimentToAnthropic(
       continue;
     }
     if (role === "tool" && !fromServer) {
-      if (typeof content === "object") {
-        const tool = content as any;
-        tools.push({
-          name: tool?.function?.name ?? "Unnamed tool",
-          description: tool?.function?.description ?? "No description",
-          input_schema: tool?.function?.parameters,
-        });
+      if (typeof content === "object" && content !== null) {
+        const tool = tryParseFunctionSchema(content as Record<string, unknown>).unwrapOr(content as ExperimentFunction);
+        tools.push(experimentFunctionToAnthropicTool(tool));
       }
     }
   }

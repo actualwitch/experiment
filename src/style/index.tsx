@@ -135,7 +135,7 @@ const button = css`
     background-color: ${Palette.disabledBackground};
     color: ${Palette.black}54;
     cursor: not-allowed;
-      text-shadow: unset;
+    text-shadow: unset;
   }
   button,
   input[type="file"]::file-selector-button {

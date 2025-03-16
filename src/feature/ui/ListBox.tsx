@@ -45,7 +45,8 @@ const ListItem = styled.li<ListItemProps & WithDarkMode>`
   padding: 3px 8px;
 
   & > div {
-    background: ${({isDarkMode, isFocused}) => isFocused ? Palette.buttonHoverBackground : Palette.actionableBackground };
+    background: ${({ isDarkMode, isFocused }) =>
+      isFocused ? Palette.buttonHoverBackground : Palette.actionableBackground};
     color: ${(props) =>
       props.isFocused ? "white"
       : props.isSelected ? Palette.black

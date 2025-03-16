@@ -1,7 +1,8 @@
 import type { ChatCompletionStreamRequest } from "@mistralai/mistralai/models/components";
 import { tokenLimit } from "../../../const";
-import { type Message, ObjectOrStringType, StringType } from "../../../types";
+import { type ExperimentFunction, type Message, ObjectOrStringType, StringType } from "../../../types";
 import { createContextFromFiles, iterateDir } from "../../../utils/context";
+import { experimentFunctionToTool, tryParseFunctionSchema } from "../function";
 
 export const experimentToMistral = async (
   experiment: Message[],
@@ -11,12 +12,11 @@ export const experimentToMistral = async (
   const tools: ChatCompletionStreamRequest["tools"] = [];
   for (const { role, content, fromServer } of experiment) {
     if (role === "tool" && !fromServer) {
-      const thisTool = content;
-
-      if (typeof thisTool === "object") {
-        tools.push(thisTool as any);
+      if (typeof content === "object" && content !== null) {
+        const tool = tryParseFunctionSchema(content as Record<string, unknown>).unwrapOr(content as ExperimentFunction);
+        tools.push(experimentFunctionToTool(tool));
+        continue;
       }
-      continue;
     }
 
     if (role === "context") {

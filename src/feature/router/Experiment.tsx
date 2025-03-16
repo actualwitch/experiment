@@ -12,6 +12,7 @@ import { type Config, ConfigRenderer } from "../ui/ConfigRenderer";
 import { createRemixButtons, createSelectionEditButtons } from "../ui/ConfigRenderer/buttonCreators";
 import { DesktopOnly } from "../ui/Mobile";
 import { Page } from "../ui/Page";
+import { useScrollToTopRef } from "../../utils/scroll";
 
 const cursorAtom = entangledAtom("cursor", atom<ExperimentCursor | null>(null));
 const selectedExperimentAtom = entangledAtom(
@@ -45,7 +46,7 @@ export const actionsAtom = atom((get) => {
     });
     counter += buttons.length;
   }
-  if (selection !== null) {
+  if (selection !== null && selection[0] !== undefined) {
     const buttons = createSelectionEditButtons(
       templates,
       (Array.isArray(experiment) ? experiment : experiment.messages)[selection[0]],
@@ -81,9 +82,11 @@ export default function () {
     return () => setTitleOverride(null);
   }, []);
 
+  const pageRef = useScrollToTopRef([experiment]);
+
   return (
     <>
-      <Page>
+      <Page ref={pageRef}>
         <DesktopOnly>
           <h2>{title}</h2>
         </DesktopOnly>

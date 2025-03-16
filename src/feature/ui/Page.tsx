@@ -1,7 +1,7 @@
 import { css } from "@emotion/react";
 import styled from "@emotion/styled";
 import { useAtom } from "jotai";
-import type { PropsWithChildren } from "react";
+import type { PropsWithChildren, RefObject } from "react";
 
 import { isDarkModeAtom, layoutAtom, type WithLayout } from "../../atoms/common";
 import { bs } from "../../style";
@@ -36,11 +36,11 @@ export const PageContainer = styled.div<WithDarkMode & WithLayout>`
     )}
 `;
 
-export const Page = ({ children }: PropsWithChildren) => {
+export const Page = ({ children, ...props }: PropsWithChildren<{ref?: RefObject<HTMLDivElement | null>}>) => {
   const [isDarkMode] = useAtom(isDarkModeAtom);
   const [layout] = useAtom(layoutAtom);
   return (
-    <PageContainer isDarkMode={isDarkMode} layout={layout}>
+    <PageContainer {...props} isDarkMode={isDarkMode} layout={layout}>
       {children}
     </PageContainer>
   );

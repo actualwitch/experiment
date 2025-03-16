@@ -16,6 +16,5 @@ export const TRIANGLE = "▴";
 
 export const tokenLimit = 8192;
 
-
 export const newLine = `
 `;

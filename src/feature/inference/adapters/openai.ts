@@ -3,20 +3,20 @@ import type {
   ChatCompletionMessageParam,
   ChatCompletionTool,
 } from "openai/resources/index.mjs";
-import { type Message, ObjectOrStringType, StringType } from "../../../types";
+import { type ExperimentFunction, type Message, ObjectOrStringType, StringType } from "../../../types";
 import { createXMLContextFromFiles, iterateDir } from "../../../utils/context";
+import { experimentFunctionToTool, tryParseFunctionSchema } from "../function";
 
 export const experimentToOpenai = async (experiment: Message[]): Promise<ChatCompletionCreateParams> => {
   const messages: ChatCompletionMessageParam[] = [];
   const tools: ChatCompletionTool[] = [];
   for (const { role, content, fromServer } of experiment) {
     if (role === "tool" && !fromServer) {
-      const thisTool = content;
-
-      if (typeof thisTool === "object") {
-        tools.push(thisTool as any);
+      if (typeof content === "object" && content !== null) {
+        const tool = tryParseFunctionSchema(content as Record<string, unknown>).unwrapOr(content as ExperimentFunction);
+        tools.push(experimentFunctionToTool(tool));
+        continue;
       }
-      continue;
     }
     if (role === "context") {
       const directory = content.directory as string;

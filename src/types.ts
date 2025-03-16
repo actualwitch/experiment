@@ -8,6 +8,8 @@ export const StringType = Union(Literal("system"), Literal("developer"), Literal
 export const ObjectOrStringType = Union(Literal("assistant"), Literal("info"), Literal("tool"));
 export const ObjectType = Union(Literal("context"), Literal("error"));
 
+export const PossibleObjectType = Union(...ObjectType.alternatives, ...ObjectOrStringType.alternatives);
+
 export type _Message =
   | ({ role: Static<typeof StringType> } & StringContent)
   | ({ role: Static<typeof ObjectOrStringType> } & ObjectOrStringContent)
@@ -22,6 +24,8 @@ export type WithTemplate = {
 export type Message = _Message & WithDirection & WithTemplate & WithIdentity;
 
 export type Role = "system" | "developer" | "user" | "assistant" | "tool" | "info" | "context" | "error";
+
+export const RoleOptions = Union(...StringType.alternatives, ...ObjectOrStringType.alternatives, ...ObjectType.alternatives);
 
 export type ExperimentWithMeta = {
   id?: string;
@@ -44,4 +48,10 @@ export type Persona = {
   role: string;
   context: Record<string, unknown>;
   systemMessage: string;
+};
+
+export type ExperimentFunction = {
+  name: string;
+  description: string;
+  schema: Record<string, unknown>;
 };

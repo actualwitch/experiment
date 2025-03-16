@@ -2,7 +2,7 @@ import { type Atom, atom, useAtom } from "jotai";
 import type { JSX, PropsWithChildren } from "react";
 import { Route, Routes, useLocation } from "react-router";
 
-import { experimentIdsAtom } from "../../atoms/common";
+import { experimentIdsAtom, selectionAtom } from "../../atoms/common";
 import type { Config } from "../ui/ConfigRenderer";
 import { TRIANGLE, description, name } from "../../const";
 import Experiment, { actionsAtom as experimentActionsAtom } from "./Experiment";
@@ -12,6 +12,7 @@ import Calendar from "./Calendar";
 import NewExperiment, { actionsAtom as newExperimentActionsAtom } from "./NewExperiment";
 import Parameters from "./Parameters";
 import Templates, { actionsAtom as templateActionsAtom } from "./Templates";
+import { atomEffect } from "jotai-effect";
 
 export type AppRoute = {
   icon: string;
