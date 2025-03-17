@@ -12,14 +12,14 @@ export const getRealm = () => {
     if (window?.[Symbol.for("REALM")] === "TESTING") {
       return "testing";
     }
-    if (window?.[Symbol.for("REALM")] === "SPA") {
-      return "spa";
+    if (window?.[Symbol.for("REALM")] === "SSG") {
+      return "ssg";
     }
     return "client";
   }
   if (typeof process === "object") {
-    if (process.env.REALM === "spa") {
-      return "spa";
+    if (process.env.REALM === "ssg") {
+      return "ssg";
     }
     return "server";
   }
@@ -34,5 +34,5 @@ export const setRealm = (realm: ReturnType<typeof getRealm>) => {
   realmOverride = realm;
 };
 
-export const isClient = () => ["client", "spa", "testing"].includes(getRealm());
+export const isClient = () => ["client", "ssg", "testing"].includes(getRealm());
 export const hasBackend = () => getRealm() === "client";

@@ -17,12 +17,12 @@ export default {
       return new Response(await getClientAsString(), { headers: { "Content-Type": "application/javascript" } });
     }
     const fixture = url.searchParams.get("fixture");
-    setRealm(isFixture(fixture) ? "testing" : "spa");
+    setRealm(isFixture(fixture) ? "testing" : "ssg");
     const html = await getStaticHtml(
       url.pathname,
       isFixture(fixture) ?
         [createHydrationScript(FIXTURES[fixture]), assignToWindow("REALM", `"TESTING"`)]
-      : [assignToWindow("REALM", `"SPA"`)],
+      : [assignToWindow("REALM", `"SSG"`)],
     );
     return new Response(html, {
       headers: { "Content-Type": "text/html" },

@@ -40,7 +40,7 @@ export function entangledAtom<
       return thisAtom;
     },
     () => {
-      if (getRealm() !== "spa") {
+      if (getRealm() !== "ssg") {
         return undefined;
       }
       return thisAtom;
