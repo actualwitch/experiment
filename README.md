@@ -11,7 +11,7 @@
   </a>
   ▴
   <a href="https://github.com/actualwitch/experiment/releases/latest">
-    Mac
+    macOS
   </a>
   ▴
   <a href="https://github.com/actualwitch/experiment/releases/latest">
@@ -39,8 +39,8 @@
 - 📱 **Mobile Optimized**: Full-featured mobile version with Progressive Web App (PWA) support
 - 🔐 **Secure by Design**: Store API tokens securely with optional 1Password integration (binary edition)
 - 🖥️ **OLED-Friendly**: Dark mode uses true black for energy efficiency on OLED displays
-- 🔒 **Free as in MIT**: All code is open source and permissively licensed
-- 🔒 **Privacy First**: Your data stays local with no telemetry or tracking
+- 🍻 **Free as in MIT**: All code is open source and permissively licensed
+- 🙊 **Privacy First**: Your data stays local with no telemetry or tracking
 
 ## Getting Started
 
@@ -50,13 +50,9 @@ Experiment is available in binary and non-binary editions. Binary edition requir
 
 Try the web version instantly at [actualwitch.github.io/experiment](https://actualwitch.github.io/experiment/)
 
-### Binary edition
+### Binary edition (macOS/Linux/Windows)
 
-Download the latest release for your platform:
-
-- [macOS](https://github.com/actualwitch/experiment/releases/latest)
-- [Windows](https://github.com/actualwitch/experiment/releases/latest)
-- [Linux](https://github.com/actualwitch/experiment/releases/latest)
+[Download](https://github.com/actualwitch/experiment/releases/latest) the latest release for your platform and run it.
 
 > [!NOTE]
 > macOS and Linux users need to make the downloaded file executable:
@@ -91,6 +87,7 @@ bun run build:bin
 
 # Build static site
 bun run build:spa
+```
 
 <hr>
 
