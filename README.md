@@ -27,34 +27,70 @@
 
 [![Tests](https://github.com/actualwitch/experiment/actions/workflows/test.yml/badge.svg)](https://github.com/actualwitch/experiment/actions/workflows/test.yml)
 
-**Experiment** is a feature-rich chat interface for Large Language Models (LLMs) like Anthropic, OpenAI, and Mistral. It offers advanced debugging tools for prompt engineering and tool integration, allowing developers to visualize and manage tool interactions seamlessly. It is designed to make building LLM applications quicker and easier through rapid iteration and greater understanding of tool interactions. 
+**Experiment** is a professional-grade chat interface for Large Language Models (LLMs) designed for developers, prompt engineers, and AI researchers. It provides a streamlined environment for working with Anthropic, OpenAI, and Mistral models, with powerful debugging tools for prompt engineering and tool integration.
 
 ## Features
 
-- 💬 Supports completion requests via Anthropic, OpenAI, and Mistral APIs.
-- 🧰 Advanced tool use debugging with JSON schema visualization.
-- ⛴️ Import and explore previous completions from CSV files.
-- 👩🏼‍💻 Universal app: runs in both browser and as a self-contained binary.
-- 📱 Full featured mobile version, installable as Progressive Web App (PWA).
-- 🎓 Free as in MIT: all code is open source and permissively licensed.
-- 🖥️ Perfect for OLED: dark mode uses pure black for energy efficiency.
-- 🙈 No telemetry or tracking.
-- 📝 Your data is yours: completions are saved to LocalStorage/File system.
-- 🔐 Securely store your tokens in 1Password (Binary version only).
+- 💬 **Multi-Provider Support**: Connect to Anthropic, OpenAI, and Mistral APIs with a unified interface
+- 🧰 **Advanced Tool Debugging**: Visualize and manage tool interactions with JSON schema visualization
+- 🔍 **Prompt Engineering**: Easily create, test, and iterate on prompts with real-time feedback
+- 📊 **Import CSV**: Analyze previous completions from CSV files
+- 🌐 **Universal Platform**: Available as both a web app and self-contained desktop application
+- 📱 **Mobile Optimized**: Full-featured mobile version with Progressive Web App (PWA) support
+- 🔐 **Secure by Design**: Store API tokens securely with optional 1Password integration (binary edition)
+- 🖥️ **OLED-Friendly**: Dark mode uses true black for energy efficiency on OLED displays
+- 🔒 **Free as in MIT**: All code is open source and permissively licensed
+- 🔒 **Privacy First**: Your data stays local with no telemetry or tracking
+
+## Getting Started
+
+Experiment is available in binary and non-binary editions. Binary edition requires no dependencies and includes additional features like 1Password integration for secure token storage.
+
+### Non-binary edition (Web/SPA)
+
+Try the web version instantly at [actualwitch.github.io/experiment](https://actualwitch.github.io/experiment/)
+
+### Binary edition
+
+Download the latest release for your platform:
+
+- [macOS](https://github.com/actualwitch/experiment/releases/latest)
+- [Windows](https://github.com/actualwitch/experiment/releases/latest)
+- [Linux](https://github.com/actualwitch/experiment/releases/latest)
+
+> [!NOTE]
+> macOS and Linux users need to make the downloaded file executable:
+> ```shell
+> chmod +x ./experiment-*
+> ```
+> macOS users also need to remove quarantine:
+> ```shell
+> xattr -d com.apple.quarantine ./experiment-*
+> ```
+
+## Tool Debugging
+
+Experiment provides comprehensive visualization for LLM tool use. Add tools by pasting a JSON schema into chat in OpenAI and Anthropic formats. The schema will be visualized with properties sorted by name and depth for easy navigation. Click on property names to collapse sections.
 
 <a href="docs/tool-debugging.md">Read more about tool debugging →</a>
 
 ## Architecture
 
-This project is itself an experiment in using a custom architecture I refer to as `entangled atoms`, which extends [jōtai](https://jotai.org/) atoms to synchronize state across different [realms](https://262.ecma-international.org/#realm). 
+Experiment uses a custom architecture called "entangled atoms" which extends [jōtai](https://jotai.org/) to synchronize state across different JavaScript realms. This enables seamless state management between server and client.
 
 <a href="docs/architecture.md">Read more about the architecture →</a>
 
-## Installation
+## Development
 
-Experiment is an universal/isomorphic app that runs in browser or as a self-contained binary that requires no dependencies. All variants are functionally equivalent with the exception of 1Password support which is only available in the binary edition. State is stored in LocalStorage/Filesystem respectively.
+```shell
+# Start development server
+bun dev
 
-<a href="https://github.com/actualwitch/experiment/releases/latest">Download the latest release →</a>
+# Build binary edition
+bun run build:bin
+
+# Build static site
+bun run build:spa
 
 <hr>
 

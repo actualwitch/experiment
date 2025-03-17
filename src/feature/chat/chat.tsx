@@ -378,7 +378,7 @@ export function ChatPreview({
     const keyed = messages.map((message, index) => {
       return { ...message, key: index };
     });
-    if (isRunning && !keyed[0].fromServer) {
+    if (isRunning && !keyed[keyed.length - 1].fromServer) {
       keyed.push({ role: "assistant", content: "...", fromServer: true, key: -1 });
     }
     return keyed;

@@ -1,24 +1,24 @@
 # Architecture
 
-This project uses custom architecture I refer to as `entangled atoms` which extends [jōtai](https://jotai.org/) atoms to synchronize state across different [realms](https://262.ecma-international.org/#realm). This allows for end-to-end isomorphic state management where same primitives are used to manage state everywhere. 
+Experiment uses a custom architecture called "entangled atoms" which extends [jōtai](https://jotai.org/) atoms to synchronize state across different JavaScript [realms](https://262.ecma-international.org/#realm). This enables end-to-end isomorphic state management where the same primitives are used to manage state everywhere.
 
 # Platform
 
-For this project, I decided to explore what modern frontend project can look like if you discard conventional approach and carefully craft the dependency tree decision by decision. Instead of using Next.js or Remix, I simply implemented streaming Server-Side Rendering (SSR) server and static HTML render. Instead of implementing api routes to exchange information, I used `entangled atoms` which use Server-Sent Events (SSE) to sync state behind the scenes.
+Experiment takes a minimalist approach to modern frontend development, carefully crafting the dependency tree decision by decision rather than using conventional frameworks. Instead of Next.js or Remix, it implements a custom streaming Server-Side Rendering (SSR) server with Static Site Generation (SSG) capability. Rather than implementing API routes for data exchange, it uses "entangled atoms" with Server-Sent Events (SSE) to synchronize state behind the scenes.
 
-The choice of TypeScript seems natural for an isomorphic crosplatform app, and I picked [Bun](https://bun.sh/) as a runtime and bundler. Not using Babel presents challenges for dependencies that require Babel plugins to work properly, however this is not an unsolvable problem.
+TypeScript provides type safety for this isomorphic cross-platform application, with [Bun](https://bun.sh/) serving as both runtime and bundler. This approach avoids Babel, which presents challenges for dependencies requiring Babel plugins, but these challenges are not insurmountable.
 
-# Jōtai
+## State Management with Jōtai
 
-In my experience, projects making use of dedicated state management libraries invariably also use hooks given enough time and scope. Impedance mismatch between these two forms may end up inflicting significant story point damage on the project in the long term. Jōtai solves this by offering a drop-in replacement for `useState`, giving you freedom to switch between them depending on your needs.
+Projects using dedicated state management libraries often end up incorporating React hooks as they grow in scope, creating an impedance mismatch between these two forms of state management. Jōtai solves this by offering a drop-in replacement for `useState` that allows seamless switching between local and global state depending on your needs.
 
-# Emotion
+## Styling with Emotion
 
-This is an area where I have particularly strong opinions on: seeing codebases using utility frameworks like Tailwind makes my eyes bleed, and implementing a separate templating/DSL to generate CSS out of it seems wasteful and backwards. In Experiment, I went with my go-to choice of [Emotion](https://emotion.sh) which is a JSS framework like Styled-Components. It allows incredible flexibility in defining styles programmatically and handles SSR with ease.
+Experiment uses [Emotion](https://emotion.sh) for styling, a JSS framework similar to Styled-Components. This approach allows for programmatic style definition with excellent flexibility and SSR support, avoiding the limitations of utility frameworks like Tailwind or separate templating/DSL approaches.
 
-# React
+## Framework Considerations
 
-Is ethically compromised and best avoided. I architected Experiment to allow for easy switching off it, and plan to transition the codebase to Preact/Solid in near future.
+The codebase is currently built with React but has been architected to allow for easy migration to alternatives like Preact or Solid in the future.
 
 # Principles
 
@@ -28,3 +28,4 @@ Is ethically compromised and best avoided. I architected Experiment to allow for
 4. **Low level.** Skip unnecessary abstractions and acknowledge the underlying platform.
 5. **Visually consistent.** System fonts and server side rendering for instant loading and no flickering.
 6. **Bleeding edge.** To prevent stale dependency hell, dev mode always upgrades dependencies to the latest version.
+7. **Privacy-focused.** No telemetry, tracking, or data collection.

@@ -9,6 +9,7 @@ import {
   experimentAtom,
   isActionPanelOpenAtom,
   isDarkModeAtom,
+  layoutAtom,
   modelAtom,
   parentAtom,
   selectedProviderAtom,
@@ -94,6 +95,7 @@ export const Block = styled.div<WithDarkMode>`
     background: transparent;
   }
   button {
+    text-shadow: none;
     ${inlineButtonModifier}
   }
   select,
@@ -300,6 +302,7 @@ const messageAtom = atom("");
 
 export default function () {
   const [isDarkMode] = useAtom(isDarkModeAtom);
+  const [layout] = useAtom(layoutAtom);
   const [experiment, setExperiment] = useAtom(experimentAtom);
   const [selection, setSelection] = useAtom(selectionAtom);
   const [message, setMessage] = useAtom(messageAtom);
@@ -417,7 +420,17 @@ export default function () {
 
   const isDisabled = false;
 
-  const pageRef = useScrollToBottomRef([experiment.length]);
+
+  const pageRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (!isRunning) return;
+    pageRef.current?.scrollTo({
+      top: pageRef.current.scrollHeight,
+      left: 0,
+      behavior: "smooth",
+    });
+  }, [experiment]);
 
   const page =
     providerOptions.length === 0 ?
@@ -459,10 +472,10 @@ export default function () {
           <TextArea
             placeholder={`${role === "tool" ? "Paste JSONSchema" : "Type a message and press Enter to append"}…`}
             value={message}
-            spellCheck={role === "tool"}
+            spellCheck={role !== "tool"}
             onChange={(e) => setMessage(e.target.value)}
             onKeyDown={(e) => {
-              if (!isDisabled && e.key === "Enter" && !e.shiftKey) {
+              if (!isDisabled && e.key === "Enter" && !e.shiftKey && layout !== "mobile") {
                 e.preventDefault();
                 submit();
               }
