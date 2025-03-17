@@ -1,7 +1,7 @@
 import { type SerializedStyles, css } from "@emotion/react";
 import styled from "@emotion/styled";
 import { atom, useAtom, useAtomValue } from "jotai";
-import { type CSSProperties, type ReactNode, type Ref, useEffect, useMemo, useRef } from "react";
+import { type CSSProperties, type ReactNode, type Ref, useEffect, useMemo, useRef, useState } from "react";
 import { TRIANGLE } from "../../const";
 import {
   type Path,
@@ -17,10 +17,9 @@ import type { WithDarkMode } from "../../style/darkMode";
 import { Palette } from "../../style/palette";
 import { deepEqual } from "../../utils";
 import { useHandlers } from "../../utils/keyboard";
-import { useScrollToTop } from "../../utils/scroll";
 import { View, collapsedAtom } from "../ui/view";
 import type { _Message, Experiment, ExperimentWithMeta, Message, Role } from "../../types";
-import { useListTransition, type WithTransitionState } from "../transitionState";
+import { useItemTransition, useListTransition, type WithTransitionState } from "../transitionState";
 
 const baseHeight = bs(6);
 export const ChatContainer = styled.div<WithDarkMode>`
@@ -223,12 +222,11 @@ export const ChatMessage = ({
   message: _message,
   index,
   collapseTemplates = true,
-  transitionState,
 }: {
   message: Message;
   index: number;
   collapseTemplates?: boolean;
-} & WithTransitionState) => {
+}) => {
   const ref = useRef<null | HTMLElement>(null);
   const selector: Path = [index, "content"];
   const [selection, setSelection] = useAtom(selectionAtom);
@@ -326,6 +324,13 @@ export const ChatMessage = ({
 
   const hitRef = useRef<Coords | null>(null);
 
+  const [isMounted, setIsMounted] = useState(false);
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  const {transitionState, shouldRender} = useItemTransition(isMounted);
+
   return (
     <MessageComponent
       // contentEditable={isSelected && selection?.[1] === "content"}
@@ -397,18 +402,13 @@ export function ChatPreview({
   const computedMessages = useMemo(() => {
     const messages = Array.isArray(experiment) ? experiment : experiment.messages;
     const keyed = messages.map((message, index) => {
-      return { ...message, key: index };
+      return { ...message, key: `${index}-${message.role}`, index };
     });
     if (isRunning && !keyed[keyed.length - 1].fromServer) {
-      keyed.push({ role: "assistant", content: "...", fromServer: true, key: -1 });
+      keyed.push({ role: "assistant", content: "...", fromServer: true, key: `${keyed.length}-assistant`, index: keyed.length });
     }
     return keyed;
   }, [experiment, isRunning]);
-
-  const messagesWithState = useListTransition(computedMessages, {
-    enterDelay: 100,
-    exitDelay: 100,
-  });
 
   useHandlers({
     Escape: () => {
@@ -416,21 +416,13 @@ export function ChatPreview({
     },
   });
 
-  if (messagesWithState.length === 0) {
+  if (computedMessages.length === 0) {
     return empty;
   }
   return (
     <ChatContainer isDarkMode={isDarkMode}>
-      {messagesWithState.map?.(({ key, state, ...message }) => {
-        return (
-          <ChatMessage
-            collapseTemplates={collapseTemplates}
-            key={key}
-            message={message}
-            index={key}
-            transitionState={state}
-          />
-        );
+      {computedMessages.map?.(({ key, index, ...message }) => {
+        return <ChatMessage collapseTemplates={collapseTemplates} key={key} message={message} index={index} />;
       })}
     </ChatContainer>
   );

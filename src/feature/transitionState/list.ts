@@ -20,7 +20,7 @@ export function useListTransition<T extends { key: Key }>(
         entering: enterDelay,
         exiting: exitDelay,
       };
-      setTimeout(() => {
+      return setTimeout(() => {
         if (type === "entering" || type === "entered") {
           setStates((states) => ({
             ...states,
@@ -37,7 +37,6 @@ export function useListTransition<T extends { key: Key }>(
           setMoveContext((moveContext) =>
             Object.fromEntries(
               Object.entries(moveContext).map(
-                // eslint-disable-next-line @typescript-eslint/no-unused-vars
                 ([key, { style, ...value }]) => [key, value],
               ),
             ),
@@ -104,9 +103,13 @@ export function useListTransition<T extends { key: Key }>(
     setEntries(newEntries);
     setStates(newStates);
     setMoveContext(newMoveContext);
-    enqueueUpdate("entering", addedIds);
-    enqueueUpdate("exiting", removedIds);
-    enqueueUpdate("moving", movedIds);
+    const timerEnter = enqueueUpdate("entering", addedIds);
+    const timerExit = enqueueUpdate("exiting", removedIds);
+    const timerMove = enqueueUpdate("moving", movedIds);
+    console.log({ resultingList, newEntries, newStates, newMoveContext, addedIds, removedIds, movedIds });
+    return () => {
+      [timerEnter, timerExit, timerMove].filter(Boolean).map((timer) => clearTimeout(timer));
+    };
   }, [list]);
   return useMemo(
     () =>
