@@ -40,7 +40,7 @@ export default defineConfig({
   ],
   // Run your local dev server before starting the tests.
   webServer: {
-    command: 'DEBUG=true bun --watch run src/entry/server.spa.tsx',
+    command: 'DEBUG=true bun --watch run src/entry/server.ssg.tsx',
     url,
     reuseExistingServer: !process.env.CI,
   },

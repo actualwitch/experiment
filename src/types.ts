@@ -25,7 +25,11 @@ export type Message = _Message & WithDirection & WithTemplate & WithIdentity;
 
 export type Role = "system" | "developer" | "user" | "assistant" | "tool" | "info" | "context" | "error";
 
-export const RoleOptions = Union(...StringType.alternatives, ...ObjectOrStringType.alternatives, ...ObjectType.alternatives);
+export const RoleOptions = Union(
+  ...StringType.alternatives,
+  ...ObjectOrStringType.alternatives,
+  ...ObjectType.alternatives,
+);
 
 export type ExperimentWithMeta = {
   id?: string;

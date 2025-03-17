@@ -36,7 +36,7 @@ export const PageContainer = styled.div<WithDarkMode & WithLayout>`
     )}
 `;
 
-export const Page = ({ children, ...props }: PropsWithChildren<{ref?: RefObject<HTMLDivElement | null>}>) => {
+export const Page = ({ children, ...props }: PropsWithChildren<{ ref?: RefObject<HTMLDivElement | null> }>) => {
   const [isDarkMode] = useAtom(isDarkModeAtom);
   const [layout] = useAtom(layoutAtom);
   return (

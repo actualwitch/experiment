@@ -1,7 +1,7 @@
 import { css } from "@emotion/react";
 import styled from "@emotion/styled";
 import { type Setter, atom, useAtom, useSetAtom } from "jotai";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { NavLink } from "react-router";
 
 import { Disc3, MessageCircleDashed, Play, Pyramid, Rewind, Trash2 } from "lucide-react";
@@ -420,17 +420,20 @@ export default function () {
 
   const isDisabled = false;
 
-
   const pageRef = useRef<HTMLDivElement | null>(null);
 
-  useEffect(() => {
-    if (!isRunning) return;
+  const scrollToEnd = useCallback(() => {
     pageRef.current?.scrollTo({
       top: pageRef.current.scrollHeight,
       left: 0,
       behavior: "smooth",
     });
-  }, [experiment]);
+  }, [pageRef.current]);
+
+  useEffect(() => {
+    if (!isRunning) return;
+    scrollToEnd();
+  }, [experiment, isRunning]);
 
   const page =
     providerOptions.length === 0 ?

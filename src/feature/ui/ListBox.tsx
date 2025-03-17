@@ -11,6 +11,7 @@ import { increaseSpecificity } from "../../style/utils";
 import type { WithDarkMode } from "../../style/darkMode";
 import { isDarkModeAtom } from "../../atoms/common";
 import { useAtom } from "jotai";
+import { bevelStyle } from "../../style";
 
 interface ListBoxProps extends AriaListBoxOptions<unknown> {
   listBoxRef?: React.RefObject<HTMLUListElement>;
@@ -23,14 +24,16 @@ interface OptionProps {
 }
 
 const List = styled.ul`
-  max-height: 300px;
+  max-height: 294px;
   overflow: auto;
   list-style: none;
-  margin: 4px 0;
+  scroll-snap-type: y proximity;
+  scrollbar-width: none;
   outline: none;
   width: 100%;
+  ${bevelStyle}
   ${increaseSpecificity()} {
-    padding: 0;
+    padding: 4px 0;
   }
 `;
 
@@ -44,16 +47,18 @@ const ListItem = styled.li<ListItemProps & WithDarkMode>`
   ${interactive}
   padding: 3px 8px;
 
+  scroll-snap-align: center;
+
+  ${(props) => props.isDarkMode && `color: ${Palette.black};`};
+
   & > div {
-    background: ${({ isDarkMode, isFocused }) =>
-      isFocused ? Palette.buttonHoverBackground : Palette.actionableBackground};
-    color: ${(props) =>
-      props.isFocused ? "white"
-      : props.isSelected ? Palette.black
-      : "#333"};
+    background: ${({ isDarkMode, isFocused }) => (isFocused ? Palette.white : Palette.actionableBackground)};
+    color: ${(props) => (props.isSelected ? Palette.black : "#333")};
     flex: 1;
-    padding: 0 6px;
+    padding: 0 10px;
     border-radius: 5px;
+    ${(p) => p.isFocused && "box-shadow: 0px 0px 16px white;"}
+    transition: ${["background", "box-shadow"].map((prop) => `${prop} 0.1s ease-out`).join(", ")};
   }
 `;
 
@@ -67,7 +72,6 @@ export function ListBox(props: ListBoxProps) {
   const ref = React.useRef<HTMLUListElement>(null);
   const { listBoxRef = ref, state } = props;
   const { listBoxProps } = useListBox(props, state, listBoxRef);
-
   return (
     <List {...listBoxProps} ref={listBoxRef}>
       {[...state.collection].map((item) => (

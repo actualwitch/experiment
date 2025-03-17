@@ -1,18 +1,13 @@
 import { $ } from "bun";
-import { name, description, iconResolutions, staticDir } from "../src/const";
+import { name, description, iconResolutions, staticDir, clientFile } from "../src/const";
 import { getStaticHtml } from "../src/entry/_handlers";
 import { getManifest } from "../src/feature/pwa/manifest";
 import { ROUTES } from "../src/feature/router";
 import { assignToWindow } from "../src/utils/hydration";
-import { store } from "../src/store";
-import { clientScriptAtom } from "../src/atoms/server";
+import { getClientAsString } from "../src/entry/_macro" with { type: "macro" };
 
 $`rm -rf ./${staticDir}`;
 
-const result = await store.get(clientScriptAtom);
-if (result.isNothing) {
-  throw new Error("could not build frontend");
-}
 const baseUrl = process.env.BASE_URL;
 const regex = /\/\w*/gm;
 
@@ -23,7 +18,7 @@ for (const route of ROUTES) {
 
   const html = await getStaticHtml(
     fullUrl,
-    [assignToWindow("REALM", `"SPA"`), baseUrl && assignToWindow("BASE_URL", `"${baseUrl}"`)],
+    [assignToWindow("REALM", `"SSG"`), baseUrl && assignToWindow("BASE_URL", `"${baseUrl}"`)],
     baseUrl,
   );
 
@@ -33,6 +28,11 @@ for (const route of ROUTES) {
 await Bun.write(
   `./${staticDir}/manifest.json`,
   JSON.stringify(getManifest(name, description, iconResolutions, baseUrl), null, 2),
+);
+
+await Bun.write(
+  `./${staticDir}${clientFile}`,
+  await getClientAsString(),
 );
 
 await $`cp ./.github/assets/experiment.png ./${staticDir}`;

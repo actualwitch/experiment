@@ -14,6 +14,7 @@ import { withDarkMode, type WithDarkMode } from "../../style/darkMode";
 import { useAtom } from "jotai";
 import { isDarkModeAtom } from "../../atoms/common";
 import { UnfoldVertical } from "lucide-react";
+import { useItemTransition } from "../transitionState";
 
 type ButtonProps = {
   isOpen?: boolean;
@@ -55,6 +56,8 @@ export function Select<T extends object>(props: AriaSelectProps<T>) {
   const { focusProps, isFocusVisible } = useFocusRing();
   const [isDarkMode] = useAtom(isDarkModeAtom);
 
+  const { transitionState, shouldRender } = useItemTransition(state.isOpen, { timeout: 100 });
+
   return (
     <InputContainer>
       {props.label ?
@@ -73,8 +76,8 @@ export function Select<T extends object>(props: AriaSelectProps<T>) {
         </Value>
         <UnfoldVertical size={12} />
       </Button>
-      {state.isOpen && (
-        <Popover state={state} triggerRef={ref} placement="bottom start">
+      {shouldRender && (
+        <Popover state={state} triggerRef={ref} placement="bottom start" transitionState={transitionState}>
           <ListBox {...menuProps} state={state} />
         </Popover>
       )}

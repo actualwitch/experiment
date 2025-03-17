@@ -9,6 +9,7 @@ import { withDarkMode, type WithDarkMode } from "../../style/darkMode";
 import { useAtom } from "jotai";
 import { isDarkModeAtom } from "../../atoms/common";
 import { css } from "@emotion/react";
+import type { WithTransitionState } from "../transitionState";
 
 interface PopoverProps extends Omit<AriaPopoverProps, "popoverRef"> {
   children: React.ReactNode;
@@ -16,7 +17,7 @@ interface PopoverProps extends Omit<AriaPopoverProps, "popoverRef"> {
   popoverRef?: React.RefObject<HTMLDivElement>;
 }
 
-const Wrapper = styled.div<WithDarkMode>`
+const Wrapper = styled.div<WithDarkMode & WithTransitionState>`
   position: absolute;
   top: 100%;
   z-index: 1;
@@ -33,9 +34,32 @@ const Wrapper = styled.div<WithDarkMode>`
         box-shadow: ${shadows.lighter};
       `,
     )}
+  opacity: 0;
+  transition: ${["transform", "opacity", "filter"].map((prop) => `${prop} 100ms ease-in-out`).join(", ")};
+  transform: translateY(32px);
+  filter: blur(10px);
+  ${({ transitionState }) => {
+    if (transitionState === "entered") {
+      return css`
+        transform: translateY(0);
+        filter: blur(0px);
+        opacity: 1;
+      `;
+    }
+    if (transitionState === "exiting") {
+      return css``;
+    }
+    if (transitionState === "entering") {
+      return css`
+        transform: translateY(0);
+        filter: blur(0px);
+        opacity: 1;
+      `;
+    }
+  }}
 `;
 
-export function Popover(props: PopoverProps) {
+export function Popover({ transitionState, ...props }: PopoverProps & WithTransitionState) {
   const ref = React.useRef<HTMLDivElement>(null);
   const { popoverRef = ref, state, children, isNonModal } = props;
   const [isDarkMode] = useAtom(isDarkModeAtom);
@@ -51,7 +75,7 @@ export function Popover(props: PopoverProps) {
   return (
     <Overlay>
       {!isNonModal && <div {...underlayProps} style={{ position: "fixed", inset: 0 }} />}
-      <Wrapper {...popoverProps} ref={popoverRef} isDarkMode={isDarkMode}>
+      <Wrapper {...popoverProps} ref={popoverRef} isDarkMode={isDarkMode} transitionState={transitionState}>
         {!isNonModal && <DismissButton onDismiss={state.close} />}
         {children}
         <DismissButton onDismiss={state.close} />

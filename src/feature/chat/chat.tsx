@@ -20,6 +20,7 @@ import { useHandlers } from "../../utils/keyboard";
 import { useScrollToTop } from "../../utils/scroll";
 import { View, collapsedAtom } from "../ui/view";
 import type { _Message, Experiment, ExperimentWithMeta, Message, Role } from "../../types";
+import { useListTransition, type WithTransitionState } from "../transitionState";
 
 const baseHeight = bs(6);
 export const ChatContainer = styled.div<WithDarkMode>`
@@ -66,15 +67,17 @@ const getAlign = (fromServer: boolean, experimentLayout: Store["experimentLayout
   }
 };
 
-export const MessageComponent = styled.article<{
-  role: Role;
-  contentType?: string;
-  ioType?: "input" | "output";
-  isSelected?: boolean;
-  isDarkMode?: boolean;
-  experimentLayout: Store["experimentLayout"];
-  name?: string;
-}>(({ name, role, ioType, contentType, isSelected, isDarkMode, experimentLayout }) => {
+export const MessageComponent = styled.article<
+  {
+    role: Role;
+    contentType?: string;
+    ioType?: "input" | "output";
+    isSelected?: boolean;
+    isDarkMode?: boolean;
+    experimentLayout: Store["experimentLayout"];
+    name?: string;
+  } & WithTransitionState
+>(({ name, role, ioType, contentType, isSelected, isDarkMode, experimentLayout, transitionState }) => {
   const fromServer = ioType === "output";
   const align = getAlign(fromServer, experimentLayout);
   const styles: SerializedStyles[] = [
@@ -82,6 +85,9 @@ export const MessageComponent = styled.article<{
       border-${align}: 4px solid transparent;
       position: relative;
       overflow: hidden;
+      transition: all 100ms ease-in;
+      opacity: 0;
+      transform: translateX(${align === "left" ? "-" : ""}10px);
 
       & > * {
         display: grid;
@@ -191,6 +197,19 @@ export const MessageComponent = styled.article<{
     }
   }
 
+  if (transitionState === "entered") {
+    styles.push(css`
+      opacity: 1;
+      transform: translateX(0px);
+    `);
+  }
+  if (transitionState === "entering") {
+    styles.push(css`
+      opacity: 1;
+      transform: translateX(0px);
+    `);
+  }
+
   return styles;
 });
 
@@ -204,11 +223,12 @@ export const ChatMessage = ({
   message: _message,
   index,
   collapseTemplates = true,
+  transitionState,
 }: {
   message: Message;
   index: number;
   collapseTemplates?: boolean;
-}) => {
+} & WithTransitionState) => {
   const ref = useRef<null | HTMLElement>(null);
   const selector: Path = [index, "content"];
   const [selection, setSelection] = useAtom(selectionAtom);
@@ -346,6 +366,7 @@ export const ChatMessage = ({
         setSelection(selector);
       }}
       ioType={message.fromServer ? "output" : "input"}
+      transitionState={transitionState}
     >
       {innerContent}
     </MessageComponent>
@@ -383,19 +404,33 @@ export function ChatPreview({
     }
     return keyed;
   }, [experiment, isRunning]);
+
+  const messagesWithState = useListTransition(computedMessages, {
+    enterDelay: 100,
+    exitDelay: 100,
+  });
+
   useHandlers({
     Escape: () => {
       setSelection([]);
     },
   });
 
-  if (computedMessages.length === 0) {
+  if (messagesWithState.length === 0) {
     return empty;
   }
   return (
     <ChatContainer isDarkMode={isDarkMode}>
-      {computedMessages.map?.(({ key, ...message }) => {
-        return <ChatMessage collapseTemplates={collapseTemplates} key={key} message={message} index={key} />;
+      {messagesWithState.map?.(({ key, state, ...message }) => {
+        return (
+          <ChatMessage
+            collapseTemplates={collapseTemplates}
+            key={key}
+            message={message}
+            index={key}
+            transitionState={state}
+          />
+        );
       })}
     </ChatContainer>
   );

@@ -10,8 +10,7 @@ import { eventStream } from "../utils/eventStream";
 import { getManifest } from "../feature/pwa/manifest";
 import { clientFile, description, iconResolutions, name } from "../const";
 import type { Nullish } from "../types";
-import { clientScriptAtom } from "../atoms/server";
-import { store } from "../store";
+import { getClientAsString } from "./_macro" with { type: "macro" };
 
 export const getStaticHtml = async (
   location: string,
@@ -53,11 +52,7 @@ export const doStatic = async (request: Request) => {
     });
   }
   if (url.pathname === clientFile) {
-    const clientScript = await store.get(clientScriptAtom);
-    response ??= clientScript.match({
-      Just: (script) => new Response(script, { headers: { "Content-Type": "application/javascript" } }),
-      Nothing: () => new Response("KO", { status: 500 }),
-    });
+    response ??= new Response(await getClientAsString(), { headers: { "Content-Type": "application/javascript" } });
   }
   if (response) {
     log("Static", request.url);

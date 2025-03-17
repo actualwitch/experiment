@@ -110,7 +110,7 @@ const Context = ({ children }: PropsWithChildren) => {
 };
 
 const SpaNormalizer = ({ children }: PropsWithChildren) => {
-  if (getRealm() === "spa") {
+  if (getRealm() === "ssg") {
     const [shouldRender, setShouldRender] = useState(false);
     useEffect(() => {
       setShouldRender(true);
@@ -129,6 +129,7 @@ export const Shell = ({
   additionalScripts?: Array<string | Nullish>;
   baseUrl?: string;
 }) => {
+  // 👻
   return (
     <html lang="en">
       <head>

@@ -86,7 +86,7 @@ bun dev
 bun run build:bin
 
 # Build static site
-bun run build:spa
+bun run build:ssg
 ```
 
 <hr>
