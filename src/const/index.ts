@@ -1,4 +1,4 @@
-import project from "../package.json";
+import project from "../../package.json";
 
 export const { name, description, author, version } = project;
 

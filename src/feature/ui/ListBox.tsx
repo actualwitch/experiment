@@ -34,6 +34,11 @@ const List = styled.ul`
   ${bevelStyle}
   ${increaseSpecificity()} {
     padding: 4px 0;
+    margin-bottom: 0;
+  }
+
+  li:has(+ [data-hover="true"]) {
+    isolation: isolate;
   }
 `;
 
@@ -103,7 +108,7 @@ function Option({ item, state }: OptionProps) {
   );
 
   return (
-    <ListItem {...optionProps} ref={ref} isFocused={isFocused} isSelected={isSelected} isDarkMode={isDarkMode}>
+    <ListItem {...optionProps} ref={ref} isFocused={isFocused} isSelected={isSelected} isDarkMode={isDarkMode} data-hover={isFocused}>
       <ItemContent>
         <OptionContext.Provider value={{ labelProps, descriptionProps }}>{item.rendered}</OptionContext.Provider>
         {isSelected ?

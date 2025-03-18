@@ -239,6 +239,7 @@ export const hasOpensslAtom = atom(async () => {
 });
 
 export const localCertAndKeyAtom = atom(async () => {
+  console.log("123");
   if (getRealm() !== "server") return Result.err(new Error("Cannot generate certificates in the browser"));
   const fs = await resolve("fs/promises");
   if (fs.isErr) {
@@ -281,16 +282,6 @@ export const localCertAndKeyAtom = atom(async () => {
   }
   return Result.ok({ key: `${getStoragePath()}/cert.key`, cert: `${getStoragePath()}/key.cert` });
 });
-
-export const revisionAtom = entangledAtom(
-  "revision",
-  atom(async (get) => {
-    const result = await spawn("git", ["rev-parse", "HEAD"]);
-    const hash = result.map((hash) => hash.slice(0, 6));
-    const revision = [version, hash.unwrapOr(undefined)].filter(Boolean).join("-");
-    return revision;
-  }),
-);
 
 export const debugAtom = entangledAtom(
   "debug",

@@ -1,5 +1,5 @@
 import type { Serve } from "bun";
-import { debugAtom } from "../atoms/common";
+import { debugAtom, localCertAndKeyAtom } from "../atoms/common";
 import { clientFile, description, hostname, iconResolutions, name, port } from "../const";
 import { getManifest } from "../feature/pwa/manifest";
 import { store } from "../store";
@@ -8,10 +8,15 @@ import { log } from "../utils/logger";
 import { doPOST, doSSE, doStreamingSSR } from "./_handlers";
 import { getClientAsString } from "./_macro" with { type: "macro" };
 
+const tls = (await store.get(localCertAndKeyAtom))
+  .map(({ cert, key }) => ({ cert: Bun.file(cert), key: Bun.file(key) }))
+  .unwrapOr(undefined);
+
 export default {
   development: store.get(debugAtom),
   hostname,
   port,
+  tls,
   fetch: createFetch(
     doSSE,
     doPOST,

@@ -1,20 +1,21 @@
 import styled from "@emotion/styled";
 import { atom, useAtom } from "jotai";
-import { Maybe } from "true-myth";
-import { NavLink, useLocation } from "react-router";
 import path from "node:path";
+import { NavLink, useLocation } from "react-router";
+import { Maybe } from "true-myth";
 
-import { ROUTES, experimentsSidebarAtom } from "../router";
-import { experimentAtom, revisionAtom, selectionAtom, templatesAtom } from "../../atoms/common";
+import { experimentAtom, selectionAtom, templatesAtom } from "../../atoms/common";
 import { TRIANGLE } from "../../const";
+import { REVISION } from "../../const/dynamic";
 import { bs, sidebarWidth } from "../../style";
 import { nonInteractive, widthAvailable } from "../../style/mixins";
 import { increaseSpecificity } from "../../style/utils";
-import { portalIO } from "../../utils/portal";
-import { View } from "./view";
-import { entangledAtom } from "../../utils/entanglement";
-import { getRealm } from "../../utils/realm";
 import { filesInDir } from "../../utils/context";
+import { entangledAtom } from "../../utils/entanglement";
+import { portalIO } from "../../utils/portal";
+import { getRealm } from "../../utils/realm";
+import { ROUTES, experimentsSidebarAtom } from "../router";
+import { View } from "./view";
 
 export const [SidebarInput, SidebarOutput] = portalIO();
 
@@ -164,7 +165,6 @@ const SidebarComponent = () => {
 export const Navigation = () => {
   const [routes] = useAtom(routesAtom);
   const location = useLocation();
-  const [revision] = useAtom(revisionAtom);
   return (
     <NavigationContainer>
       <header>
@@ -182,7 +182,7 @@ export const Navigation = () => {
         {(location.pathname === "/" || location.pathname.startsWith("/experiment")) && <SidebarComponent />}
       </GrowBox>
       <Footer>
-        © ∞ {TRIANGLE} {revision}
+        © ∞ {TRIANGLE} {REVISION}
       </Footer>
     </NavigationContainer>
   );

@@ -143,7 +143,7 @@
 
     "@jridgewell/trace-mapping": ["@jridgewell/trace-mapping@0.3.25", "", { "dependencies": { "@jridgewell/resolve-uri": "^3.1.0", "@jridgewell/sourcemap-codec": "^1.4.14" } }, "sha512-vNk6aEwybGtawWmy/PzwnGDOjCkLWSD2wqvjGGAgOAwCGWySYXfYoxt00IJkTF+8Lb57DwOb3Aa0o9CApepiYQ=="],
 
-    "@mistralai/mistralai": ["@mistralai/mistralai@1.5.1", "", { "dependencies": { "zod-to-json-schema": "^3.24.1" }, "peerDependencies": { "zod": ">= 3" } }, "sha512-Ie0EH4dAO11MEXR5N2kS2cgr+ycTWvqN/yP9bKrtmUEqjdcF4i7DLxtrFMUw5l2dOPhrkX93G4SziFiATPWu2w=="],
+    "@mistralai/mistralai": ["@mistralai/mistralai@1.5.2", "", { "dependencies": { "zod-to-json-schema": "^3.24.1" }, "peerDependencies": { "zod": ">= 3" } }, "sha512-mBTIDQmuAX9RowMYteZFHJIYlEwDcHzzaxgXzrFtlvH9CkKXK7R1VnZ1sZSe+uLMg0dIXUVdPRUh1SwyFeSqXw=="],
 
     "@playwright/test": ["@playwright/test@1.51.1", "", { "dependencies": { "playwright": "1.51.1" }, "bin": { "playwright": "cli.js" } }, "sha512-nM+kEaTSAoVlXmMPH10017vn3FSiFqr/bh4fKg9vmAdMfd9SDqRZNvPSiAHADc/itWak+qPvMPZQOPwCBW7k7Q=="],
 
@@ -461,7 +461,7 @@
 
     "lodash": ["lodash@4.17.21", "", {}, "sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg=="],
 
-    "lucide-react": ["lucide-react@0.482.0", "", { "peerDependencies": { "react": "^16.5.1 || ^17.0.0 || ^18.0.0 || ^19.0.0" } }, "sha512-XM8PzHzSrg8ATmmO+fzf+JyYlVVdQnJjuyLDj2p4V2zEtcKeBNAqAoJIGFv1x2HSBa7kT8gpYUxwdQ0g7nypfw=="],
+    "lucide-react": ["lucide-react@0.483.0", "", { "peerDependencies": { "react": "^16.5.1 || ^17.0.0 || ^18.0.0 || ^19.0.0" } }, "sha512-WldsY17Qb/T3VZdMnVQ9C3DDIP7h1ViDTHVdVGnLZcvHNg30zH/MTQ04RTORjexoGmpsXroiQXZ4QyR0kBy0FA=="],
 
     "luxon": ["luxon@3.5.0", "", {}, "sha512-rh+Zjr6DNfUYR3bPwJEnuwDdqMbxZW7LOQfUN4B54+Cl+0o5zaU9RJ6bcidfDtC1cWCZXQ+nvX8bf6bAji37QQ=="],
 
@@ -549,7 +549,7 @@
 
     "turbo-stream": ["turbo-stream@2.4.0", "", {}, "sha512-FHncC10WpBd2eOmGwpmQsWLDoK4cqsA/UT/GqNoaKOQnT8uzhtCbg3EoUDMvqpOSAI0S26mr0rkjzbOO6S3v1g=="],
 
-    "typescript": ["typescript@5.9.0-dev.20250317", "", { "bin": { "tsc": "bin/tsc", "tsserver": "bin/tsserver" } }, "sha512-uJqhFodkdY2AwOyuwbI+o9Ywgyi2OHBhEEUTgtHwFJskUQnUvNXylzMLgQIXn3VqRKS+/oXrq5tD3ZJsYcV2VQ=="],
+    "typescript": ["typescript@5.9.0-dev.20250318", "", { "bin": { "tsc": "bin/tsc", "tsserver": "bin/tsserver" } }, "sha512-PargTTEKzWpTiNuMV24CBaPCvXjRnpLNwCVVAjQjWBABOazwuYXJ3nXp3VCBavv9IJo2riKWWG7TgLOthATwSQ=="],
 
     "undici-types": ["undici-types@6.20.0", "", {}, "sha512-Ny6QZ2Nju20vw1SRHe3d9jVu6gJ+4e3+MMpqu7pqE5HT6WsTSlce++GQmK5UXS8mzV8DSYHrQH+Xrf2jVcuKNg=="],
 
