@@ -33,6 +33,7 @@
 
 - 💬 **Multi-Provider Support**: Connect to Anthropic, OpenAI, and Mistral APIs with a unified interface
 - 🧰 **Advanced Tool Debugging**: Visualize and manage tool interactions with JSON schema visualization
+- 📂 **Include Context**: Add a directory to experiment and share its text content with the model
 - 🔍 **Prompt Engineering**: Easily create, test, and iterate on prompts with real-time feedback
 - 📊 **Import CSV**: Analyze previous completions from CSV files
 - 🌐 **Universal Platform**: Available as both a web app and self-contained desktop application

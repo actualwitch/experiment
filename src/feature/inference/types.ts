@@ -22,10 +22,11 @@ const GPT_4 = Literal("gpt-4");
 const GPT_4_turbo = Literal("gpt-4-turbo");
 const o3_mini = Literal("o3-mini");
 const o1 = Literal("o1");
+const o1_pro = Literal("o1-pro");
 const o1_preview = Literal("o1-preview");
 const o1_mini = Literal("o1-mini");
 
-export const OpenAIModel = Union(GPT_4_5, GPT_4o, GPT_4o_mini, GPT_4, GPT_4_turbo, o3_mini, o1, o1_preview, o1_mini);
+export const OpenAIModel = Union(GPT_4_5, GPT_4o, GPT_4o_mini, GPT_4, GPT_4_turbo, o3_mini, o1, o1_pro, o1_preview, o1_mini);
 
 const Claude_3_7_Sonnet = Literal("claude-3-7-sonnet-20250219");
 const Claude_3_6_Sonnet = Literal("claude-3-5-sonnet-20241022");
@@ -59,6 +60,7 @@ export const modelLabels = {
     [GPT_4.value]: "GPT-4",
     [GPT_4_turbo.value]: "GPT-4 Turbo",
     [o1.value]: "O1",
+    [o1_pro.value]: "O1 Pro",
     [o1_preview.value]: "O1 Preview",
     [o1_mini.value]: "O1 Mini",
     [o3_mini.value]: "O3 Mini",
@@ -78,4 +80,4 @@ export const modelLabels = {
 } as const;
 
 export const isReasoningModel = (model: string) =>
-  [o1_mini.value, o1_preview.value, o3_mini.value, o1.value].includes(model);
+  [o1_mini.value, o1_preview.value, o3_mini.value, o1.value, o1_pro.value].includes(model);

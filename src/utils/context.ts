@@ -1,7 +1,6 @@
 import { readFile, readdir } from "node:fs/promises";
 import path from "node:path";
 
-const includeExtensions = ["css", "scss", "rs", "sql", "ts", "tsx", "md", "json", "yml", "yaml", "toml", ".gitignore"];
 export async function iterateDir(dir: string, ignore: string[] = [".git", ".sqlx", "package-lock.json"]) {
   const thisIgnores = [...ignore];
   const entries = await readdir(dir, { withFileTypes: true });
@@ -24,14 +23,10 @@ export async function iterateDir(dir: string, ignore: string[] = [".git", ".sqlx
   for (const entry of entries) {
     if (thisIgnores.some((ignore) => entry.name === ignore)) continue;
     if (entry.isDirectory()) {
-      if (entry.name === "fixtures") continue;
       directories.push(entry.name);
-    } else {
-      const parts = entry.name.split(".");
-      const ext = parts[parts.length - 1];
-      if (entry.isFile() && includeExtensions.includes(ext)) {
-        files.push(`${entry.parentPath}${path.sep}${entry.name}`);
-      }
+    }
+    if (entry.isFile()) {
+      files.push(`${entry.parentPath}${path.sep}${entry.name}`);
     }
   }
   directories.sort();
