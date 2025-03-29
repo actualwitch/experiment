@@ -23,11 +23,12 @@
     "dev": "bun i && bun update && DEBUG=true OPEN_ON_START=true bun scripts/start.ts",
     "dev:ssg": "REALM=ssg bun --watch run src/entry/server.ssg.tsx",
     "format": "bunx biome format --write ./src/*",
-    "format:prettier": "prettier ./src/* --write",
+    "format:prettier": "prettier --write ./src/*",
     "lint": "bunx biome lint --write .",
     "test:unit": "bun test src/feature",
     "test:e2e": "bunx playwright test",
-    "playwright:update": "bunx playwright install"
+    "playwright:update": "bunx playwright install",
+    "prepare": "husky"
   },
   "devDependencies": {
     "@biomejs/biome": "latest",
@@ -37,6 +38,7 @@
     "@types/react": "latest",
     "@types/react-dom": "latest",
     "@types/selenium-webdriver": "latest",
+    "husky": "latest",
     "playwright": "latest",
     "prettier": "latest"
   },

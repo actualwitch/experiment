@@ -9,7 +9,6 @@ import { localCertAndKeyAtom } from "../atoms/https";
 process.env.REALM = "ssr";
 
 const tls = (await store.get(localCertAndKeyAtom))
-
   .map(({ cert, key }) => ({ cert: Bun.file(cert), key: Bun.file(key) }))
   .unwrapOr(undefined);
 
