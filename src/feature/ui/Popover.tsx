@@ -7,7 +7,7 @@ import { Palette } from "../../style/palette";
 import { bs, shadows } from "../../style";
 import { withDarkMode, type WithDarkMode } from "../../style/darkMode";
 import { useAtom } from "jotai";
-import { isDarkModeAtom } from "../../atoms/common";
+import { isDarkModeAtom } from "../../atoms/store";
 import { css } from "@emotion/react";
 import type { WithTransitionState } from "../transitionState";
 

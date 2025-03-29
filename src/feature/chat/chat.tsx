@@ -3,14 +3,8 @@ import styled from "@emotion/styled";
 import { atom, useAtom, useAtomValue } from "jotai";
 import { type CSSProperties, type ReactNode, type Ref, useEffect, useMemo, useRef, useState } from "react";
 import { TRIANGLE } from "../../const";
-import {
-  type Path,
-  type Store,
-  experimentLayoutAtom,
-  isDarkModeAtom,
-  selectionAtom,
-  templatesAtom,
-} from "../../atoms/common";
+import { type Path, experimentLayoutAtom, selectionAtom, templatesAtom } from "../../atoms/common";
+import { type Store, isDarkModeAtom } from "../../atoms/store";
 import { isRunningAtom } from "../inference/atoms";
 import { bs } from "../../style";
 import type { WithDarkMode } from "../../style/darkMode";
@@ -19,7 +13,12 @@ import { deepEqual } from "../../utils";
 import { useHandlers } from "../../utils/keyboard";
 import { View, collapsedAtom } from "../ui/view";
 import type { _Message, Experiment, ExperimentWithMeta, Message, Role } from "../../types";
-import { useItemTransition, useListTransition, type WithTransitionState } from "../transitionState";
+import {
+  useItemTransition,
+  useListTransition,
+  type TransitionState,
+  type WithTransitionState,
+} from "../transitionState";
 
 const baseHeight = bs(6);
 export const ChatContainer = styled.div<WithDarkMode>`
@@ -101,11 +100,11 @@ export const MessageComponent = styled.article<
         ${align}: 0;
         transform-origin: ${align};
         ${
-          align === "right" ?
-            css`
+          align === "right"
+            ? css`
               transform: rotate(-90deg) translate(0, -20px);
             `
-          : css`
+            : css`
               transform: rotate(270deg) translate(-100%, 16px);
             `
         }
@@ -222,10 +221,12 @@ export const ChatMessage = ({
   message: _message,
   index,
   collapseTemplates = true,
+  transitionState,
 }: {
   message: Message;
   index: number;
   collapseTemplates?: boolean;
+  transitionState: TransitionState;
 }) => {
   const ref = useRef<null | HTMLElement>(null);
   const selector: Path = [index, "content"];
@@ -329,8 +330,6 @@ export const ChatMessage = ({
     setIsMounted(true);
   }, []);
 
-  const {transitionState, shouldRender} = useItemTransition(isMounted);
-
   return (
     <MessageComponent
       // contentEditable={isSelected && selection?.[1] === "content"}
@@ -405,10 +404,18 @@ export function ChatPreview({
       return { ...message, key: `${index}-${message.role}`, index };
     });
     if (isRunning && !keyed[keyed.length - 1].fromServer) {
-      keyed.push({ role: "assistant", content: "...", fromServer: true, key: `${keyed.length}-assistant`, index: keyed.length });
+      keyed.push({
+        role: "assistant",
+        content: "...",
+        fromServer: true,
+        key: `${keyed.length}-assistant`,
+        index: keyed.length,
+      });
     }
     return keyed;
   }, [experiment, isRunning]);
+
+  const messagesWithState = useListTransition(computedMessages);
 
   useHandlers({
     Escape: () => {
@@ -416,13 +423,21 @@ export function ChatPreview({
     },
   });
 
-  if (computedMessages.length === 0) {
+  if (messagesWithState.length === 0) {
     return empty;
   }
   return (
     <ChatContainer isDarkMode={isDarkMode}>
-      {computedMessages.map?.(({ key, index, ...message }) => {
-        return <ChatMessage collapseTemplates={collapseTemplates} key={key} message={message} index={index} />;
+      {messagesWithState.map?.(({ key, index, state, ...message }) => {
+        return (
+          <ChatMessage
+            collapseTemplates={collapseTemplates}
+            key={key}
+            message={message}
+            index={index}
+            transitionState={state}
+          />
+        );
       })}
     </ChatContainer>
   );

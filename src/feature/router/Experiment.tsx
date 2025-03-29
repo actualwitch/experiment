@@ -3,7 +3,9 @@ import { useEffect } from "react";
 import { useParams } from "react-router";
 
 import { navigateAtom, titleOverrideAtom } from ".";
-import { type ExperimentCursor, getExperimentAtom, selectionAtom, templatesAtom } from "../../atoms/common";
+import { selectionAtom, templatesAtom } from "../../atoms/common";
+import type { ExperimentCursor } from "../../atoms/experiment";
+import { getExperimentAtom } from "../../atoms/store";
 import type { Experiment } from "../../types";
 import { entangledAtom } from "../../utils/entanglement";
 import { ExperimentPreview } from "../chat/ExperimentPreview";

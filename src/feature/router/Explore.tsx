@@ -5,15 +5,15 @@ import { useEffect } from "react";
 
 import { Maybe } from "true-myth";
 import { titleOverrideAtom } from ".";
-import { store } from "../../store";
+import { nopeAtom } from "../../atoms/common";
+import { createContextFromFiles, iterateDir } from "../../utils/context";
 import { entangledAtom } from "../../utils/entanglement";
 import { getRealm } from "../../utils/realm";
+import type { Language } from "../editor";
+import { Editor } from "../editor/Editor";
 import { SidebarInput } from "../ui/Navigation";
 import { Page } from "../ui/Page";
 import { View, collapsedAtom } from "../ui/view";
-import { Editor } from "../editor/Editor";
-import type { Language } from "../editor";
-import { nopeAtom } from "../../atoms/common";
 
 export const pwdAtom = getRealm() === "server" ? atom(Bun.env.PWD) : nopeAtom;
 

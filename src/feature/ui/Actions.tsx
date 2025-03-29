@@ -1,7 +1,8 @@
 import { useAtom } from "jotai";
 import type { PropsWithChildren } from "react";
 
-import { isActionPanelOpenAtom, isDarkModeAtom, layoutAtom } from "../../atoms/common";
+import { isActionPanelOpenAtom, layoutAtom } from "../../atoms/common";
+import { isDarkModeAtom } from "../../atoms/store";
 import { Sidebar, Slideover } from "../../style";
 import { DesktopOnly } from "./Mobile";
 

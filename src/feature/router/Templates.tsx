@@ -1,7 +1,8 @@
 import { type Setter, atom, useAtom } from "jotai";
 
 import { navigateAtom } from ".";
-import { experimentAtom, templatesAtom } from "../../atoms/common";
+import { templatesAtom } from "../../atoms/common";
+import { experimentAtom } from "../../atoms/experiment";
 import { ChatPreview, hasMessages } from "../chat/chat";
 import { Actions } from "../ui/Actions";
 import { type Config, ConfigRenderer } from "../ui/ConfigRenderer";

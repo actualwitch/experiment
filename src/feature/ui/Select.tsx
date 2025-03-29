@@ -12,7 +12,7 @@ import { interactive } from "../../style/mixins";
 import { bevelStyle, buttonPopModifier, iSawTheButtonGlow, iSawTheButtonsGlowLightMode } from "../../style";
 import { withDarkMode, type WithDarkMode } from "../../style/darkMode";
 import { useAtom } from "jotai";
-import { isDarkModeAtom } from "../../atoms/common";
+import { isDarkModeAtom } from "../../atoms/store";
 import { UnfoldVertical } from "lucide-react";
 import { useItemTransition } from "../transitionState";
 
@@ -60,9 +60,7 @@ export function Select<T extends object>(props: AriaSelectProps<T>) {
 
   return (
     <InputContainer>
-      {props.label ?
-        <Label {...labelProps}>{props.label}</Label>
-      : null}
+      {props.label ? <Label {...labelProps}>{props.label}</Label> : null}
       <HiddenSelect state={state} triggerRef={ref} label={props.label} name={props.name} />
       <Button
         isDarkMode={isDarkMode}

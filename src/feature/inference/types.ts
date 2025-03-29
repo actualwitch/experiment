@@ -26,7 +26,18 @@ const o1_pro = Literal("o1-pro");
 const o1_preview = Literal("o1-preview");
 const o1_mini = Literal("o1-mini");
 
-export const OpenAIModel = Union(GPT_4_5, GPT_4o, GPT_4o_mini, GPT_4, GPT_4_turbo, o3_mini, o1, o1_pro, o1_preview, o1_mini);
+export const OpenAIModel = Union(
+  GPT_4_5,
+  GPT_4o,
+  GPT_4o_mini,
+  GPT_4,
+  GPT_4_turbo,
+  o3_mini,
+  o1,
+  o1_pro,
+  o1_preview,
+  o1_mini,
+);
 
 const Claude_3_7_Sonnet = Literal("claude-3-7-sonnet-20250219");
 const Claude_3_6_Sonnet = Literal("claude-3-5-sonnet-20241022");

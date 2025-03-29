@@ -83,9 +83,8 @@ function asTreeNodes(
     } catch {}
   }
   const prefix = isNullish(title) || (Array.isArray(input) && input.length === 0) ? "" : title;
-  const interactiveProps =
-    onTitleClick ?
-      ({
+  const interactiveProps = onTitleClick
+    ? ({
         onClick(e) {
           e.preventDefault();
           e.stopPropagation();
@@ -96,11 +95,11 @@ function asTreeNodes(
       })
     : { isDisabled: true };
   if (shouldBeCollapsed?.(path)) {
-    return prefix ?
-        <Emphasis isCollapsed {...interactiveProps}>
-          {prefix}
-        </Emphasis>
-      : null;
+    return prefix ? (
+      <Emphasis isCollapsed {...interactiveProps}>
+        {prefix}
+      </Emphasis>
+    ) : null;
   }
   let inner = null;
   if (typeof input === "string") {
@@ -251,7 +250,7 @@ export function Code({ language, value }: { language?: string; value?: ReactNode
     return (
       <>
         <pre>
-          {hasBackend() ?
+          {hasBackend() ? (
             <>
               <ActionRow>
                 <button
@@ -265,7 +264,7 @@ export function Code({ language, value }: { language?: string; value?: ReactNode
               </ActionRow>
               <hr />
             </>
-          : null}
+          ) : null}
           <Container>
             <code>{value}</code>
           </Container>

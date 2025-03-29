@@ -10,7 +10,7 @@ import { withDarkMode, type WithDarkMode } from "../../style/darkMode";
 import { TRIANGLE } from "../../const";
 import { bs } from "../../style";
 import { InputContainer } from "./shared";
-import { isDarkModeAtom } from "../../atoms/common";
+import { isDarkModeAtom } from "../../atoms/store";
 import { triangle } from "polished";
 
 const Container = styled(InputContainer)<{ orientation: "horizontal" | "vertical" }>`

@@ -44,12 +44,12 @@ export const experimentToMistral = async (
   if (tools.length) {
     result.tools = tools;
     result.toolChoice =
-      tools.length === 1 ?
-        {
-          type: "function" as const,
-          function: { name: tools[0].function.name },
-        }
-      : undefined;
+      tools.length === 1
+        ? {
+            type: "function" as const,
+            function: { name: tools[0].function.name },
+          }
+        : undefined;
   }
   return result;
 };

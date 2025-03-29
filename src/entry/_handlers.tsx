@@ -8,7 +8,7 @@ import { Shell } from "../root";
 import { publish, subscribe, type Update } from "../utils/æther";
 import { eventStream } from "../utils/eventStream";
 import { getManifest } from "../feature/pwa/manifest";
-import { clientFile, description, iconResolutions, name } from "../const";
+import { clientCss, clientFile, description, iconResolutions, name } from "../const";
 import type { Nullish } from "../types";
 import { getClientAsString } from "./_macro" with { type: "macro" };
 
@@ -38,12 +38,6 @@ export const doStatic = async (request: Request) => {
   if (url.pathname === "/favicon.ico") {
     response ??= new Response("KO", { status: 404 });
   }
-  if (url.pathname === "/client.css") {
-    const file = Bun.file("./static/client.css");
-    if (file) {
-      response ??= new Response(file, { headers: { "Content-Type": "text/css" } });
-    }
-  }
   if (url.pathname === "/manifest.json") {
     response ??= new Response(JSON.stringify(getManifest(name, description, iconResolutions)), {
       headers: {
@@ -51,8 +45,12 @@ export const doStatic = async (request: Request) => {
       },
     });
   }
+  const [clientFileContent, css] = await getClientAsString();
   if (url.pathname === clientFile) {
-    response ??= new Response(await getClientAsString(), { headers: { "Content-Type": "application/javascript" } });
+    response ??= new Response(clientFileContent.text, { headers: { "Content-Type": "application/javascript" } });
+  }
+  if (url.pathname === clientCss) {
+    response ??= new Response(css.text, { headers: { "Content-Type": "text/css" } });
   }
   if (response) {
     log("Static", request.url);

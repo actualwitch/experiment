@@ -3,11 +3,13 @@ import { hostname, port } from "../const";
 import { createFetch } from "../utils/handler";
 import { doPOST, doSSE, doStatic, doStreamingSSR } from "./_handlers";
 import { store } from "../store";
-import { debugAtom, localCertAndKeyAtom } from "../atoms/common";
+import { debugAtom } from "../atoms/common";
+import { localCertAndKeyAtom } from "../atoms/https";
 
 process.env.REALM = "ssr";
 
 const tls = (await store.get(localCertAndKeyAtom))
+
   .map(({ cert, key }) => ({ cert: Bun.file(cert), key: Bun.file(key) }))
   .unwrapOr(undefined);
 

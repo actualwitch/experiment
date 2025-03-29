@@ -16,13 +16,12 @@ import { clientFile, name } from "./const";
 import { ErrorBoundary } from "./feature/ui/error";
 import {
   isActionPanelOpenAtom,
-  isDarkModeAtom,
   isNavPanelOpenAtom,
-  isTransRightsAtom,
   layoutAtom,
   layoutTrackerAtom,
   selectionAtom,
 } from "./atoms/common";
+import { isDarkModeAtom, isTransRightsAtom } from "./atoms/store";
 import { DesktopOnly, MobileHeader, MobileOnly } from "./feature/ui/Mobile";
 import type { Nullish } from "./types";
 import { Page } from "./feature/ui/Page";
@@ -69,7 +68,7 @@ const App = () => {
   return (
     <Suspense fallback={null}>
       <Container layout={layout}>
-        {isTransRights === false ?
+        {isTransRights === false ? (
           <Page>
             <h2>
               🏳️‍⚧️ Trans rights <i>are</i> human rights
@@ -80,7 +79,8 @@ const App = () => {
               rights you not only forfeit your humanity, you erase wonderful contribution that could have existed.
             </Paragraph>
           </Page>
-        : <>
+        ) : (
+          <>
             <DesktopOnly>
               <Navigation />
             </DesktopOnly>
@@ -94,7 +94,7 @@ const App = () => {
             </MobileOnly>
             <Router />
           </>
-        }
+        )}
         <Global styles={styles} />
       </Container>
     </Suspense>

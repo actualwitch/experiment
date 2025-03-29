@@ -5,14 +5,7 @@ import { navigateAtom, titleOverrideAtom } from ".";
 import templates from "../../../fixtures/templates.json";
 import testing from "../../../fixtures/testing.json";
 import { filenames, importsRegistry, selectedChat } from "../../atoms/client";
-import {
-  debugAtom,
-  experimentAtom,
-  isNavPanelOpenAtom,
-  layoutAtom,
-  selectionAtom,
-  templatesAtom,
-} from "../../atoms/common";
+import { debugAtom, isNavPanelOpenAtom, layoutAtom, selectionAtom, templatesAtom } from "../../atoms/common";
 import { type Config, ConfigRenderer } from "../ui/ConfigRenderer";
 import { View } from "../ui/view";
 import type { ExperimentWithMeta } from "../../types";
@@ -140,9 +133,10 @@ export default function () {
   return (
     <>
       <Page>
-        {experiment ?
+        {experiment ? (
           <ExperimentPreview key={`${filename}-${idx}`} experiment={experiment} />
-        : <>
+        ) : (
+          <>
             <DesktopOnly>
               <h2>{title}</h2>
             </DesktopOnly>
@@ -150,7 +144,7 @@ export default function () {
               Import and explore previous completions from CSV files, or <a onClick={addSamples}>see some examples</a>.
             </p>
           </>
-        }
+        )}
       </Page>
       <Actions>
         <ConfigRenderer>{config}</ConfigRenderer>

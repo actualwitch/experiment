@@ -6,7 +6,7 @@ import { DateTime, Interval } from "luxon";
 import { memo, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Temporal } from "temporal-polyfill";
 
-import { isDarkModeAtom } from "../../atoms/common";
+import { isDarkModeAtom } from "../../atoms/store";
 import { TRIANGLE } from "../../const";
 import { type WithDarkMode, withDarkMode } from "../../style/darkMode";
 
@@ -60,12 +60,12 @@ const Week: React.FC<WeekReference & { size: number; shift: number }> = memo(
           const month = String(start.month);
           return (
             <Day key={date} today={date === today.toISODate()}>
-              {Object.keys(events).includes(month) ?
+              {Object.keys(events).includes(month) ? (
                 <>
                   <p>{events[month]}</p>
                   <Spacer />
                 </>
-              : null}
+              ) : null}
               {index === 0 && (
                 <p>
                   {start.toLocaleString({ year: "numeric" })} W{start.weekNumber}

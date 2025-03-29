@@ -5,14 +5,15 @@ import { type PropsWithChildren, useState } from "react";
 import { Item } from "react-stately";
 
 import { Select } from "../ui/Select";
+import { experimentLayoutAtom } from "../../atoms/common";
 import {
-  experimentLayoutAtom,
   fontStackAtom,
   isBoldTextAtom,
   isDarkModeAtom,
+  isMetaExperimentAtom,
   isTransRightsAtom,
   tokensAtom,
-} from "../../atoms/common";
+} from "../../atoms/store";
 import { Button, FONT_STACKS, bs } from "../../style";
 import { type WithDarkMode, withDarkMode } from "../../style/darkMode";
 import { Palette } from "../../style/palette";
@@ -95,7 +96,10 @@ const ModalContent = ({ children, close }: PropsWithChildren<{ close: () => void
     <Container isDarkMode={isDarkMode}>
       <h3>Add provider</h3>
       <p>
-        <Select items={providers} onSelectionChange={(value) => setSelectedProvider(value)}>
+        <Select
+          items={providers}
+          onSelectionChange={(value) => setSelectedProvider(value as "anthropic" | "mistral" | "openai")}
+        >
           {(item) => (
             <Item textValue={item.name}>
               <div>{item.name}</div>
@@ -133,6 +137,7 @@ export default function Parameters() {
   const [fontStack, setFontStack] = useAtom(fontStackAtom);
   const [experimentLayout, setExperimentLayout] = useAtom(experimentLayoutAtom);
 
+  const [isMetaExperiment, setIsMetaExperiment] = useAtom(isMetaExperimentAtom);
   const [isTransRights, setIsTransRights] = useAtom(isTransRightsAtom);
 
   const [tokens, setTokens] = useAtom(tokensAtom);
@@ -178,7 +183,7 @@ export default function Parameters() {
           <header>Font</header>
           <Select
             items={withIds(Object.keys(FONT_STACKS))}
-            onSelectionChange={(value) => setFontStack(value)}
+            onSelectionChange={(value) => setFontStack(value as keyof typeof FONT_STACKS)}
             selectedKey={fontStack ?? "Transitional"}
           >
             {(item) => (
@@ -210,6 +215,15 @@ export default function Parameters() {
         </Row>
         <h3>Semantic</h3>
         <Row>
+          <header>MetaExperiment</header>
+          <Switch value={isMetaExperiment} onChange={setIsMetaExperiment}>
+            {[
+              { value: false, name: "Off", isDefault: true },
+              { value: true, name: "On" },
+            ]}
+          </Switch>
+        </Row>
+        <Row>
           <header>🏳️‍⚧️ Trans rights</header>
           <Switch value={isTransRights} onChange={setIsTransRights}>
             {[
@@ -221,7 +235,7 @@ export default function Parameters() {
         <h3>Inference</h3>
         <Row>
           <header>Providers</header>
-          {isAdding ?
+          {isAdding ? (
             <Switch value={selectedProvider} onChange={setSelectedProvider}>
               {providerTypes
                 .filter((provider) => !tokens[provider])
@@ -230,7 +244,9 @@ export default function Parameters() {
                   name: providerLabels[provider],
                 }))}
             </Switch>
-          : <Button onClick={() => setIsAdding(true)}>Add</Button>}
+          ) : (
+            <Button onClick={() => setIsAdding(true)}>Add</Button>
+          )}
         </Row>
         {selectedProvider && (
           <TextField

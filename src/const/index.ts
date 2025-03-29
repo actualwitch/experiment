@@ -3,6 +3,7 @@ import project from "../../package.json";
 export const { name, description, author, version } = project;
 
 export const clientFile = "/client.js";
+export const clientCss = "/client.css";
 export const staticDir = "static";
 
 export const schema = "http";

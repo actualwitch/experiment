@@ -1,23 +1,15 @@
 import { css } from "@emotion/react";
 import styled from "@emotion/styled";
 import { type Setter, atom, useAtom, useSetAtom } from "jotai";
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { NavLink } from "react-router";
 
 import { Disc3, MessageCircleDashed, Play, Pyramid, Rewind, Trash2 } from "lucide-react";
-import {
-  experimentAtom,
-  isActionPanelOpenAtom,
-  isDarkModeAtom,
-  layoutAtom,
-  modelAtom,
-  parentAtom,
-  selectedProviderAtom,
-  selectionAtom,
-  templatesAtom,
-} from "../../atoms/common";
+import { isActionPanelOpenAtom, layoutAtom, selectionAtom } from "../../atoms/common";
+import { experimentAtom } from "../../atoms/experiment";
 import { personasAtom } from "../../atoms/persona";
 import { pwdAtom } from "../../atoms/server";
+import { isDarkModeAtom, modelAtom, parentAtom, selectedProviderAtom, templatesAtom } from "../../atoms/store";
 import { name } from "../../const";
 import { bs } from "../../style";
 import { type WithDarkMode, withDarkMode } from "../../style/darkMode";
@@ -25,7 +17,6 @@ import { Palette } from "../../style/palette";
 import { type Message, PossibleObjectType, type Role, RoleOptions } from "../../types";
 import { useHandlers } from "../../utils/keyboard";
 import { hasBackend } from "../../utils/realm";
-import { useScrollToBottomRef } from "../../utils/scroll";
 import { ChatPreview } from "../chat/chat";
 import {
   availableProviderOptionsAtom,
@@ -276,7 +267,7 @@ export const actionsAtom = atom((get) => {
     });
     counter++;
   }
-  if (hasBackend()) {
+  if (hasBackend() && get(hasLoadedAtom)) {
     config.Actions.push({
       Special: {
         buttons: [
@@ -298,7 +289,10 @@ export const actionsAtom = atom((get) => {
   return { config, counter };
 });
 
-const messageAtom = atom("");
+export const messageAtom = atom("");
+export const roleAtom = atom<Role>("user");
+
+const hasLoadedAtom = atom(false);
 
 export default function () {
   const [isDarkMode] = useAtom(isDarkModeAtom);
@@ -306,7 +300,12 @@ export default function () {
   const [experiment, setExperiment] = useAtom(experimentAtom);
   const [selection, setSelection] = useAtom(selectionAtom);
   const [message, setMessage] = useAtom(messageAtom);
-  const [role, setRole] = useState<Role>("user");
+  const [role, setRole] = useAtom(roleAtom);
+  const [hasLoaded, setHasLoaded] = useAtom(hasLoadedAtom);
+
+  useEffect(() => {
+    setHasLoaded(true);
+  }, []);
 
   const [providerOptions] = useAtom(availableProviderOptionsAtom);
   const [provider, setProvider] = useAtom(selectedProviderAtom);
@@ -436,7 +435,7 @@ export default function () {
   }, [experiment, isRunning]);
 
   const page =
-    providerOptions.length === 0 ?
+    providerOptions.length === 0 ? (
       <Page>
         <h2>
           Welcome to <Underline>{name}</Underline>
@@ -446,7 +445,8 @@ export default function () {
           .csv file on the <NavLink to="/import">Import</NavLink> page.
         </p>
       </Page>
-    : <Page ref={pageRef}>
+    ) : (
+      <Page ref={pageRef}>
         <ChatPreview experiment={experiment} autoScroll />
         <Block isDarkMode={isDarkMode}>
           <ActionRow>
@@ -456,21 +456,21 @@ export default function () {
                 return <option key={text}>{text}</option>;
               })}
             </select>
-            {isEditing ?
+            {isEditing ? (
               <button type="button" disabled={isDisabled} onClick={submit}>
                 update
               </button>
-            : null}
-            {!isEditing && message ?
+            ) : null}
+            {!isEditing && message ? (
               <button type="button" disabled={isDisabled} onClick={submit}>
                 add
               </button>
-            : null}
-            {!isEditing && !message && experiment.length ?
+            ) : null}
+            {!isEditing && !message && experiment.length ? (
               <button type="button" disabled={isDisabled} onClick={submit}>
                 start
               </button>
-            : null}
+            ) : null}
           </ActionRow>
           <TextArea
             placeholder={`${role === "tool" ? "Paste JSONSchema" : "Type a message and press Enter to append"}…`}
@@ -512,16 +512,17 @@ export default function () {
             }}
           />
         </Block>
-      </Page>;
+      </Page>
+    );
 
   return (
     <>
       {page}
-      {counter ?
+      {counter ? (
         <Actions>
           <ConfigRenderer>{actions}</ConfigRenderer>
         </Actions>
-      : null}
+      ) : null}
     </>
   );
 }

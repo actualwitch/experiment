@@ -12,15 +12,9 @@ import { experimentToOpenai } from "./adapters/openai";
 import { spawn } from "../../utils";
 import { entangledAtom } from "../../utils/entanglement";
 import { hasBackend } from "../../utils/realm";
-import {
-  createExperiment,
-  experimentAtom,
-  modelAtom,
-  parentAtom,
-  selectedProviderAtom,
-  storeAtom,
-  tokensAtom,
-} from "../../atoms/common";
+import { parentAtom } from "../../atoms/common";
+import { createExperiment, experimentAtom } from "../../atoms/experiment";
+import { modelAtom, selectedProviderAtom, storeAtom, tokensAtom } from "../../atoms/store";
 import type { Message } from "../../types";
 import { isReasoningModel, modelLabels, modelOptions, providerLabels, type ProviderType } from "./types";
 

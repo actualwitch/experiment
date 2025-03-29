@@ -1,6 +1,6 @@
 import { $ } from "bun";
 import { store } from "../src/store";
-import { localCertAndKeyAtom } from "../src/atoms/common";
+import { localCertAndKeyAtom } from "../src/atoms/https";
 import { isMac } from "../src/utils/realm";
 import { hostname, port } from "../src/const";
 

@@ -1,13 +1,13 @@
 import { type Atom, atom, useAtom } from "jotai";
-import type { JSX, PropsWithChildren } from "react";
+import { useEffect, type JSX, type PropsWithChildren } from "react";
 import { Route, Routes, useLocation } from "react-router";
 
-import { experimentIdsAtom, selectionAtom } from "../../atoms/common";
+import { experimentIdsAtom, isMetaExperimentAtom } from "../../atoms/store";
 import type { Config } from "../ui/ConfigRenderer";
 import { TRIANGLE, description, name } from "../../const";
 import Experiment, { actionsAtom as experimentActionsAtom } from "./Experiment";
 import Import, { actionsAtom as importActionsAtom } from "./Import";
-// import Explore from "./Explore";
+import Explore from "./Explore";
 import Calendar from "./Calendar";
 import NewExperiment, { actionsAtom as newExperimentActionsAtom } from "./NewExperiment";
 import Parameters from "./Parameters";
@@ -21,6 +21,7 @@ export type AppRoute = {
   component: () => JSX.Element;
   showInSidebar?: boolean;
   sidebar?: { atom: Atom<{ counter: number; config: Config }>; title?: string };
+  experimental?: boolean;
 };
 
 export const experimentsSidebarAtom = atom((get) => {
@@ -66,19 +67,21 @@ export const ROUTES: AppRoute[] = [
     component: Templates,
     sidebar: { atom: templateActionsAtom, title: "Actions" },
   },
-  // {
-  //   icon: "🌍",
-  //   title: "Explore",
-  //   showInSidebar: true,
-  //   path: "/explore",
-  //   component: Explore,
-  // },
+  {
+    icon: "🌍",
+    title: "Explore",
+    showInSidebar: true,
+    path: "/explore",
+    component: Explore,
+    experimental: true,
+  },
   {
     icon: "📅",
     title: "Calendar",
     showInSidebar: true,
     path: "/calendar",
     component: Calendar,
+    experimental: true,
   },
   { icon: "🛠️", title: "Parameters", showInSidebar: true, path: "/parameters", component: Parameters },
 ];
@@ -88,25 +91,34 @@ export const routeAtom = atom<AppRoute | null>(null);
 function RouteSync({ thisRoute, children }: PropsWithChildren<{ thisRoute: AppRoute }>) {
   const location = useLocation();
   const [route, setRoute] = useAtom(routeAtom);
-  if (!route || route.path !== location.pathname) {
-    setRoute(thisRoute);
-  }
+  useEffect(() => {
+    if (!route || route.path !== location.pathname) {
+      setRoute(thisRoute);
+    }
+  }, [route?.path, location]);
   return children;
 }
 
-const routerRoutes = ROUTES.map((route) => {
-  const Component = route.component;
-  return {
-    ...route,
-    element: (
-      <RouteSync thisRoute={route}>
-        <Component />
-      </RouteSync>
-    ),
-  };
+export const routerRoutesAtom = atom((get) => {
+  const isMetaExperiment = get(isMetaExperimentAtom);
+  return ROUTES.filter((route) => {
+    if (route.experimental) return isMetaExperiment;
+    return true;
+  }).map((route) => {
+    const Component = route.component;
+    return {
+      ...route,
+      element: (
+        <RouteSync thisRoute={route}>
+          <Component />
+        </RouteSync>
+      ),
+    };
+  });
 });
 
 export const Router = () => {
+  const [routerRoutes] = useAtom(routerRoutesAtom);
   return (
     <Routes>
       {routerRoutes.map(({ path, element }) => (

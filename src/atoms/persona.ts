@@ -1,7 +1,7 @@
 import { atom } from "jotai";
 import { focusAtom } from "jotai-optics";
 import { entangledAtom } from "../utils/entanglement";
-import { storeAtom } from "./common";
+import { storeAtom } from "./store";
 
 // Personas stored in the main Store
 export const personasAtom = entangledAtom(

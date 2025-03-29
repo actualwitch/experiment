@@ -1,8 +1,11 @@
 import type { Setter } from "jotai";
 import { Ban, Copy, Disc3, GitBranchPlus } from "lucide-react";
 
-import { type Path, type Store, experimentAtom, parentAtom, selectionAtom, templatesAtom } from "../../../atoms/common";
+import { type Path, parentAtom, selectionAtom, templatesAtom } from "../../../atoms/common";
+import type { Store } from "../../../atoms/store";
+import { experimentAtom } from "../../../atoms/experiment";
 import type { Experiment, Message } from "../../../types";
+import { messageAtom, roleAtom } from "../../router/NewExperiment";
 
 export const createTemplateButton = (templates: Store["templates"], content: Message) => ({
   label: "Template",
@@ -33,7 +36,11 @@ export const createSelectionEditButtons = (templates: Store["templates"], conten
 export const createCancelEditingButton = (newSelection: Path) => ({
   label: "Cancel",
   icon: Ban,
-  action: (set: Setter) => set(selectionAtom, newSelection),
+  action: (set: Setter) => {
+    set(selectionAtom, newSelection);
+    set(roleAtom, "user");
+    set(messageAtom, "");
+  },
 });
 
 export const createRemixButtons = (

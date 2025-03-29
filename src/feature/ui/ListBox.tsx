@@ -9,7 +9,7 @@ import { interactive } from "../../style/mixins";
 import { Palette } from "../../style/palette";
 import { increaseSpecificity } from "../../style/utils";
 import type { WithDarkMode } from "../../style/darkMode";
-import { isDarkModeAtom } from "../../atoms/common";
+import { isDarkModeAtom } from "../../atoms/store";
 import { useAtom } from "jotai";
 import { bevelStyle } from "../../style";
 
@@ -108,12 +108,17 @@ function Option({ item, state }: OptionProps) {
   );
 
   return (
-    <ListItem {...optionProps} ref={ref} isFocused={isFocused} isSelected={isSelected} isDarkMode={isDarkMode} data-hover={isFocused}>
+    <ListItem
+      {...optionProps}
+      ref={ref}
+      isFocused={isFocused}
+      isSelected={isSelected}
+      isDarkMode={isDarkMode}
+      data-hover={isFocused}
+    >
       <ItemContent>
         <OptionContext.Provider value={{ labelProps, descriptionProps }}>{item.rendered}</OptionContext.Provider>
-        {isSelected ?
-          <Check size={12} />
-        : null}
+        {isSelected ? <Check size={12} /> : null}
       </ItemContent>
     </ListItem>
   );

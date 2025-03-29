@@ -67,5 +67,230 @@
       { "role": "info", "fromServer": true, "content": "This is an info message." },
       { "role": "error", "fromServer": true, "content": "This is an error message." }
     ]
+  },
+  "Multi-tool example": {
+    "messages": [
+      { "role": "system", "content": "You are a helpful assistant with access to multiple tools." },
+      { "role": "user", "content": "I need to find the weather in Tokyo and then save that information to my bio." },
+      {
+        "role": "tool",
+        "content": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "type": "function",
+          "function": {
+            "name": "get_weather",
+            "description": "Get the current weather in a given location",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "location": {
+                  "type": "string",
+                  "description": "The city and state, e.g. San Francisco, CA"
+                },
+                "unit": {
+                  "type": "string",
+                  "enum": ["celsius", "fahrenheit"],
+                  "description": "The temperature unit to use. Infer this from the user's location."
+                }
+              },
+              "required": ["location"]
+            }
+          }
+        }
+      },
+      {
+        "role": "tool",
+        "content": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "type": "function",
+          "function": {
+            "name": "bio",
+            "description": "The `bio` tool allows you to persist information across conversations.",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "memory": {
+                  "type": "string",
+                  "description": "The information you want to persist across conversations."
+                }
+              },
+              "required": ["memory"]
+            }
+          }
+        }
+      },
+      {
+        "role": "tool",
+        "fromServer": true,
+        "content": { "function": "get_weather", "arguments": { "location": "Tokyo", "unit": "celsius" } }
+      },
+      {
+        "role": "assistant",
+        "fromServer": true,
+        "content": "I've checked the weather in Tokyo for you. It's currently 22°C with partly cloudy skies. Would you like me to save this information to your bio?"
+      },
+      {
+        "role": "user",
+        "content": "Yes, please save it."
+      },
+      {
+        "role": "tool",
+        "fromServer": true,
+        "content": { "function": "bio", "arguments": { "memory": "Weather in Tokyo: 22°C, partly cloudy (as of last check)." } }
+      },
+      {
+        "role": "assistant",
+        "fromServer": true,
+        "content": "I've saved the Tokyo weather information to your bio. This information will be available in future conversations."
+      }
+    ]
+  },
+  "Complex schema example": {
+    "messages": [
+      { "role": "system", "content": "You are a database assistant that helps users query and update their database." },
+      { "role": "user", "content": "I need to create a new product in my e-commerce database." },
+      {
+        "role": "tool",
+        "content": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "type": "function",
+          "function": {
+            "name": "create_product",
+            "description": "Create a new product in the e-commerce database",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "description": "The name of the product"
+                },
+                "price": {
+                  "type": "number",
+                  "description": "The price of the product in USD"
+                },
+                "description": {
+                  "type": "string",
+                  "description": "A detailed description of the product"
+                },
+                "category": {
+                  "type": "string",
+                  "enum": ["electronics", "clothing", "food", "books", "other"],
+                  "description": "The category of the product"
+                },
+                "inventory": {
+                  "type": "object",
+                  "properties": {
+                    "quantity": {
+                      "type": "integer",
+                      "description": "The number of items in stock"
+                    },
+                    "warehouse_id": {
+                      "type": "string",
+                      "description": "The ID of the warehouse where the product is stored"
+                    }
+                  },
+                  "required": ["quantity"]
+                },
+                "attributes": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "description": "The name of the attribute (e.g., 'color', 'size')"
+                      },
+                      "value": {
+                        "type": "string",
+                        "description": "The value of the attribute"
+                      }
+                    },
+                    "required": ["name", "value"]
+                  },
+                  "description": "Additional attributes of the product"
+                }
+              },
+              "required": ["name", "price", "category"]
+            }
+          }
+        }
+      },
+      {
+        "role": "assistant",
+        "fromServer": true,
+        "content": "I can help you create a new product in your e-commerce database. I'll need some information about the product:\n\n1. Product name (required)\n2. Price in USD (required)\n3. Product category (required - must be one of: electronics, clothing, food, books, or other)\n4. Description (optional)\n5. Inventory information (optional)\n6. Additional attributes like color, size, etc. (optional)\n\nPlease provide the details for your new product."
+      },
+      {
+        "role": "user",
+        "content": "I want to add a new smartphone. It's called 'Galaxy X20', costs $899.99, and is in the electronics category. The description is 'Next-generation smartphone with AI capabilities and 48MP camera'. We have 120 units in warehouse 'WH-005'. It comes in black color and has 256GB storage."
+      },
+      {
+        "role": "tool",
+        "fromServer": true,
+        "content": {
+          "function": "create_product",
+          "arguments": {
+            "name": "Galaxy X20",
+            "price": 899.99,
+            "category": "electronics",
+            "description": "Next-generation smartphone with AI capabilities and 48MP camera",
+            "inventory": {
+              "quantity": 120,
+              "warehouse_id": "WH-005"
+            },
+            "attributes": [
+              {
+                "name": "color",
+                "value": "black"
+              },
+              {
+                "name": "storage",
+                "value": "256GB"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "role": "assistant",
+        "fromServer": true,
+        "content": "I've successfully created the new product in your database with the following details:\n\n- **Name**: Galaxy X20\n- **Price**: $899.99\n- **Category**: Electronics\n- **Description**: Next-generation smartphone with AI capabilities and 48MP camera\n- **Inventory**: 120 units in warehouse WH-005\n- **Attributes**: \n  - Color: Black\n  - Storage: 256GB\n\nThe product has been added to your e-commerce database and is ready for listing."
+      }
+    ]
+  },
+  "Error handling": {
+    "messages": [
+      { "role": "system", "content": "You are a helpful assistant." },
+      { "role": "user", "content": "Can you help me with a calculation?" },
+      { "role": "assistant", "fromServer": true, "content": "Of course! What calculation do you need help with?" },
+      { "role": "user", "content": "What is 1337 * 42?" },
+      { "role": "assistant", "fromServer": true, "content": "Let me calculate that for you.\n\n1337 * 42 = 56,154\n\nSo the result of 1337 multiplied by 42 is 56,154." },
+      { "role": "user", "content": "Now divide that by zero." },
+      { "role": "error", "fromServer": true, "content": "Error: Division by zero is not defined in mathematics. Cannot perform the requested operation." },
+      { "role": "assistant", "fromServer": true, "content": "I'm afraid I can't divide by zero as it's mathematically undefined. Division by zero doesn't yield a real number result because any number multiplied by zero equals zero, so there's no number that can be multiplied by zero to get a non-zero result.\n\nIs there another calculation I can help you with instead?" }
+    ]
+  },
+  "Context example": {
+    "messages": [
+      { "role": "system", "content": "You are a code assistant that helps with programming tasks." },
+      { "role": "user", "content": "Can you help me understand how the tool debugging works in this project?" },
+      { 
+        "role": "context", 
+        "content": { 
+          "directory": "./src/feature/inference/function.ts" 
+        } 
+      },
+      { 
+        "role": "assistant", 
+        "fromServer": true, 
+        "content": "Based on the code I can see, the tool debugging in this project works by parsing and converting function schemas between different formats used by various LLM providers.\n\nThe main functionality is in the `function.ts` file, which contains:\n\n1. `tryParseFunctionSchema` - This function attempts to parse a JSON object into a standardized `ExperimentFunction` format. It handles both OpenAI/Mistral format (with `type: \"function\"`) and Anthropic format (with `name`, `description`, and `input_schema`).\n\n2. `experimentFunctionToTool` - Converts the internal representation to OpenAI/Mistral's format.\n\n3. `experimentFunctionToAnthropicTool` - Converts the internal representation to Anthropic's format.\n\nThis allows the application to have a unified way of handling tool definitions regardless of which LLM provider you're using, making it easier to debug and visualize tool interactions across different models." 
+      },
+      { "role": "user", "content": "Can you show me how to add a new tool to a conversation?" },
+      { 
+        "role": "assistant", 
+        "fromServer": true, 
+        "content": "To add a new tool to a conversation in Experiment, you can paste a JSON schema into the chat input. Here's how to do it:\n\n1. Create your tool schema in either OpenAI/Mistral format or Anthropic format\n2. Paste it into the chat input when the role is set to \"tool\"\n\nHere's an example of a tool in OpenAI/Mistral format:\n\n```json\n{\n  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\",\n  \"type\": \"function\",\n  \"function\": {\n    \"name\": \"get_stock_price\",\n    \"description\": \"Get the current stock price for a given ticker symbol\",\n    \"parameters\": {\n      \"type\": \"object\",\n      \"properties\": {\n        \"ticker\": {\n          \"type\": \"string\",\n          \"description\": \"The stock ticker symbol, e.g. AAPL for Apple Inc.\"\n        }\n      },\n      \"required\": [\"ticker\"]\n    }\n  }\n}\n```\n\nAnd here's the same tool in Anthropic format:\n\n```json\n{\n  \"name\": \"get_stock_price\",\n  \"description\": \"Get the current stock price for a given ticker symbol\",\n  \"input_schema\": {\n    \"type\": \"object\",\n    \"properties\": {\n      \"ticker\": {\n        \"type\": \"string\",\n        \"description\": \"The stock ticker symbol, e.g. AAPL for Apple Inc.\"\n      }\n    },\n    \"required\": [\"ticker\"]\n  }\n}\n```\n\nThe application will automatically detect and parse these schemas, then add them to your conversation as tool messages. When you run the experiment, the LLM will have access to these tools and can use them in its responses." 
+      }
+    ]
   }
 }

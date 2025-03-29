@@ -1,8 +1,13 @@
 import { readFile, readdir } from "node:fs/promises";
 import path from "node:path";
+import ignore from "ignore";
 
-export async function iterateDir(dir: string, ignore: string[] = [".git", ".sqlx", "package-lock.json"]) {
-  const thisIgnores = [...ignore];
+export async function iterateDir(
+  dir: string,
+  defaultIgnores: string[] = [".git", ".sqlx", "package-lock.json", "*.png", "*.afphoto", "*.jpg"],
+) {
+  const thisIgnores = [...defaultIgnores];
+  let ig = ignore().add(defaultIgnores);
   const entries = await readdir(dir, { withFileTypes: true });
   if (entries.some((entry) => entry.isFile() && entry.name === ".gitignore")) {
     const contents = await readFile(path.join(dir, ".gitignore"), "utf-8");
@@ -16,12 +21,13 @@ export async function iterateDir(dir: string, ignore: string[] = [".git", ".sqlx
       }
       return newIgnore;
     });
+    ig = ig.add(newIgnores);
     thisIgnores.push(...newIgnores);
   }
   const directories: string[] = [];
   let files: string[] = [];
   for (const entry of entries) {
-    if (thisIgnores.some((ignore) => entry.name === ignore)) continue;
+    if (ig.ignores(entry.name)) continue;
     if (entry.isDirectory()) {
       directories.push(entry.name);
     }
@@ -73,10 +79,10 @@ ${content}
     index += 1;
   }
   return `${
-    title ?
-      `${title}
+    title
+      ? `${title}
 ---`
-    : ""
+      : ""
   }
 ${context}
 `;

@@ -13,39 +13,58 @@ export function useListTransition<T extends { key: Key }>(
   const [entries, setEntries] = useState<Record<Key, T>>({});
   const [states, setStates] = useState<Record<Key, TransitionState>>({});
   const [moveContext, setMoveContext] = useState<Record<Key, MoveContext>>({});
-  const enqueueUpdate = useCallback(
-    (type: TransitionState, items: Key[]) => {
-      if (items.length === 0) return;
-      const delays: Partial<Record<TransitionState, number>> = {
-        entering: enterDelay,
-        exiting: exitDelay,
-      };
-      return setTimeout(() => {
-        if (type === "entering" || type === "entered") {
-          setStates((states) => ({
-            ...states,
-            ...Object.fromEntries(items.map((id) => [id, type])),
-          }));
-          if (type === "entering") enqueueUpdate("entered", items);
+
+  function enqueueUpdate(type: TransitionState, items: Key[]) {
+    if (items.length === 0) return;
+    const delays: Partial<Record<TransitionState, number>> = {
+      entering: enterDelay,
+      exiting: exitDelay,
+    };
+    const timerId = setTimeout(() => {
+      // 1) Handle "entering" and "entered"
+      if (type === "entering" || type === "entered") {
+        setStates((prev) => ({
+          ...prev,
+          ...Object.fromEntries(items.map((id) => [id, type])),
+        }));
+        if (type === "entering") {
+          // Queue the final 'entered' state
+          enqueueUpdate("entered", items);
         }
+      }
+
+      // 2) Handle "exiting" and "exited"
+      if (type === "exiting" || type === "exited") {
+        setStates((prev) => ({
+          ...prev,
+          ...Object.fromEntries(items.map((id) => [id, type])),
+        }));
         if (type === "exiting") {
-          setIds((ids) => ids.filter((id) => !items.includes(id)));
-          setStates((states) => Object.fromEntries(Object.entries(states).filter(([id]) => !items.includes(id))));
-          setEntries((entries) => Object.fromEntries(Object.entries(entries).filter(([id]) => !items.includes(id))));
-        }
-        if (type === "moving") {
-          setMoveContext((moveContext) =>
-            Object.fromEntries(
-              Object.entries(moveContext).map(
-                ([key, { style, ...value }]) => [key, value],
-              ),
-            ),
+          // Move from "exiting" to "exited" after exitDelay
+          enqueueUpdate("exited", items);
+        } else if (type === "exited") {
+          // Now that they've fully exited, actually remove them.
+          setIds((prevIds) => prevIds.filter((id) => !items.includes(id)));
+          setStates((prevStates) =>
+            Object.fromEntries(Object.entries(prevStates).filter(([key]) => !items.includes(key))),
+          );
+          setEntries((prevEntries) =>
+            Object.fromEntries(Object.entries(prevEntries).filter(([key]) => !items.includes(key))),
           );
         }
-      }, delays[type] || 0);
-    },
-    [setStates, setEntries],
-  );
+      }
+
+      // 3) Clean up "moving"
+      if (type === "moving") {
+        setMoveContext((moveCtx) =>
+          Object.fromEntries(Object.entries(moveCtx).map(([key, { style, ...rest }]) => [key, rest])),
+        );
+      }
+    }, delays[type] || 0);
+
+    // Keep track so we can cancel if needed
+    return timerId;
+  }
   useEffect(() => {
     const newIds: Key[] = [];
     const addedIds: Key[] = [];
@@ -106,7 +125,6 @@ export function useListTransition<T extends { key: Key }>(
     const timerEnter = enqueueUpdate("entering", addedIds);
     const timerExit = enqueueUpdate("exiting", removedIds);
     const timerMove = enqueueUpdate("moving", movedIds);
-    console.log({ resultingList, newEntries, newStates, newMoveContext, addedIds, removedIds, movedIds });
     return () => {
       [timerEnter, timerExit, timerMove].filter(Boolean).map((timer) => clearTimeout(timer));
     };

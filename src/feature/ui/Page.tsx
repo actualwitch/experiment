@@ -3,7 +3,8 @@ import styled from "@emotion/styled";
 import { useAtom } from "jotai";
 import type { PropsWithChildren, RefObject } from "react";
 
-import { isDarkModeAtom, layoutAtom, type WithLayout } from "../../atoms/common";
+import { layoutAtom, type WithLayout } from "../../atoms/common";
+import { isDarkModeAtom } from "../../atoms/store";
 import { bs } from "../../style";
 import type { WithDarkMode } from "../../style/darkMode";
 import { withOnMobile } from "../../style/layout";

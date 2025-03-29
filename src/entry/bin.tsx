@@ -1,6 +1,7 @@
 import type { Serve } from "bun";
-import { debugAtom, localCertAndKeyAtom } from "../atoms/common";
-import { clientFile, description, hostname, iconResolutions, name, port } from "../const";
+import { debugAtom } from "../atoms/common";
+import { localCertAndKeyAtom } from "../atoms/https";
+import { clientCss, clientFile, description, hostname, iconResolutions, name, port } from "../const";
 import { getManifest } from "../feature/pwa/manifest";
 import { store } from "../store";
 import { createFetch } from "../utils/handler";
@@ -33,8 +34,12 @@ export default {
           },
         });
       }
+      const [clientFileContent, css] = await getClientAsString();
       if (url.pathname === clientFile) {
-        return new Response(await getClientAsString(), { headers: { "Content-Type": "application/javascript" } });
+        return new Response(clientFileContent.text, { headers: { "Content-Type": "application/javascript" } });
+      }
+      if (url.pathname === clientCss) {
+        return new Response(css.text, { headers: { "Content-Type": "text/css" } });
       }
       if (response) {
         log("Static", request.url);

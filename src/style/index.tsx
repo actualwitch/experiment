@@ -5,7 +5,8 @@ import { cover } from "polished";
 import { type HTMLProps, useRef } from "react";
 import { useButton } from "react-aria";
 import Shevy from "shevyjs";
-import { type WithLayout, fontStackAtom, isBoldTextAtom, isDarkModeAtom } from "../atoms/common";
+import type { WithLayout } from "../atoms/common";
+import { fontStackAtom, isBoldTextAtom, isDarkModeAtom } from "../atoms/store";
 import { type WithDarkMode, withDarkMode } from "./darkMode";
 import { withOnMobile } from "./layout";
 import { interactive } from "./mixins";
@@ -21,21 +22,21 @@ const config: {
 // from https://github.com/system-fonts/modern-font-stacks
 export const FONT_STACKS = {
   "System UI": "system-ui, sans-serif",
-  "Transitional": "Charter, 'Bitstream Charter', 'Sitka Text', Cambria, serif",
+  Transitional: "Charter, 'Bitstream Charter', 'Sitka Text', Cambria, serif",
   "Old Style": "'Iowan Old Style', 'Palatino Linotype', 'URW Palladio L', P052, serif",
-  "Humanist": "Seravek, 'Gill Sans Nova', Ubuntu, Calibri, 'DejaVu Sans', source-sans-pro, sans-serif",
+  Humanist: "Seravek, 'Gill Sans Nova', Ubuntu, Calibri, 'DejaVu Sans', source-sans-pro, sans-serif",
   "Geometric Humanist": "Avenir, Montserrat, Corbel, 'URW Gothic', source-sans-pro, sans-serif",
   "Classic Humanist": "Optima, Candara, 'Noto Sans', source-sans-pro, sans-serif",
   "Neo Grotesque": "Inter, Roboto, 'Helvetica Neue', 'Arial Nova', 'Nimbus Sans', Arial, sans-serif",
   "Monospace Slab Serif": "'Nimbus Mono PS', 'Courier New', monospace",
   "Monospace Code": "ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Consolas, 'DejaVu Sans Mono', monospace",
-  "Industrial":
+  Industrial:
     "Bahnschrift, 'DIN Alternate', 'Franklin Gothic Medium', 'Nimbus Sans Narrow', sans-serif-condensed, sans-serif",
   "Rounded Sans":
     "ui-rounded, 'Hiragino Maru Gothic ProN', Quicksand, Comfortaa, Manjari, 'Arial Rounded MT', 'Arial Rounded MT Bold', Calibri, source-sans-pro, sans-serif",
   "Slab Serif": "Rockwell, 'Rockwell Nova', 'Roboto Slab', 'DejaVu Serif', 'Sitka Small', serif",
-  "Antique": "Superclarendon, 'Bookman Old Style', 'URW Bookman', 'URW Bookman L', 'Georgia Pro', Georgia, serif",
-  "Didone": "Didot, 'Bodoni MT', 'Noto Serif Display', 'URW Palladio L', P052, Sylfaen, serif",
+  Antique: "Superclarendon, 'Bookman Old Style', 'URW Bookman', 'URW Bookman L', 'Georgia Pro', Georgia, serif",
+  Didone: "Didot, 'Bodoni MT', 'Noto Serif Display', 'URW Palladio L', P052, Sylfaen, serif",
 } as const;
 
 export const withEmoji = ", 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji'";
@@ -380,11 +381,11 @@ export const Slideover = styled.aside<{ isOpen: boolean; from?: "left" | "right"
       `,
     )}
   ${(p) =>
-    p.isOpen ?
-      css`
+    p.isOpen
+      ? css`
         transform: translateX(0);
       `
-    : css`
+      : css`
         transform: translateX(${p.from === "left" ? "" : "-"}100%);
       `}
 `;

@@ -18,7 +18,9 @@ export const createHydrationScript = (map: HydrationMap) => {
 export const Hydration = () => {
   const [hasLoaded, setHasLoaded] = useState(false);
   useEffect(() => {
-    setHasLoaded(true);
+    setTimeout(() => {
+      setHasLoaded(true);
+    }, 100);
   }, []);
   if (hasLoaded) {
     return null;

@@ -1,17 +1,18 @@
 import { css } from "@emotion/react";
 import styled from "@emotion/styled";
 import { useAtom } from "jotai";
-import { type PropsWithChildren, useEffect } from "react";
+import { type PropsWithChildren, useEffect, useState } from "react";
 
 import {
   desktopQuery,
   isActionPanelOpenAtom,
-  isDarkModeAtom,
   isNavPanelOpenAtom,
   layoutAtom,
   mobileQuery,
   nopeAtom,
+  type LayoutType,
 } from "../../atoms/common";
+import { isDarkModeAtom } from "../../atoms/store";
 import { effectiveTitleAtom, iconAtom, routeAtom } from "../../feature/router";
 import { Button, bs } from "../../style";
 import { type WithDarkMode, withDarkMode } from "../../style/darkMode";
@@ -77,7 +78,7 @@ export const MobileHeader = () => {
         {icon} <span>{title}</span>
       </MobileHeaderContainer>
       <MobileAction>
-        {actions?.counter ?
+        {actions?.counter ? (
           <Button
             onClick={() => {
               setIsActionPanelOpened(!isActionsPanelOpen);
@@ -85,7 +86,7 @@ export const MobileHeader = () => {
           >
             {actions.counter}
           </Button>
-        : null}
+        ) : null}
       </MobileAction>
     </>
   );
@@ -100,8 +101,14 @@ export const DesktopOnlyContainer = styled.div`
 
 export const DesktopOnly = ({ children }: PropsWithChildren) => {
   const [layout] = useAtom(layoutAtom);
-  if (!layout) return <DesktopOnlyContainer>{children}</DesktopOnlyContainer>;
-  return layout === "desktop" ? children : null;
+  const [staggeredLayout, setStaggeredLayout] = useState<LayoutType | undefined>(undefined);
+  useEffect(() => {
+    if (layout) {
+      setStaggeredLayout(layout);
+    }
+  }, [layout]);
+  if (!staggeredLayout) return <DesktopOnlyContainer>{children}</DesktopOnlyContainer>;
+  return staggeredLayout === "desktop" ? children : null;
 };
 
 export const MobileOnlyContainer = styled.div`
@@ -113,6 +120,12 @@ export const MobileOnlyContainer = styled.div`
 
 export const MobileOnly = ({ children }: PropsWithChildren) => {
   const [layout] = useAtom(layoutAtom);
-  if (!layout) return <MobileOnlyContainer>{children}</MobileOnlyContainer>;
-  return layout === "mobile" ? children : null;
+  const [staggeredLayout, setStaggeredLayout] = useState<LayoutType | undefined>(undefined);
+  useEffect(() => {
+    if (layout) {
+      setStaggeredLayout(layout);
+    }
+  }, [layout]);
+  if (!staggeredLayout) return <MobileOnlyContainer>{children}</MobileOnlyContainer>;
+  return staggeredLayout === "mobile" ? children : null;
 };

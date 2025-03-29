@@ -77,7 +77,6 @@ export function entangledAtom<
           if (data.id === id) {
             try {
               channelValue = data.value;
-              console.log(data);
               store.set(thisAtom, data.value);
             } catch (e) {
               console.error(e);

@@ -1,5 +1,5 @@
 import { $ } from "bun";
-import { name, description, iconResolutions, staticDir, clientFile } from "../src/const";
+import { name, description, iconResolutions, staticDir, clientFile, clientCss } from "../src/const";
 import { getStaticHtml } from "../src/entry/_handlers";
 import { getManifest } from "../src/feature/pwa/manifest";
 import { ROUTES } from "../src/feature/router";
@@ -30,10 +30,9 @@ await Bun.write(
   JSON.stringify(getManifest(name, description, iconResolutions, baseUrl), null, 2),
 );
 
-await Bun.write(
-  `./${staticDir}${clientFile}`,
-  await getClientAsString(),
-);
+const [clientFileContent, css] = await getClientAsString();
+await Bun.write(`./${staticDir}${clientFile}`, clientFileContent.text);
+await Bun.write(`./${staticDir}${clientCss}`, css.text);
 
 await $`cp ./.github/assets/experiment.png ./${staticDir}`;
 for (const res of iconResolutions) {

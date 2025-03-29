@@ -52,6 +52,7 @@
     "@tanstack/react-virtual": "latest",
     "@xterm/xterm": "latest",
     "csvtojson": "latest",
+    "ignore": "latest",
     "jotai": "latest",
     "jotai-effect": "latest",
     "jotai-optics": "latest",
@@ -70,6 +71,7 @@
     "runtypes": "latest",
     "shevyjs": "latest",
     "temporal-polyfill": "latest",
-    "true-myth": "latest"
+    "true-myth": "latest",
+    "ts-pattern": "latest"
   }
 }

@@ -7,7 +7,7 @@ import type { WithDarkMode } from "../../style/darkMode";
 import { Palette } from "../../style/palette";
 import { bs } from "../../style";
 import { useAtom } from "jotai";
-import { isDarkModeAtom } from "../../atoms/common";
+import { isDarkModeAtom } from "../../atoms/store";
 
 const CheckboxContainer = styled.label<{ isDisabled?: boolean }>`
   display: flex;
@@ -30,11 +30,11 @@ const CheckboxSvg = styled.svg<WithDarkMode & { isFocused?: boolean; isSelected?
 
   path {
     fill: ${(props) =>
-      props.isSelected ?
-        props.isDarkMode ?
-          Palette.actionableBackground
-        : Palette.actionableBackground
-      : "transparent"};
+      props.isSelected
+        ? props.isDarkMode
+          ? Palette.actionableBackground
+          : Palette.actionableBackground
+        : "transparent"};
     stroke: ${(props) => (props.isDarkMode ? Palette.actionableBackground : Palette.actionableBackground)};
     transition: fill 0.3s ease-out;
   }

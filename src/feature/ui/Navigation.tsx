@@ -4,7 +4,8 @@ import path from "node:path";
 import { NavLink, useLocation } from "react-router";
 import { Maybe } from "true-myth";
 
-import { experimentAtom, selectionAtom, templatesAtom } from "../../atoms/common";
+import { templatesAtom, selectionAtom } from "../../atoms/common";
+import { experimentAtom } from "../../atoms/experiment";
 import { TRIANGLE } from "../../const";
 import { REVISION } from "../../const/dynamic";
 import { bs, sidebarWidth } from "../../style";
@@ -16,6 +17,7 @@ import { portalIO } from "../../utils/portal";
 import { getRealm } from "../../utils/realm";
 import { ROUTES, experimentsSidebarAtom } from "../router";
 import { View } from "./view";
+import { isMetaExperimentAtom } from "../../atoms/store";
 
 export const [SidebarInput, SidebarOutput] = portalIO();
 
@@ -61,10 +63,12 @@ const H2 = styled.h2`
 
 const routesAtom = atom((get) => {
   const templates = get(templatesAtom);
+  const isMetaExperiment = get(isMetaExperimentAtom);
+  let routes = [...ROUTES.filter((route) => (route.experimental ? isMetaExperiment : true))];
   if (Object.keys(templates ?? {}).length === 0) {
-    return ROUTES.filter((route) => route.title !== "Templates");
+    routes = routes.filter((route) => route.title !== "Templates");
   }
-  return ROUTES;
+  return routes;
 });
 
 const Header = styled.h3`
@@ -77,7 +81,7 @@ export const selectedContextPath = atom(
     const experiment = get(experimentAtom);
     return Maybe.of(selection[0])
       .map((idx) => experiment[idx])
-      .map((msg) => msg.content.directory)
+      .map((msg) => msg.content?.directory)
       .unwrapOr(null);
   },
   (get, set, value: string) => {
