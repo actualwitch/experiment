@@ -1,6 +1,6 @@
 import { css } from "@emotion/react";
 import styled from "@emotion/styled";
-import { atom, useAtom, useSetAtom } from "jotai";
+import { atom, useSetAtom } from "jotai";
 import Markdown, { type ReactRenderer } from "marked-react";
 import {
   type JSX,
@@ -11,13 +11,13 @@ import {
   memo,
   useMemo,
 } from "react";
-import { newLine, TRIANGLE } from "../../const";
-import { bs, Button } from "../../style";
+import { applyDiffAtom } from "../../atoms/diff";
+import { newLine } from "../../const";
+import { bs } from "../../style";
 import { nonInteractive } from "../../style/mixins";
 import { increaseSpecificity } from "../../style/utils";
-import { inlineButtonModifier } from "../router/NewExperiment";
 import { hasBackend } from "../../utils/realm";
-import { applyDiffAtom } from "../../atoms/diff";
+import { inlineButtonModifier } from "../router/NewExperiment";
 
 type Primitive = string | number | boolean | null | undefined;
 
@@ -192,14 +192,12 @@ const ViewContainer = styled.div<PropsWithChildren<{ markdownMode?: true }>>`
       margin-bottom: ${bs(1 / 3)};
     }
   }
+  ul,
+  ol {
+    margin-bottom: ${bs(1 / 6)};
+  }
   li p {
     margin-bottom: ${bs(1 / 3)};
-  }
-  ul ::marker {
-    content: "▵ ";
-  }
-  ul ul ::marker {
-    content: "${TRIANGLE} ";
   }
   pre {
     overflow: hidden;
@@ -209,7 +207,7 @@ const ViewContainer = styled.div<PropsWithChildren<{ markdownMode?: true }>>`
     css`
       ul,
       ol {
-        list-style-type: none;
+        list-style: none;
       }
       ${["ul", "ol"].map((tag) => `:not(li) > ${tag}`).join(", ")} {
         padding-left: 0;

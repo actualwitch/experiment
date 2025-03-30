@@ -12,6 +12,7 @@ import { withOnMobile } from "./layout";
 import { interactive } from "./mixins";
 import { Palette } from "./palette";
 import { reset } from "./reset";
+import { TRIANGLE } from "../const";
 
 const config: {
   fontScale: "majorSecond" | "minorThird" | "majorThird" | "perfectFourth" | "augmentedFourth";
@@ -248,7 +249,8 @@ export const darkMode = css`
     th {
       border-bottom: 1px solid ${Palette.white};
     }
-    pre {
+    pre,
+    code {
       background-color: ${Palette.white}30;
     }
   }
@@ -264,6 +266,12 @@ export const appStyle = [
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
     }
+    ul ::marker {
+      content: "▵ ";
+    }
+    ul ul ::marker {
+      content: "${TRIANGLE} ";
+    }
     :root {
       background-color: ${Palette.white};
       color: ${Palette.black};
@@ -272,7 +280,6 @@ export const appStyle = [
 
       ul,
       ol {
-        margin-bottom: ${bs(1 / 6)};
         padding-left: ${bs()};
       }
 
@@ -289,9 +296,13 @@ export const appStyle = [
         padding: 0 ${bs(1 / 4)} ${bs(1 / 10)};
       }
 
+      pre,
+      code {
+        background-color: ${Palette.black}10;
+      }
+
       pre {
         font-size: 0.75em;
-        background-color: ${Palette.black}10;
         padding: ${bs(1 / 3)} ${bs(1 / 2)};
         border-radius: ${bs(Palette.borderCode)};
         overflow-x: scroll;

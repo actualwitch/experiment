@@ -13,3 +13,7 @@ export const widthAvailable = css`
   width: -moz-available;
   width: -webkit-fill-available;
 `;
+
+export const widthLimit = css`
+  max-width: 80ch;
+`;

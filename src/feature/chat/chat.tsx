@@ -1,6 +1,6 @@
 import { type SerializedStyles, css } from "@emotion/react";
 import styled from "@emotion/styled";
-import { atom, useAtom, useAtomValue } from "jotai";
+import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
 import { type CSSProperties, type ReactNode, type Ref, useEffect, useMemo, useRef, useState } from "react";
 import { TRIANGLE } from "../../const";
 import { type Path, experimentLayoutAtom, selectionAtom, templatesAtom } from "../../atoms/common";
@@ -13,12 +13,8 @@ import { deepEqual } from "../../utils";
 import { useHandlers } from "../../utils/keyboard";
 import { View, collapsedAtom } from "../ui/view";
 import type { _Message, Experiment, ExperimentWithMeta, Message, Role } from "../../types";
-import {
-  useItemTransition,
-  useListTransition,
-  type TransitionState,
-  type WithTransitionState,
-} from "../transitionState";
+import { useListTransition, type TransitionState, type WithTransitionState } from "../transitionState";
+import { resetMessageAtom } from "../router/NewExperiment";
 
 const baseHeight = bs(6);
 export const ChatContainer = styled.div<WithDarkMode>`
@@ -28,11 +24,7 @@ export const ChatContainer = styled.div<WithDarkMode>`
   justify-content: end;
 
   code {
-    background-color: ${(p) => (p.isDarkMode ? Palette.white + "50" : Palette.black + "20")};
     border-radius: ${bs(Palette.borderSpan)};
-  }
-
-  code {
     padding: 0 ${bs(1 / 10)};
   }
 
@@ -398,6 +390,7 @@ export function ChatPreview({
   const [selection, setSelection] = useAtom(selectionAtom);
   const [isDarkMode] = useAtom(isDarkModeAtom);
   const [isRunning] = useAtom(isRunningAtom);
+  const resetMessage = useSetAtom(resetMessageAtom);
   const computedMessages = useMemo(() => {
     const messages = Array.isArray(experiment) ? experiment : experiment.messages;
     const keyed = messages.map((message, index) => {
@@ -420,6 +413,7 @@ export function ChatPreview({
   useHandlers({
     Escape: () => {
       setSelection([]);
+      resetMessage();
     },
   });
 

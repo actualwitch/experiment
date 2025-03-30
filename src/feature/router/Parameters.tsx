@@ -23,11 +23,12 @@ import { Page } from "../ui/Page";
 import { TextField } from "../ui/TextField";
 import { Switch } from "../ui/Switch";
 import { Checkbox } from "../ui/Checkbox";
+import { widthLimit } from "../../style/mixins";
 
 const StyledForm = styled.form`
   display: flex;
-  max-width: 80ch;
   flex-direction: column;
+  ${widthLimit}
   input[type="text"] {
     flex: 1;
   }

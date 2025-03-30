@@ -15,6 +15,7 @@ import { useAtom } from "jotai";
 import { isDarkModeAtom } from "../../atoms/store";
 import { UnfoldVertical } from "lucide-react";
 import { useItemTransition } from "../transitionState";
+import { useRef } from "react";
 
 type ButtonProps = {
   isOpen?: boolean;
@@ -47,7 +48,7 @@ export function Select<T extends object>(props: AriaSelectProps<T>) {
   const state = useSelectState(props);
 
   // Get props for child elements from useSelect
-  const ref = React.useRef(null);
+  const ref = useRef(null);
   const { labelProps, triggerProps, valueProps, menuProps } = useSelect(props, state, ref);
 
   // Get props for the button based on the trigger props from useSelect
@@ -56,7 +57,7 @@ export function Select<T extends object>(props: AriaSelectProps<T>) {
   const { focusProps, isFocusVisible } = useFocusRing();
   const [isDarkMode] = useAtom(isDarkModeAtom);
 
-  const { transitionState, shouldRender } = useItemTransition(state.isOpen, { timeout: 100 });
+  const { transitionState, shouldRender } = useItemTransition(state.isOpen, ref);
 
   return (
     <InputContainer>

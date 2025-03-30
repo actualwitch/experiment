@@ -9,8 +9,7 @@ import { getExperimentAtom } from "../../atoms/store";
 import type { Experiment } from "../../types";
 import { entangledAtom } from "../../utils/entanglement";
 import { ExperimentPreview } from "../chat/ExperimentPreview";
-import { Actions } from "../ui/Actions";
-import { type Config, ConfigRenderer } from "../ui/ConfigRenderer";
+import type { Config } from "../ui/ConfigRenderer";
 import { createRemixButtons, createSelectionEditButtons } from "../ui/ConfigRenderer/buttonCreators";
 import { DesktopOnly } from "../ui/Mobile";
 import { Page } from "../ui/Page";
@@ -87,16 +86,11 @@ export default function () {
   const pageRef = useScrollToTopRef([experiment]);
 
   return (
-    <>
-      <Page ref={pageRef}>
-        <DesktopOnly>
-          <h2>{title}</h2>
-        </DesktopOnly>
-        <ExperimentPreview key={title} experiment={experiment} />
-      </Page>
-      <Actions>
-        <ConfigRenderer>{config}</ConfigRenderer>
-      </Actions>
-    </>
+    <Page ref={pageRef}>
+      <DesktopOnly>
+        <h2>{title}</h2>
+      </DesktopOnly>
+      <ExperimentPreview key={title} experiment={experiment} />
+    </Page>
   );
 }

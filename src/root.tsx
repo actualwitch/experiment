@@ -25,6 +25,7 @@ import { isDarkModeAtom, isTransRightsAtom } from "./atoms/store";
 import { DesktopOnly, MobileHeader, MobileOnly } from "./feature/ui/Mobile";
 import type { Nullish } from "./types";
 import { Page } from "./feature/ui/Page";
+import { widthLimit } from "./style/mixins";
 
 const Meta = () => {
   const [title] = useAtom(pageTitleAtom);
@@ -39,9 +40,7 @@ const Meta = () => {
   );
 };
 
-const Paragraph = styled.p`
-  max-width: 64ch;
-`;
+const Paragraph = styled.p(widthLimit);
 
 const App = () => {
   const [styles] = useAtom(stylesAtom);

@@ -3,7 +3,7 @@ import { useEffect, type JSX, type PropsWithChildren } from "react";
 import { Route, Routes, useLocation } from "react-router";
 
 import { experimentIdsAtom, isMetaExperimentAtom } from "../../atoms/store";
-import type { Config } from "../ui/ConfigRenderer";
+import { ConfigRenderer, type Config } from "../ui/ConfigRenderer";
 import { TRIANGLE, description, name } from "../../const";
 import Experiment, { actionsAtom as experimentActionsAtom } from "./Experiment";
 import Import, { actionsAtom as importActionsAtom } from "./Import";
@@ -13,6 +13,7 @@ import NewExperiment, { actionsAtom as newExperimentActionsAtom } from "./NewExp
 import Parameters from "./Parameters";
 import Templates, { actionsAtom as templateActionsAtom } from "./Templates";
 import { atomEffect } from "jotai-effect";
+import { Actions } from "../ui/Actions";
 
 export type AppRoute = {
   icon: string;
@@ -111,11 +112,21 @@ export const routerRoutesAtom = atom((get) => {
       element: (
         <RouteSync thisRoute={route}>
           <Component />
+          {route.sidebar ? <ActionsRenderer actionsAtom={route.sidebar.atom} /> : null}
         </RouteSync>
       ),
     };
   });
 });
+
+const ActionsRenderer = ({ actionsAtom }: { actionsAtom: Atom<{ config: Config; counter: number }> }) => {
+  const [{ config: actions, counter }] = useAtom(actionsAtom);
+  return counter ? (
+    <Actions>
+      <ConfigRenderer>{actions}</ConfigRenderer>
+    </Actions>
+  ) : null;
+};
 
 export const Router = () => {
   const [routerRoutes] = useAtom(routerRoutesAtom);

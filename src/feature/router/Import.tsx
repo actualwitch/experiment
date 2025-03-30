@@ -6,7 +6,7 @@ import templates from "../../../fixtures/templates.json";
 import testing from "../../../fixtures/testing.json";
 import { filenames, importsRegistry, selectedChat } from "../../atoms/client";
 import { debugAtom, isNavPanelOpenAtom, layoutAtom, selectionAtom, templatesAtom } from "../../atoms/common";
-import { type Config, ConfigRenderer } from "../ui/ConfigRenderer";
+import { type Config } from "../ui/ConfigRenderer";
 import { View } from "../ui/view";
 import type { ExperimentWithMeta } from "../../types";
 import { ExperimentPreview } from "../chat/ExperimentPreview";
@@ -105,8 +105,6 @@ export default function () {
     return () => setTitleOverride(null);
   }, []);
 
-  const [{ config, counter }] = useAtom(actionsAtom);
-
   const [debug] = useAtom(debugAtom);
 
   const addSamples = () => {
@@ -141,14 +139,24 @@ export default function () {
               <h2>{title}</h2>
             </DesktopOnly>
             <p>
-              Import and explore previous completions from CSV files, or <a onClick={addSamples}>see some examples</a>.
+              Import and analyze previous completions from CSV files to review past experiments or share results with
+              your team.
+            </p>
+            <p>
+              <strong>How to use:</strong>
+            </p>
+            <ul>
+              <li>Click "Import CSV" to upload a file with previous model completions</li>
+              <li>CSV files should contain columns with JSON-formatted messages</li>
+              <li>Select any imported experiment to view its contents</li>
+              <li>Use the "Fork" button to continue working with any imported experiment</li>
+            </ul>
+            <p>
+              <a onClick={addSamples}>See example experiments</a> to understand the format and capabilities.
             </p>
           </>
         )}
       </Page>
-      <Actions>
-        <ConfigRenderer>{config}</ConfigRenderer>
-      </Actions>
       <SidebarInput>
         <SidebarContents />
       </SidebarInput>

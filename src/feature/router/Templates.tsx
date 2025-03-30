@@ -4,10 +4,10 @@ import { navigateAtom } from ".";
 import { templatesAtom } from "../../atoms/common";
 import { experimentAtom } from "../../atoms/experiment";
 import { ChatPreview, hasMessages } from "../chat/chat";
-import { Actions } from "../ui/Actions";
-import { type Config, ConfigRenderer } from "../ui/ConfigRenderer";
+import type { Config } from "../ui/ConfigRenderer";
 import { SidebarInput } from "../ui/Navigation";
 import { Page } from "../ui/Page";
+import { DesktopOnly } from "../ui/Mobile";
 
 const selectedTemplateAtom = atom<string | null>(null);
 
@@ -75,11 +75,33 @@ export default function Templates() {
   return (
     <>
       <Page>
-        <ChatPreview collapseTemplates={false} experiment={experiment} />
+        {experiment.length > 0 ? (
+          <ChatPreview collapseTemplates={false} experiment={experiment} />
+        ) : (
+          <>
+            <DesktopOnly>
+              <h2>Templates</h2>
+            </DesktopOnly>
+            <p>
+              Templates help you save and reuse common message patterns, prompts, and tool definitions for consistent
+              experiments.
+            </p>
+            <p>
+              <strong>How to use templates:</strong>
+            </p>
+            <ul>
+              <li>Select a template from the sidebar to preview its content</li>
+              <li>Use the "Apply" button to add the template to your current experiment</li>
+              <li>Create new templates by selecting messages in an experiment and clicking "Template"</li>
+            </ul>
+            <p>
+              {templates && Object.keys(templates).length > 0
+                ? "Select a template from the sidebar to get started."
+                : "You haven't created any templates yet. Create your first template by selecting a message in an experiment and clicking 'Template'."}
+            </p>
+          </>
+        )}
       </Page>
-      <Actions>
-        <ConfigRenderer>{config}</ConfigRenderer>
-      </Actions>
       <SidebarInput>
         <ul>
           {templates &&

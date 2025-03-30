@@ -1,7 +1,7 @@
 import { css } from "@emotion/react";
 import styled from "@emotion/styled";
 import { type Setter, atom, useAtom, useSetAtom } from "jotai";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import { NavLink } from "react-router";
 
 import { Disc3, MessageCircleDashed, Play, Pyramid, Rewind, Trash2 } from "lucide-react";
@@ -29,8 +29,7 @@ import {
 } from "../inference/atoms";
 import { tryParseFunctionSchema } from "../inference/function";
 import { modelOptions } from "../inference/types";
-import { Actions } from "../ui/Actions";
-import { type Config, ConfigRenderer } from "../ui/ConfigRenderer";
+import type { Config } from "../ui/ConfigRenderer";
 import { createCancelEditingButton, createSelectionEditButtons } from "../ui/ConfigRenderer/buttonCreators";
 import { Page } from "../ui/Page";
 import { TextArea } from "../ui/TextArea";
@@ -147,7 +146,7 @@ export const actionsAtom = atom((get) => {
   if (providerOptions.length === 0 || modelOptions.length === 0) {
     return { config, counter };
   }
-  if (providerOptions.length > 1) {
+  if (providerOptions.length > 0) {
     config.Actions.push({
       type: "select",
       label: "Provider",
@@ -212,6 +211,7 @@ export const actionsAtom = atom((get) => {
             set(experimentAtom, []);
             set(parentAtom, undefined);
             set(selectionAtom, []);
+            set(resetMessageAtom);
           },
           disabled: isRunning || experiment.length === 0,
         },
@@ -291,6 +291,10 @@ export const actionsAtom = atom((get) => {
 
 export const messageAtom = atom("");
 export const roleAtom = atom<Role>("user");
+export const resetMessageAtom = atom(null, (_, set) => {
+  set(messageAtom, "");
+  set(roleAtom, "user");
+});
 
 const hasLoadedAtom = atom(false);
 
@@ -301,6 +305,7 @@ export default function () {
   const [selection, setSelection] = useAtom(selectionAtom);
   const [message, setMessage] = useAtom(messageAtom);
   const [role, setRole] = useAtom(roleAtom);
+  const resetMessage = useSetAtom(resetMessageAtom);
   const [hasLoaded, setHasLoaded] = useAtom(hasLoadedAtom);
 
   useEffect(() => {
@@ -396,20 +401,17 @@ export default function () {
           return item;
         }),
       );
-      setMessage("");
-      setRole("user");
+      resetMessage();
       return;
     }
     if (object && PossibleObjectType.guard(role)) {
       setExperiment([...experiment, { role, content: object }]);
-      setMessage("");
-      setRole("user");
+      resetMessage();
       return;
     }
     if (message) {
       setExperiment([...experiment, { role, content: message }]);
-      setMessage("");
-      setRole("user");
+      resetMessage();
       return;
     }
     if (experiment.length) {
@@ -434,95 +436,92 @@ export default function () {
     scrollToEnd();
   }, [experiment, isRunning]);
 
-  const page =
-    providerOptions.length === 0 ? (
-      <Page>
-        <h2>
-          Welcome to <Underline>{name}</Underline>
-        </h2>
-        <p>
-          To start inference, add a token on <NavLink to="/parameters">Parameters</NavLink> page. You can also explore a
-          .csv file on the <NavLink to="/import">Import</NavLink> page.
-        </p>
-      </Page>
-    ) : (
-      <Page ref={pageRef}>
-        <ChatPreview experiment={experiment} autoScroll />
-        <Block isDarkMode={isDarkMode}>
-          <ActionRow>
-            <select value={role} onChange={(e) => setRole(e.target.value as Role)} style={{ flex: 1 }}>
-              {RoleOptions.alternatives.map((role) => {
-                const text = role.value;
-                return <option key={text}>{text}</option>;
-              })}
-            </select>
-            {isEditing ? (
-              <button type="button" disabled={isDisabled} onClick={submit}>
-                update
-              </button>
-            ) : null}
-            {!isEditing && message ? (
-              <button type="button" disabled={isDisabled} onClick={submit}>
-                add
-              </button>
-            ) : null}
-            {!isEditing && !message && experiment.length ? (
-              <button type="button" disabled={isDisabled} onClick={submit}>
-                start
-              </button>
-            ) : null}
-          </ActionRow>
-          <TextArea
-            placeholder={`${role === "tool" ? "Paste JSONSchema" : "Type a message and press Enter to append"}…`}
-            value={message}
-            spellCheck={role !== "tool"}
-            onChange={(e) => setMessage(e.target.value)}
-            onKeyDown={(e) => {
-              if (!isDisabled && e.key === "Enter" && !e.shiftKey && layout !== "mobile") {
+  return providerOptions.length === 0 ? (
+    <Page>
+      <h2>
+        Let's start the <Underline>{name}</Underline>
+      </h2>
+      <p>Welcome to Experiment, your professional-grade chat interface for Large Language Models. To begin:</p>
+      <ol>
+        <li>
+          Add an API token on the <NavLink to="/parameters">Parameters</NavLink> page for Anthropic, OpenAI, or Mistral
+        </li>
+        <li>Return here to create your first experiment with different message types (user, system, tool, etc.)</li>
+        <li>Use the role selector to switch between message types and add structured content</li>
+        <li>Click "Start" to run inference with your selected model</li>
+      </ol>
+      <p>
+        You can also explore previous completions on the <NavLink to="/import">Import</NavLink> page or use pre-defined
+        templates from the <NavLink to="/templates">Templates</NavLink> page.
+      </p>
+    </Page>
+  ) : (
+    <Page ref={pageRef}>
+      <ChatPreview experiment={experiment} autoScroll />
+      <Block isDarkMode={isDarkMode}>
+        <ActionRow>
+          <select value={role} onChange={(e) => setRole(e.target.value as Role)} style={{ flex: 1 }}>
+            {RoleOptions.alternatives.map((role) => {
+              const text = role.value;
+              return <option key={text}>{text}</option>;
+            })}
+          </select>
+          {isEditing ? (
+            <button type="button" disabled={isDisabled} onClick={submit}>
+              update
+            </button>
+          ) : null}
+          {!isEditing && message ? (
+            <button type="button" disabled={isDisabled} onClick={submit}>
+              add
+            </button>
+          ) : null}
+          {!isEditing && !message && experiment.length ? (
+            <button type="button" disabled={isDisabled} onClick={submit}>
+              start
+            </button>
+          ) : null}
+        </ActionRow>
+        <TextArea
+          placeholder={`${role === "tool" ? "Paste JSONSchema" : "Type a message and press Enter to append"}…`}
+          value={message}
+          spellCheck={role !== "tool"}
+          onChange={(e) => setMessage(e.target.value)}
+          onKeyDown={(e) => {
+            if (!isDisabled && e.key === "Enter" && !e.shiftKey && layout !== "mobile") {
+              e.preventDefault();
+              submit();
+            }
+          }}
+          onPaste={(e) => {
+            const text = e.clipboardData.getData("text");
+            try {
+              const object = JSON.parse(text);
+              if (Array.isArray(object)) {
                 e.preventDefault();
-                submit();
+                e.stopPropagation();
+                setExperiment([...experiment, ...object]);
+                return;
               }
-            }}
-            onPaste={(e) => {
-              const text = e.clipboardData.getData("text");
-              try {
-                const object = JSON.parse(text);
-                if (Array.isArray(object)) {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  setExperiment([...experiment, ...object]);
-                  return;
-                }
-                const parsed = tryParseFunctionSchema(object);
-                if (parsed.isJust) {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  setExperiment([...experiment, { role: "tool", content: parsed.value }]);
-                  return;
-                }
-                setRole("context");
-              } catch {}
-            }}
-            autoFocus
-            onFocus={() => {
-              isFocusedRef.current = true;
-            }}
-            onBlur={() => {
-              isFocusedRef.current = false;
-            }}
-          />
-        </Block>
-      </Page>
-    );
-
-  return (
-    <>
-      {page}
-      {counter ? (
-        <Actions>
-          <ConfigRenderer>{actions}</ConfigRenderer>
-        </Actions>
-      ) : null}
-    </>
+              const parsed = tryParseFunctionSchema(object);
+              if (parsed.isJust) {
+                e.preventDefault();
+                e.stopPropagation();
+                setExperiment([...experiment, { role: "tool", content: parsed.value }]);
+                return;
+              }
+              setRole("context");
+            } catch {}
+          }}
+          autoFocus
+          onFocus={() => {
+            isFocusedRef.current = true;
+          }}
+          onBlur={() => {
+            isFocusedRef.current = false;
+          }}
+        />
+      </Block>
+    </Page>
   );
 }

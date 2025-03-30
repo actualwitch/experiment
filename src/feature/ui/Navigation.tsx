@@ -29,8 +29,10 @@ const NavigationContainer = styled.nav<{ shouldHideOnMobile?: boolean }>`
   height: 100%;
   flex: 0 ${sidebarWidth};
   ul {
-    list-style: none;
     padding: 0;
+  }
+  li::marker {
+    content: none;
   }
   input {
     ${widthAvailable}
@@ -62,13 +64,8 @@ const H2 = styled.h2`
 `;
 
 const routesAtom = atom((get) => {
-  const templates = get(templatesAtom);
   const isMetaExperiment = get(isMetaExperimentAtom);
-  let routes = [...ROUTES.filter((route) => (route.experimental ? isMetaExperiment : true))];
-  if (Object.keys(templates ?? {}).length === 0) {
-    routes = routes.filter((route) => route.title !== "Templates");
-  }
-  return routes;
+  return ROUTES.filter((route) => (route.experimental ? isMetaExperiment : true));
 });
 
 const Header = styled.h3`
