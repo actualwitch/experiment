@@ -6,7 +6,7 @@ import { isDarkModeAtom } from "../../atoms/store";
 import { Sidebar, Slideover } from "../../style";
 import { DesktopOnly } from "./Mobile";
 
-export const Actions = ({ children, from = "left" }: PropsWithChildren<{ from?: "left" | "right" }>) => {
+export const Actions = ({ children, from = "right" }: PropsWithChildren<{ from?: "left" | "right" }>) => {
   const [layout] = useAtom(layoutAtom);
   const [isDarkMode] = useAtom(isDarkModeAtom);
   const [isActionsPanelOpen, setIsActionPanelOpened] = useAtom(isActionPanelOpenAtom);

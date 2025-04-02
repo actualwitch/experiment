@@ -87,7 +87,7 @@ const App = () => {
               <MobileHeader />
             </MobileOnly>
             <MobileOnly>
-              <Slideover isOpen={isNavPanelOpen} isDarkMode={isDarkMode} from="right">
+              <Slideover isOpen={isNavPanelOpen} isDarkMode={isDarkMode} from="left">
                 <Navigation />
               </Slideover>
             </MobileOnly>

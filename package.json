@@ -51,6 +51,7 @@
     "@emotion/react": "latest",
     "@emotion/styled": "latest",
     "@mistralai/mistralai": "latest",
+    "@modelcontextprotocol/sdk": "latest",
     "@tanstack/react-virtual": "latest",
     "@xterm/xterm": "latest",
     "csvtojson": "latest",
@@ -72,6 +73,7 @@
     "react-stately": "latest",
     "runtypes": "latest",
     "shevyjs": "latest",
+    "shiki": "latest",
     "temporal-polyfill": "latest",
     "true-myth": "latest",
     "ts-pattern": "latest"

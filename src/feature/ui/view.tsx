@@ -1,6 +1,6 @@
 import { css } from "@emotion/react";
 import styled from "@emotion/styled";
-import { atom, useSetAtom } from "jotai";
+import { atom, useAtom, useSetAtom } from "jotai";
 import Markdown, { type ReactRenderer } from "marked-react";
 import {
   type JSX,
@@ -9,15 +9,18 @@ import {
   type ReactNode,
   createElement,
   memo,
+  useEffect,
   useMemo,
+  useState,
 } from "react";
+import { codeToHtml } from "shiki";
 import { applyDiffAtom } from "../../atoms/diff";
 import { newLine } from "../../const";
 import { bs } from "../../style";
 import { nonInteractive } from "../../style/mixins";
 import { increaseSpecificity } from "../../style/utils";
-import { hasBackend } from "../../utils/realm";
 import { inlineButtonModifier } from "../router/NewExperiment";
+import { isDarkModeAtom } from "../../atoms/store";
 
 type Primitive = string | number | boolean | null | undefined;
 
@@ -201,6 +204,8 @@ const ViewContainer = styled.div<PropsWithChildren<{ markdownMode?: true }>>`
   }
   pre {
     overflow: hidden;
+    overflow-x: scroll;
+    scrollbar-width: none;
   }
   ${(p) =>
     !p.markdownMode &&
@@ -236,43 +241,49 @@ const Container = styled.div`
   overflow-x: scroll;
   scrollbar-width: none;
   ${["left", "right", "bottom"].map((align) => widen(align, bs(1 / 2))).join(newLine)}
-
-  code {
-    padding: 0;
-  }
 `;
 
 export function Code({ language, value }: { language?: string; value?: ReactNode }) {
   const applyDiff = useSetAtom(applyDiffAtom);
-  if (language === "diff") {
-    return (
-      <>
-        <pre>
-          {hasBackend() ? (
-            <>
-              <ActionRow>
-                <button
-                  onClick={(e) => {
-                    e.preventDefault();
-                    applyDiff(value);
-                  }}
-                >
-                  Apply
-                </button>
-              </ActionRow>
-              <hr />
-            </>
-          ) : null}
-          <Container>
-            <code>{value}</code>
-          </Container>
-        </pre>
-      </>
-    );
-  }
+  const [isDarkMode] = useAtom(isDarkModeAtom);
+  const [htmlContent, setHtmlContent] = useState<string | null>(null);
+  useEffect(() => {
+    if (typeof value !== "string" && language) return;
+    codeToHtml(value, {
+      lang: language,
+      theme: isDarkMode ? "laserwave" : "material-theme-lighter",
+    }).then((content) => setHtmlContent(content));
+  }, []);
+  if (htmlContent) return <div style={{ display: "contents" }} dangerouslySetInnerHTML={{ __html: htmlContent }}></div>;
+  // if (language === "diff") {
+  //   return (
+  //     <>
+  //       <pre>
+  //         {hasBackend() ? (
+  //           <>
+  //             <ActionRow>
+  //               <button
+  //                 onClick={(e) => {
+  //                   e.preventDefault();
+  //                   applyDiff(value);
+  //                 }}
+  //               >
+  //                 Apply
+  //               </button>
+  //             </ActionRow>
+  //             <hr />
+  //           </>
+  //         ) : null}
+  //         <Container>
+  //           <code>{value}</code>
+  //         </Container>
+  //       </pre>
+  //     </>
+  //   );
+  // }
   return (
     <pre>
-      <ActionRow>
+      {/* <ActionRow>
         <button
           onClick={(e) => {
             e.preventDefault();
@@ -283,7 +294,7 @@ export function Code({ language, value }: { language?: string; value?: ReactNode
           Copy
         </button>
       </ActionRow>
-      <hr />
+      <hr /> */}
       <Container>
         <code>{value}</code>
       </Container>

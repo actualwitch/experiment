@@ -2,9 +2,9 @@ import { atom, useAtom } from "jotai";
 import { useMemo } from "react";
 import { Temporal } from "temporal-polyfill";
 
-import { View } from "../ui/view";
 import type { Experiment } from "../../types";
 import { entangledAtom } from "../../utils/entanglement";
+import { View } from "../ui/view";
 import { ChatPreview } from "./chat";
 
 export const timezoneAtom = entangledAtom(

@@ -10,7 +10,6 @@ import { type Config } from "../ui/ConfigRenderer";
 import { View } from "../ui/view";
 import type { ExperimentWithMeta } from "../../types";
 import { ExperimentPreview } from "../chat/ExperimentPreview";
-import { Actions } from "../ui/Actions";
 import { DesktopOnly } from "../ui/Mobile";
 import { SidebarInput } from "../ui/Navigation";
 import { Page } from "../ui/Page";

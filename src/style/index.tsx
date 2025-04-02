@@ -251,7 +251,7 @@ export const darkMode = css`
     }
     pre,
     code {
-      background-color: ${Palette.white}30;
+      background-color: #2f2f2f;
     }
   }
   ${buttonDarkMode}
@@ -298,7 +298,7 @@ export const appStyle = [
 
       pre,
       code {
-        background-color: ${Palette.black}10;
+        background-color: ${Palette.white};
       }
 
       pre {
@@ -363,11 +363,16 @@ export const stylesAtom = atom((get) => {
       font-family: ${FONT_STACKS[fontStack]}${withEmoji};
     }
   `);
-  const isBoldText = get(isBoldTextAtom);
-  if (isBoldText) {
+  if (get(isBoldTextAtom)) {
     styleSet.push(css`
       body {
-        font-weight: bold;
+        font-weight: 600;
+      }
+      ${new Array(6)
+        .fill(0)
+        .map((_, i) => `h${i + 1}`)
+        .join(", ")} {
+        font-weight: 800;
       }
     `);
   }
@@ -375,12 +380,25 @@ export const stylesAtom = atom((get) => {
 });
 
 export const Slideover = styled.aside<{ isOpen: boolean; from?: "left" | "right" } & WithDarkMode>`
-  ${cover()}
-  background-color: ${Palette.white};
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  border-${(p) => (p.from === "left" ? "right" : "left")}: 1px solid #2f2f2f1c;
+  ${(p) =>
+    p.from === "right"
+      ? `
+      right: 0;
+    `
+      : `
+      left: 0;
+    `}
+  background-color: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(7px) brightness(0.98);
   z-index: 2;
   transition: transform 100ms ease-out;
   display: flex;
   flex-direction: column;
+
   & > * {
     flex: 1;
   }
@@ -388,7 +406,9 @@ export const Slideover = styled.aside<{ isOpen: boolean; from?: "left" | "right"
     withDarkMode(
       p.isDarkMode,
       css`
-        background-color: ${Palette.black};
+        border-${p.from === "left" ? "right" : "left"}: 1px solid #ffffff1c;
+        background-color: color(display-p3 0.1 0.1 0.1 / 0.1);
+        backdrop-filter: blur(18px) brightness(2) contrast(0.9);
       `,
     )}
   ${(p) =>
@@ -397,6 +417,6 @@ export const Slideover = styled.aside<{ isOpen: boolean; from?: "left" | "right"
         transform: translateX(0);
       `
       : css`
-        transform: translateX(${p.from === "left" ? "" : "-"}100%);
+        transform: translateX(${p.from === "right" ? "" : "-"}100%);
       `}
 `;

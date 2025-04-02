@@ -6,7 +6,7 @@ import { Maybe } from "true-myth";
 
 import { templatesAtom, selectionAtom } from "../../atoms/common";
 import { experimentAtom } from "../../atoms/experiment";
-import { TRIANGLE } from "../../const";
+import { name, TRIANGLE } from "../../const";
 import { REVISION } from "../../const/dynamic";
 import { bs, sidebarWidth } from "../../style";
 import { nonInteractive, widthAvailable } from "../../style/mixins";
@@ -18,6 +18,7 @@ import { getRealm } from "../../utils/realm";
 import { ROUTES, experimentsSidebarAtom } from "../router";
 import { View } from "./view";
 import { isMetaExperimentAtom } from "../../atoms/store";
+import { css } from "@emotion/react";
 
 export const [SidebarInput, SidebarOutput] = portalIO();
 
@@ -29,6 +30,7 @@ const NavigationContainer = styled.nav<{ shouldHideOnMobile?: boolean }>`
   height: 100%;
   flex: 0 ${sidebarWidth};
   ul {
+    list-style: none;
     padding: 0;
   }
   li::marker {
@@ -42,6 +44,14 @@ const NavigationContainer = styled.nav<{ shouldHideOnMobile?: boolean }>`
     &[aria-current="page"] {
       text-decoration: underline;
       text-underline-offset: 4px;
+    }
+  }
+  & > header {
+    span {
+      width: 42px;
+      display: inline-grid;
+      place-items: center;
+      margin-right: 6px;
     }
   }
 `;
@@ -59,8 +69,18 @@ const Footer = styled.footer`
   ${nonInteractive}
 `;
 
-const H2 = styled.h2`
+const H2 = styled.h2<{ subContent?: string }>`
   user-select: none;
+  ${(p) =>
+    p.subContent &&
+    css`
+      a::after {
+        content: "${p.subContent}";
+        font-variant: super;
+        color: currentColor;
+        padding-left: 1px;
+      }
+    `}
 `;
 
 const routesAtom = atom((get) => {
@@ -173,7 +193,11 @@ export const Navigation = () => {
           ({ icon, title, path, showInSidebar }) =>
             showInSidebar && (
               <H2 key={path}>
-                {icon} <NavLink to={path}>{title}</NavLink>
+                <span>{icon}</span>
+                <NavLink to={path}>
+                  {title}
+                  {false && title === name ? <sup style={{ textDecoration: "none" }}>σ</sup> : undefined}
+                </NavLink>
               </H2>
             ),
         )}

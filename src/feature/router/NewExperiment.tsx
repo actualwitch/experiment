@@ -5,7 +5,7 @@ import { useCallback, useEffect, useMemo, useRef } from "react";
 import { NavLink } from "react-router";
 
 import { Disc3, MessageCircleDashed, Play, Pyramid, Rewind, Trash2 } from "lucide-react";
-import { isActionPanelOpenAtom, layoutAtom, selectionAtom } from "../../atoms/common";
+import { isActionPanelOpenAtom, isNavPanelOpenAtom, layoutAtom, selectionAtom } from "../../atoms/common";
 import { experimentAtom } from "../../atoms/experiment";
 import { personasAtom } from "../../atoms/persona";
 import { pwdAtom } from "../../atoms/server";
@@ -46,7 +46,7 @@ export const inlineButtonModifier = css`
   }
 `;
 
-export const Block = styled.div<WithDarkMode>`
+export const Block = styled.div<WithDarkMode & { isHidden: boolean }>`
   display: flex;
   flex-direction: column;
 
@@ -63,6 +63,9 @@ export const Block = styled.div<WithDarkMode>`
   box-shadow:
     0px 0px 2px 0px inset #ffffff78,
     0px 2px 8px 1px #ffffff3f;
+
+  transition: 100ms ease-out;
+  transform: translateY(0);
 
   & * {
     border-radius: 0;
@@ -112,6 +115,7 @@ export const Block = styled.div<WithDarkMode>`
         }
       `,
     )}
+  ${(p) => p.isHidden && "transform: translateY(200px);"}
 `;
 
 const ActionRow = styled.div`
@@ -377,10 +381,10 @@ export default function () {
     }
   }, [experiment, selection]);
 
-  const [{ config: actions, counter }] = useAtom(actionsAtom);
   const startExperiment = useSetAtom(runInferenceAtom);
 
-  const setIsActionPanelOpen = useSetAtom(isActionPanelOpenAtom);
+  const [isNavPanelOpen] = useAtom(isNavPanelOpenAtom);
+  const [isActionPanelOpen, setIsActionPanelOpen] = useAtom(isActionPanelOpenAtom);
   useEffect(() => {
     setIsActionPanelOpen(false);
   }, [experiment, isRunning, isEditing, selection]);
@@ -458,7 +462,7 @@ export default function () {
   ) : (
     <Page ref={pageRef}>
       <ChatPreview experiment={experiment} autoScroll />
-      <Block isDarkMode={isDarkMode}>
+      <Block isDarkMode={isDarkMode} isHidden={isNavPanelOpen || isActionPanelOpen}>
         <ActionRow>
           <select value={role} onChange={(e) => setRole(e.target.value as Role)} style={{ flex: 1 }}>
             {RoleOptions.alternatives.map((role) => {

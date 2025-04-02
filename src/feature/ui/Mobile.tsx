@@ -17,14 +17,24 @@ import { effectiveTitleAtom, iconAtom, routeAtom } from "../../feature/router";
 import { Button, bs } from "../../style";
 import { type WithDarkMode, withDarkMode } from "../../style/darkMode";
 import { Palette } from "../../style/palette";
+import { Menu } from "lucide-react";
+import { increaseSpecificity } from "../../style/utils";
 
 export const MobileHeaderContainer = styled.h2<WithDarkMode>`
   position: absolute;
   cursor: pointer;
-  left: ${bs()};
-  top: ${bs()};
+  left: ${bs(0.75)};
+  top: 0;
   z-index: 1;
   user-select: none;
+
+  padding: ${bs(1)} ${bs(1 / 2)};
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: inline-block;
+  max-width: calc(100vw - 52px);
+
   span {
     text-decoration: underline;
     text-decoration-thickness: auto;
@@ -48,10 +58,41 @@ export const MobileHeaderContainer = styled.h2<WithDarkMode>`
 
 export const MobileAction = styled.div`
   position: absolute;
-  right: ${bs()};
-  top: ${bs()};
+  right: ${bs(3 / 4)};
+  top: ${bs(3 / 4)};
   z-index: 3;
   margin-top: ${bs(1 / 6)};
+`;
+
+const MenuButton = styled.button<WithDarkMode>`
+    position: relative;
+    padding: ${bs(1 / 4)};
+
+  ${(p) =>
+    withDarkMode(
+      p.isDarkMode,
+      css`
+        color: white;
+      `,
+    )}
+    ${increaseSpecificity()} {
+      background: transparent;
+      :hover {
+        background: transparent;
+      }
+    }
+    svg {
+      margin-bottom: 0;a
+    }
+    span {
+      font-size: 11px;
+      position: absolute;
+      right: 2px;
+      top: 6px;
+      text-shadow: none;
+      border-radius: 100%;
+      font-weight: 600;
+    }
 `;
 
 export const MobileHeader = () => {
@@ -79,13 +120,15 @@ export const MobileHeader = () => {
       </MobileHeaderContainer>
       <MobileAction>
         {actions?.counter ? (
-          <Button
+          <MenuButton
+            isDarkMode={isDarkMode}
             onClick={() => {
               setIsActionPanelOpened(!isActionsPanelOpen);
             }}
           >
-            {actions.counter}
-          </Button>
+            <Menu size={32} />
+            <span>{actions.counter}</span>
+          </MenuButton>
         ) : null}
       </MobileAction>
     </>

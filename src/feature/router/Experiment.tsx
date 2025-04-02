@@ -81,7 +81,7 @@ export default function () {
   useEffect(() => {
     setTitleOverride(title);
     return () => setTitleOverride(null);
-  }, []);
+  }, [title]);
 
   const pageRef = useScrollToTopRef([experiment]);
 

@@ -1,207 +1,15 @@
-import { type SerializedStyles, css } from "@emotion/react";
-import styled from "@emotion/styled";
-import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
-import { type CSSProperties, type ReactNode, type Ref, useEffect, useMemo, useRef, useState } from "react";
-import { TRIANGLE } from "../../const";
-import { type Path, experimentLayoutAtom, selectionAtom, templatesAtom } from "../../atoms/common";
-import { type Store, isDarkModeAtom } from "../../atoms/store";
-import { isRunningAtom } from "../inference/atoms";
-import { bs } from "../../style";
-import type { WithDarkMode } from "../../style/darkMode";
-import { Palette } from "../../style/palette";
+import { useAtom, useAtomValue, useSetAtom } from "jotai";
+import { type CSSProperties, type ReactNode, useEffect, useMemo, useRef, useState } from "react";
+import { type Path, experimentLayoutAtom, layoutAtom, selectionAtom, templatesAtom } from "../../atoms/common";
+import { isDarkModeAtom } from "../../atoms/store";
+import type { Experiment, ExperimentWithMeta, Message, _Message } from "../../types";
 import { deepEqual } from "../../utils";
 import { useHandlers } from "../../utils/keyboard";
-import { View, collapsedAtom } from "../ui/view";
-import type { _Message, Experiment, ExperimentWithMeta, Message, Role } from "../../types";
-import { useListTransition, type TransitionState, type WithTransitionState } from "../transitionState";
+import { isRunningAtom } from "../inference/atoms";
 import { resetMessageAtom } from "../router/NewExperiment";
-
-const baseHeight = bs(6);
-export const ChatContainer = styled.div<WithDarkMode>`
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: end;
-
-  code {
-    border-radius: ${bs(Palette.borderSpan)};
-    padding: 0 ${bs(1 / 10)};
-  }
-
-  pre {
-    text-align: left;
-  }
-
-  a {
-    color: ${(p) => (p.isDarkMode ? Palette.pink : Palette.pink)};
-    text-decoration: underline;
-    :hover {
-      color: ${(p) => (p.isDarkMode ? Palette.purple : Palette.purple)};
-    }
-  }
-
-  & > article {
-    min-height: ${baseHeight};
-    flex-shrink: 0;
-  }
-`;
-
-const getAlign = (fromServer: boolean, experimentLayout: Store["experimentLayout"]) => {
-  switch (experimentLayout) {
-    case "left":
-      return "left";
-    case "chat-reverse":
-      return fromServer ? "right" : "left";
-    default:
-      return fromServer ? "left" : "right";
-  }
-};
-
-export const MessageComponent = styled.article<
-  {
-    role: Role;
-    contentType?: string;
-    ioType?: "input" | "output";
-    isSelected?: boolean;
-    isDarkMode?: boolean;
-    experimentLayout: Store["experimentLayout"];
-    name?: string;
-  } & WithTransitionState
->(({ name, role, ioType, contentType, isSelected, isDarkMode, experimentLayout, transitionState }) => {
-  const fromServer = ioType === "output";
-  const align = getAlign(fromServer, experimentLayout);
-  const styles: SerializedStyles[] = [
-    css`
-      border-${align}: 4px solid transparent;
-      position: relative;
-      overflow: hidden;
-      transition: all 100ms ease-in;
-      opacity: 0;
-      transform: translateX(${align === "left" ? "-" : ""}10px);
-
-      & > * {
-        display: grid;
-        padding: ${bs(1 / 2)};
-        padding-${align}: ${bs(1.5)};
-        word-wrap: break-word;
-      }
-
-      &:before {
-        content: "${[contentType, name ?? role].filter(Boolean).join(` ${TRIANGLE} `)}";
-        position: absolute;
-        ${align}: 0;
-        transform-origin: ${align};
-        ${
-          align === "right"
-            ? css`
-              transform: rotate(-90deg) translate(0, -20px);
-            `
-            : css`
-              transform: rotate(270deg) translate(-100%, 16px);
-            `
-        }
-      }
-
-      li ul,
-      li ol {
-        padding-${align}: ${bs(1)};
-        padding-${align === "right" ? "left" : "right"}: 0;
-      }
-
-      hr {
-        opacity: 0.2;
-        color: ${isDarkMode ? Palette.white : Palette.black};
-        margin-top: ${bs(0.15)};
-        margin-bottom: ${bs(0.05)};
-        border: 0;
-        border-bottom: 1px solid currentColor;
-      }
-
-      pre > hr {
-        margin-bottom: ${bs(1 / 4)}
-      }
-    `,
-  ];
-  if (align === "right" && contentType === "object") {
-    styles.push(css`
-      ol {
-        padding-left: 0;
-      }
-    `);
-  }
-  if (role === "system") {
-    styles.push(css`
-      border-color: ${Palette.yellow};
-    `);
-  }
-  if (role === "developer") {
-    styles.push(css`
-      border-color: ${Palette.blue};
-    `);
-  }
-  if (role === "user") {
-    styles.push(css`
-      border-color: ${Palette.purple};
-    `);
-  }
-  if (role === "assistant") {
-    styles.push(css`
-      border-color: ${Palette.pink};
-    `);
-  }
-  if (role === "tool") {
-    styles.push(css`
-      border-color: ${Palette.green};
-    `);
-  }
-  if (role === "info") {
-    if (isDarkMode) {
-      styles.push(css`
-        border-color: ${Palette.white}70;
-      `);
-    } else {
-      styles.push(css`
-        border-color: ${Palette.black}50;
-      `);
-    }
-  }
-  if (role === "error") {
-    styles.push(css`
-      border-color: ${Palette.red};
-    `);
-  }
-  if (role === "context") {
-    styles.push(css`
-      border-color: ${Palette.teal};
-    `);
-  }
-  if (isSelected) {
-    if (isDarkMode) {
-      styles.push(css`
-        background-color: ${Palette.white}30;
-      `);
-    } else {
-      styles.push(css`
-        background-color: #7d7d7d42;
-      `);
-    }
-  }
-
-  if (transitionState === "entered") {
-    styles.push(css`
-      opacity: 1;
-      transform: translateX(0px);
-    `);
-  }
-  if (transitionState === "entering") {
-    styles.push(css`
-      opacity: 1;
-      transform: translateX(0px);
-    `);
-  }
-
-  return styles;
-});
+import { type TransitionState, useItemTransition, useListTransition } from "../transitionState";
+import { View, collapsedAtom } from "../ui/view";
+import { Banner, ChatContainer, getAlign, MessageComponent, Header } from "./style";
 
 export function hasMessages(obj: _Message | ExperimentWithMeta): obj is ExperimentWithMeta {
   return Object.hasOwn(obj, "messages");
@@ -213,12 +21,10 @@ export const ChatMessage = ({
   message: _message,
   index,
   collapseTemplates = true,
-  transitionState,
 }: {
   message: Message;
   index: number;
   collapseTemplates?: boolean;
-  transitionState: TransitionState;
 }) => {
   const ref = useRef<null | HTMLElement>(null);
   const selector: Path = [index, "content"];
@@ -228,6 +34,8 @@ export const ChatMessage = ({
   const templates = useAtomValue(templatesAtom);
   const isDarkMode = useAtomValue(isDarkModeAtom);
   const experimentLayout = useAtomValue(experimentLayoutAtom);
+
+  const { transitionState } = useItemTransition(true, ref);
 
   const message = { ..._message };
   for (const [name, template] of Object.entries(templates ?? {})) {
@@ -273,18 +81,6 @@ export const ChatMessage = ({
         {{ name: message.template }}
       </View>
     );
-    // } else if (isSelected && selection?.[1] === "content") {
-    //   const [{ height }] = ref.current?.getClientRects() ?? [{ height: baseHeight }];
-    //   innerContent ??= (
-    //     <Editor
-    //       minHeight={height}
-    //       setValue={(value) => {
-    //         setter(value);
-    //         setSelection(null);
-    //       }}>
-    //       {message.content}
-    //     </Editor>
-    //   );
   } else if (!message.content) {
     innerContent ??= (
       <div>
@@ -324,10 +120,6 @@ export const ChatMessage = ({
 
   return (
     <MessageComponent
-      // contentEditable={isSelected && selection?.[1] === "content"}
-      // onBlur={(e) => {
-      //   setSelection([index]);
-      // }}
       ref={ref}
       role={message.role}
       contentType={contentType}
@@ -363,18 +155,13 @@ export const ChatMessage = ({
       }}
       ioType={message.fromServer ? "output" : "input"}
       transitionState={transitionState}
+      sideLabel={false}
     >
+      <Header>{message.role}</Header>
       {innerContent}
     </MessageComponent>
   );
 };
-
-const Banner = styled.div`
-  display: grid;
-  place-items: center;
-  height: 100%;
-  font-size: ${bs(2)};
-`;
 
 export function ChatPreview({
   experiment,
@@ -389,6 +176,7 @@ export function ChatPreview({
 }) {
   const [selection, setSelection] = useAtom(selectionAtom);
   const [isDarkMode] = useAtom(isDarkModeAtom);
+  const [layout] = useAtom(layoutAtom);
   const [isRunning] = useAtom(isRunningAtom);
   const resetMessage = useSetAtom(resetMessageAtom);
   const computedMessages = useMemo(() => {
@@ -408,8 +196,6 @@ export function ChatPreview({
     return keyed;
   }, [experiment, isRunning]);
 
-  const messagesWithState = useListTransition(computedMessages);
-
   useHandlers({
     Escape: () => {
       setSelection([]);
@@ -417,21 +203,13 @@ export function ChatPreview({
     },
   });
 
-  if (messagesWithState.length === 0) {
+  if (computedMessages.length === 0) {
     return empty;
   }
   return (
-    <ChatContainer isDarkMode={isDarkMode}>
-      {messagesWithState.map?.(({ key, index, state, ...message }) => {
-        return (
-          <ChatMessage
-            collapseTemplates={collapseTemplates}
-            key={key}
-            message={message}
-            index={index}
-            transitionState={state}
-          />
-        );
+    <ChatContainer isDarkMode={isDarkMode} layout={layout}>
+      {computedMessages.map?.(({ key, index, ...message }) => {
+        return <ChatMessage collapseTemplates={collapseTemplates} key={key} message={message} index={index} />;
       })}
     </ChatContainer>
   );

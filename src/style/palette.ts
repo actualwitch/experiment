@@ -20,7 +20,7 @@ export const Palette = {
   purple: enbyFlag[1],
   yellow: enbyFlag[3],
   green: "lightgreen",
-  pink: "color(display-p3 0.9 0.66 0.81)",
+  pink: "rgba(241, 165, 209, 1)",
   red: "red",
   teal: "rgb(0, 255, 231)",
   baseRadius: 3 / 4,
