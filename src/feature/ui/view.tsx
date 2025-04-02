@@ -21,6 +21,7 @@ import { nonInteractive } from "../../style/mixins";
 import { increaseSpecificity } from "../../style/utils";
 import { inlineButtonModifier } from "../router/NewExperiment";
 import { isDarkModeAtom } from "../../atoms/store";
+import { isRunningAtom } from "../inference/atoms";
 
 type Primitive = string | number | boolean | null | undefined;
 
@@ -246,14 +247,15 @@ const Container = styled.div`
 export function Code({ language, value }: { language?: string; value?: ReactNode }) {
   const applyDiff = useSetAtom(applyDiffAtom);
   const [isDarkMode] = useAtom(isDarkModeAtom);
+  const [isRunning] = useAtom(isRunningAtom);
   const [htmlContent, setHtmlContent] = useState<string | null>(null);
   useEffect(() => {
-    if (typeof value !== "string" && language) return;
+    if (isRunning || typeof value !== "string" || !language) return;
     codeToHtml(value, {
       lang: language,
       theme: isDarkMode ? "laserwave" : "material-theme-lighter",
     }).then((content) => setHtmlContent(content));
-  }, []);
+  }, [isRunning]);
   if (htmlContent) return <div style={{ display: "contents" }} dangerouslySetInnerHTML={{ __html: htmlContent }}></div>;
   // if (language === "diff") {
   //   return (

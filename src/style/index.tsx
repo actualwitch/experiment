@@ -193,7 +193,7 @@ const inputDarkMode = css`
   }
 `;
 
-export const sidebarWidth = "320px";
+export const sidebarWidth = "324px";
 
 export const Container = styled.div<WithLayout>(
   content,
