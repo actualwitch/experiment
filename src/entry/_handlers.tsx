@@ -1,7 +1,7 @@
 import type { Server } from "bun";
 import { renderToReadableStream } from "react-dom/server";
 import { prerenderToNodeStream as prerender } from "react-dom/static";
-import { StaticRouter } from "react-router";
+import { matchRoutes, StaticRouter } from "react-router";
 
 import { log } from "../utils/logger";
 import { Shell } from "../root";
@@ -11,6 +11,8 @@ import { getManifest } from "../feature/pwa/manifest";
 import { clientCss, clientFile, description, iconResolutions, name } from "../const";
 import type { Nullish } from "../types";
 import { getClientAsString } from "./_macro" with { type: "macro" };
+import { paramsAtom, routeAtom, ROUTES } from "../feature/router";
+import { store } from "../store";
 
 export const getStaticHtml = async (
   location: string,
@@ -71,6 +73,13 @@ export const doSSR = async (request: Request) => {
 export const doStreamingSSR = async (request: Request) => {
   const url = new URL(request.url);
   log("SSR", request.url);
+  const matches = matchRoutes(ROUTES, url.pathname);
+  if (matches && matches.length === 1) {
+    const [{ route, params }] = matches;
+    console.log("setting ", JSON.stringify({ route, params }, null, 2));
+    store.set(routeAtom, route);
+    store.set(paramsAtom, params);
+  }
   const stream = await renderToReadableStream(
     <StaticRouter location={url.pathname}>
       <Shell />

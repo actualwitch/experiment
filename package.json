@@ -52,6 +52,7 @@
     "@emotion/styled": "latest",
     "@mistralai/mistralai": "latest",
     "@modelcontextprotocol/sdk": "latest",
+    "@shikijs/colorized-brackets": "latest",
     "@tanstack/react-virtual": "latest",
     "@xterm/xterm": "latest",
     "csvtojson": "latest",

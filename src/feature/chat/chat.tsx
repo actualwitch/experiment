@@ -6,10 +6,11 @@ import type { Experiment, ExperimentWithMeta, Message, _Message } from "../../ty
 import { deepEqual } from "../../utils";
 import { useHandlers } from "../../utils/keyboard";
 import { isRunningAtom } from "../inference/atoms";
-import { resetMessageAtom } from "../router/NewExperiment";
+import { resetMessageAtom } from "../router/NewExperiment/NewExperiment";
 import { type TransitionState, useItemTransition, useListTransition } from "../transitionState";
 import { View, collapsedAtom } from "../ui/view";
 import { Banner, ChatContainer, getAlign, MessageComponent, Header } from "./style";
+import { match, P } from "ts-pattern";
 
 export function hasMessages(obj: _Message | ExperimentWithMeta): obj is ExperimentWithMeta {
   return Object.hasOwn(obj, "messages");
@@ -30,7 +31,7 @@ export const ChatMessage = ({
   const selector: Path = [index, "content"];
   const [selection, setSelection] = useAtom(selectionAtom);
   const isSelected = index === selection?.[0];
-  const [collapsed, setCollapsed] = useAtom(collapsedAtom);
+  const [collapsed, setCollapsed] = useState<string[]>([]);
   const templates = useAtomValue(templatesAtom);
   const isDarkMode = useAtomValue(isDarkModeAtom);
   const experimentLayout = useAtomValue(experimentLayoutAtom);
@@ -62,9 +63,9 @@ export const ChatMessage = ({
     contentType = "tmpl";
     innerContent ??= (
       <View
-        onClick={(value, key, path) => {
-          const fullPath = [...selector, ...path, key];
-        }}
+        // onClick={(value, key, path) => {
+        //   const fullPath = [...selector, ...path, key];
+        // }}
         onTitleClick={(value, key, path) => {
           setCollapsed((prev) => {
             const fullPath = path.join(".");
@@ -90,9 +91,9 @@ export const ChatMessage = ({
   } else if (["string", "object"].includes(typeof message.content)) {
     innerContent ??= (
       <View
-        onClick={(value, key, path) => {
-          const fullPath = [...selector, ...path, key];
-        }}
+        // onClick={(value, key, path) => {
+        //   const fullPath = [...selector, ...path, key];
+        // }}
         onTitleClick={(value, key, path) => {
           setCollapsed((prev) => {
             const fullPath = path.join(".");
@@ -117,6 +118,10 @@ export const ChatMessage = ({
   useEffect(() => {
     setIsMounted(true);
   }, []);
+
+  const header = match([message.role, message.fromServer])
+    .with(["tool", P.nullish], () => "function")
+    .otherwise(([role]) => role);
 
   return (
     <MessageComponent
@@ -157,7 +162,7 @@ export const ChatMessage = ({
       transitionState={transitionState}
       sideLabel={false}
     >
-      <Header>{message.role}</Header>
+      <Header>{header}</Header>
       {innerContent}
     </MessageComponent>
   );

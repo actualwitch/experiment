@@ -23,17 +23,34 @@ import { increaseSpecificity } from "../../style/utils";
 export const MobileHeaderContainer = styled.h2<WithDarkMode>`
   position: absolute;
   cursor: pointer;
-  left: ${bs(0.75)};
-  top: 0;
+  left: ${bs(1 / 4)};
+  top: ${bs(2 / 3)};
   z-index: 1;
   user-select: none;
 
-  padding: ${bs(1)} ${bs(1 / 2)};
+  padding: ${bs(1 / 3)} ${bs(3 / 2)} ${bs(1 / 2)} ${bs()};
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   display: inline-block;
   max-width: calc(100vw - 52px);
+
+  mask: radial-gradient(
+    ellipse at center,
+    rgb(255, 255, 255),
+    rgb(255, 255, 255) 56%,
+    rgba(255, 255, 255, 0.2) 74%,
+    rgba(255, 255, 255, 0) 100%
+  );
+
+  ${(p) =>
+    p.isDarkMode
+      ? css`
+        backdrop-filter: blur(1px) brightness(1.1);
+      `
+      : css`
+        backdrop-filter: blur(1px);
+      `}
 
   span {
     text-decoration: underline;
@@ -102,7 +119,7 @@ export const MobileHeader = () => {
   const [isNavPanelOpen, setIsNavPanelOpened] = useAtom(isNavPanelOpenAtom);
   const [isActionsPanelOpen, setIsActionPanelOpened] = useAtom(isActionPanelOpenAtom);
   const [route] = useAtom(routeAtom);
-  const [actions] = useAtom(route?.sidebar?.atom ?? nopeAtom);
+  const [actions] = useAtom(route?.actions ?? nopeAtom);
   useEffect(() => {
     if (isActionsPanelOpen && actions?.counter === 0) {
       setIsActionPanelOpened(false);

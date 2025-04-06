@@ -17,9 +17,9 @@ export const timezoneAtom = entangledAtom(
 export function ExperimentPreview({ experiment }: { experiment: Experiment }) {
   const [timezone] = useAtom(timezoneAtom);
 
-  const meta = useMemo(() => {
+  const experimentWithMeta: Experiment = useMemo(() => {
     if (Array.isArray(experiment)) {
-      return null;
+      return experiment;
     }
     const { messages, ...meta } = experiment;
     if (meta.timestamp) {
@@ -27,12 +27,13 @@ export function ExperimentPreview({ experiment }: { experiment: Experiment }) {
       const zoned = instant.toZonedDateTimeISO(timezone);
       meta.timestamp = zoned.toLocaleString(undefined, { timeStyle: "full", dateStyle: "full" });
     }
-    return meta;
+    return [
+      {
+        role: "info",
+        content: meta,
+      },
+      ...messages,
+    ];
   }, [experiment, timezone]);
-  return (
-    <>
-      {meta && <View>{meta}</View>}
-      <ChatPreview experiment={experiment} />
-    </>
-  );
+  return <ChatPreview experiment={experimentWithMeta} />;
 }

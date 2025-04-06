@@ -16,7 +16,14 @@ import { parentAtom } from "../../atoms/common";
 import { createExperiment, experimentAtom } from "../../atoms/experiment";
 import { modelAtom, selectedProviderAtom, storeAtom, tokensAtom } from "../../atoms/store";
 import type { Message } from "../../types";
-import { isReasoningModel, modelLabels, modelOptions, providerLabels, type ProviderType } from "./types";
+import {
+  isReasoningEffortSupported,
+  isReasoningModel,
+  modelLabels,
+  modelOptions,
+  providerLabels,
+  type ProviderType,
+} from "./types";
 
 export const availableProviderOptionsAtom = atom((get) => {
   const tokens = get(tokensAtom);
@@ -48,6 +55,14 @@ export const isRunningAtom = entangledAtom("is running", atom(false));
 export const isReasoningModelAtom = atom((get) => {
   const model = get(modelAtom);
   if (get(selectedProviderAtom) === "openai" && model && isReasoningModel(model)) {
+    return true;
+  }
+  return false;
+});
+
+export const isReasoningEffortSupportedAtom = atom((get) => {
+  const model = get(modelAtom);
+  if (get(selectedProviderAtom) === "openai" && model && isReasoningEffortSupported(model)) {
     return true;
   }
   return false;
@@ -256,6 +271,8 @@ export const runExperimentAsOpenAi = entangledAtom(
       dangerouslyAllowBrowser: hasBackend() ? undefined : true,
     });
 
+    const model = get(modelAtom) ?? "gpt-4o";
+
     const params: ChatCompletionCreateParamsStreaming = {
       ...experimentAsOpenai,
       stream: true,
@@ -263,11 +280,13 @@ export const runExperimentAsOpenAi = entangledAtom(
         include_usage: true,
       },
       temperature: get(tempAtom),
-      model: get(modelAtom) ?? "gpt-4o",
+      model,
     };
-    if (get(isReasoningModelAtom)) {
+    if (isReasoningModel(model)) {
       params.temperature = undefined;
-      params.reasoning_effort = get(effortAtom);
+      if (isReasoningEffortSupported(model)) {
+        params.reasoning_effort = get(effortAtom);
+      }
     }
     const stream = await client.chat.completions.create(params);
     const contentChunks: Message[] = [];

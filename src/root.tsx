@@ -12,7 +12,7 @@ import { Container, Slideover, stylesAtom } from "./style";
 import { Hydration } from "./utils/hydration";
 import { FavIcon } from "./feature/ui/FavIcon";
 import { getRealm } from "./utils/realm";
-import { clientFile, name } from "./const";
+import { clientCss, clientFile, name } from "./const";
 import { ErrorBoundary } from "./feature/ui/error";
 import {
   isActionPanelOpenAtom,
@@ -135,7 +135,7 @@ export const Shell = ({
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
         <link rel="manifest" href="manifest.json" />
-        <link rel="stylesheet" href="client.css" />
+        <link rel="stylesheet" href={clientCss} />
         <link rel="icon" href="experiment.png" />
         <Context>
           <Meta />

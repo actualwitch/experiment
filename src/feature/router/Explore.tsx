@@ -13,7 +13,7 @@ import type { Language } from "../editor";
 import { Editor } from "../editor/Editor";
 import { SidebarInput } from "../ui/Navigation";
 import { Page } from "../ui/Page";
-import { View, collapsedAtom } from "../ui/view";
+import { View } from "../ui/view";
 
 export const pwdAtom = getRealm() === "server" ? atom(Bun.env.PWD) : nopeAtom;
 
@@ -139,7 +139,6 @@ export const currentDirContextAtom = entangledAtom(
 export const SidebarExplore = () => {
   const [currentDir] = useAtom(currentDirContentAtom);
   const [_, goToDir] = useAtom(goToAtom);
-  const [collapsed, setCollapsed] = useAtom(collapsedAtom);
   if (!currentDir) {
     return null;
   }

@@ -93,10 +93,10 @@ export const MessageComponent = styled.article<
       border-${align}: 4px solid transparent;
       position: relative;
       overflow: hidden;
-      transition: all 100ms ease-in;
+      transition: transform 100ms ease-in;
       opacity: 0;
       transform: translateX(${align === "left" ? "-" : ""}10px);
-      padding-bottom: ${bs(1 / 2)};
+      padding-bottom: ${bs(1 / 4)};
       padding-${align}: ${bs(3 / 8)};
       padding-${alignComplement}: ${bs(1 / 4)};
       text-align: ${align};
@@ -110,8 +110,7 @@ export const MessageComponent = styled.article<
         transition: background 100ms ease-out, border-color 100ms ease-out;
         border-radius: ${bs(Palette.borderCode)};
         border: 1px solid ${Palette.white}00;
-        padding-top: ${bs(1 / 4)};
-        padding-${alignComplement}: ${bs(1 / 4)};
+        padding: ${bs(1 / 4)} ${bs(1 / 4)} 0;
       }
 
       
@@ -131,8 +130,6 @@ export const MessageComponent = styled.article<
       }
 
       hr {
-        opacity: 0.2;
-        color: ${isDarkMode ? Palette.white : Palette.black};
         margin-top: ${bs(0.15)};
         margin-bottom: ${bs(0.05)};
         border: 0;
@@ -180,7 +177,7 @@ export const MessageComponent = styled.article<
       .with("user", () => Palette.purple)
       .with("assistant", () => Palette.pink)
       .with("tool", () => Palette.green)
-      .with("info", () => (isDarkMode ? `${Palette.white}70` : `${Palette.black}50`))
+      .with("info", () => (isDarkMode ? "#9B9B9B" : "#7b7b7b"))
       .with("error", () => Palette.red)
       .with("context", () => Palette.teal)
       .exhaustive();
@@ -237,7 +234,7 @@ export const Banner = styled.div`
 `;
 
 export const Header = styled.header`
-  padding-top: ${bs(1 / 4)};
+  padding-top: ${bs(1 / 3)};
   font-size: 14px;
   opacity: 0.6;
   text-transform: uppercase;

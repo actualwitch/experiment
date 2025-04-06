@@ -1,6 +1,6 @@
 import { css } from "@emotion/react";
 import styled from "@emotion/styled";
-import { atom, useAtom, useSetAtom } from "jotai";
+import { atom } from "jotai";
 import Markdown, { type ReactRenderer } from "marked-react";
 import {
   type JSX,
@@ -9,19 +9,12 @@ import {
   type ReactNode,
   createElement,
   memo,
-  useEffect,
   useMemo,
-  useState,
 } from "react";
-import { codeToHtml } from "shiki";
-import { applyDiffAtom } from "../../atoms/diff";
-import { newLine } from "../../const";
 import { bs } from "../../style";
-import { nonInteractive } from "../../style/mixins";
 import { increaseSpecificity } from "../../style/utils";
-import { inlineButtonModifier } from "../router/NewExperiment";
-import { isDarkModeAtom } from "../../atoms/store";
-import { isRunningAtom } from "../inference/atoms";
+import { cancelEvent } from "../../utils/event";
+import { Code } from "./Code";
 
 type Primitive = string | number | boolean | null | undefined;
 
@@ -44,11 +37,15 @@ const interactive = css`
     opacity: 1;
   }
 `;
+const nonInteractive = css`
+  user-select: none;
+`;
 
 const Emphasis = styled.em<{ isCollapsed?: boolean; isDisabled?: boolean }>(
   css`
     font-weight: italic;
     opacity: 0.7;
+    transition: opacity 100ms ease-out;
   `,
   ({ isCollapsed }) => {
     if (!isCollapsed) return;
@@ -66,33 +63,36 @@ const Emphasis = styled.em<{ isCollapsed?: boolean; isDisabled?: boolean }>(
   ({ isDisabled }) => (isDisabled ? nonInteractive : interactive),
 );
 
+const Item = styled.li<{ isDisabled?: boolean }>(({ isDisabled }) =>
+  isDisabled
+    ? nonInteractive
+    : css`
+      cursor: pointer;
+      user-select: none;
+      :hover > hr {
+        opacity: 1;
+      }
+    `,
+);
+
 export const collapsedAtom = atom<string[]>([]);
 
-function asTreeNodes(
-  input: unknown,
-  title?: Primitive,
-  { separator = ".", onClick, onTitleClick, path = [], shouldBeCollapsed, disableSorting }: TreeOptions = {},
-): JSX.Element | null {
+function asTreeNodes(input: unknown, title?: Primitive, options: TreeOptions = {}): JSX.Element | null {
   // unwrap JSON strings
   if (typeof input === "string" && input[0] === "{" && input[input.length - 1] === "}") {
     try {
       input = JSON.parse(input);
-      return asTreeNodes(input, title, {
-        separator,
-        onClick,
-        onTitleClick,
-        shouldBeCollapsed,
-        path,
-      });
+      return asTreeNodes(input, title, options);
     } catch {}
   }
+  const { separator = ".", onClick, onTitleClick, path = [], shouldBeCollapsed, disableSorting } = options;
+
   const prefix = isNullish(title) || (Array.isArray(input) && input.length === 0) ? "" : title;
   const interactiveProps = onTitleClick
     ? ({
         onClick(e) {
-          e.preventDefault();
-          e.stopPropagation();
-          onTitleClick?.(prefix, undefined, path);
+          cancelEvent(e);
+          onTitleClick(prefix, undefined, path);
         },
       } as {
         onClick: MouseEventHandler<HTMLElement>;
@@ -114,10 +114,7 @@ function asTreeNodes(
     if (keysArr?.length === 2 && keysArr?.includes("key") && keysArr?.includes("value")) {
       // @ts-ignore
       return asTreeNodes(Object.fromEntries(input.map(({ key, value }) => [key, value])), title, {
-        separator,
-        onClick,
-        onTitleClick,
-        shouldBeCollapsed,
+        ...options,
         path: [...path, "key"],
       });
     }
@@ -132,22 +129,22 @@ function asTreeNodes(
       });
     }
     inner = entries.map(([key, value]) => (
-      <li
+      <Item
         key={key}
-        onClick={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          onClick?.(value, key, path);
-        }}
+        {...(onClick
+          ? {
+              onClick: (e) => {
+                cancelEvent(e);
+                onClick(value, key, path);
+              },
+            }
+          : { isDisabled: true })}
       >
         {asTreeNodes(value, key, {
-          separator,
-          onClick,
-          onTitleClick,
-          shouldBeCollapsed,
+          ...options,
           path: [...path, key],
         })}
-      </li>
+      </Item>
     ));
   } else {
     inner = String(input);
@@ -226,83 +223,6 @@ const ViewContainer = styled.div<PropsWithChildren<{ markdownMode?: true }>>`
     margin-bottom: ${bs(1 / 4)};
   }
 `;
-
-const ActionRow = styled.div`
-  button {
-    ${inlineButtonModifier}
-  }
-`;
-
-const widen = (align: string, length: string) => `
-padding-${align}: ${length};
-margin-${align}: -${length};
-`;
-
-const Container = styled.div`
-  overflow-x: scroll;
-  scrollbar-width: none;
-  ${["left", "right", "bottom"].map((align) => widen(align, bs(1 / 2))).join(newLine)}
-`;
-
-export function Code({ language, value }: { language?: string; value?: ReactNode }) {
-  const applyDiff = useSetAtom(applyDiffAtom);
-  const [isDarkMode] = useAtom(isDarkModeAtom);
-  const [isRunning] = useAtom(isRunningAtom);
-  const [htmlContent, setHtmlContent] = useState<string | null>(null);
-  useEffect(() => {
-    if (isRunning || typeof value !== "string" || !language) return;
-    codeToHtml(value, {
-      lang: language,
-      theme: isDarkMode ? "laserwave" : "material-theme-lighter",
-    }).then((content) => setHtmlContent(content));
-  }, [isRunning]);
-  if (htmlContent) return <div style={{ display: "contents" }} dangerouslySetInnerHTML={{ __html: htmlContent }}></div>;
-  // if (language === "diff") {
-  //   return (
-  //     <>
-  //       <pre>
-  //         {hasBackend() ? (
-  //           <>
-  //             <ActionRow>
-  //               <button
-  //                 onClick={(e) => {
-  //                   e.preventDefault();
-  //                   applyDiff(value);
-  //                 }}
-  //               >
-  //                 Apply
-  //               </button>
-  //             </ActionRow>
-  //             <hr />
-  //           </>
-  //         ) : null}
-  //         <Container>
-  //           <code>{value}</code>
-  //         </Container>
-  //       </pre>
-  //     </>
-  //   );
-  // }
-  return (
-    <pre>
-      {/* <ActionRow>
-        <button
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            navigator.clipboard.writeText(value);
-          }}
-        >
-          Copy
-        </button>
-      </ActionRow>
-      <hr /> */}
-      <Container>
-        <code>{value}</code>
-      </Container>
-    </pre>
-  );
-}
 
 export function Paragraph({ children }: { children?: ReactNode }) {
   const parsedContent = useMemo(() => {

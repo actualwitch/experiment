@@ -43,6 +43,8 @@ export type WithLayout = { layout?: "mobile" | "desktop" };
 export const _isActionPanelOpenAtom = atom(false);
 export const _isNavPanelOpenAtom = atom(false);
 
+export const isAnyPanelOpenAtom = atom((get) => get(_isNavPanelOpenAtom) || get(_isActionPanelOpenAtom));
+
 export const isActionPanelOpenAtom = atom(
   (get) => get(_isActionPanelOpenAtom),
   (get, set, value: boolean) => {

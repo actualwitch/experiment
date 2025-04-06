@@ -92,9 +92,7 @@ export const buttonPopModifier = css`
   }
 `;
 
-const InternalButton = styled.button<WithDarkMode>(iSawTheButtonsGlowLightMode, (p) =>
-  withDarkMode(p.isDarkMode, iSawTheButtonGlow),
-);
+const InternalButton = styled.button<WithDarkMode>((p) => withDarkMode(p.isDarkMode, iSawTheButtonGlow));
 
 // function injectAtoms<T extends Record<string, unknown>, P extends {}>(atoms: T) {
 //   const newProps = {} as Record<string, unknown>;
@@ -126,11 +124,12 @@ const button = css`
     svg {
       margin-bottom: 5px;
     }
-  }
-  button:not(:disabled) {
-    background-color: ${Palette.actionableBackground};
-    :hover {
-      background-color: ${Palette.buttonHoverBackground};
+    :not(:disabled) {
+      ${buttonPopModifier}
+      background-color: ${Palette.actionableBackground};
+      :hover {
+        background-color: ${Palette.buttonHoverBackground};
+      }
     }
   }
   button[disabled] {
@@ -153,9 +152,6 @@ const button = css`
     color: ${Palette.black};
     border-radius: ${bs(Palette.borderCode)};
     ${interactive}
-    ${buttonPopModifier}
-    ${iSawTheButtonsGlowLightMode}
-    ${bevelStyle}
     &[disabled] {
       background-color: ${Palette.buttonDisabledBackground};
       color: ${Palette.buttonDisabledForeground};
@@ -166,6 +162,7 @@ const button = css`
 
 const buttonDarkMode = css`
   button:not(:disabled) {
+    ${bevelStyle}
     :hover {
       background-color: ${Palette.white};
     }
@@ -179,6 +176,32 @@ const buttonDarkMode = css`
 `;
 
 const input = css`
+  input {
+    border-radius: ${bs(Palette.borderCode)};
+    ${content}
+    margin: 0;
+    outline: 0;
+    transition:
+      background-color 0.1s ease-out,
+      box-shadow 0.1s ease-out,
+      transform 0.1s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+
+    &:not(:disabled) {
+      background-color: ${Palette.actionableBackground};
+      :hover {
+        background-color: ${Palette.buttonHoverBackground};
+      }
+    }
+    &[disabled] {
+      background-color: ${Palette.disabledBackground};
+      color: ${Palette.black}54;
+      cursor: not-allowed;
+    }
+
+    ::placeholder {
+      font-style: italic;
+    }
+  }
   input:not([type="file"]) {
     background-color: ${Palette.inputBackground};
   }
@@ -190,10 +213,16 @@ const input = css`
 const inputDarkMode = css`
   input {
     color: ${Palette.black};
+    &:not(:disabled) {
+      :hover,
+      :focus {
+        background-color: ${Palette.white};
+      }
+    }
   }
 `;
 
-export const sidebarWidth = "324px";
+export const sidebarWidth = "320px";
 
 export const Container = styled.div<WithLayout>(
   content,
@@ -219,7 +248,7 @@ export const Sidebar = styled.aside`
   padding: ${bs()};
   overflow: auto;
   flex: 0 ${sidebarWidth};
-  & > * {
+  & > *:not(style) {
     display: flex;
     flex-wrap: wrap;
   }
@@ -251,7 +280,10 @@ export const darkMode = css`
     }
     pre,
     code {
-      background-color: #2f2f2f;
+      background-color: #27212e;
+    }
+    *:not(pre) > code {
+      color: ${Palette.white};
     }
   }
   ${buttonDarkMode}
@@ -262,6 +294,12 @@ export const appStyle = [
   reset,
   shevyStyle,
   css`
+    :root {
+      background-color: ${Palette.white};
+      color: ${Palette.black};
+      font-weight: normal;
+      hyphens: auto;
+    }
     html {
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
@@ -272,53 +310,59 @@ export const appStyle = [
     ul ul ::marker {
       content: "${TRIANGLE} ";
     }
-    :root {
-      background-color: ${Palette.white};
-      color: ${Palette.black};
-      font-weight: normal;
-      hyphens: auto;
 
-      ul,
-      ol {
-        padding-left: ${bs()};
-      }
+    ul,
+    ol {
+      padding-left: ${bs()};
+    }
 
-      table {
-        border-collapse: collapse;
-      }
+    table {
+      border-collapse: collapse;
+    }
 
-      th {
-        border-bottom: 1px solid ${Palette.black};
-      }
+    th {
+      border-bottom: 1px solid ${Palette.black};
+    }
 
-      th,
-      td {
-        padding: 0 ${bs(1 / 4)} ${bs(1 / 10)};
-      }
+    th,
+    td {
+      padding: 0 ${bs(1 / 4)} ${bs(1 / 10)};
+    }
 
-      pre,
+    pre,
+    code {
+      background-color: #fafafa;
+      color: #90a4ae;
+    }
+
+    pre {
+      font-size: 0.75em;
+      padding: ${bs(1 / 3)} ${bs(1 / 2)};
+      border-radius: ${bs(Palette.borderCode)};
+      overflow-x: scroll;
+      position: relative;
       code {
-        background-color: ${Palette.white};
-      }
-
-      pre {
-        font-size: 0.75em;
-        padding: ${bs(1 / 3)} ${bs(1 / 2)};
-        border-radius: ${bs(Palette.borderCode)};
-        overflow-x: scroll;
-        position: relative;
-        code {
-          background: none;
-        }
-      }
-
-      style {
-        display: none;
+        background: none;
       }
     }
+
+    *:not(pre) > code {
+      color: ${Palette.black};
+    }
+
+    style {
+      display: none;
+    }
+
+    hr {
+      opacity: 0.3;
+      transition: opacity 100ms ease-out;
+    }
+
     ::selection {
       background-color: ${Palette.accent};
     }
+
     a {
       color: inherit;
       transition: color 0.1s ease-out;
