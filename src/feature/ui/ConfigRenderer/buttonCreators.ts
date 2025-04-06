@@ -5,7 +5,7 @@ import { type Path, parentAtom, selectionAtom, templatesAtom } from "../../../at
 import { experimentAtom } from "../../../atoms/experiment";
 import type { Store } from "../../../atoms/store";
 import type { Experiment, Message } from "../../../types";
-import { resetMessageAtom } from "../../router/NewExperiment";
+import { resetMessageAtom } from "../../router/NewExperiment/NewExperiment";
 
 export const createTemplateButton = (templates: Store["templates"], content: Message) => ({
   label: "Template",

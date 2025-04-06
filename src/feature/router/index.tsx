@@ -1,19 +1,18 @@
 import { type Atom, atom, useAtom } from "jotai";
-import { useEffect, type JSX, type PropsWithChildren } from "react";
-import { Route, Routes, useLocation } from "react-router";
+import { type JSX, type PropsWithChildren, useEffect } from "react";
+import { Route, Routes, useLocation, useParams } from "react-router";
 
-import { experimentIdsAtom, isMetaExperimentAtom } from "../../atoms/store";
-import { ConfigRenderer, type Config } from "../ui/ConfigRenderer";
+import { isMetaExperimentAtom } from "../../atoms/store";
 import { TRIANGLE, description, name } from "../../const";
-import Experiment, { actionsAtom as experimentActionsAtom } from "./Experiment";
-import Import, { actionsAtom as importActionsAtom } from "./Import";
-import Explore from "./Explore";
+import { Actions } from "../ui/Actions";
+import { type Config, ConfigRenderer } from "../ui/ConfigRenderer";
 import Calendar from "./Calendar";
-import NewExperiment, { actionsAtom as newExperimentActionsAtom } from "./NewExperiment";
+import Experiment, { actionsAtom as experimentActionsAtom } from "./Experiment";
+import Explore from "./Explore";
+import Import, { actionsAtom as importActionsAtom } from "./Import";
+import NewExperiment, { actionsAtom as newExperimentActionsAtom } from "./NewExperiment/NewExperiment";
 import Parameters from "./Parameters";
 import Templates, { actionsAtom as templateActionsAtom } from "./Templates";
-import { atomEffect } from "jotai-effect";
-import { Actions } from "../ui/Actions";
 
 export type AppRoute = {
   icon: string;
@@ -21,19 +20,9 @@ export type AppRoute = {
   path: string;
   component: () => JSX.Element;
   showInSidebar?: boolean;
-  sidebar?: { atom: Atom<{ counter: number; config: Config }>; title?: string };
+  actions?: Atom<{ counter: number; config: Config }>;
   experimental?: boolean;
 };
-
-export const experimentsSidebarAtom = atom((get) => {
-  const experimentIds = get(experimentIdsAtom);
-  return [...experimentIds]
-    .map(([id, subId]) => ({
-      name: `Experiment #${id}.${subId}`,
-      link: `/experiment/${id}/${subId}`,
-    }))
-    .reverse();
-});
 
 export const ROUTES: AppRoute[] = [
   {
@@ -42,7 +31,7 @@ export const ROUTES: AppRoute[] = [
     showInSidebar: true,
     path: "/",
     component: NewExperiment,
-    sidebar: { atom: newExperimentActionsAtom, title: "Actions" },
+    actions: newExperimentActionsAtom,
   },
   {
     icon: "🔬",
@@ -50,7 +39,7 @@ export const ROUTES: AppRoute[] = [
     showInSidebar: false,
     path: "/experiment/:id/:runId",
     component: Experiment,
-    sidebar: { atom: experimentActionsAtom, title: "Actions" },
+    actions: experimentActionsAtom,
   },
   {
     icon: "⛴️",
@@ -58,7 +47,7 @@ export const ROUTES: AppRoute[] = [
     showInSidebar: true,
     path: "/import",
     component: Import,
-    sidebar: { atom: importActionsAtom, title: "Actions" },
+    actions: importActionsAtom,
   },
   {
     icon: "💿",
@@ -66,7 +55,7 @@ export const ROUTES: AppRoute[] = [
     showInSidebar: true,
     path: "/templates",
     component: Templates,
-    sidebar: { atom: templateActionsAtom, title: "Actions" },
+    actions: templateActionsAtom,
   },
   {
     icon: "🌍",
@@ -88,13 +77,17 @@ export const ROUTES: AppRoute[] = [
 ];
 
 export const routeAtom = atom<AppRoute | null>(null);
+export const paramsAtom = atom<Record<string, string | undefined>>({});
 
 function RouteSync({ thisRoute, children }: PropsWithChildren<{ thisRoute: AppRoute }>) {
   const location = useLocation();
+  const params = useParams();
   const [route, setRoute] = useAtom(routeAtom);
+  const [_, setParams] = useAtom(paramsAtom);
   useEffect(() => {
     if (!route || route.path !== location.pathname) {
       setRoute(thisRoute);
+      setParams(params);
     }
   }, [route?.path, location]);
   return children;
@@ -112,7 +105,7 @@ export const routerRoutesAtom = atom((get) => {
       element: (
         <RouteSync thisRoute={route}>
           <Component />
-          {route.sidebar ? <ActionsRenderer actionsAtom={route.sidebar.atom} /> : null}
+          {route.actions ? <ActionsRenderer actionsAtom={route.actions} /> : null}
         </RouteSync>
       ),
     };

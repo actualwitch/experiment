@@ -32,16 +32,16 @@ export function Switch<T>({
 }: {
   value: T;
   onChange: (value: T) => void;
-  children: Array<{ value: T; name: string; isDefault?: true }>;
+  children: Array<{ value: T; name: string; isDefault?: true; isDisabled?: boolean }>;
 }) {
   return (
     <Container>
-      {children.map(({ value: v, name, isDefault }) => (
+      {children.map(({ value: v, name, isDefault, isDisabled }) => (
         <Button
           key={name}
           type="button"
           onClick={() => onChange(v)}
-          disabled={value !== undefined ? v === value : isDefault}
+          disabled={isDisabled || (value !== undefined ? v === value : isDefault)}
         >
           {name}
         </Button>

@@ -11,6 +11,9 @@ import { getRealm } from "../utils/realm";
 import type { ExperimentCursor } from "./experiment";
 
 export type Store = {
+  name?: string;
+  pronouns?: string;
+  isOnboarded?: boolean;
   isDarkMode?: boolean;
   isBoldText?: boolean;
   fontStack?: keyof typeof FONT_STACKS;
@@ -33,6 +36,7 @@ export const getInitialStore = (): Store => ({
   tokens: {},
   experiments: {},
 });
+
 export const storeAtom = divergentAtom(
   () => {
     if (getRealm() === "server") {
@@ -66,6 +70,16 @@ export const storeAtom = divergentAtom(
       return atom<Store>(getInitialStore());
     }
   },
+);
+
+export const nameAtom = entangledAtom(
+  "name",
+  focusAtom(storeAtom, (o) => o.prop("name")),
+);
+
+export const pronounsAtom = entangledAtom(
+  "pronouns",
+  focusAtom(storeAtom, (o) => o.prop("pronouns")),
 );
 
 export const selectedProviderAtom = entangledAtom(
@@ -119,6 +133,11 @@ export const fontStackAtom = entangledAtom(
   focusAtom(storeAtom, (o) => o.prop("fontStack")),
 );
 
+export const isOnboardedAtom = entangledAtom(
+  "isOnboarded",
+  focusAtom(storeAtom, (o) => o.prop("isOnboarded")),
+);
+
 export const isDarkModeAtom = entangledAtom(
   "isDarkMode",
   focusAtom(storeAtom, (o) => o.prop("isDarkMode")),
@@ -155,3 +174,13 @@ export const debugAtom = entangledAtom(
 );
 
 export const nopeAtom = atom((get) => null);
+
+export const setTokenAtom = atom(null, (get, set, provider: string, token: string) => {
+  let value = token;
+
+  if (value.startsWith('"') && value.endsWith('"')) {
+    value = value.slice(1, -1);
+  }
+
+  set(tokensAtom, { ...get(tokensAtom), [provider]: value });
+});

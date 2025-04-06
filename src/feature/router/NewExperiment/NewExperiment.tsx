@@ -2,37 +2,44 @@ import { css } from "@emotion/react";
 import styled from "@emotion/styled";
 import { type Setter, atom, useAtom, useSetAtom } from "jotai";
 import { useCallback, useEffect, useMemo, useRef } from "react";
-import { NavLink } from "react-router";
 
 import { Disc3, MessageCircleDashed, Play, Pyramid, Rewind, Trash2 } from "lucide-react";
-import { isActionPanelOpenAtom, isNavPanelOpenAtom, layoutAtom, selectionAtom } from "../../atoms/common";
-import { experimentAtom } from "../../atoms/experiment";
-import { personasAtom } from "../../atoms/persona";
-import { pwdAtom } from "../../atoms/server";
-import { isDarkModeAtom, modelAtom, parentAtom, selectedProviderAtom, templatesAtom } from "../../atoms/store";
-import { name } from "../../const";
-import { bs } from "../../style";
-import { type WithDarkMode, withDarkMode } from "../../style/darkMode";
-import { Palette } from "../../style/palette";
-import { type Message, PossibleObjectType, type Role, RoleOptions } from "../../types";
-import { useHandlers } from "../../utils/keyboard";
-import { hasBackend } from "../../utils/realm";
-import { ChatPreview } from "../chat/chat";
+import { isActionPanelOpenAtom, isNavPanelOpenAtom, layoutAtom, selectionAtom } from "../../../atoms/common";
+import { experimentAtom } from "../../../atoms/experiment";
+import { personasAtom } from "../../../atoms/persona";
+import { pwdAtom } from "../../../atoms/server";
+import {
+  isDarkModeAtom,
+  isOnboardedAtom,
+  modelAtom,
+  parentAtom,
+  selectedProviderAtom,
+  templatesAtom,
+} from "../../../atoms/store";
+import { bs } from "../../../style";
+import { type WithDarkMode, withDarkMode } from "../../../style/darkMode";
+import { Palette } from "../../../style/palette";
+import { type Message, PossibleObjectType, type Role, RoleOptions } from "../../../types";
+import { useHandlers } from "../../../utils/keyboard";
+import { hasBackend } from "../../../utils/realm";
+import { ChatPreview } from "../../chat/chat";
 import {
   availableProviderOptionsAtom,
   effortAtom,
+  isReasoningEffortSupportedAtom,
   isReasoningModelAtom,
   isRunningAtom,
   modelOptionsAtom,
   runInferenceAtom,
   tempAtom,
-} from "../inference/atoms";
-import { tryParseFunctionSchema } from "../inference/function";
-import { modelOptions } from "../inference/types";
-import type { Config } from "../ui/ConfigRenderer";
-import { createCancelEditingButton, createSelectionEditButtons } from "../ui/ConfigRenderer/buttonCreators";
-import { Page } from "../ui/Page";
-import { TextArea } from "../ui/TextArea";
+} from "../../inference/atoms";
+import { tryParseFunctionSchema } from "../../inference/function";
+import { modelOptions } from "../../inference/types";
+import type { Config } from "../../ui/ConfigRenderer";
+import { createCancelEditingButton, createSelectionEditButtons } from "../../ui/ConfigRenderer/buttonCreators";
+import { Page } from "../../ui/Page";
+import { TextArea } from "../../ui/TextArea";
+import { Onboarding } from "./Onboarding";
 
 const baseMargin = 1 / 2;
 
@@ -130,11 +137,12 @@ const ActionRow = styled.div`
   }
 `;
 
-export const Underline = styled.span`
-  text-decoration: underline;
-`;
-
 export const actionsAtom = atom((get) => {
+  let counter = 0;
+  const config: Config = {
+    Actions: [],
+  };
+
   const providerOptions = get(availableProviderOptionsAtom);
   const modelOptions = get(modelOptionsAtom);
   const isReasoningModel = get(isReasoningModelAtom);
@@ -143,11 +151,7 @@ export const actionsAtom = atom((get) => {
   const selection = get(selectionAtom);
   const templates = get(templatesAtom);
   const personas = get(personasAtom);
-  let counter = 0;
-  const config: Config = {
-    Actions: [],
-  };
-  if (providerOptions.length === 0 || modelOptions.length === 0) {
+  if (!get(isOnboardedAtom) || providerOptions.length === 0 || modelOptions.length === 0) {
     return { config, counter };
   }
   if (providerOptions.length > 0) {
@@ -168,7 +172,14 @@ export const actionsAtom = atom((get) => {
     });
     counter++;
   }
-  if (isReasoningModel) {
+  if (!isReasoningModel) {
+    config.Actions.push({
+      type: "number",
+      label: "Temperature",
+      atom: tempAtom,
+    });
+    counter += 1;
+  } else if (get(isReasoningEffortSupportedAtom)) {
     config.Actions.push({
       type: "select",
       label: "Effort",
@@ -179,13 +190,6 @@ export const actionsAtom = atom((get) => {
         // just like me fr fr
         { id: "high", name: "High" },
       ],
-    });
-    counter += 1;
-  } else {
-    config.Actions.push({
-      type: "number",
-      label: "Temperature",
-      atom: tempAtom,
     });
     counter += 1;
   }
@@ -311,6 +315,7 @@ export default function () {
   const [role, setRole] = useAtom(roleAtom);
   const resetMessage = useSetAtom(resetMessageAtom);
   const [hasLoaded, setHasLoaded] = useAtom(hasLoadedAtom);
+  const [isOnboarded, setIsOnboarded] = useAtom(isOnboardedAtom);
 
   useEffect(() => {
     setHasLoaded(true);
@@ -440,24 +445,9 @@ export default function () {
     scrollToEnd();
   }, [experiment, isRunning]);
 
-  return providerOptions.length === 0 ? (
+  return !isOnboarded ? (
     <Page>
-      <h2>
-        Let's start the <Underline>{name}</Underline>
-      </h2>
-      <p>Welcome to Experiment, your professional-grade chat interface for Large Language Models. To begin:</p>
-      <ol>
-        <li>
-          Add an API token on the <NavLink to="/parameters">Parameters</NavLink> page for Anthropic, OpenAI, or Mistral
-        </li>
-        <li>Return here to create your first experiment with different message types (user, system, tool, etc.)</li>
-        <li>Use the role selector to switch between message types and add structured content</li>
-        <li>Click "Start" to run inference with your selected model</li>
-      </ol>
-      <p>
-        You can also explore previous completions on the <NavLink to="/import">Import</NavLink> page or use pre-defined
-        templates from the <NavLink to="/templates">Templates</NavLink> page.
-      </p>
+      <Onboarding />
     </Page>
   ) : (
     <Page ref={pageRef}>

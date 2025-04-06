@@ -10,9 +10,9 @@ export const providerTypes = ["anthropic", "mistral", "openai"] as const;
 export type ProviderType = (typeof providerTypes)[number];
 export const providers = withIds(providerTypes);
 export const providerLabels = {
-  anthropic: "Anthropic",
-  mistral: "Mistral",
-  openai: "OpenAI",
+  anthropic: "🧶 Anthropic",
+  mistral: "🐈 Mistral",
+  openai: "🪢 OpenAI",
 } satisfies { [K in ProviderType]: string };
 
 const GPT_4_5 = Literal("gpt-4.5-preview");
@@ -34,7 +34,7 @@ export const OpenAIModel = Union(
   GPT_4_turbo,
   o3_mini,
   o1,
-  o1_pro,
+  // o1_pro,
   o1_preview,
   o1_mini,
 );
@@ -71,7 +71,7 @@ export const modelLabels = {
     [GPT_4.value]: "GPT-4",
     [GPT_4_turbo.value]: "GPT-4 Turbo",
     [o1.value]: "O1",
-    [o1_pro.value]: "O1 Pro",
+    // [o1_pro.value]: "O1 Pro",
     [o1_preview.value]: "O1 Preview",
     [o1_mini.value]: "O1 Mini",
     [o3_mini.value]: "O3 Mini",
@@ -91,4 +91,7 @@ export const modelLabels = {
 } as const;
 
 export const isReasoningModel = (model: string) =>
-  [o1_mini.value, o1_preview.value, o3_mini.value, o1.value, o1_pro.value].includes(model);
+  [o1_mini.value, o1_preview.value, o3_mini.value, o1.value].includes(model);
+
+export const isReasoningEffortSupported = (model: string) =>
+  [o1_preview.value, o3_mini.value, o1.value].includes(model);

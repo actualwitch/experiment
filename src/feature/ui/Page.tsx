@@ -3,7 +3,7 @@ import styled from "@emotion/styled";
 import { useAtom } from "jotai";
 import type { PropsWithChildren, RefObject } from "react";
 
-import { isActionPanelOpenAtom, isNavPanelOpenAtom, layoutAtom, type WithLayout } from "../../atoms/common";
+import { isAnyPanelOpenAtom, layoutAtom, type WithLayout } from "../../atoms/common";
 import { isDarkModeAtom } from "../../atoms/store";
 import { bs } from "../../style";
 import type { WithDarkMode } from "../../style/darkMode";
@@ -11,7 +11,7 @@ import { withOnMobile } from "../../style/layout";
 import { Palette } from "../../style/palette";
 import { increaseSpecificity } from "../../style/utils";
 
-type WithSidemenuOpen = { isSidemenuOpen?: boolean };
+type WithSidemenuOpen = { isAnyPanelOpen?: boolean };
 
 export const PageContainer = styled.div<WithDarkMode & WithLayout & WithSidemenuOpen>`
   display: flex;
@@ -23,6 +23,7 @@ export const PageContainer = styled.div<WithDarkMode & WithLayout & WithSidemenu
   transform: scale(1);
   ${increaseSpecificity()} {
     overflow-x: hidden;
+    overscroll-behavior-y: contain;
   }
   a {
     color: ${Palette.pink};
@@ -40,24 +41,19 @@ export const PageContainer = styled.div<WithDarkMode & WithLayout & WithSidemenu
       `,
     )}
   ${(p) =>
-    p.isSidemenuOpen &&
+    p.isAnyPanelOpen &&
     css`
       transform: scale(0.98);
+      overflow-y: hidden;
     `}
 `;
 
 export const Page = ({ children, ...props }: PropsWithChildren<{ ref?: RefObject<HTMLDivElement | null> }>) => {
   const [isDarkMode] = useAtom(isDarkModeAtom);
   const [layout] = useAtom(layoutAtom);
-  const [isNavPanelOpen, setIsNavPanelOpen] = useAtom(isNavPanelOpenAtom);
-  const [isActionPanelOpen, setIsActionPanelOpen] = useAtom(isActionPanelOpenAtom);
+  const [isAnyPanelOpen] = useAtom(isAnyPanelOpenAtom);
   return (
-    <PageContainer
-      {...props}
-      isDarkMode={isDarkMode}
-      layout={layout}
-      isSidemenuOpen={isNavPanelOpen || isActionPanelOpen}
-    >
+    <PageContainer {...props} isDarkMode={isDarkMode} layout={layout} isAnyPanelOpen={isAnyPanelOpen}>
       {children}
     </PageContainer>
   );

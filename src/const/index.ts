@@ -19,3 +19,8 @@ export const tokenLimit = 8192;
 
 export const newLine = `
 `;
+
+export const PRONOUNS = ["she/her", "they/them", "he/him", "it/its", "ze/zir", "fae/faer"];
+export const CUSTOM_OPTION = "( custom )";
+// what's up tack? haha falsum
+export const BOTTTOM_OPTION = "( empty )";

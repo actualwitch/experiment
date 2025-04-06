@@ -15,9 +15,9 @@ import { filesInDir } from "../../utils/context";
 import { entangledAtom } from "../../utils/entanglement";
 import { portalIO } from "../../utils/portal";
 import { getRealm } from "../../utils/realm";
-import { ROUTES, experimentsSidebarAtom } from "../router";
+import { ROUTES } from "../router";
 import { View } from "./view";
-import { isMetaExperimentAtom } from "../../atoms/store";
+import { experimentIdsAtom, isMetaExperimentAtom } from "../../atoms/store";
 import { css } from "@emotion/react";
 
 export const [SidebarInput, SidebarOutput] = portalIO();
@@ -71,6 +71,7 @@ const Footer = styled.footer`
 
 const H2 = styled.h2<{ subContent?: string }>`
   user-select: none;
+  white-space: nowrap;
   ${(p) =>
     p.subContent &&
     css`
@@ -148,6 +149,15 @@ export const goToAtom = entangledAtom(
   }),
 );
 
+export const experimentsSidebarAtom = atom((get) => {
+  const experimentIds = get(experimentIdsAtom);
+  return [...experimentIds]
+    .map(([id, subId]) => ({
+      name: `Experiment #${id}.${subId}`,
+      link: `/experiment/${id}/${subId}`,
+    }))
+    .reverse();
+});
 const SidebarComponent = () => {
   const [data] = useAtom(experimentsSidebarAtom);
   const [selectedContext] = useAtom(selectedContextContent);
@@ -171,7 +181,7 @@ const SidebarComponent = () => {
   if (!data.length) return null;
   return (
     <>
-      <Header>History</Header>
+      <Header>Observations</Header>
       <ul>
         {data.map(({ link, name }) => (
           <li key={name}>

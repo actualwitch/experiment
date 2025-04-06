@@ -1,6 +1,6 @@
 import { css } from "@emotion/react";
 import styled from "@emotion/styled";
-import { useAtom } from "jotai";
+import { atom, useAtom, useSetAtom } from "jotai";
 import { type PropsWithChildren, useState } from "react";
 import { Item } from "react-stately";
 
@@ -12,6 +12,7 @@ import {
   isDarkModeAtom,
   isMetaExperimentAtom,
   isTransRightsAtom,
+  setTokenAtom,
   tokensAtom,
 } from "../../atoms/store";
 import { Button, FONT_STACKS, bs } from "../../style";
@@ -34,6 +35,9 @@ const StyledForm = styled.form`
   }
   & > :not(h3) {
     margin-bottom: ${bs()};
+  }
+  & > :not(h3) + h3 {
+    margin-top: ${bs(1 / 2)};
   }
 `;
 
@@ -111,7 +115,7 @@ const ModalContent = ({ children, close }: PropsWithChildren<{ close: () => void
       <p>
         <input
           type="password"
-          placeholder={hasBackend() ? "Token or 1password reference" : "Token"}
+          placeholder={hasBackend() ? "Token or 1Password reference" : "Token"}
           value={token}
           onChange={(e) => setToken(e.target.value)}
         />
@@ -142,6 +146,7 @@ export default function Parameters() {
   const [isTransRights, setIsTransRights] = useAtom(isTransRightsAtom);
 
   const [tokens, setTokens] = useAtom(tokensAtom);
+  const setProviderToken = useSetAtom(setTokenAtom);
   const [isAdding, setIsAdding] = useState(false);
 
   const [selectedProvider, setSelectedProvider] = useState<ProviderType | null>(null);
@@ -151,12 +156,8 @@ export default function Parameters() {
     if (!selectedProvider || !token) {
       return;
     }
-    let value = token;
 
-    if (value.startsWith('"') && value.endsWith('"')) {
-      value = value.slice(1, -1);
-    }
-    setTokens({ ...tokens, [selectedProvider]: value });
+    setProviderToken(selectedProvider, token);
     setIsAdding(false);
     setToken("");
     setSelectedProvider(null);
@@ -181,7 +182,7 @@ export default function Parameters() {
           </Switch>
         </Row>
         <Row>
-          <header>Font</header>
+          <header>Font stack</header>
           <Select
             items={withIds(Object.keys(FONT_STACKS))}
             onSelectionChange={(value) => setFontStack(value as keyof typeof FONT_STACKS)}
@@ -224,6 +225,7 @@ export default function Parameters() {
             ]}
           </Switch>
         </Row>
+        <Row style={{ marginTop: `-${bs(3 / 4)}` }}>Enable hypotheses that are yet to demonstrate their viability.</Row>
         <Row>
           <header>🏳️‍⚧️ Trans rights</header>
           <Switch value={isTransRights} onChange={setIsTransRights}>
@@ -252,7 +254,7 @@ export default function Parameters() {
         {selectedProvider && (
           <TextField
             type="password"
-            placeholder={hasBackend() ? "Token or 1password reference" : "Token"}
+            placeholder={hasBackend() ? "Token or 1Password reference" : "Token"}
             onChange={(value) => setToken(value)}
             onBlur={() => {
               submit();

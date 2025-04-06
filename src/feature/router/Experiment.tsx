@@ -2,7 +2,7 @@ import { atom, useAtom, useSetAtom } from "jotai";
 import { useEffect } from "react";
 import { useParams } from "react-router";
 
-import { navigateAtom, titleOverrideAtom } from ".";
+import { navigateAtom, paramsAtom, titleOverrideAtom } from ".";
 import { selectionAtom, templatesAtom } from "../../atoms/common";
 import type { ExperimentCursor } from "../../atoms/experiment";
 import { getExperimentAtom } from "../../atoms/store";
@@ -27,8 +27,6 @@ const selectedExperimentAtom = entangledAtom(
     return [];
   }),
 );
-
-export const paramsAtom = atom<Record<string, string | undefined>>({});
 
 export const actionsAtom = atom((get) => {
   const selection = get(selectionAtom);
@@ -63,17 +61,13 @@ export const actionsAtom = atom((get) => {
 });
 
 export default function () {
-  const params = useParams();
-  const { id, runId } = params;
-  const setParams = useSetAtom(paramsAtom);
-  useEffect(() => setParams(params), [params]);
+  const [{ id, runId }] = useAtom(paramsAtom);
+
   const [cursor, setCursor] = useAtom(cursorAtom);
   const [experiment] = useAtom(selectedExperimentAtom);
   if (id && runId && (!cursor || cursor.id !== id || cursor.runId !== runId)) {
     setCursor({ id, runId });
   }
-
-  const [{ config, counter }] = useAtom(actionsAtom);
 
   const title = `Experiment #${id}.${runId}`;
   const [titleOverride, setTitleOverride] = useAtom(titleOverrideAtom);
