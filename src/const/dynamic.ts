@@ -1,6 +1,6 @@
 import { version } from ".";
 
-import { getDebug, getReleaseHash } from "./_macro" with { type: "macro" };
+import { getReleaseHash } from "./_macro" with { type: "macro" };
 
 // export const DEBUG = getDebug();
 

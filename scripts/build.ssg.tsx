@@ -5,11 +5,14 @@ import { getManifest } from "../src/feature/pwa/manifest";
 import { ROUTES } from "../src/feature/router";
 import { assignToWindow } from "../src/utils/hydration";
 import { getClientAsString } from "../src/entry/_macro" with { type: "macro" };
+import { setRealm } from "../src/utils/realm";
 
 $`rm -rf ./${staticDir}`;
 
 const baseUrl = process.env.BASE_URL;
 const regex = /\/\w*/gm;
+
+setRealm("ssg");
 
 for (const route of ROUTES) {
   const path = route.path.match(regex)?.[0] ?? "/";

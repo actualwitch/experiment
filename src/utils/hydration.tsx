@@ -7,7 +7,7 @@ type HydrationMap = Record<string, unknown>;
 const id = "hydration";
 export const HYDRATION: unique symbol = Symbol.for(id);
 export const hydrationMap: HydrationMap =
-  (isClient() && (window as typeof window & { [HYDRATION]?: HydrationMap })[HYDRATION]) || {};
+  (typeof document !== "undefined" && (window as typeof window & { [HYDRATION]?: HydrationMap })[HYDRATION]) || {};
 
 export const assignToWindow = (id: string, value: string) => `window[Symbol.for("${id}")] = ${value};`;
 

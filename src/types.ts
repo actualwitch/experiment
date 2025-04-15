@@ -15,13 +15,14 @@ export type _Message =
   | ({ role: Static<typeof ObjectOrStringType> } & ObjectOrStringContent)
   | ({ role: Static<typeof ObjectType> } & ObjectContent);
 
-export type WithIdentity = { name?: string };
+export type WithIdentity = { name?: string; pronouns?: string };
 export type WithDirection = { fromServer?: boolean };
 export type WithTemplate = {
   template?: string;
 };
+export type WithTimestamp = { timestamp?: string };
 
-export type Message = _Message & WithDirection & WithTemplate & WithIdentity;
+export type Message = _Message & WithDirection & WithTemplate & WithIdentity & WithTimestamp;
 
 export type Role = "system" | "developer" | "user" | "assistant" | "tool" | "info" | "context" | "error";
 

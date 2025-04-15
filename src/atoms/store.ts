@@ -7,8 +7,9 @@ import type { FONT_STACKS } from "../style";
 import type { ExperimentWithMeta, Persona, SerialExperiment, _Message } from "../types";
 import { createFileStorage } from "../utils";
 import { divergentAtom, entangledAtom } from "../utils/entanglement";
-import { getRealm } from "../utils/realm";
+import { getRealm, isClient } from "../utils/realm";
 import type { ExperimentCursor } from "./experiment";
+import { match, P } from "ts-pattern";
 
 export type Store = {
   name?: string;
@@ -51,7 +52,7 @@ export const storeAtom = divergentAtom(
     }
   },
   () => {
-    if (getRealm() === "client") {
+    if (isClient()) {
       return atom<Store>(getInitialStore());
     }
   },
@@ -81,6 +82,15 @@ export const pronounsAtom = entangledAtom(
   "pronouns",
   focusAtom(storeAtom, (o) => o.prop("pronouns")),
 );
+
+export const identityAtom = atom((get) => {
+  const name = get(nameAtom);
+  const pronouns = get(pronounsAtom);
+  return match([name, pronouns])
+    .with([P.string, P.string], ([name, pronouns]) => `${name} (${pronouns})`)
+    .with([P.string, P.nullish], ([name]) => name)
+    .otherwise(() => undefined);
+});
 
 export const selectedProviderAtom = entangledAtom(
   "selected-provider",

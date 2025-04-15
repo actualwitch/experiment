@@ -12,6 +12,8 @@ import {
   isDarkModeAtom,
   isMetaExperimentAtom,
   isTransRightsAtom,
+  nameAtom,
+  pronounsAtom,
   setTokenAtom,
   tokensAtom,
 } from "../../atoms/store";
@@ -25,6 +27,8 @@ import { TextField } from "../ui/TextField";
 import { Switch } from "../ui/Switch";
 import { Checkbox } from "../ui/Checkbox";
 import { widthLimit } from "../../style/mixins";
+import { CUSTOM_OPTION, PRONOUNS } from "../../const";
+import { pronounOptions } from "./NewExperiment/Onboarding";
 
 const StyledForm = styled.form`
   display: flex;
@@ -152,6 +156,9 @@ export default function Parameters() {
   const [selectedProvider, setSelectedProvider] = useState<ProviderType | null>(null);
   const [token, setToken] = useState("");
 
+  const [name, setName] = useAtom(nameAtom);
+  const [pronouns, setPronouns] = useAtom(pronounsAtom);
+
   const submit = () => {
     if (!selectedProvider || !token) {
       return;
@@ -216,6 +223,30 @@ export default function Parameters() {
           </Switch>
         </Row>
         <h3>Semantic</h3>
+        <Row>
+          <header>Name</header>
+          <TextField value={name} onChange={setName} />
+        </Row>
+        <Row>
+          <header>Pronouns</header>
+
+          {pronouns === undefined || PRONOUNS.includes(pronouns) ? (
+            <Select
+              optional
+              selectedKey={pronouns}
+              onSelectionChange={(option) => setPronouns(String(option))}
+              items={pronounOptions}
+            >
+              {(item) => (
+                <Item textValue={item.name}>
+                  {item.name === CUSTOM_OPTION ? <i>{item.name}</i> : <div>{item.name}</div>}
+                </Item>
+              )}
+            </Select>
+          ) : (
+            <TextField optional value={pronouns} onChange={setPronouns} placeholder="( custom )" autoFocus />
+          )}
+        </Row>
         <Row>
           <header>MetaExperiment</header>
           <Switch value={isMetaExperiment} onChange={setIsMetaExperiment}>

@@ -297,6 +297,7 @@ export const appStyle = [
     :root {
       background-color: ${Palette.white};
       color: ${Palette.black};
+      transition: ${["background-color", "color"].map((prop) => `${prop} 100ms ease-in`).join(", ")};
       font-weight: normal;
       hyphens: auto;
     }
@@ -389,8 +390,9 @@ export const appStyle = [
     ${input}
 
     blockquote {
-      border-left: 2px solid currentColor;
-      padding-left: ${bs(1 / 4)};
+      border-left: 4px solid currentColor;
+      padding-top: ${bs(1 / 4)};
+      padding-left: ${bs(1 / 2)};
     }
   `,
 ];
@@ -442,6 +444,7 @@ export const Slideover = styled.aside<{ isOpen: boolean; from?: "left" | "right"
   transition: transform 100ms ease-out;
   display: flex;
   flex-direction: column;
+  min-width: 200px;
 
   & > * {
     flex: 1;
@@ -452,7 +455,7 @@ export const Slideover = styled.aside<{ isOpen: boolean; from?: "left" | "right"
       css`
         border-${p.from === "left" ? "right" : "left"}: 1px solid #ffffff1c;
         background-color: color(display-p3 0.1 0.1 0.1 / 0.1);
-        backdrop-filter: blur(18px) brightness(2) contrast(0.9);
+        backdrop-filter: blur(38px) brightness(1.6) contrast(0.8);
       `,
     )}
   ${(p) =>

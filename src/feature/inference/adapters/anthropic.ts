@@ -2,40 +2,43 @@ import type {
   MessageCreateParams,
   MessageCreateParamsNonStreaming,
   MessageParam,
+  Model,
   Tool,
 } from "@anthropic-ai/sdk/resources/index.mjs";
-import { tokenLimit } from "../../../const";
-import type { ExperimentFunction, Message } from "../../../types";
+import { newLine, tokenLimit } from "../../../const";
+import { StringType, type ExperimentFunction, type Message } from "../../../types";
 import { createXMLContextFromFiles, iterateDir } from "../../../utils/context";
 import { experimentFunctionToAnthropicTool, tryParseFunctionSchema } from "../function";
+import type { InferenceConfig } from "../types";
 
 export async function experimentToAnthropic(
   experiment: Message[],
-  { max_tokens = tokenLimit }: { max_tokens?: number } = {},
-): Promise<MessageCreateParams | MessageCreateParamsNonStreaming> {
+  config: InferenceConfig,
+): Promise<MessageCreateParams> {
   let system = "";
   const messages: MessageParam[] = [];
   const tools: Tool[] = [];
-  for (const { role, content, fromServer } of experiment) {
-    if (role === "system") {
-      system += `${content}
-`;
-      continue;
-    }
-    if (role === "user" || role === "assistant") {
-      if (typeof content === "object") {
-        messages.push({ role, content: JSON.stringify(content) });
-      }
-      if (typeof content === "string") {
-        messages.push({ role, content });
-      }
-      continue;
-    }
+  for (const { role, content, fromServer, name, pronouns } of experiment) {
     if (role === "context") {
       const directory = content.directory as string;
       const files = await iterateDir(directory);
       const context = await createXMLContextFromFiles(files, directory);
       messages.push({ role: "user", content: context });
+      continue;
+    }
+    if (role === "system") {
+      system += `${content}${newLine}`;
+      continue;
+    }
+    if (role === "user" && typeof content === "string") {
+      const message = { role, content };
+      const identity = pronouns ? `${name} (${pronouns})` : name;
+      message.content = identity ? `${identity}:${newLine}${message.content}` : message.content;
+      messages.push(message);
+      continue;
+    }
+    if (role === "assistant") {
+      messages.push({ role, content: typeof content === "object" ? JSON.stringify(content) : content });
       continue;
     }
     if (role === "tool" && !fromServer) {
@@ -51,9 +54,9 @@ export async function experimentToAnthropic(
     messages,
     tools,
     tool_choice,
-    model: "claude-3-5-haiku-20241022",
-    temperature: 0.0,
-    max_tokens,
+    max_tokens: config.n_tokens,
+    model: config.model,
+    temperature: config.temperature,
     stream: true,
   };
 }

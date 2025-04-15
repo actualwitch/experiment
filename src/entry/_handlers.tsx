@@ -13,6 +13,7 @@ import type { Nullish } from "../types";
 import { getClientAsString } from "./_macro" with { type: "macro" };
 import { paramsAtom, routeAtom, ROUTES } from "../feature/router";
 import { store } from "../store";
+import { assignToWindow } from "../utils/hydration";
 
 export const getStaticHtml = async (
   location: string,
@@ -76,13 +77,12 @@ export const doStreamingSSR = async (request: Request) => {
   const matches = matchRoutes(ROUTES, url.pathname);
   if (matches && matches.length === 1) {
     const [{ route, params }] = matches;
-    console.log("setting ", JSON.stringify({ route, params }, null, 2));
     store.set(routeAtom, route);
     store.set(paramsAtom, params);
   }
   const stream = await renderToReadableStream(
     <StaticRouter location={url.pathname}>
-      <Shell />
+      <Shell additionalScripts={[assignToWindow("REALM", `"SSR"`)]} />
     </StaticRouter>,
     {
       signal: request.signal,

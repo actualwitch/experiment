@@ -54,6 +54,7 @@ export const ChatMessage = ({
   let contentType: string | undefined;
   const align = getAlign(message.fromServer ?? false, experimentLayout);
   const viewStyle = {
+    display: "grid",
     float: align,
     textAlign: typeof message.content === "object" ? align : undefined,
     width: "initial",
@@ -119,8 +120,10 @@ export const ChatMessage = ({
     setIsMounted(true);
   }, []);
 
-  const header = match([message.role, message.fromServer])
-    .with(["tool", P.nullish], () => "function")
+  const header = match([message.role, message.fromServer, message.name])
+    .with(["tool", P.nullish, P._], () => "function")
+    .with(["tool", true, P._], () => "call")
+    .with(["user", P._, P.string], ([role, fromServer, name]) => name)
     .otherwise(([role]) => role);
 
   return (
@@ -174,16 +177,12 @@ export function ChatPreview({
   empty = <Banner>∅</Banner>,
 }: {
   experiment: Experiment;
-  autoScroll?: boolean;
-  autoScrollAnchor?: "first" | "last";
   collapseTemplates?: boolean;
   empty?: ReactNode;
 }) {
-  const [selection, setSelection] = useAtom(selectionAtom);
   const [isDarkMode] = useAtom(isDarkModeAtom);
   const [layout] = useAtom(layoutAtom);
   const [isRunning] = useAtom(isRunningAtom);
-  const resetMessage = useSetAtom(resetMessageAtom);
   const computedMessages = useMemo(() => {
     const messages = Array.isArray(experiment) ? experiment : experiment.messages;
     const keyed = messages.map((message, index) => {
@@ -201,6 +200,8 @@ export function ChatPreview({
     return keyed;
   }, [experiment, isRunning]);
 
+  const setSelection = useSetAtom(selectionAtom);
+  const resetMessage = useSetAtom(resetMessageAtom);
   useHandlers({
     Escape: () => {
       setSelection([]);

@@ -9,10 +9,13 @@ import { experimentAtom } from "../../../atoms/experiment";
 import { personasAtom } from "../../../atoms/persona";
 import { pwdAtom } from "../../../atoms/server";
 import {
+  identityAtom,
   isDarkModeAtom,
   isOnboardedAtom,
   modelAtom,
+  nameAtom,
   parentAtom,
+  pronounsAtom,
   selectedProviderAtom,
   templatesAtom,
 } from "../../../atoms/store";
@@ -21,7 +24,7 @@ import { type WithDarkMode, withDarkMode } from "../../../style/darkMode";
 import { Palette } from "../../../style/palette";
 import { type Message, PossibleObjectType, type Role, RoleOptions } from "../../../types";
 import { useHandlers } from "../../../utils/keyboard";
-import { hasBackend } from "../../../utils/realm";
+import { getRealm, hasBackend } from "../../../utils/realm";
 import { ChatPreview } from "../../chat/chat";
 import {
   availableProviderOptionsAtom,
@@ -40,11 +43,12 @@ import { createCancelEditingButton, createSelectionEditButtons } from "../../ui/
 import { Page } from "../../ui/Page";
 import { TextArea } from "../../ui/TextArea";
 import { Onboarding } from "./Onboarding";
+import { EXPERIMENT_MODE } from "../../../const/dynamic";
 
 const baseMargin = 1 / 2;
 
 export const inlineButtonModifier = css`
-  background: transparent;
+  background-color: transparent;
   color: inherit;
   padding-top: 0;
   padding-bottom: 0;
@@ -275,7 +279,7 @@ export const actionsAtom = atom((get) => {
     });
     counter++;
   }
-  if (hasBackend() && get(hasLoadedAtom)) {
+  if (hasBackend()) {
     config.Actions.push({
       Special: {
         buttons: [
@@ -394,6 +398,9 @@ export default function () {
     setIsActionPanelOpen(false);
   }, [experiment, isRunning, isEditing, selection]);
 
+  const [name] = useAtom(nameAtom);
+  const [pronouns] = useAtom(pronounsAtom);
+
   const submit = () => {
     let object: object | undefined;
     try {
@@ -404,7 +411,12 @@ export default function () {
       setExperiment(
         experiment.map((item, i) => {
           if (i === selection[0]) {
-            const newMessage: Message = { role, content: object || message, fromServer: item.fromServer };
+            const newMessage: Message = {
+              ...item,
+              role,
+              content: object || message,
+              fromServer: item.fromServer,
+            };
             return newMessage;
           }
           return item;
@@ -413,13 +425,14 @@ export default function () {
       resetMessage();
       return;
     }
+    const identity = role === "user" ? { name, pronouns } : {};
     if (object && PossibleObjectType.guard(role)) {
-      setExperiment([...experiment, { role, content: object }]);
+      setExperiment([...experiment, { ...identity, role, content: object }]);
       resetMessage();
       return;
     }
     if (message) {
-      setExperiment([...experiment, { role, content: message }]);
+      setExperiment([...experiment, { ...identity, role, content: message }]);
       resetMessage();
       return;
     }
@@ -451,7 +464,7 @@ export default function () {
     </Page>
   ) : (
     <Page ref={pageRef}>
-      <ChatPreview experiment={experiment} autoScroll />
+      <ChatPreview experiment={experiment} />
       <Block isDarkMode={isDarkMode} isHidden={isNavPanelOpen || isActionPanelOpen}>
         <ActionRow>
           <select value={role} onChange={(e) => setRole(e.target.value as Role)} style={{ flex: 1 }}>

@@ -19,7 +19,7 @@ export const ChatContainer = styled.div<WithDarkMode & WithLayout>`
   flex-direction: column;
   justify-content: end;
 
-  :not(pre) > code {
+  *:not(pre) > code {
     border-radius: ${bs(Palette.borderSpan)};
     padding: 0 ${bs(1 / 10)};
   }
@@ -101,6 +101,7 @@ export const MessageComponent = styled.article<
       padding-${alignComplement}: ${bs(1 / 4)};
       text-align: ${align};
       cursor: pointer;
+      word-wrap: break-word;
 
       & > * {
         padding-${align}: ${bs(3 / 8)};
@@ -116,11 +117,6 @@ export const MessageComponent = styled.article<
       
       &:hover > *:not(header) {
         border-color: ${isDarkMode ? `${Palette.white}40` : "#22222240"};
-      }
-
-      & > * {
-        display: grid;
-        word-wrap: break-word;
       }
 
       li ul,
@@ -191,6 +187,9 @@ export const MessageComponent = styled.article<
       );
       *::selection {
         background-color: ${accentColor};
+      }
+      blockquote {
+        border-color: ${transparentize(0.5, accentColor)};
       }
     `);
     if (isSelected) {

@@ -3,7 +3,14 @@ import { useAtom, useSetAtom } from "jotai";
 import { useState } from "react";
 import { Item } from "react-stately";
 
-import { isOnboardedAtom, nameAtom, pronounsAtom, setTokenAtom, tokensAtom } from "../../../atoms/store";
+import {
+  isMetaExperimentAtom,
+  isOnboardedAtom,
+  nameAtom,
+  pronounsAtom,
+  setTokenAtom,
+  tokensAtom,
+} from "../../../atoms/store";
 import { CUSTOM_OPTION, PRONOUNS, name } from "../../../const";
 import { bs, Button } from "../../../style";
 import { hasBackend } from "../../../utils/realm";
@@ -12,6 +19,8 @@ import { Select } from "../../ui/Select";
 import { Switch } from "../../ui/Switch";
 import { TextField } from "../../ui/TextField";
 import { Underline } from "../../../style/utils";
+import { DesktopOnly } from "../../ui/Mobile";
+import { tryOr } from "true-myth/result";
 
 export const pronounOptions = withIds([...PRONOUNS, CUSTOM_OPTION]);
 
@@ -34,7 +43,26 @@ export const MarginTop = styled.div`
   margin-top: ${bs(3 / 2)};
 `;
 
+const parseString = (input: string) => {
+  return tryOr("Couldn't parse config", () => {
+    const parsed = JSON.parse(input) as {
+      mcpServers: {
+        [name: string]: {
+          env?: Record<string, string>;
+          command: string;
+          args?: string[];
+        };
+      };
+    };
+    const [name] = Object.keys(parsed.mcpServers);
+    const config = parsed.mcpServers[name];
+    return { name, ...config };
+  });
+};
+
 export const Onboarding = () => {
+  const [metaExperiment] = useAtom(isMetaExperimentAtom);
+
   const [userName, setUserName] = useAtom(nameAtom);
   const [pronouns, setPronouns] = useAtom(pronounsAtom);
   const setIsOnboarded = useSetAtom(isOnboardedAtom);
@@ -45,19 +73,23 @@ export const Onboarding = () => {
   const [tokens, setTokens] = useAtom(tokensAtom);
 
   const [selectedTransport, setSelectedTransport] = useState<"stdio" | "http" | null>(null);
+  const [mcpName, setMcpName] = useState("");
+  const [mcpCommandOrUrl, setMcpCommandOrUrl] = useState("");
 
   return (
     <>
-      <h2>
-        Let's start the <Underline>{name}</Underline>
-      </h2>
+      <DesktopOnly>
+        <h2>
+          Let's start the <Underline>{name}</Underline>
+        </h2>
+      </DesktopOnly>
 
       <h5>
         Welcome, <i>{userName || "User"}</i>.
       </h5>
       <OnboardingForm>
         <TextField label="Name" optional value={userName || ""} onChange={(val) => setUserName(val)} />
-        {pronouns === undefined || PRONOUNS.includes(pronouns) ?
+        {pronouns === undefined || PRONOUNS.includes(pronouns) ? (
           <Select
             label="Pronouns"
             optional
@@ -67,21 +99,20 @@ export const Onboarding = () => {
           >
             {(item) => (
               <Item textValue={item.name}>
-                {item.name === CUSTOM_OPTION ?
-                  <i>{item.name}</i>
-                : <div>{item.name}</div>}
+                {item.name === CUSTOM_OPTION ? <i>{item.name}</i> : <div>{item.name}</div>}
               </Item>
             )}
           </Select>
-        : <TextField
+        ) : (
+          <TextField
             label="Pronouns"
             optional
             value={pronouns}
-            onChange={(val) => setPronouns(val)}
+            onChange={setPronouns}
             placeholder="( custom )"
             autoFocus
           />
-        }
+        )}
       </OnboardingForm>
 
       {Object.keys(tokens).length !== 3 && (
@@ -121,23 +152,50 @@ export const Onboarding = () => {
         </>
       )}
 
-      {/* {Object.keys(tokens).length > 0 && (
+      {Object.keys(tokens).length > 0 && (
         <>
-          <h3>Add MCP</h3>
-          <Margin>
-            <Switch value={selectedTransport} onChange={setSelectedTransport}>
-              {[
-                {
-                  name: "⌨️ stdio",
-                  value: "stdio",
-                },
-                {
-                  name: "🛰️ HTTP",
-                  value: "http",
-                },
-              ]}
-            </Switch>
-          </Margin>
+          {/* {metaExperiment && (
+            <>
+              <h3>Add MCP</h3>
+              <Margin>
+                <Switch value={selectedTransport} onChange={setSelectedTransport}>
+                  {[
+                    {
+                      name: "⌨️ stdio",
+                      value: "stdio",
+                    },
+                    {
+                      name: "🌐 HTTP",
+                      value: "http",
+                    },
+                  ]}
+                </Switch>
+              </Margin>
+            </>
+          )} */}
+
+          {selectedTransport && (
+            <OnboardingForm>
+              <TextField label="Name" type="text" value={mcpName} onChange={setMcpName} />
+              <TextField
+                label={selectedTransport === "stdio" ? "Command" : "URL"}
+                type="text"
+                placeholder={selectedTransport === "stdio" ? "Paste command or Claude Desktop config" : undefined}
+                value={mcpCommandOrUrl}
+                onChange={setMcpCommandOrUrl}
+              />
+              <p>
+                <Button
+                  onClick={() => {
+                    setSelectedTransport(null);
+                  }}
+                >
+                  Add
+                </Button>
+              </p>
+            </OnboardingForm>
+          )}
+
           <MarginTop>
             <Button
               onClick={() => {
@@ -148,7 +206,7 @@ export const Onboarding = () => {
             </Button>
           </MarginTop>
         </>
-      )} */}
+      )}
     </>
   );
 };

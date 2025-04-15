@@ -1,4 +1,6 @@
 import { Literal, Union } from "runtypes";
+import type { Message } from "../../types";
+import type { ReasoningEffort } from "openai/resources/shared.mjs";
 
 export function withIds<T extends string>(items: T[] | readonly T[]) {
   return items.map((name) => ({
@@ -16,6 +18,10 @@ export const providerLabels = {
 } satisfies { [K in ProviderType]: string };
 
 const GPT_4_5 = Literal("gpt-4.5-preview");
+const GPT_4_1 = Literal("gpt-4.1");
+const GPT_4_1_mini = Literal("gpt-4.1-mini");
+const GPT_4_1_nano = Literal("gpt-4.1-nano");
+const ChatGPT = Literal("chatgpt-4o-latest");
 const GPT_4o = Literal("gpt-4o");
 const GPT_4o_mini = Literal("gpt-4o-mini");
 const GPT_4 = Literal("gpt-4");
@@ -28,6 +34,10 @@ const o1_mini = Literal("o1-mini");
 
 export const OpenAIModel = Union(
   GPT_4_5,
+  GPT_4_1,
+  GPT_4_1_mini,
+  GPT_4_1_nano,
+  ChatGPT,
   GPT_4o,
   GPT_4o_mini,
   GPT_4,
@@ -66,6 +76,10 @@ export const modelOptions = {
 export const modelLabels = {
   openai: {
     [GPT_4_5.value]: "GPT-4.5",
+    [GPT_4_1.value]: "GPT-4.1",
+    [GPT_4_1_mini.value]: "GPT-4.1 Mini",
+    [GPT_4_1_nano.value]: "GPT-4.1 Nano",
+    [ChatGPT.value]: "ChatGPT",
     [GPT_4o.value]: "GPT-4o",
     [GPT_4o_mini.value]: "GPT-4o Mini",
     [GPT_4.value]: "GPT-4",
@@ -95,3 +109,15 @@ export const isReasoningModel = (model: string) =>
 
 export const isReasoningEffortSupported = (model: string) =>
   [o1_preview.value, o3_mini.value, o1.value].includes(model);
+
+export type InferenceConfig = {
+  stream: boolean;
+  token: string;
+  provider: ProviderType;
+  model: string;
+  temperature: number;
+  reasoningEffort?: ReasoningEffort;
+  n_tokens: number;
+  messages: Message[];
+  prefill?: Message;
+};

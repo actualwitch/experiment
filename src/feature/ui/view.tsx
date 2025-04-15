@@ -241,6 +241,10 @@ const renderer: Partial<ReactRenderer> = {
   code(snippet, lang) {
     return <Code key={this.elementId} language={lang} value={snippet} />;
   },
+  heading(children, level) {
+    const Heading = `h${Math.min(6, level + 3)}` as "h4" | "h5" | "h6";
+    return <Heading key={this.elementId}>{children}</Heading>;
+  },
   paragraph(children) {
     return <Paragraph key={this.elementId}>{children}</Paragraph>;
   },

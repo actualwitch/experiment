@@ -65,6 +65,7 @@
     "marked": "latest",
     "marked-react": "latest",
     "monaco-editor": "latest",
+    "nanoid": "latest",
     "openai": "latest",
     "polished": "latest",
     "react": "canary",

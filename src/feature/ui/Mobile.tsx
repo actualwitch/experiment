@@ -24,51 +24,36 @@ export const MobileHeaderContainer = styled.h2<WithDarkMode>`
   position: absolute;
   cursor: pointer;
   left: ${bs(1 / 4)};
-  top: ${bs(2 / 3)};
+  top: ${bs()};
   z-index: 1;
   user-select: none;
 
-  padding: ${bs(1 / 3)} ${bs(3 / 2)} ${bs(1 / 2)} ${bs()};
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   display: inline-block;
   max-width: calc(100vw - 52px);
 
-  mask: radial-gradient(
-    ellipse at center,
-    rgb(255, 255, 255),
-    rgb(255, 255, 255) 56%,
-    rgba(255, 255, 255, 0.2) 74%,
-    rgba(255, 255, 255, 0) 100%
-  );
-
-  ${(p) =>
-    p.isDarkMode
-      ? css`
-        backdrop-filter: blur(1px) brightness(1.1);
-      `
-      : css`
-        backdrop-filter: blur(1px);
-      `}
-
   span {
     text-decoration: underline;
     text-decoration-thickness: auto;
     text-underline-offset: 4px;
-    text-shadow:
-      ${Palette.white} 1px 2px 14px,
-      ${Palette.white} 0px 0px 24px;
   }
+
+  & > div {
+    padding: 0 ${bs(3 / 2)} ${bs(1 / 2)} ${bs()};
+  }
+
+  text-shadow:
+    ${Palette.white}50 -1px -1px 1px,
+    ${Palette.white}50 1px 1px 1px;
   ${(p) =>
     withDarkMode(
       p.isDarkMode,
       css`
-        span {
-          text-shadow:
-            ${Palette.black} 1px 2px 14px,
-            ${Palette.black} 0px 0px 24px;
-        }
+        text-shadow:
+          ${Palette.black}50 -1px -1px 1px,
+          ${Palette.black}50 1px 1px 1px;
       `,
     )}
 `;
@@ -82,34 +67,80 @@ export const MobileAction = styled.div`
 `;
 
 const MenuButton = styled.button<WithDarkMode>`
-    position: relative;
-    padding: ${bs(1 / 4)};
+  position: relative;
+  padding: ${bs(1 / 4)};
+
+  svg {
+    filter: drop-shadow(-1px -1px 1px ${Palette.white}50) drop-shadow(1px 1px 1px ${Palette.white}50);
+  }
+
+  text-shadow:
+    ${Palette.white}50 -1px -1px 1px,
+    ${Palette.white}50 1px 1px 1px;
 
   ${(p) =>
     withDarkMode(
       p.isDarkMode,
       css`
         color: white;
+        text-shadow:
+          ${Palette.black}50 -1px -1px 1px,
+          ${Palette.black}50 1px 1px 1px;
+
+        svg {
+          filter: drop-shadow(-1px -1px 1px ${Palette.black}50) drop-shadow(1px 1px 1px ${Palette.black}50);
+        }
       `,
     )}
-    ${increaseSpecificity()} {
+  ${increaseSpecificity()} {
+    background: transparent;
+    :hover {
       background: transparent;
-      :hover {
-        background: transparent;
-      }
     }
-    svg {
-      margin-bottom: 0;a
-    }
-    span {
-      font-size: 11px;
-      position: absolute;
-      right: 2px;
-      top: 6px;
-      text-shadow: none;
-      border-radius: 100%;
-      font-weight: 600;
-    }
+  }
+  svg {
+    margin-bottom: 0;
+  }
+  span {
+    font-size: 11px;
+    position: absolute;
+    right: 2px;
+    top: 6px;
+    text-shadow: none;
+    border-radius: 100%;
+    font-weight: 600;
+  }
+`;
+
+const Container = styled.div<WithDarkMode>`
+  position: relative;
+
+  ::before {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+
+    mask: radial-gradient(
+      ellipse at center,
+      rgb(255, 255, 255),
+      rgb(255, 255, 255) 56%,
+      rgba(255, 255, 255, 0.2) 74%,
+      rgba(255, 255, 255, 0) 100%
+    );
+
+    ${(p) =>
+      p.isDarkMode
+        ? css`
+          backdrop-filter: blur(1px) brightness(1.1);
+        `
+        : css`
+          backdrop-filter: blur(1px);
+        `}
+  }
 `;
 
 export const MobileHeader = () => {
@@ -133,19 +164,23 @@ export const MobileHeader = () => {
           setIsNavPanelOpened(!isNavPanelOpen);
         }}
       >
-        {icon} <span>{title}</span>
+        <Container isDarkMode={isDarkMode}>
+          {icon} <span>{title}</span>
+        </Container>
       </MobileHeaderContainer>
       <MobileAction>
         {actions?.counter ? (
-          <MenuButton
-            isDarkMode={isDarkMode}
-            onClick={() => {
-              setIsActionPanelOpened(!isActionsPanelOpen);
-            }}
-          >
-            <Menu size={32} />
-            <span>{actions.counter}</span>
-          </MenuButton>
+          <Container isDarkMode={isDarkMode}>
+            <MenuButton
+              isDarkMode={isDarkMode}
+              onClick={() => {
+                setIsActionPanelOpened(!isActionsPanelOpen);
+              }}
+            >
+              <Menu size={32} />
+              <span>{actions.counter}</span>
+            </MenuButton>
+          </Container>
         ) : null}
       </MobileAction>
     </>

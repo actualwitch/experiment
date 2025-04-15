@@ -12,6 +12,8 @@ import { increaseSpecificity, widen } from "../../style/utils";
 import { hasBackend } from "../../utils/realm";
 import { isRunningAtom } from "../inference/atoms";
 import { inlineButtonModifier } from "../router/NewExperiment/NewExperiment";
+import { systemThemeAtom } from "../../atoms/darkMode";
+import { match, P } from "ts-pattern";
 
 const ActionRow = styled.div`
   display: flex;
@@ -25,11 +27,17 @@ const ActionRow = styled.div`
     text-decoration: underline;
     text-shadow: none;
 
-    ${inlineButtonModifier}
-
     :hover {
       background: initial;
       color: ${Palette.accent};
+    }
+  }
+  ${
+    /* it may look stupid, but this exact construct is required because you can't increase specificity of element type selector, but class works */ ""
+  }
+  ${increaseSpecificity()} {
+    button {
+      ${inlineButtonModifier}
     }
   }
 `;
@@ -45,12 +53,17 @@ export function Code({ language, value }: { language?: string; value?: ReactNode
   const [isDarkMode] = useAtom(isDarkModeAtom);
   const [isRunning] = useAtom(isRunningAtom);
   const [htmlContent, setHtmlContent] = useState<string | null>(null);
+  const [systemTheme] = useAtom(systemThemeAtom);
 
   useEffect(() => {
     if (isRunning || typeof value !== "string" || !language) return;
+    const theme = match(isDarkMode)
+      .with(P.nullish, () => systemTheme || "light")
+      .with(false, () => "light")
+      .otherwise(() => "dark");
     codeToHtml(value, {
       lang: language,
-      theme: isDarkMode ? "laserwave" : "material-theme-lighter",
+      theme: theme === "dark" ? "laserwave" : "material-theme-lighter",
       transformers: [transformerColorizedBrackets()],
     }).then((content) => setHtmlContent(content));
   }, [isRunning, language, value]);

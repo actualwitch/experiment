@@ -26,6 +26,7 @@ import { DesktopOnly, MobileHeader, MobileOnly } from "./feature/ui/Mobile";
 import type { Nullish } from "./types";
 import { Page } from "./feature/ui/Page";
 import { widthLimit } from "./style/mixins";
+import { trackSystemEffect } from "./atoms/darkMode";
 
 const Meta = () => {
   const [title] = useAtom(pageTitleAtom);
@@ -44,18 +45,23 @@ const Paragraph = styled.p(widthLimit);
 
 const App = () => {
   const [styles] = useAtom(stylesAtom);
+
   useAtom(trackVisibleAtom);
   useAtom(subscriptionAtom);
   useAtom(layoutTrackerAtom);
+  useAtom(trackSystemEffect);
+
   const [layout] = useAtom(layoutAtom);
   const [isDarkMode] = useAtom(isDarkModeAtom);
   const [isTransRights] = useAtom(isTransRightsAtom);
-  const { pathname } = useLocation();
+
   const navigate = useNavigate();
   const setNavigate = useSetAtom(navigateAtom);
   useEffect(() => {
     setNavigate(() => navigate);
   }, [navigate]);
+
+  const { pathname } = useLocation();
   const [isNavPanelOpen, setIsNavPanelOpen] = useAtom(isNavPanelOpenAtom);
   const [isActionPanelOpen, setIsActionPanelOpen] = useAtom(isActionPanelOpenAtom);
   const setSelection = useSetAtom(selectionAtom);
@@ -64,6 +70,7 @@ const App = () => {
     setIsActionPanelOpen(false);
     setSelection([]);
   }, [pathname]);
+
   return (
     <Suspense fallback={null}>
       <Container layout={layout}>
@@ -108,17 +115,6 @@ const Context = ({ children }: PropsWithChildren) => {
   );
 };
 
-const SpaNormalizer = ({ children }: PropsWithChildren) => {
-  if (getRealm() === "ssg") {
-    const [shouldRender, setShouldRender] = useState(false);
-    useEffect(() => {
-      setShouldRender(true);
-    }, []);
-    if (!shouldRender) return null;
-  }
-  return children;
-};
-
 export const Shell = ({
   bootstrap,
   additionalScripts,
@@ -143,9 +139,7 @@ export const Shell = ({
       </head>
       <body>
         <Context>
-          <SpaNormalizer>
-            <App />
-          </SpaNormalizer>
+          <App />
         </Context>
         <Suspense fallback={null}>
           <ErrorBoundary>

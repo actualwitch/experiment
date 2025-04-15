@@ -22,8 +22,10 @@ import {
   modelLabels,
   modelOptions,
   providerLabels,
+  type InferenceConfig,
   type ProviderType,
 } from "./types";
+import { tokenLimit } from "../../const";
 
 export const availableProviderOptionsAtom = atom((get) => {
   const tokens = get(tokensAtom);
@@ -71,358 +73,266 @@ export const isReasoningEffortSupportedAtom = atom((get) => {
 export const resolveToken = async (token: string) => {
   if (token.startsWith("op:")) {
     const resolvedToken = await spawn("op", ["read", token]);
-    return resolvedToken.unwrapOr(token);
+    return resolvedToken.unwrapOr(null);
   }
   return token;
 };
 
-const saveExperimentAtom = entangledAtom(
-  { name: "save-experiment" },
-  atom(null, async (get, set) => {
-    const experiment: Message[] = get(experimentAtom);
-    if (!experiment.length) return;
-    set(createExperiment, experiment);
-  }),
-);
+export const saveExperimentAtom = atom(null, (get, set) => {
+  const experiment = get(experimentAtom);
+  if (experiment.length > 0) {
+    const { id } = set(createExperiment, experiment);
+    // set parent id if unset
+    const parent = get(parentAtom);
+    if (!parent) {
+      set(parentAtom, id);
+    }
+  }
+});
 
 export const runInferenceAtom = entangledAtom(
   { name: "run-inference" },
   atom(null, async (get, set) => {
     const provider = get(selectedProviderAtom);
-    if (!provider) return;
-    set(isRunningAtom, true);
     const experiment = get(experimentAtom);
+    if (!provider || experiment.length === 0) return;
     const noErrors = experiment.filter((msg) => msg.role !== "error");
     if (experiment.length !== noErrors.length) {
       set(experimentAtom, noErrors);
     }
 
+    set(isRunningAtom, true);
+
     try {
+      const model = get(modelAtom);
+      if (!model) {
+        throw new Error("Model not set");
+      }
+
+      const tokenOrReference = get(focusAtom(storeAtom, (o) => o.prop("tokens").prop(provider)));
+      if (!tokenOrReference) {
+        throw new Error(`No ${provider} token`);
+      }
+
+      const resolvedToken = await resolveToken(tokenOrReference);
+      if (!resolvedToken) {
+        throw new Error("Could not resolve token");
+      }
+
+      const experiment: Message[] = get(experimentAtom);
+
+      const config: InferenceConfig = {
+        provider,
+        model,
+        temperature: get(tempAtom),
+        reasoningEffort: get(effortAtom),
+        messages: experiment,
+        n_tokens: tokenLimit,
+        token: resolvedToken,
+        stream: true,
+      };
+
+      if (experiment.length > 0) {
+        // support prefilling assistant response
+        if (experiment.at(-1)?.role === "assistant") {
+          config.prefill = experiment.pop();
+        }
+      }
+
       switch (provider) {
         case "anthropic": {
-          await set(runExperimentAsAnthropic);
+          await set(runExperimentAsAnthropic, config);
           break;
         }
         case "openai": {
-          await set(runExperimentAsOpenAi);
+          await set(runExperimentAsOpenAi, config);
           break;
         }
         case "mistral": {
-          await set(runExperimentAsMistral);
+          await set(runExperimentAsMistral, config);
           break;
         }
       }
-      const experiment: Message[] = get(experimentAtom);
-      if (experiment.length > 0) {
-        const { id } = set(createExperiment, experiment);
-        const parent = get(parentAtom);
-        if (!parent) {
-          set(parentAtom, id);
-        }
-      }
+      set(saveExperimentAtom);
     } catch (content) {
-      const experiment = get(experimentAtom);
-      set(experimentAtom, [...experiment, { role: "error", fromServer: true, content }]);
+      set(experimentAtom, [...get(experimentAtom), { role: "error", fromServer: true, content }]);
     } finally {
       set(isRunningAtom, false);
     }
   }),
 );
 
-export const testStreaming = entangledAtom(
-  { name: "test-streaming" },
-  atom(null, async (get, set, content: string) => {
-    const experiment = get(experimentAtom);
+export const runExperimentAsAnthropic = atom(null, async (get, set, config: InferenceConfig) => {
+  const { temperature, token, n_tokens, messages: experiment, model, prefill } = config;
+  const anthropicExperiment = await experimentToAnthropic(experiment, config);
 
-    let index = 0;
-    const int = setInterval(() => {
-      if (index >= content.length) {
-        clearInterval(int);
-        set(saveExperimentAtom);
-        return;
-      }
-      const advanceBy = 1;
-      index += advanceBy;
-      set(experimentAtom, [
-        ...experiment,
-        {
-          role: "assistant",
-          fromServer: true,
-          content: content.slice(0, index),
-        },
-      ]);
-    }, 10);
-  }),
-);
+  const anthropic = new Anthropic({
+    apiKey: token,
+    dangerouslyAllowBrowser: hasBackend() ? undefined : true,
+  });
 
-export const runExperimentAsAnthropic = entangledAtom(
-  { name: "run-experiment-anthropic" },
-  atom(null, async (get, set) => {
-    const provider = "anthropic" as const;
-    const tokenAtom = focusAtom(storeAtom, (o) => o.prop("tokens").prop(provider));
-    const tokenOrReference = get(tokenAtom);
-    if (!tokenOrReference) {
-      console.error(`No ${provider} token`);
-      return;
-    }
-    const resolvedToken = await resolveToken(tokenOrReference);
-    if (!resolvedToken) {
-      console.error("No resolved token");
-      return;
-    }
-
-    const experiment = get(experimentAtom);
-    if (!experiment || experiment.length === 0) {
-      console.error("No experiment");
-      return;
-    }
-
-    const { stream, ...experimentAsAnthropic } = await experimentToAnthropic(experiment);
-
-    const anthropic = new Anthropic({
-      apiKey: resolvedToken,
-      dangerouslyAllowBrowser: hasBackend() ? undefined : true,
-    });
-    if (stream) {
-      const stream = await anthropic.messages.create({
-        ...experimentAsAnthropic,
-        stream: true,
-        temperature: get(tempAtom),
-        model: get(modelAtom) ?? "claude-3-5-sonnet-latest",
+  const stream = await anthropic.messages.create(anthropicExperiment);
+  const contentBlocks: Message[] = prefill ? [prefill] : [];
+  for await (const messageStreamEvent of stream) {
+    if (messageStreamEvent.type === "content_block_start") {
+      contentBlocks.push({
+        role: messageStreamEvent.content_block.type === "text" ? "assistant" : "tool",
+        fromServer: true,
+        content: "",
       });
-      const contentBlocks: Message[] = [];
-      for await (const messageStreamEvent of stream) {
-        if (messageStreamEvent.type === "content_block_start") {
-          contentBlocks.push({
-            role: messageStreamEvent.content_block.type === "text" ? "assistant" : "tool",
+    }
+    if (messageStreamEvent.type === "content_block_delta") {
+      const block = contentBlocks[messageStreamEvent.index];
+      if (block && messageStreamEvent.delta.type === "text_delta") {
+        block.content += messageStreamEvent.delta.text;
+      }
+      if (block && messageStreamEvent.delta.type === "input_json_delta") {
+        block.content += messageStreamEvent.delta.partial_json;
+      }
+    }
+
+    set(experimentAtom, [...experiment, ...contentBlocks]);
+  }
+  set(experimentAtom, [
+    ...experiment,
+    ...contentBlocks.map((block) => {
+      if (block.role === "tool" && typeof block.content === "string") {
+        try {
+          return {
+            role: "tool" as const,
             fromServer: true,
-            content: "",
-          });
-        }
-        if (messageStreamEvent.type === "content_block_delta") {
-          const block = contentBlocks[messageStreamEvent.index];
-          if (block && messageStreamEvent.delta.type === "text_delta") {
-            block.content += messageStreamEvent.delta.text;
-          }
-          if (block && messageStreamEvent.delta.type === "input_json_delta") {
-            block.content += messageStreamEvent.delta.partial_json;
-          }
-        }
-
-        set(experimentAtom, [...experiment, ...contentBlocks]);
-      }
-      set(experimentAtom, [
-        ...experiment,
-        ...contentBlocks.map((block) => {
-          if (block.role === "tool" && typeof block.content === "string") {
-            try {
-              return {
-                role: "tool" as const,
-                fromServer: true,
-                content: JSON.parse(block.content),
-              };
-            } catch (e) {
-              return block;
-            }
-          }
+            content: JSON.parse(block.content),
+          };
+        } catch (e) {
           return block;
-        }),
-      ]);
-    } else {
-      const response = await anthropic.messages.create(experimentAsAnthropic);
-      for (const contentBlock of response.content) {
-        if (contentBlock.type === "text") {
-          set(experimentAtom, (prev) => [...prev, { role: "assistant", fromServer: true, content: contentBlock.text }]);
-        }
-        if (contentBlock.type === "tool_use") {
-          set(experimentAtom, (prev) => [...prev, { role: "tool", fromServer: true, content: contentBlock }]);
         }
       }
+      return block;
+    }),
+  ]);
+});
+
+export const runExperimentAsOpenAi = atom(null, async (get, set, config: InferenceConfig) => {
+  const { temperature, token, n_tokens, messages: experiment, model, prefill } = config;
+  const params = await experimentToOpenai(experiment, config);
+
+  const client = new OpenAI({
+    apiKey: token,
+    dangerouslyAllowBrowser: hasBackend() ? undefined : true,
+  });
+  const stream = await client.chat.completions.create(params);
+  const contentChunks: Message[] = [];
+  const namesForToolCalls = new Map<number, string>();
+  for await (const chunk of stream) {
+    if (chunk.choices.length === 0) {
+      continue;
     }
-  }),
-);
-
-export const runExperimentAsOpenAi = entangledAtom(
-  { name: "run-experiment-openai" },
-  atom(null, async (get, set) => {
-    const provider = "openai" as const;
-    const tokenAtom = focusAtom(storeAtom, (o) => o.prop("tokens").prop(provider));
-    const tokenOrReference = get(tokenAtom);
-    if (!tokenOrReference) {
-      console.error(`No ${provider} token`);
-      return;
+    const choice = chunk.choices[0];
+    const delta = choice.delta;
+    if (!delta.content && !delta.tool_calls) {
+      continue;
     }
-    const resolvedToken = await resolveToken(tokenOrReference);
-    if (!resolvedToken) {
-      console.error("No resolved token");
-      return;
-    }
-
-    const experiment = get(experimentAtom);
-    if (!experiment || experiment.length === 0) {
-      console.error("No experiment");
-      return;
-    }
-
-    const experimentAsOpenai = await experimentToOpenai(experiment);
-
-    const client = new OpenAI({
-      apiKey: resolvedToken,
-      dangerouslyAllowBrowser: hasBackend() ? undefined : true,
-    });
-
-    const model = get(modelAtom) ?? "gpt-4o";
-
-    const params: ChatCompletionCreateParamsStreaming = {
-      ...experimentAsOpenai,
-      stream: true,
-      stream_options: {
-        include_usage: true,
-      },
-      temperature: get(tempAtom),
-      model,
-    };
-    if (isReasoningModel(model)) {
-      params.temperature = undefined;
-      if (isReasoningEffortSupported(model)) {
-        params.reasoning_effort = get(effortAtom);
-      }
-    }
-    const stream = await client.chat.completions.create(params);
-    const contentChunks: Message[] = [];
-    const namesForToolCalls = new Map<number, string>();
-    for await (const chunk of stream) {
-      if (chunk.choices.length === 0) {
-        continue;
-      }
-      const choice = chunk.choices[0];
-      const delta = choice.delta;
-      if (!delta.content && !delta.tool_calls) {
-        continue;
-      }
-      if (delta.tool_calls && delta.tool_calls.length > 0) {
-        for (const toolCall of delta.tool_calls) {
-          if (!contentChunks[toolCall.index]) {
-            contentChunks[toolCall.index] = {
-              role: "tool",
-              fromServer: true,
-              content: "",
-            };
-          }
-          if (toolCall.function?.name) {
-            namesForToolCalls.set(toolCall.index, toolCall.function.name);
-          }
-          if (toolCall.function?.arguments) {
-            contentChunks[toolCall.index].content += toolCall.function.arguments;
-          }
-        }
-      } else {
-        if (!contentChunks[choice.index]) {
-          contentChunks[choice.index] = {
-            role: chunk.choices[0].delta.role ?? "assistant",
+    if (delta.tool_calls && delta.tool_calls.length > 0) {
+      for (const toolCall of delta.tool_calls) {
+        if (!contentChunks[toolCall.index]) {
+          contentChunks[toolCall.index] = {
+            role: "tool",
             fromServer: true,
             content: "",
           };
         }
-        if (typeof contentChunks[choice.index].content === "string") {
-          contentChunks[choice.index].content += choice.delta.content ?? "";
+        if (toolCall.function?.name) {
+          namesForToolCalls.set(toolCall.index, toolCall.function.name);
+        }
+        if (toolCall.function?.arguments) {
+          contentChunks[toolCall.index].content += toolCall.function.arguments;
         }
       }
-
-      set(experimentAtom, [...experiment, ...contentChunks]);
+    } else {
+      if (!contentChunks[choice.index]) {
+        contentChunks[choice.index] = {
+          role: chunk.choices[0].delta.role ?? "assistant",
+          fromServer: true,
+          content: "",
+        };
+      }
+      if (typeof contentChunks[choice.index].content === "string") {
+        contentChunks[choice.index].content += choice.delta.content ?? "";
+      }
     }
-    set(experimentAtom, [
-      ...experiment,
-      ...contentChunks.map((chunk, index) => {
-        if (chunk.role === "tool" && typeof chunk.content === "string") {
-          try {
-            return {
-              role: "tool" as const,
-              fromServer: true,
-              content: {
-                function: namesForToolCalls.get(index),
-                arguments: JSON.parse(chunk.content),
-              },
-            };
-          } catch (e) {
-            return chunk;
-          }
+
+    set(experimentAtom, [...experiment, ...contentChunks]);
+  }
+  set(experimentAtom, [
+    ...experiment,
+    ...contentChunks.map((chunk, index) => {
+      if (chunk.role === "tool" && typeof chunk.content === "string") {
+        try {
+          return {
+            role: "tool" as const,
+            fromServer: true,
+            content: {
+              function: namesForToolCalls.get(index),
+              arguments: JSON.parse(chunk.content),
+            },
+          };
+        } catch (e) {
+          return chunk;
         }
-        return chunk;
-      }),
-    ]);
-  }),
-);
+      }
+      return chunk;
+    }),
+  ]);
+});
 
-export const runExperimentAsMistral = entangledAtom(
-  { name: "run-experiment-mistral" },
-  atom(null, async (get, set) => {
-    const provider = "mistral" as const;
-    const tokenAtom = focusAtom(storeAtom, (o) => o.prop("tokens").prop(provider));
-    const tokenOrReference = get(tokenAtom);
-    if (!tokenOrReference) {
-      console.error(`No ${provider} token`);
-      return;
-    }
-    const resolvedToken = await resolveToken(tokenOrReference);
-    if (!resolvedToken) {
-      console.error("No resolved token");
-      return;
-    }
+export const runExperimentAsMistral = atom(null, async (get, set, config: InferenceConfig) => {
+  const { temperature, token, n_tokens, messages: experiment, model, prefill } = config;
+  const experimentAsMistral = await experimentToMistral(experiment);
 
-    const experiment = get(experimentAtom);
-    if (!experiment || experiment.length === 0) {
-      console.error("No experiment");
-      return;
-    }
-
-    const experimentAsMistral = await experimentToMistral(experiment);
-
-    const client = new Mistral({
-      apiKey: resolvedToken,
-    });
-    if (experimentAsMistral.stream) {
-      const params: ChatCompletionStreamRequest = {
-        ...experimentAsMistral,
-        stream: true,
-        temperature: get(tempAtom),
-        model: get(modelAtom) ?? "mistral-small-latest",
-      };
-      const stream = await client.chat.stream(params);
-      const contentChunks: Message[] = [];
-      for await (const chunk of stream) {
-        if (chunk.data.choices.length === 0) {
-          continue;
+  const client = new Mistral({
+    apiKey: token,
+  });
+  if (experimentAsMistral.stream) {
+    const params: ChatCompletionStreamRequest = {
+      ...experimentAsMistral,
+      stream: true,
+      temperature: get(tempAtom),
+      model: get(modelAtom) ?? "mistral-small-latest",
+    };
+    const stream = await client.chat.stream(params);
+    const contentChunks: Message[] = [];
+    for await (const chunk of stream) {
+      if (chunk.data.choices.length === 0) {
+        continue;
+      }
+      const choice = chunk.data.choices[0];
+      const delta = choice.delta;
+      const content = delta.content;
+      const toolCalls = delta.toolCalls ?? [];
+      if (content) {
+        if (choice.index !== contentChunks.length - 1) {
+          contentChunks.push({
+            role: "assistant",
+            fromServer: true,
+            content: "",
+          });
         }
-        const choice = chunk.data.choices[0];
-        const delta = choice.delta;
-        const content = delta.content;
-        const toolCalls = delta.toolCalls ?? [];
-        if (content) {
-          if (choice.index !== contentChunks.length - 1) {
+        if (typeof contentChunks[choice.index].content === "string" && typeof choice.delta.content === "string") {
+          contentChunks[choice.index].content += choice.delta.content ?? "";
+        }
+      } else if (toolCalls.length > 0) {
+        for (const toolCall of toolCalls) {
+          if (toolCall.index !== contentChunks.length - 1) {
             contentChunks.push({
-              role: "assistant",
+              role: "tool",
               fromServer: true,
               content: "",
             });
           }
-          if (typeof contentChunks[choice.index].content === "string" && typeof choice.delta.content === "string") {
-            contentChunks[choice.index].content += choice.delta.content ?? "";
-          }
-        } else if (toolCalls.length > 0) {
-          for (const toolCall of toolCalls) {
-            if (toolCall.index !== contentChunks.length - 1) {
-              contentChunks.push({
-                role: "tool",
-                fromServer: true,
-                content: "",
-              });
-            }
-            contentChunks[toolCall.index!].content = toolCall.function;
-          }
+          contentChunks[toolCall.index!].content = toolCall.function;
         }
-        set(experimentAtom, [...experiment, ...contentChunks]);
       }
+      set(experimentAtom, [...experiment, ...contentChunks]);
     }
-  }),
-);
+  }
+});
