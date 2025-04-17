@@ -7,7 +7,7 @@ import type { FONT_STACKS } from "../style";
 import type { ExperimentWithMeta, Persona, SerialExperiment, _Message } from "../types";
 import { createFileStorage } from "../utils";
 import { divergentAtom, entangledAtom } from "../utils/entanglement";
-import { getRealm, isClient } from "../utils/realm";
+import { getRealm, hasBackend, isClient } from "../utils/realm";
 import type { ExperimentCursor } from "./experiment";
 import { match, P } from "ts-pattern";
 
@@ -52,7 +52,7 @@ export const storeAtom = divergentAtom(
     }
   },
   () => {
-    if (isClient()) {
+    if (hasBackend()) {
       return atom<Store>(getInitialStore());
     }
   },

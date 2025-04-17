@@ -28,12 +28,6 @@ export const MobileHeaderContainer = styled.h2<WithDarkMode>`
   z-index: 1;
   user-select: none;
 
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: inline-block;
-  max-width: calc(100vw - 52px);
-
   span {
     text-decoration: underline;
     text-decoration-thickness: auto;
@@ -42,6 +36,11 @@ export const MobileHeaderContainer = styled.h2<WithDarkMode>`
 
   & > div {
     padding: 0 ${bs(3 / 2)} ${bs(1 / 2)} ${bs()};
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: inline-block;
+    max-width: calc(100vw - 22px);
   }
 
   text-shadow:
