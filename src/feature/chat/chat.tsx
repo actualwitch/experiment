@@ -1,7 +1,7 @@
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import { type CSSProperties, type ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { type Path, experimentLayoutAtom, layoutAtom, selectionAtom, templatesAtom } from "../../atoms/common";
-import { isDarkModeAtom } from "../../atoms/store";
+import { identityAtom, isDarkModeAtom } from "../../atoms/store";
 import type { Experiment, ExperimentWithMeta, Message, _Message } from "../../types";
 import { deepEqual } from "../../utils";
 import { useHandlers } from "../../utils/keyboard";
@@ -120,11 +120,18 @@ export const ChatMessage = ({
     setIsMounted(true);
   }, []);
 
-  const header = match([message.role, message.fromServer, message.name])
-    .with(["tool", P.nullish, P._], () => "function")
-    .with(["tool", true, P._], () => "call")
-    .with(["user", P._, P.string], ([role, fromServer, name]) => name)
-    .otherwise(([role]) => role);
+  const userIdentity = useAtomValue(identityAtom);
+
+  const header = match(message)
+    .with({ role: "tool" }, () => "function")
+    .with({ role: "tool", fromServer: true }, () => "call")
+    .with({ role: "user", name: P.string, pronouns: P.string }, ({ name, pronouns }) => {
+      const thisIdentity = `${name} (${pronouns})`;
+      if (userIdentity === thisIdentity) return name;
+      return thisIdentity;
+    })
+    .with({ name: P.string }, ({ name }) => name)
+    .otherwise(({ role }) => role);
 
   return (
     <MessageComponent

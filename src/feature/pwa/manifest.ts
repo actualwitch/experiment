@@ -11,6 +11,6 @@ export const getManifest = (name: string, description: string, iconResolutions: 
     src: `experiment-${res}.png`,
     sizes: `${res}x${res}`,
     type: "image/png",
-    purpose: "maskable",
+    purpose: "any maskable",
   })),
 });
