@@ -1,7 +1,7 @@
 <a href="https://actualwitch.github.io/experiment/">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset=".github/screenshots/browser-dark.png">
-    <img alt="Experiment screenshot" src=".github/screenshots/browser-light.png">
+    <source media="(prefers-color-scheme: dark)" srcset=".github/screenshots/tapestry-dark.png">
+    <img alt="Experiment screenshot" src=".github/screenshots/tapestry-light.png">
   </picture>
 </a>
 

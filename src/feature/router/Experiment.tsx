@@ -1,11 +1,11 @@
-import { atom, useAtom, useSetAtom } from "jotai";
+import { atom, useAtom, useSetAtom, type Setter } from "jotai";
 import { useEffect } from "react";
 import { useParams } from "react-router";
 
 import { navigateAtom, paramsAtom, titleOverrideAtom } from ".";
 import { selectionAtom, templatesAtom } from "../../atoms/common";
 import type { ExperimentCursor } from "../../atoms/experiment";
-import { getExperimentAtom } from "../../atoms/store";
+import { deleteExperiment, getExperimentAtom } from "../../atoms/experiment";
 import type { Experiment } from "../../types";
 import { entangledAtom } from "../../utils/entanglement";
 import { ExperimentPreview } from "../chat/ExperimentPreview";
@@ -14,6 +14,7 @@ import { createRemixButtons, createSelectionEditButtons } from "../ui/ConfigRend
 import { DesktopOnly } from "../ui/Mobile";
 import { Page } from "../ui/Page";
 import { useScrollToTopRef } from "../../utils/scroll";
+import { Trash2 } from "lucide-react";
 
 const cursorAtom = entangledAtom("cursor", atom<ExperimentCursor | null>(null));
 const selectedExperimentAtom = entangledAtom(
@@ -39,7 +40,16 @@ export const actionsAtom = atom((get) => {
     Actions: [],
   };
   {
-    const buttons = createRemixButtons(experiment, params?.id, navigate);
+    const buttons = [
+      ...createRemixButtons(experiment, params?.id, navigate),
+      {
+        label: "Delete",
+        icon: Trash2,
+        action: (set: Setter) => {
+          set(deleteExperiment, params);
+        },
+      },
+    ];
     config.Actions.push({
       buttons,
     });

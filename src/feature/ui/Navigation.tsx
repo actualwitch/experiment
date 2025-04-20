@@ -1,12 +1,14 @@
 import styled from "@emotion/styled";
+import { css } from "@emotion/react";
 import { atom, useAtom } from "jotai";
 import path from "node:path";
 import { NavLink, useLocation } from "react-router";
 import { Maybe } from "true-myth";
 
-import { templatesAtom, selectionAtom } from "../../atoms/common";
-import { experimentAtom } from "../../atoms/experiment";
-import { name, TRIANGLE } from "../../const";
+import { selectionAtom } from "../../atoms/common";
+import { experimentAtom, experimentIdsAtom } from "../../atoms/experiment";
+import { isMetaExperimentAtom } from "../../atoms/store";
+import { TRIANGLE, name } from "../../const";
 import { REVISION } from "../../const/dynamic";
 import { bs, sidebarWidth } from "../../style";
 import { nonInteractive, widthAvailable } from "../../style/mixins";
@@ -17,8 +19,6 @@ import { portalIO } from "../../utils/portal";
 import { getRealm } from "../../utils/realm";
 import { ROUTES } from "../router";
 import { View } from "./view";
-import { experimentIdsAtom, isMetaExperimentAtom } from "../../atoms/store";
-import { css } from "@emotion/react";
 
 export const [SidebarInput, SidebarOutput] = portalIO();
 

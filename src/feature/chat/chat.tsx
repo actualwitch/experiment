@@ -1,5 +1,5 @@
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
-import { type CSSProperties, type ReactNode, useEffect, useMemo, useRef, useState } from "react";
+import { type CSSProperties, memo, type ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { type Path, experimentLayoutAtom, layoutAtom, selectionAtom, templatesAtom } from "../../atoms/common";
 import { identityAtom, isDarkModeAtom } from "../../atoms/store";
 import type { Experiment, ExperimentWithMeta, Message, _Message } from "../../types";
@@ -9,8 +9,12 @@ import { isRunningAtom } from "../inference/atoms";
 import { resetMessageAtom } from "../router/NewExperiment/NewExperiment";
 import { type TransitionState, useItemTransition, useListTransition } from "../transitionState";
 import { View, collapsedAtom } from "../ui/view";
-import { Banner, ChatContainer, getAlign, MessageComponent, Header } from "./style";
+import { Banner, ChatContainer, getAlign, MessageComponent, Header, Footer } from "./style";
 import { match, P } from "ts-pattern";
+import { Clock } from "lucide-react";
+import { DateTime } from "luxon";
+import { timezoneAtom } from "./ExperimentPreview";
+import { modelLabels } from "../inference/types";
 
 export function hasMessages(obj: _Message | ExperimentWithMeta): obj is ExperimentWithMeta {
   return Object.hasOwn(obj, "messages");
@@ -55,7 +59,6 @@ export const ChatMessage = ({
   const align = getAlign(message.fromServer ?? false, experimentLayout);
   const viewStyle = {
     display: "grid",
-    float: align,
     textAlign: typeof message.content === "object" ? align : undefined,
     width: "initial",
   } satisfies CSSProperties;
@@ -123,12 +126,16 @@ export const ChatMessage = ({
   const userIdentity = useAtomValue(identityAtom);
 
   const header = match(message)
-    .with({ role: "tool" }, () => "function")
     .with({ role: "tool", fromServer: true }, () => "call")
+    .with({ role: "tool" }, () => "function")
     .with({ role: "user", name: P.string, pronouns: P.string }, ({ name, pronouns }) => {
-      const thisIdentity = `${name} (${pronouns})`;
+      const thisIdentity = pronouns ? `${name} (${pronouns})` : name;
       if (userIdentity === thisIdentity) return name;
       return thisIdentity;
+    })
+    .with({ role: "assistant", name: P.string }, ({ name }) => {
+      if (name in modelLabels) return modelLabels[name as keyof typeof modelLabels];
+      return name;
     })
     .with({ name: P.string }, ({ name }) => name)
     .otherwise(({ role }) => role);
@@ -174,6 +181,7 @@ export const ChatMessage = ({
     >
       <Header>{header}</Header>
       {innerContent}
+      {message.timestamp && <Timestamp timestamp={message.timestamp} />}
     </MessageComponent>
   );
 };
@@ -227,3 +235,15 @@ export function ChatPreview({
     </ChatContainer>
   );
 }
+
+const Timestamp = memo(function Timestamp(props: { timestamp: string }) {
+  const timezone = useAtomValue(timezoneAtom);
+  const date = DateTime.fromISO(props.timestamp, { zone: timezone });
+  const timestamp = date.isValid ? date.toFormat("T D") : props.timestamp;
+  return (
+    <Footer title={props.timestamp}>
+      <Clock size={10} />
+      {timestamp}
+    </Footer>
+  );
+});

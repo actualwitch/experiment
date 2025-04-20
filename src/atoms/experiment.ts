@@ -1,9 +1,8 @@
 import { atom } from "jotai";
-
-import { modelLabels } from "../feature/inference/types";
+import { focusAtom } from "jotai-optics";
 import type { Message } from "../types";
 import { entangledAtom } from "../utils/entanglement";
-import { experimentsAtom, modelAtom, parentAtom, selectedProviderAtom } from "./store";
+import { modelAtom, parentAtom, storeAtom } from "./store";
 
 export const experimentAtom = entangledAtom("experiment", atom<Message[]>([]));
 
@@ -20,24 +19,60 @@ export const createExperiment = atom(
     id ??= String(Object.keys(exp).length + 1);
 
     const thisExperiment = exp[id] ?? {};
-    runId ??= String(Object.keys(thisExperiment).length + 1);
+    const maxId = Object.keys(thisExperiment).reduce((max, thisId) => {
+      const asNumber = Number(thisId);
+      if (!Number.isNaN(asNumber)) {
+        return Math.max(max, asNumber);
+      }
+      return max;
+    }, 0);
+    runId ??= String(maxId + 1);
 
-    const provider = get(selectedProviderAtom);
     const model = get(modelAtom);
-    const modelName = provider && model && modelLabels[provider][model];
 
     set(experimentsAtom, (prev) => ({
       ...prev,
       [id]: {
         ...thisExperiment,
-        [runId]: {
-          messages: messages ?? [],
-          timestamp: new Date().toISOString(),
-          model: modelName,
-        },
+        [runId]: (messages ?? []).map((message) => ({
+          ...message,
+          ...(message.role === "assistant" ? { model } : null),
+        })),
       },
     }));
 
     return { id, runId };
   },
 );
+
+export const experimentIdsAtom = entangledAtom(
+  "experimentIds",
+  atom((get) => {
+    const store = get(storeAtom);
+    const ids: Array<[id: string, subId: string]> = [];
+    for (const id in store.experiments) {
+      for (const runId in store.experiments[id]) {
+        ids.push([id, runId]);
+      }
+    }
+    return ids;
+  }),
+);
+
+export const experimentsAtom = focusAtom(storeAtom, (o) => o.prop("experiments"));
+
+export const deleteExperiment = entangledAtom(
+  "deleteExperiment",
+  atom(null, (get, set, { id, runId }: ExperimentCursor) => {
+    const { [id]: thisSerialExperiment, ...experiments } = get(experimentsAtom) ?? {};
+    const { [runId]: _, ...experiment } = thisSerialExperiment;
+    if (Object.keys(experiment).length > 0) {
+      set(experimentsAtom, { ...experiments, [runId]: experiment });
+      return;
+    }
+    set(experimentsAtom, experiments);
+  }),
+);
+
+export const getExperimentAtom = ({ id, runId }: ExperimentCursor) =>
+  focusAtom(storeAtom, (o) => o.prop("experiments").optional().prop(id).optional().prop(runId));

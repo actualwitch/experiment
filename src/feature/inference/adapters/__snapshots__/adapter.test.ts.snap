@@ -13,7 +13,6 @@ exports[`inference/anthropic tool use experiment 1`] = `
   "stream": true,
   "system": "",
   "temperature": 0,
-  "tool_choice": undefined,
   "tools": [
     {
       "description": "The \`bio\` tool allows you to persist information across conversations. The information will appear in the model set context below in future conversations.",
@@ -138,7 +137,6 @@ Here's a horizontal rule:
 "
 ,
   "temperature": 0,
-  "tool_choice": undefined,
   "tools": [],
 }
 `;

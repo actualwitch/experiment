@@ -29,6 +29,7 @@ import { Checkbox } from "../ui/Checkbox";
 import { widthLimit } from "../../style/mixins";
 import { CUSTOM_OPTION, PRONOUNS } from "../../const";
 import { pronounOptions } from "./NewExperiment/Onboarding";
+import { Trash2 } from "lucide-react";
 
 const StyledForm = styled.form`
   display: flex;
@@ -244,7 +245,7 @@ export default function Parameters() {
               )}
             </Select>
           ) : (
-            <TextField optional value={pronouns} onChange={setPronouns} placeholder="( custom )" autoFocus />
+            <TextField optional value={pronouns} onChange={setPronouns} autoFocus />
           )}
         </Row>
         <Row>
@@ -279,7 +280,7 @@ export default function Parameters() {
                 }))}
             </Switch>
           ) : (
-            <Button onClick={() => setIsAdding(true)}>Add</Button>
+            Object.keys(tokens).length < 3 && <Button onClick={() => setIsAdding(true)}>Add</Button>
           )}
         </Row>
         {selectedProvider && (
@@ -301,6 +302,7 @@ export default function Parameters() {
                 setTokens(newTokens);
               }}
             >
+              <Trash2 size={12} />
               Remove
             </Button>
           </Row>

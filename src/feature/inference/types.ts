@@ -26,6 +26,8 @@ const GPT_4o = Literal("gpt-4o");
 const GPT_4o_mini = Literal("gpt-4o-mini");
 const GPT_4 = Literal("gpt-4");
 const GPT_4_turbo = Literal("gpt-4-turbo");
+const o4_mini = Literal("o4-mini");
+const o3 = Literal("o3");
 const o3_mini = Literal("o3-mini");
 const o1 = Literal("o1");
 const o1_pro = Literal("o1-pro");
@@ -42,6 +44,8 @@ export const OpenAIModel = Union(
   GPT_4o_mini,
   GPT_4,
   GPT_4_turbo,
+  o4_mini,
+  o3,
   o3_mini,
   o1,
   // o1_pro,
@@ -74,41 +78,40 @@ export const modelOptions = {
   mistral: MistralModel.alternatives.map((model) => model.value),
 };
 export const modelLabels = {
-  openai: {
-    [GPT_4_5.value]: "GPT-4.5",
-    [GPT_4_1.value]: "GPT-4.1",
-    [GPT_4_1_mini.value]: "GPT-4.1 Mini",
-    [GPT_4_1_nano.value]: "GPT-4.1 Nano",
-    [ChatGPT.value]: "ChatGPT",
-    [GPT_4o.value]: "GPT-4o",
-    [GPT_4o_mini.value]: "GPT-4o Mini",
-    [GPT_4.value]: "GPT-4",
-    [GPT_4_turbo.value]: "GPT-4 Turbo",
-    [o1.value]: "O1",
-    // [o1_pro.value]: "O1 Pro",
-    [o1_preview.value]: "O1 Preview",
-    [o1_mini.value]: "O1 Mini",
-    [o3_mini.value]: "O3 Mini",
-  },
-  anthropic: {
-    [Claude_3_Opus.value]: "Claude 3 Opus",
-    [Claude_3_5_Haiku.value]: "Claude 3.5 Haiku",
-    [Claude_3_5_Sonnet.value]: "Claude 3.5 Sonnet",
-    [Claude_3_6_Sonnet.value]: "Claude 3.6 Sonnet",
-    [Claude_3_7_Sonnet.value]: "Claude 3.7 Sonnet",
-  },
-  mistral: {
-    "mistral-large-latest": "Mistral Large",
-    "mistral-medium-latest": "Mistral Medium",
-    "mistral-small-latest": "Mistral Small",
-  },
+  //openai
+  [GPT_4_5.value]: "GPT-4.5",
+  [GPT_4_1.value]: "GPT-4.1",
+  [GPT_4_1_mini.value]: "GPT-4.1 Mini",
+  [GPT_4_1_nano.value]: "GPT-4.1 Nano",
+  [ChatGPT.value]: "ChatGPT",
+  [GPT_4o.value]: "GPT-4o",
+  [GPT_4o_mini.value]: "GPT-4o Mini",
+  [GPT_4.value]: "GPT-4",
+  [GPT_4_turbo.value]: "GPT-4 Turbo",
+  [o4_mini.value]: "O4 Mini",
+  [o3.value]: "O3",
+  [o3_mini.value]: "O3 Mini",
+  [o1.value]: "O1",
+  [o1_pro.value]: "O1 Pro",
+  [o1_preview.value]: "O1 Preview",
+  [o1_mini.value]: "O1 Mini",
+  // anthropic
+  [Claude_3_Opus.value]: "Claude 3 Opus",
+  [Claude_3_5_Haiku.value]: "Claude 3.5 Haiku",
+  [Claude_3_5_Sonnet.value]: "Claude 3.5 Sonnet",
+  [Claude_3_6_Sonnet.value]: "Claude 3.6 Sonnet",
+  [Claude_3_7_Sonnet.value]: "Claude 3.7 Sonnet",
+  // mistral
+  "mistral-large-latest": "Mistral Large",
+  "mistral-medium-latest": "Mistral Medium",
+  "mistral-small-latest": "Mistral Small",
 } as const;
 
 export const isReasoningModel = (model: string) =>
-  [o1_mini.value, o1_preview.value, o3_mini.value, o1.value].includes(model);
+  [o1_mini.value, o1_preview.value, o1.value, o3_mini.value, o3.value, o4_mini.value].includes(model);
 
 export const isReasoningEffortSupported = (model: string) =>
-  [o1_preview.value, o3_mini.value, o1.value].includes(model);
+  [o1_preview.value, o1.value, o3_mini.value, o3.value, o4_mini.value].includes(model);
 
 export type InferenceConfig = {
   stream: boolean;

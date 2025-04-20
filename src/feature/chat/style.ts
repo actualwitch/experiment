@@ -107,16 +107,21 @@ export const MessageComponent = styled.article<
         padding-${align}: ${bs(3 / 8)};
       }
 
-      & > *:not(header) {
+      & > div {
         transition: background 100ms ease-out, border-color 100ms ease-out;
         border-radius: ${bs(Palette.borderCode)};
         border: 1px solid ${Palette.white}00;
         padding: ${bs(1 / 4)} ${bs(1 / 4)} 0;
+        width: fit-content;
+        margin-${alignComplement}: auto;
+      }
+      
+      &:hover > div {
+        border-color: ${isDarkMode ? `${Palette.white}40` : "#22222240"};
       }
 
-      
-      &:hover > *:not(header) {
-        border-color: ${isDarkMode ? `${Palette.white}40` : "#22222240"};
+      & > footer {
+        justify-content: ${align === "right" ? "end" : "start"};
       }
 
       li ul,
@@ -182,8 +187,8 @@ export const MessageComponent = styled.article<
       border-color: ${accentColor};
       background: linear-gradient(
         to ${alignComplement},
-        ${transparentize(0.87, accentColor)},
-        ${transparentize(1, accentColor)} 33%
+        ${transparentize(0.83, accentColor)},
+        ${transparentize(1, accentColor)} 43%
       );
       *::selection {
         background-color: ${accentColor};
@@ -191,17 +196,24 @@ export const MessageComponent = styled.article<
       blockquote {
         border-color: ${transparentize(0.5, accentColor)};
       }
+      strong {
+        text-shadow: ${
+          isDarkMode
+            ? "rgba(0, 0, 0, 0.4) -0.4px -0.4px 0px,rgba(0, 0, 0, 0.4) 0.4px 0.4px 0px, rgb(255, 255, 255) 0px 0px 12px"
+            : "rgba(255, 255, 255, 0.67) -0.4px -0.4px 0px,rgba(255, 255, 255, 0.68) 0.4px 0.4px 0px,rgba(0, 0, 0, 0.5) 0px 0px 12px"
+        };
+      }
     `);
     if (isSelected) {
       if (isDarkMode) {
         styles.push(css`
-          & > *:not(header) {
+          & > div {
             background: #f9f9f924;
           }
         `);
       } else {
         styles.push(css`
-          & > *:not(header) {
+          & > div {
             background: #7d7d7d24;
           }
         `);
@@ -233,10 +245,19 @@ export const Banner = styled.div`
 `;
 
 export const Header = styled.header`
-  padding-top: ${bs(1 / 3)};
+  padding-top: ${bs(1 / 2)};
   font-size: 14px;
   opacity: 0.6;
   text-transform: uppercase;
   letter-spacing: 4px;
-  ${nonInteractive}
+`;
+
+export const Footer = styled.footer`
+  padding-bottom: ${bs(1 / 4)};
+  opacity: 0.6;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  letter-spacing: 0.4px;
 `;

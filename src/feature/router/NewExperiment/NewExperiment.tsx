@@ -43,7 +43,6 @@ import { createCancelEditingButton, createSelectionEditButtons } from "../../ui/
 import { Page } from "../../ui/Page";
 import { TextArea } from "../../ui/TextArea";
 import { Onboarding } from "./Onboarding";
-import { EXPERIMENT_MODE } from "../../../const/dynamic";
 
 const baseMargin = 1 / 2;
 
@@ -415,7 +414,6 @@ export default function () {
               ...item,
               role,
               content: object || message,
-              fromServer: item.fromServer,
             };
             return newMessage;
           }
@@ -426,13 +424,14 @@ export default function () {
       return;
     }
     const identity = role === "user" ? { name, pronouns } : {};
+    const timestamp = new Date().toISOString();
     if (object && PossibleObjectType.guard(role)) {
-      setExperiment([...experiment, { ...identity, role, content: object }]);
+      setExperiment([...experiment, { ...identity, role, content: object, timestamp }]);
       resetMessage();
       return;
     }
     if (message) {
-      setExperiment([...experiment, { ...identity, role, content: message }]);
+      setExperiment([...experiment, { ...identity, role, content: message, timestamp }]);
       resetMessage();
       return;
     }

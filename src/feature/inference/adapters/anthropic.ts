@@ -1,12 +1,8 @@
-import type {
-  MessageCreateParams,
-  MessageCreateParamsNonStreaming,
-  MessageParam,
-  Model,
-  Tool,
-} from "@anthropic-ai/sdk/resources/index.mjs";
-import { newLine, tokenLimit } from "../../../const";
-import { StringType, type ExperimentFunction, type Message } from "../../../types";
+import type { MessageCreateParams, MessageParam, Tool } from "@anthropic-ai/sdk/resources/index.mjs";
+import { just, nothing } from "true-myth/maybe";
+import { P, match } from "ts-pattern";
+import { newLine } from "../../../const";
+import { type ExperimentFunction, type Message } from "../../../types";
 import { createXMLContextFromFiles, iterateDir } from "../../../utils/context";
 import { experimentFunctionToAnthropicTool, tryParseFunctionSchema } from "../function";
 import type { InferenceConfig } from "../types";
@@ -16,44 +12,53 @@ export async function experimentToAnthropic(
   config: InferenceConfig,
 ): Promise<MessageCreateParams> {
   let system = "";
-  const messages: MessageParam[] = [];
   const tools: Tool[] = [];
-  for (const { role, content, fromServer, name, pronouns } of experiment) {
-    if (role === "context") {
-      const directory = content.directory as string;
-      const files = await iterateDir(directory);
-      const context = await createXMLContextFromFiles(files, directory);
-      messages.push({ role: "user", content: context });
-      continue;
-    }
-    if (role === "system") {
-      system += `${content}${newLine}`;
-      continue;
-    }
-    if (role === "user" && typeof content === "string") {
-      const message = { role, content };
-      const identity = pronouns ? `${name} (${pronouns})` : name;
-      message.content = identity ? `${identity}:${newLine}${message.content}` : message.content;
-      messages.push(message);
-      continue;
-    }
-    if (role === "assistant") {
-      messages.push({ role, content: typeof content === "object" ? JSON.stringify(content) : content });
-      continue;
-    }
-    if (role === "tool" && !fromServer) {
-      if (typeof content === "object" && content !== null) {
-        const tool = tryParseFunctionSchema(content as Record<string, unknown>).unwrapOr(content as ExperimentFunction);
-        tools.push(experimentFunctionToAnthropicTool(tool));
-      }
-    }
-  }
-  const tool_choice = tools.length === 1 ? { type: "tool" as const, name: tools[0].name } : undefined;
+  const messages = await Promise.all(
+    experiment.map((message) =>
+      match(message)
+        .with({ role: "context" }, async ({ content }) => {
+          const directory = content.directory as string;
+          const files = await iterateDir(directory);
+          const context = await createXMLContextFromFiles(files, directory);
+          return just({ role: "user" as const, content: context });
+        })
+        .with({ role: "user", content: P.string }, (message) => {
+          const { name, pronouns } = message;
+          const identity = pronouns ? `${name} (${pronouns})` : name;
+          return just({
+            role: "user" as const,
+            content: identity ? `${identity}:${newLine}${message.content}` : message.content,
+          });
+        })
+        .with({ role: "assistant", content: P._ }, ({ content }) => {
+          return just({
+            role: "assistant" as const,
+            content: typeof content === "object" ? JSON.stringify(content) : content,
+          });
+        })
+        .with({ role: "tool" }, ({ content, fromServer }) => {
+          if (!fromServer && typeof content === "object" && content !== null) {
+            const tool = tryParseFunctionSchema(content as Record<string, unknown>).unwrapOr(
+              content as ExperimentFunction,
+            );
+            tools.push(experimentFunctionToAnthropicTool(tool));
+          }
+          return nothing();
+        })
+        .with({ role: "system" }, ({ content }) => {
+          system += `${content}${newLine}`;
+          return nothing();
+        })
+        .otherwise(() => nothing()),
+    ),
+  );
   return {
     system,
-    messages,
+    messages: messages.reduce((acc, item) => {
+      if (item.isJust) acc.push(item.value);
+      return acc;
+    }, [] as MessageParam[]),
     tools,
-    tool_choice,
     max_tokens: config.n_tokens,
     model: config.model,
     temperature: config.temperature,

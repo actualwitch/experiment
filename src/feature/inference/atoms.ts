@@ -26,6 +26,7 @@ import {
   type ProviderType,
 } from "./types";
 import { tokenLimit } from "../../const";
+import { createAssistantResponse } from "./utils";
 
 export const availableProviderOptionsAtom = atom((get) => {
   const tokens = get(tokensAtom);
@@ -46,7 +47,7 @@ export const modelOptionsAtom = atom((get) => {
   if (!provider) return [];
   return modelOptions[provider].map((model) => ({
     id: model,
-    name: modelLabels?.[provider]?.[model] ?? model,
+    name: modelLabels?.[model] ?? model,
   }));
 });
 
@@ -175,11 +176,11 @@ export const runExperimentAsAnthropic = atom(null, async (get, set, config: Infe
   const contentBlocks: Message[] = prefill ? [prefill] : [];
   for await (const messageStreamEvent of stream) {
     if (messageStreamEvent.type === "content_block_start") {
-      contentBlocks.push({
-        role: messageStreamEvent.content_block.type === "text" ? "assistant" : "tool",
-        fromServer: true,
-        content: "",
-      });
+      contentBlocks.push(
+        createAssistantResponse(
+          messageStreamEvent.content_block.type === "text" ? { role: "assistant", name: model } : { role: "tool" },
+        ),
+      );
     }
     if (messageStreamEvent.type === "content_block_delta") {
       const block = contentBlocks[messageStreamEvent.index];
@@ -250,11 +251,7 @@ export const runExperimentAsOpenAi = atom(null, async (get, set, config: Inferen
       }
     } else {
       if (!contentChunks[choice.index]) {
-        contentChunks[choice.index] = {
-          role: chunk.choices[0].delta.role ?? "assistant",
-          fromServer: true,
-          content: "",
-        };
+        contentChunks[choice.index] = createAssistantResponse({ role: "assistant", name: model });
       }
       if (typeof contentChunks[choice.index].content === "string") {
         contentChunks[choice.index].content += choice.delta.content ?? "";
@@ -305,17 +302,13 @@ export const runExperimentAsMistral = atom(null, async (get, set, config: Infere
       if (chunk.data.choices.length === 0) {
         continue;
       }
-      const choice = chunk.data.choices[0];
+      const [choice] = chunk.data.choices;
       const delta = choice.delta;
       const content = delta.content;
       const toolCalls = delta.toolCalls ?? [];
       if (content) {
         if (choice.index !== contentChunks.length - 1) {
-          contentChunks.push({
-            role: "assistant",
-            fromServer: true,
-            content: "",
-          });
+          contentChunks.push(createAssistantResponse({ role: "assistant", name: model }));
         }
         if (typeof contentChunks[choice.index].content === "string" && typeof choice.delta.content === "string") {
           contentChunks[choice.index].content += choice.delta.content ?? "";

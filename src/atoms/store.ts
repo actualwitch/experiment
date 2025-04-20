@@ -2,14 +2,13 @@ import { atom } from "jotai";
 import { focusAtom } from "jotai-optics";
 import { atomWithStorage, createJSONStorage } from "jotai/utils";
 
+import { P, match } from "ts-pattern";
 import type { ProviderType } from "../feature/inference/types";
 import type { FONT_STACKS } from "../style";
 import type { ExperimentWithMeta, Persona, SerialExperiment, _Message } from "../types";
 import { createFileStorage } from "../utils";
 import { divergentAtom, entangledAtom } from "../utils/entanglement";
-import { getRealm, hasBackend, isClient } from "../utils/realm";
-import type { ExperimentCursor } from "./experiment";
-import { match, P } from "ts-pattern";
+import { getRealm, hasBackend } from "../utils/realm";
 
 export type Store = {
   name?: string;
@@ -100,33 +99,6 @@ export const modelAtom = entangledAtom(
   "model",
   focusAtom(storeAtom, (o) => o.prop("selectedModel")),
 );
-
-export const experimentIdsAtom = entangledAtom(
-  "experimentIds",
-  atom((get) => {
-    const store = get(storeAtom);
-    const ids: Array<[id: string, subId: string]> = [];
-    for (const id in store.experiments) {
-      for (const runId in store.experiments[id]) {
-        ids.push([id, runId]);
-      }
-    }
-    return ids;
-  }),
-);
-
-export const experimentsAtom = focusAtom(storeAtom, (o) => o.prop("experiments"));
-
-export const deleteExperiment = atom(null, (get, set, id: string) => {
-  set(experimentsAtom, (prev) => {
-    const next = { ...prev };
-    delete next[id];
-    return next;
-  });
-});
-
-export const getExperimentAtom = ({ id, runId }: ExperimentCursor) =>
-  focusAtom(storeAtom, (o) => o.prop("experiments").optional().prop(id).optional().prop(runId));
 
 export const tokensAtom = entangledAtom(
   "tokens",
