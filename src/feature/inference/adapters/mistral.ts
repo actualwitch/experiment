@@ -3,10 +3,11 @@ import { newLine, tokenLimit } from "../../../const";
 import { type ExperimentFunction, type Message, ObjectOrStringType, StringType } from "../../../types";
 import { createContextFromFiles, iterateDir } from "../../../utils/context";
 import { experimentFunctionToTool, tryParseFunctionSchema } from "../function";
+import type { InferenceConfig } from "../types";
 
 export const experimentToMistral = async (
   experiment: Message[],
-  { maxTokens = tokenLimit }: { maxTokens?: number } = {},
+  { n_tokens, model, temperature }: InferenceConfig,
 ): Promise<ChatCompletionStreamRequest> => {
   const messages: ChatCompletionStreamRequest["messages"] = [];
   const tools: ChatCompletionStreamRequest["tools"] = [];
@@ -41,9 +42,9 @@ export const experimentToMistral = async (
   }
   const result: ChatCompletionStreamRequest = {
     messages,
-    model: "mistral-small-latest",
-    temperature: 0.0,
-    maxTokens,
+    model,
+    temperature,
+    maxTokens: n_tokens,
     stream: true,
   };
   if (tools.length) {

@@ -8,25 +8,29 @@ export const experimentAtom = entangledAtom("experiment", atom<Message[]>([]));
 
 export type ExperimentCursor = { id: string; runId: string };
 
+const newIdForObject = <T extends object>(ob: T) => {
+  return Object.keys(ob).reduce((max, thisId) => {
+    const asNumber = Number(thisId);
+    if (!Number.isNaN(asNumber)) {
+      return Math.max(max, asNumber);
+    }
+    return max;
+  }, 0);
+};
+
 export const createExperiment = atom(
   null,
   (get, set, messages?: Message[], id?: string, runId?: string): ExperimentCursor => {
     const exp = get(experimentsAtom) ?? {};
 
     const parent = get(parentAtom);
+
     id ??= parent;
 
-    id ??= String(Object.keys(exp).length + 1);
+    id ??= String(newIdForObject(exp) + 1);
 
     const thisExperiment = exp[id] ?? {};
-    const maxId = Object.keys(thisExperiment).reduce((max, thisId) => {
-      const asNumber = Number(thisId);
-      if (!Number.isNaN(asNumber)) {
-        return Math.max(max, asNumber);
-      }
-      return max;
-    }, 0);
-    runId ??= String(maxId + 1);
+    runId ??= String(newIdForObject(thisExperiment) + 1);
 
     const model = get(modelAtom);
 
@@ -67,7 +71,7 @@ export const deleteExperiment = entangledAtom(
     const { [id]: thisSerialExperiment, ...experiments } = get(experimentsAtom) ?? {};
     const { [runId]: _, ...experiment } = thisSerialExperiment;
     if (Object.keys(experiment).length > 0) {
-      set(experimentsAtom, { ...experiments, [runId]: experiment });
+      set(experimentsAtom, { ...experiments, [id]: experiment });
       return;
     }
     set(experimentsAtom, experiments);

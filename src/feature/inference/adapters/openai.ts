@@ -60,9 +60,12 @@ export const experimentToOpenai = async (
 
   if (isReasoningModel(model)) {
     params.temperature = undefined;
+    params.max_completion_tokens = n_tokens;
     if (isReasoningEffortSupported(model)) {
       params.reasoning_effort = reasoningEffort;
     }
+  } else {
+    params.max_tokens = n_tokens;
   }
   return params;
 };

@@ -284,48 +284,41 @@ export const runExperimentAsOpenAi = atom(null, async (get, set, config: Inferen
 
 export const runExperimentAsMistral = atom(null, async (get, set, config: InferenceConfig) => {
   const { temperature, token, n_tokens, messages: experiment, model, prefill } = config;
-  const experimentAsMistral = await experimentToMistral(experiment);
+  const experimentAsMistral = await experimentToMistral(experiment, config);
 
   const client = new Mistral({
     apiKey: token,
   });
-  if (experimentAsMistral.stream) {
-    const params: ChatCompletionStreamRequest = {
-      ...experimentAsMistral,
-      stream: true,
-      temperature: get(tempAtom),
-      model: get(modelAtom) ?? "mistral-small-latest",
-    };
-    const stream = await client.chat.stream(params);
-    const contentChunks: Message[] = [];
-    for await (const chunk of stream) {
-      if (chunk.data.choices.length === 0) {
-        continue;
-      }
-      const [choice] = chunk.data.choices;
-      const delta = choice.delta;
-      const content = delta.content;
-      const toolCalls = delta.toolCalls ?? [];
-      if (content) {
-        if (choice.index !== contentChunks.length - 1) {
-          contentChunks.push(createAssistantResponse({ role: "assistant", name: model }));
-        }
-        if (typeof contentChunks[choice.index].content === "string" && typeof choice.delta.content === "string") {
-          contentChunks[choice.index].content += choice.delta.content ?? "";
-        }
-      } else if (toolCalls.length > 0) {
-        for (const toolCall of toolCalls) {
-          if (toolCall.index !== contentChunks.length - 1) {
-            contentChunks.push({
-              role: "tool",
-              fromServer: true,
-              content: "",
-            });
-          }
-          contentChunks[toolCall.index!].content = toolCall.function;
-        }
-      }
-      set(experimentAtom, [...experiment, ...contentChunks]);
+
+  const stream = await client.chat.stream(experimentAsMistral);
+  const contentChunks: Message[] = [];
+  for await (const chunk of stream) {
+    if (chunk.data.choices.length === 0) {
+      continue;
     }
+    const [choice] = chunk.data.choices;
+    const delta = choice.delta;
+    const content = delta.content;
+    const toolCalls = delta.toolCalls ?? [];
+    if (content) {
+      if (choice.index !== contentChunks.length - 1) {
+        contentChunks.push(createAssistantResponse({ role: "assistant", name: model }));
+      }
+      if (typeof contentChunks[choice.index].content === "string" && typeof choice.delta.content === "string") {
+        contentChunks[choice.index].content += choice.delta.content ?? "";
+      }
+    } else if (toolCalls.length > 0) {
+      for (const toolCall of toolCalls) {
+        if (toolCall.index !== contentChunks.length - 1) {
+          contentChunks.push({
+            role: "tool",
+            fromServer: true,
+            content: "",
+          });
+        }
+        contentChunks[toolCall.index!].content = toolCall.function;
+      }
+    }
+    set(experimentAtom, [...experiment, ...contentChunks]);
   }
 });

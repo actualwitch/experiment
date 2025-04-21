@@ -303,6 +303,7 @@ Here's a horizontal rule:
 
 exports[`inference/openai tool use experiment 1`] = `
 {
+  "max_tokens": 8192,
   "messages": [
     {
       "content": "hello friend! my name is ade, please remember that. then, search for the definition of singularity",
@@ -371,6 +372,7 @@ exports[`inference/openai tool use experiment 1`] = `
 
 exports[`inference/openai sample 1`] = `
 {
+  "max_tokens": 8192,
   "messages": [
     {
       "content": "This is a system message.",
