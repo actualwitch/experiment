@@ -136,7 +136,10 @@
       {
         "role": "tool",
         "fromServer": true,
-        "content": { "function": "bio", "arguments": { "memory": "Weather in Tokyo: 22°C, partly cloudy (as of last check)." } }
+        "content": {
+          "function": "bio",
+          "arguments": { "memory": "Weather in Tokyo: 22°C, partly cloudy (as of last check)." }
+        }
       },
       {
         "role": "assistant",
@@ -264,32 +267,74 @@
       { "role": "user", "content": "Can you help me with a calculation?" },
       { "role": "assistant", "fromServer": true, "content": "Of course! What calculation do you need help with?" },
       { "role": "user", "content": "What is 1337 * 42?" },
-      { "role": "assistant", "fromServer": true, "content": "Let me calculate that for you.\n\n1337 * 42 = 56,154\n\nSo the result of 1337 multiplied by 42 is 56,154." },
+      {
+        "role": "assistant",
+        "fromServer": true,
+        "content": "Let me calculate that for you.\n\n1337 * 42 = 56,154\n\nSo the result of 1337 multiplied by 42 is 56,154."
+      },
       { "role": "user", "content": "Now divide that by zero." },
-      { "role": "error", "fromServer": true, "content": "Error: Division by zero is not defined in mathematics. Cannot perform the requested operation." },
-      { "role": "assistant", "fromServer": true, "content": "I'm afraid I can't divide by zero as it's mathematically undefined. Division by zero doesn't yield a real number result because any number multiplied by zero equals zero, so there's no number that can be multiplied by zero to get a non-zero result.\n\nIs there another calculation I can help you with instead?" }
+      {
+        "role": "error",
+        "fromServer": true,
+        "content": "Error: Division by zero is not defined in mathematics. Cannot perform the requested operation."
+      },
+      {
+        "role": "assistant",
+        "fromServer": true,
+        "content": "I'm afraid I can't divide by zero as it's mathematically undefined. Division by zero doesn't yield a real number result because any number multiplied by zero equals zero, so there's no number that can be multiplied by zero to get a non-zero result.\n\nIs there another calculation I can help you with instead?"
+      }
     ]
   },
   "Context example": {
     "messages": [
       { "role": "system", "content": "You are a code assistant that helps with programming tasks." },
       { "role": "user", "content": "Can you help me understand how the tool debugging works in this project?" },
-      { 
-        "role": "context", 
-        "content": { 
-          "directory": "./src/feature/inference/function.ts" 
-        } 
+      {
+        "role": "context",
+        "content": {
+          "directory": "./src/feature/inference/function.ts"
+        }
       },
-      { 
-        "role": "assistant", 
-        "fromServer": true, 
-        "content": "Based on the code I can see, the tool debugging in this project works by parsing and converting function schemas between different formats used by various LLM providers.\n\nThe main functionality is in the `function.ts` file, which contains:\n\n1. `tryParseFunctionSchema` - This function attempts to parse a JSON object into a standardized `ExperimentFunction` format. It handles both OpenAI/Mistral format (with `type: \"function\"`) and Anthropic format (with `name`, `description`, and `input_schema`).\n\n2. `experimentFunctionToTool` - Converts the internal representation to OpenAI/Mistral's format.\n\n3. `experimentFunctionToAnthropicTool` - Converts the internal representation to Anthropic's format.\n\nThis allows the application to have a unified way of handling tool definitions regardless of which LLM provider you're using, making it easier to debug and visualize tool interactions across different models." 
+      {
+        "role": "assistant",
+        "fromServer": true,
+        "content": "Based on the code I can see, the tool debugging in this project works by parsing and converting function schemas between different formats used by various LLM providers.\n\nThe main functionality is in the `function.ts` file, which contains:\n\n1. `tryParseFunctionSchema` - This function attempts to parse a JSON object into a standardized `ExperimentFunction` format. It handles both OpenAI/Mistral format (with `type: \"function\"`) and Anthropic format (with `name`, `description`, and `input_schema`).\n\n2. `experimentFunctionToTool` - Converts the internal representation to OpenAI/Mistral's format.\n\n3. `experimentFunctionToAnthropicTool` - Converts the internal representation to Anthropic's format.\n\nThis allows the application to have a unified way of handling tool definitions regardless of which LLM provider you're using, making it easier to debug and visualize tool interactions across different models."
       },
       { "role": "user", "content": "Can you show me how to add a new tool to a conversation?" },
-      { 
-        "role": "assistant", 
-        "fromServer": true, 
-        "content": "To add a new tool to a conversation in Experiment, you can paste a JSON schema into the chat input. Here's how to do it:\n\n1. Create your tool schema in either OpenAI/Mistral format or Anthropic format\n2. Paste it into the chat input when the role is set to \"tool\"\n\nHere's an example of a tool in OpenAI/Mistral format:\n\n```json\n{\n  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\",\n  \"type\": \"function\",\n  \"function\": {\n    \"name\": \"get_stock_price\",\n    \"description\": \"Get the current stock price for a given ticker symbol\",\n    \"parameters\": {\n      \"type\": \"object\",\n      \"properties\": {\n        \"ticker\": {\n          \"type\": \"string\",\n          \"description\": \"The stock ticker symbol, e.g. AAPL for Apple Inc.\"\n        }\n      },\n      \"required\": [\"ticker\"]\n    }\n  }\n}\n```\n\nAnd here's the same tool in Anthropic format:\n\n```json\n{\n  \"name\": \"get_stock_price\",\n  \"description\": \"Get the current stock price for a given ticker symbol\",\n  \"input_schema\": {\n    \"type\": \"object\",\n    \"properties\": {\n      \"ticker\": {\n        \"type\": \"string\",\n        \"description\": \"The stock ticker symbol, e.g. AAPL for Apple Inc.\"\n      }\n    },\n    \"required\": [\"ticker\"]\n  }\n}\n```\n\nThe application will automatically detect and parse these schemas, then add them to your conversation as tool messages. When you run the experiment, the LLM will have access to these tools and can use them in its responses." 
+      {
+        "role": "assistant",
+        "fromServer": true,
+        "content": "To add a new tool to a conversation in Experiment, you can paste a JSON schema into the chat input. Here's how to do it:\n\n1. Create your tool schema in either OpenAI/Mistral format or Anthropic format\n2. Paste it into the chat input when the role is set to \"tool\"\n\nHere's an example of a tool in OpenAI/Mistral format:\n\n```json\n{\n  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\",\n  \"type\": \"function\",\n  \"function\": {\n    \"name\": \"get_stock_price\",\n    \"description\": \"Get the current stock price for a given ticker symbol\",\n    \"parameters\": {\n      \"type\": \"object\",\n      \"properties\": {\n        \"ticker\": {\n          \"type\": \"string\",\n          \"description\": \"The stock ticker symbol, e.g. AAPL for Apple Inc.\"\n        }\n      },\n      \"required\": [\"ticker\"]\n    }\n  }\n}\n```\n\nAnd here's the same tool in Anthropic format:\n\n```json\n{\n  \"name\": \"get_stock_price\",\n  \"description\": \"Get the current stock price for a given ticker symbol\",\n  \"input_schema\": {\n    \"type\": \"object\",\n    \"properties\": {\n      \"ticker\": {\n        \"type\": \"string\",\n        \"description\": \"The stock ticker symbol, e.g. AAPL for Apple Inc.\"\n      }\n    },\n    \"required\": [\"ticker\"]\n  }\n}\n```\n\nThe application will automatically detect and parse these schemas, then add them to your conversation as tool messages. When you run the experiment, the LLM will have access to these tools and can use them in its responses."
+      }
+    ]
+  },
+  "Identity": {
+    "messages": [
+      {
+        "name": "Heisenberg",
+        "role": "user",
+        "content": "Say my name",
+        "timestamp": "2025-04-20T17:42:48.087Z"
+      },
+      {
+        "role": "assistant",
+        "name": "gpt-4.1",
+        "fromServer": true,
+        "content": "You're **Heisenberg**.",
+        "timestamp": "2025-04-20T17:42:55.602Z"
+      },
+      {
+        "name": "Heisenberg",
+        "role": "user",
+        "content": "You're goddamn right!",
+        "timestamp": "2025-04-20T17:43:05.338Z"
+      },
+      {
+        "role": "assistant",
+        "name": "gpt-4.1",
+        "fromServer": true,
+        "content": "😎👨‍🔬💊\n\nThat's right, Heisenberg!",
+        "timestamp": "2025-04-20T17:43:09.232Z"
       }
     ]
   }

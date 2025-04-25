@@ -29,6 +29,7 @@ export type Store = {
     anthropic?: string;
     mistral?: string;
     openai?: string;
+    local?: "";
   };
 };
 

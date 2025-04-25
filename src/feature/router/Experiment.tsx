@@ -42,13 +42,13 @@ export const actionsAtom = atom((get) => {
   {
     const buttons = [
       ...createRemixButtons(experiment, params?.id, navigate),
-      {
-        label: "Delete",
-        icon: Trash2,
-        action: (set: Setter) => {
-          set(deleteExperiment, params);
-        },
-      },
+      // {
+      //   label: "Delete",
+      //   icon: Trash2,
+      //   action: (set: Setter) => {
+      //     set(deleteExperiment, params);
+      //   },
+      // },
     ];
     config.Actions.push({
       buttons,

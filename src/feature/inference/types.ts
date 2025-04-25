@@ -8,13 +8,14 @@ export function withIds<T extends string>(items: T[] | readonly T[]) {
     name,
   }));
 }
-export const providerTypes = ["anthropic", "mistral", "openai"] as const;
+export const providerTypes = ["anthropic", "mistral", "openai", "local"] as const;
 export type ProviderType = (typeof providerTypes)[number];
 export const providers = withIds(providerTypes);
 export const providerLabels = {
   anthropic: "🧶 Anthropic",
   mistral: "🐈 Mistral",
   openai: "🪢 OpenAI",
+  local: "💻 Local",
 } satisfies { [K in ProviderType]: string };
 
 const GPT_4_5 = Literal("gpt-4.5-preview");
@@ -66,19 +67,37 @@ export const AnthropicModel = Union(
   Claude_3_5_Haiku,
   Claude_3_Opus,
 );
-export const MistralModel = Union(
-  Literal("mistral-large-latest"),
-  Literal("mistral-medium-latest"),
-  Literal("mistral-small-latest"),
-);
+
+const Mistral_Large = Literal("mistral-large-latest");
+const Mistral_Medium = Literal("mistral-medium-latest");
+const Mistral_Small = Literal("mistral-small-latest");
+export const MistralModel = Union(Mistral_Large, Mistral_Medium, Mistral_Small);
+
+const Local_Mistral_Small = Literal("mistralai/Mistral-Small-24B-Instruct-2501");
+const Local_Mistral_Large = Literal("mlx-community/Mistral-Large-Instruct-2407-4bit");
+const Local_Gemma_3_27 = Literal("mlx-community/gemma-3-27b-it-qat-4bit");
+const Local_Gemma_3_4 = Literal("mlx-community/gemma-3-4b-it-qat-4bit");
+
+export const LocalModel = Union(Local_Mistral_Small, Local_Mistral_Large, Local_Gemma_3_27, Local_Gemma_3_4);
 
 export const modelOptions = {
-  openai: OpenAIModel.alternatives.map((model) => model.value),
   anthropic: AnthropicModel.alternatives.map((model) => model.value),
   mistral: MistralModel.alternatives.map((model) => model.value),
+  openai: OpenAIModel.alternatives.map((model) => model.value),
+  local: LocalModel.alternatives.map((model) => model.value),
 };
 export const modelLabels = {
-  //openai
+  // anthropic
+  [Claude_3_Opus.value]: "Claude 3 Opus",
+  [Claude_3_5_Haiku.value]: "Claude 3.5 Haiku",
+  [Claude_3_5_Sonnet.value]: "Claude 3.5 Sonnet",
+  [Claude_3_6_Sonnet.value]: "Claude 3.6 Sonnet",
+  [Claude_3_7_Sonnet.value]: "Claude 3.7 Sonnet",
+  // mistral
+  [Mistral_Large.value]: "Mistral Large",
+  [Mistral_Medium.value]: "Mistral Medium",
+  [Mistral_Small.value]: "Mistral Small",
+  // openai
   [GPT_4_5.value]: "GPT-4.5",
   [GPT_4_1.value]: "GPT-4.1",
   [GPT_4_1_mini.value]: "GPT-4.1 Mini",
@@ -95,16 +114,11 @@ export const modelLabels = {
   [o1_pro.value]: "O1 Pro",
   [o1_preview.value]: "O1 Preview",
   [o1_mini.value]: "O1 Mini",
-  // anthropic
-  [Claude_3_Opus.value]: "Claude 3 Opus",
-  [Claude_3_5_Haiku.value]: "Claude 3.5 Haiku",
-  [Claude_3_5_Sonnet.value]: "Claude 3.5 Sonnet",
-  [Claude_3_6_Sonnet.value]: "Claude 3.6 Sonnet",
-  [Claude_3_7_Sonnet.value]: "Claude 3.7 Sonnet",
-  // mistral
-  "mistral-large-latest": "Mistral Large",
-  "mistral-medium-latest": "Mistral Medium",
-  "mistral-small-latest": "Mistral Small",
+  // local
+  [Local_Mistral_Small.value]: "Mistral Small",
+  [Local_Mistral_Large.value]: "Mistral Large",
+  [Local_Gemma_3_27.value]: "Gemma 3 Mini",
+  [Local_Gemma_3_4.value]: "Gemma 3 Nano",
 } as const;
 
 export const isReasoningModel = (model: string) =>
@@ -114,7 +128,7 @@ export const isReasoningEffortSupported = (model: string) =>
   [o1_preview.value, o1.value, o3_mini.value, o3.value, o4_mini.value].includes(model);
 
 export type InferenceConfig = {
-  stream: boolean;
+  stream: true;
   token: string;
   provider: ProviderType;
   model: string;

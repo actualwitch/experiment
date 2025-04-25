@@ -1,37 +1,45 @@
+import { spawn, type ChildProcessWithoutNullStreams } from "node:child_process";
+
 import Anthropic from "@anthropic-ai/sdk";
 import { Mistral } from "@mistralai/mistralai";
-import type { ChatCompletionStreamRequest } from "@mistralai/mistralai/models/components";
 import { atom } from "jotai";
+import { observe } from "jotai-effect";
 import { focusAtom } from "jotai-optics";
 import OpenAI from "openai";
-import type { ChatCompletionCreateParamsStreaming, ReasoningEffort } from "openai/resources/index.mjs";
+import type { ReasoningEffort } from "openai/resources/index.mjs";
 
+import { parentAtom } from "../../atoms/common";
+import { createExperiment, experimentAtom } from "../../atoms/experiment";
+import { isMetaExperimentAtom, modelAtom, selectedProviderAtom, storeAtom, tokensAtom } from "../../atoms/store";
+import { newLine, tokenLimit } from "../../const";
+import { store } from "../../store";
+import type { Message } from "../../types";
+import { getStoragePath, spawn as maybeSpawn } from "../../utils";
+import { entangledAtom } from "../../utils/entanglement";
+import { getRealm, hasBackend } from "../../utils/realm";
 import { experimentToAnthropic } from "./adapters/anthropic";
 import { experimentToMistral } from "./adapters/mistral";
 import { experimentToOpenai } from "./adapters/openai";
-import { spawn } from "../../utils";
-import { entangledAtom } from "../../utils/entanglement";
-import { hasBackend } from "../../utils/realm";
-import { parentAtom } from "../../atoms/common";
-import { createExperiment, experimentAtom } from "../../atoms/experiment";
-import { modelAtom, selectedProviderAtom, storeAtom, tokensAtom } from "../../atoms/store";
-import type { Message } from "../../types";
 import {
+  type InferenceConfig,
+  type ProviderType,
   isReasoningEffortSupported,
   isReasoningModel,
   modelLabels,
   modelOptions,
   providerLabels,
-  type InferenceConfig,
-  type ProviderType,
 } from "./types";
-import { tokenLimit } from "../../const";
 import { createAssistantResponse } from "./utils";
+import { tryOr } from "true-myth/result";
+import { platform } from "node:os";
+import { join } from "node:path";
+import { writeFile } from "node:fs";
+import { mlxBackend } from "./backend";
 
 export const availableProviderOptionsAtom = atom((get) => {
   const tokens = get(tokensAtom);
   const providers = Object.keys(tokens).reduce<ProviderType[]>((acc, item) => {
-    if (tokens[item]) {
+    if (tokens[item] !== undefined) {
       acc.push(item);
     }
     return acc;
@@ -41,6 +49,104 @@ export const availableProviderOptionsAtom = atom((get) => {
     name: providerLabels[provider],
   }));
 });
+
+export const shouldEnableLocalInferenceAtom = entangledAtom(
+  "local",
+  atom(async (get) => {
+    if (getRealm() === "server" || platform() !== "darwin") {
+      const uvBin = await maybeSpawn("which", ["uv"]);
+      return uvBin.match({ Ok: (val) => val !== "", Err: () => false });
+    }
+    return false;
+  }),
+);
+
+export const inferenceBackendStatus = atom<"inactive" | "activating" | "active" | "error">("inactive");
+
+type StdioMessage = { type: "ready" } | { type: "delta"; content: string } | { type: "end" };
+
+let inferenceBackend: ChildProcessWithoutNullStreams | null = null;
+let inferenceController: AbortController;
+const target = new EventTarget();
+
+if (getRealm() === "server") {
+  inferenceController = new AbortController();
+  const { signal } = inferenceController;
+  const unobserve = observe((get, set) => {
+    const selectedProvider = get(selectedProviderAtom);
+    if (selectedProvider !== "local") {
+      if (inferenceBackend) {
+        inferenceBackend.kill();
+        inferenceBackend = null;
+        set(inferenceBackendStatus, "inactive");
+      }
+      return;
+    }
+    const selectedModel = get(modelAtom);
+    if (!selectedModel) return;
+    const backendStatus = get(inferenceBackendStatus);
+    if (backendStatus === "inactive") {
+      set(inferenceBackendStatus, "activating");
+      const fullPath = join(getStoragePath(), "server.py");
+      writeFile(fullPath, mlxBackend, (err) => {
+        if (err) {
+          console.error(err);
+        } else {
+          inferenceBackend = spawn("uv", ["run", fullPath, `--model=${selectedModel}`], { signal });
+          inferenceBackend.stdout.on("data", (data) => {
+            tryOr("could not parse message", () => {
+              const output: StdioMessage = JSON.parse(data.toString());
+              if (output.type === "ready") {
+                set(inferenceBackendStatus, "active");
+              }
+              if (output.type === "delta" || output.type === "end") {
+                target.dispatchEvent(new CustomEvent("message", { detail: output }));
+              }
+            });
+          });
+          inferenceBackend.stderr.on("data", (data) => {
+            console.error(`backend stderr: ${data}`);
+          });
+        }
+      });
+    }
+  }, store);
+  process.on("beforeExit", () => {
+    unobserve();
+    inferenceController.abort();
+  });
+}
+
+async function* generateTokens(config: InferenceConfig) {
+  const listener = (e: CustomEvent) => {
+    queue.push(e.detail);
+    if (resolveNext) {
+      resolveNext();
+      resolveNext = null;
+    }
+  };
+  let resolveNext: (() => void) | null = null;
+  const queue: StdioMessage[] = [];
+  target.addEventListener("message", listener);
+  inferenceBackend?.stdin.write(JSON.stringify(config) + newLine);
+  while (true) {
+    if (queue.length > 0) {
+      const thisMessage = queue.shift();
+      if (thisMessage?.type === "end") {
+        break;
+      }
+      if (thisMessage?.type === "delta") yield thisMessage;
+    } else {
+      await new Promise<void>((resolve) => {
+        resolveNext = resolve;
+      });
+    }
+  }
+  while (queue.length > 0) {
+    yield queue.shift();
+  }
+  target.removeEventListener("message", listener);
+}
 
 export const modelOptionsAtom = atom((get) => {
   const provider = get(selectedProviderAtom);
@@ -73,7 +179,7 @@ export const isReasoningEffortSupportedAtom = atom((get) => {
 
 export const resolveToken = async (token: string) => {
   if (token.startsWith("op:")) {
-    const resolvedToken = await spawn("op", ["read", token]);
+    const resolvedToken = await maybeSpawn("op", ["read", token]);
     return resolvedToken.unwrapOr(null);
   }
   return token;
@@ -96,7 +202,8 @@ export const runInferenceAtom = entangledAtom(
   atom(null, async (get, set) => {
     const provider = get(selectedProviderAtom);
     const experiment = get(experimentAtom);
-    if (!provider || experiment.length === 0) return;
+    if (!provider || experiment.length === 0 || (provider === "local" && get(inferenceBackendStatus) !== "active"))
+      return;
     const noErrors = experiment.filter((msg) => msg.role !== "error");
     if (experiment.length !== noErrors.length) {
       set(experimentAtom, noErrors);
@@ -111,12 +218,12 @@ export const runInferenceAtom = entangledAtom(
       }
 
       const tokenOrReference = get(focusAtom(storeAtom, (o) => o.prop("tokens").prop(provider)));
-      if (!tokenOrReference) {
+      if (typeof tokenOrReference !== "string") {
         throw new Error(`No ${provider} token`);
       }
 
       const resolvedToken = await resolveToken(tokenOrReference);
-      if (!resolvedToken) {
+      if (typeof resolvedToken !== "string") {
         throw new Error("Could not resolve token");
       }
 
@@ -153,10 +260,17 @@ export const runInferenceAtom = entangledAtom(
           await set(runExperimentAsMistral, config);
           break;
         }
+        case "local": {
+          await set(runExperimentAsLocal, config);
+          break;
+        }
       }
       set(saveExperimentAtom);
     } catch (content) {
-      set(experimentAtom, [...get(experimentAtom), { role: "error", fromServer: true, content }]);
+      set(experimentAtom, [
+        ...get(experimentAtom),
+        { role: "error", fromServer: true, content: Error.isError(content) ? content.message : content },
+      ]);
     } finally {
       set(isRunningAtom, false);
     }
@@ -222,7 +336,7 @@ export const runExperimentAsOpenAi = atom(null, async (get, set, config: Inferen
     dangerouslyAllowBrowser: hasBackend() ? undefined : true,
   });
   const stream = await client.chat.completions.create(params);
-  const contentChunks: Message[] = [];
+  const contentChunks: Message[] = prefill ? [prefill] : [];
   const namesForToolCalls = new Map<number, string>();
   for await (const chunk of stream) {
     if (chunk.choices.length === 0) {
@@ -291,7 +405,7 @@ export const runExperimentAsMistral = atom(null, async (get, set, config: Infere
   });
 
   const stream = await client.chat.stream(experimentAsMistral);
-  const contentChunks: Message[] = [];
+  const contentChunks: Message[] = prefill ? [prefill] : [];
   for await (const chunk of stream) {
     if (chunk.data.choices.length === 0) {
       continue;
@@ -318,6 +432,19 @@ export const runExperimentAsMistral = atom(null, async (get, set, config: Infere
         }
         contentChunks[toolCall.index!].content = toolCall.function;
       }
+    }
+    set(experimentAtom, [...experiment, ...contentChunks]);
+  }
+});
+
+export const runExperimentAsLocal = atom(null, async (get, set, config: InferenceConfig) => {
+  const { temperature, token, n_tokens, messages: experiment, model, prefill } = config;
+
+  const contentChunks: Message[] = prefill ? [prefill] : [];
+  contentChunks.push(createAssistantResponse({ role: "assistant", name: model }));
+  for await (const chunk of generateTokens(config)) {
+    if (chunk?.type === "delta") {
+      contentChunks[0].content += chunk.content;
     }
     set(experimentAtom, [...experiment, ...contentChunks]);
   }

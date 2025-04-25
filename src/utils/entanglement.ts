@@ -8,24 +8,6 @@ type Config = {
   name: string;
 };
 
-function deepEqual(a: any, b: any): boolean {
-  if (a === b) return true;
-
-  if (a === null || b === null || typeof a !== "object" || typeof b !== "object") return false;
-
-  if (Array.isArray(a) && Array.isArray(b)) {
-    if (a.length !== b.length) return false;
-    return a.every((val, i) => deepEqual(val, b[i]));
-  }
-
-  const keysA = Object.keys(a);
-  const keysB = Object.keys(b);
-
-  if (keysA.length !== keysB.length) return false;
-
-  return keysA.every((key) => Object.prototype.hasOwnProperty.call(b, key) && deepEqual(a[key], b[key]));
-}
-
 export function divergentAtom<T extends Atom<unknown> | WritableAtom<unknown, unknown[], unknown>>(
   ...cases: Array<() => T | undefined>
 ) {
@@ -85,9 +67,7 @@ export function entangledAtom<
       const updater = async () => {
         const value = await store.get(thisAtom);
         hydrationMap[id] = value;
-        if (!deepEqual(channelValue, value)) {
-          publish({ id, value });
-        }
+        publish({ id, value });
         channelValue = value;
       };
       updater();

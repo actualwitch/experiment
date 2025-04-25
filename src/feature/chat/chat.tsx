@@ -58,9 +58,9 @@ export const ChatMessage = ({
   let contentType: string | undefined;
   const align = getAlign(message.fromServer ?? false, experimentLayout);
   const viewStyle = {
-    display: "grid",
+    display: "flex",
+    flexDirection: "column",
     textAlign: typeof message.content === "object" ? align : undefined,
-    width: "initial",
   } satisfies CSSProperties;
 
   if (collapseTemplates && message.template) {

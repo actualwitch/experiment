@@ -112,7 +112,6 @@ export const MessageComponent = styled.article<
         border-radius: ${bs(Palette.borderCode)};
         border: 1px solid ${Palette.white}00;
         padding: ${bs(1 / 4)} ${bs(1 / 4)} 0;
-        width: fit-content;
         margin-${alignComplement}: auto;
       }
       

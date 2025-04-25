@@ -5,8 +5,8 @@ export type ObjectOrStringContent = { content: object | string };
 export type ObjectContent = { content: object };
 
 export const StringType = Union(Literal("system"), Literal("developer"), Literal("user"));
-export const ObjectOrStringType = Union(Literal("assistant"), Literal("info"), Literal("tool"));
-export const ObjectType = Union(Literal("context"), Literal("error"));
+export const ObjectOrStringType = Union(Literal("assistant"), Literal("info"), Literal("tool"), Literal("error"));
+export const ObjectType = Union(Literal("context"));
 
 export const PossibleObjectType = Union(...ObjectType.alternatives, ...ObjectOrStringType.alternatives);
 

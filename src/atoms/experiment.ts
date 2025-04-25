@@ -32,15 +32,12 @@ export const createExperiment = atom(
     const thisExperiment = exp[id] ?? {};
     runId ??= String(newIdForObject(thisExperiment) + 1);
 
-    const model = get(modelAtom);
-
     set(experimentsAtom, (prev) => ({
       ...prev,
       [id]: {
         ...thisExperiment,
         [runId]: (messages ?? []).map((message) => ({
           ...message,
-          ...(message.role === "assistant" ? { model } : null),
         })),
       },
     }));
