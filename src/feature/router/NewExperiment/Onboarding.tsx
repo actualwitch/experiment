@@ -1,5 +1,5 @@
 import styled from "@emotion/styled";
-import { useAtom, useSetAtom } from "jotai";
+import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import { useState } from "react";
 import { Item } from "react-stately";
 
@@ -21,6 +21,7 @@ import { TextField } from "../../ui/TextField";
 import { Underline } from "../../../style/utils";
 import { DesktopOnly } from "../../ui/Mobile";
 import { tryOr } from "true-myth/result";
+import { newProviderOptionsAtom } from "../../inference/atoms";
 
 export const pronounOptions = withIds([...PRONOUNS, CUSTOM_OPTION]);
 
@@ -76,6 +77,8 @@ export const Onboarding = () => {
   const [mcpName, setMcpName] = useState("");
   const [mcpCommandOrUrl, setMcpCommandOrUrl] = useState("");
 
+  const availableOptions = useAtomValue(newProviderOptionsAtom);
+
   return (
     <>
       <DesktopOnly>
@@ -120,10 +123,9 @@ export const Onboarding = () => {
           <h3>Add provider</h3>
           <Margin>
             <Switch value={selectedProvider} onChange={setSelectedProvider}>
-              {providerTypes.map((provider) => ({
-                value: provider,
-                name: providerLabels[provider],
-                isDisabled: tokens[provider] !== undefined,
+              {availableOptions.map((provider) => ({
+                ...provider,
+                isDisabled: tokens[provider.value] !== undefined,
               }))}
             </Switch>
           </Margin>

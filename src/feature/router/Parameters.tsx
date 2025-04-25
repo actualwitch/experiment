@@ -1,6 +1,6 @@
 import { css } from "@emotion/react";
 import styled from "@emotion/styled";
-import { atom, useAtom, useSetAtom } from "jotai";
+import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
 import { type PropsWithChildren, useEffect, useState } from "react";
 import { Item } from "react-stately";
 
@@ -30,7 +30,7 @@ import { widthLimit } from "../../style/mixins";
 import { CUSTOM_OPTION, PRONOUNS } from "../../const";
 import { pronounOptions } from "./NewExperiment/Onboarding";
 import { Trash2 } from "lucide-react";
-import { shouldEnableLocalInferenceAtom } from "../inference/atoms";
+import { newProviderOptionsAtom, shouldEnableLocalInferenceAtom } from "../inference/atoms";
 
 const StyledForm = styled.form`
   display: flex;
@@ -152,7 +152,6 @@ export default function Parameters() {
   const [isTransRights, setIsTransRights] = useAtom(isTransRightsAtom);
 
   const [tokens, setTokens] = useAtom(tokensAtom);
-  const [shouldEnableLocalInference] = useAtom(shouldEnableLocalInferenceAtom);
   const setProviderToken = useSetAtom(setTokenAtom);
   const [isAdding, setIsAdding] = useState(false);
 
@@ -173,14 +172,7 @@ export default function Parameters() {
     setSelectedProvider(null);
   };
 
-  const availableOptions = providerTypes
-    .filter((provider) =>
-      tokens[provider] !== undefined ? false : provider === "local" ? shouldEnableLocalInference : true,
-    )
-    .map((provider) => ({
-      value: provider,
-      name: providerLabels[provider],
-    }));
+  const availableOptions = useAtomValue(newProviderOptionsAtom);
 
   useEffect(() => {
     if (selectedProvider === "local") {

@@ -294,6 +294,10 @@ Here's a horizontal rule:
 ,
       "role": "assistant",
     },
+    {
+      "content": "This is an error message.",
+      "role": "error",
+    },
   ],
   "model": "mistral-small-latest",
   "stream": true,
@@ -456,6 +460,10 @@ Here's a horizontal rule:
 "
 ,
       "role": "assistant",
+    },
+    {
+      "content": "This is an error message.",
+      "role": "error",
     },
   ],
   "model": "gpt-4o",

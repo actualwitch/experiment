@@ -75,10 +75,17 @@ export const MistralModel = Union(Mistral_Large, Mistral_Medium, Mistral_Small);
 
 const Local_Mistral_Small = Literal("mistralai/Mistral-Small-24B-Instruct-2501");
 const Local_Mistral_Large = Literal("mlx-community/Mistral-Large-Instruct-2407-4bit");
-const Local_Gemma_3_27 = Literal("mlx-community/gemma-3-27b-it-qat-4bit");
-const Local_Gemma_3_4 = Literal("mlx-community/gemma-3-4b-it-qat-4bit");
+const Local_Gemma_3_27 = Literal("google/gemma-3-27b-it");
+const Local_Gemma_3_27_QAT = Literal("mlx-community/gemma-3-27b-it-qat-4bit");
+const Local_Gemma_3_4_QAT = Literal("mlx-community/gemma-3-4b-it-qat-4bit");
 
-export const LocalModel = Union(Local_Mistral_Small, Local_Mistral_Large, Local_Gemma_3_27, Local_Gemma_3_4);
+export const LocalModel = Union(
+  Local_Mistral_Small,
+  Local_Mistral_Large,
+  Local_Gemma_3_27,
+  Local_Gemma_3_27_QAT,
+  Local_Gemma_3_4_QAT,
+);
 
 export const modelOptions = {
   anthropic: AnthropicModel.alternatives.map((model) => model.value),
@@ -117,8 +124,9 @@ export const modelLabels = {
   // local
   [Local_Mistral_Small.value]: "Mistral Small",
   [Local_Mistral_Large.value]: "Mistral Large",
-  [Local_Gemma_3_27.value]: "Gemma 3 Mini",
-  [Local_Gemma_3_4.value]: "Gemma 3 Nano",
+  [Local_Gemma_3_27.value]: "Gemma 3 27B",
+  [Local_Gemma_3_27_QAT.value]: "Gemma 3 27B (QAT)",
+  [Local_Gemma_3_4_QAT.value]: "Gemma 3 4B (QAT)",
 } as const;
 
 export const isReasoningModel = (model: string) =>

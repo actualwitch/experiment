@@ -28,6 +28,7 @@ import {
   modelLabels,
   modelOptions,
   providerLabels,
+  providerTypes,
 } from "./types";
 import { createAssistantResponse } from "./utils";
 import { tryOr } from "true-myth/result";
@@ -60,6 +61,19 @@ export const shouldEnableLocalInferenceAtom = entangledAtom(
     return false;
   }),
 );
+
+export const newProviderOptionsAtom = atom(async (get) => {
+  const tokens = get(tokensAtom);
+  const shouldEnableLocalInference = await get(shouldEnableLocalInferenceAtom);
+  return providerTypes
+    .filter((provider) =>
+      tokens[provider] !== undefined ? false : provider === "local" ? shouldEnableLocalInference : true,
+    )
+    .map((provider) => ({
+      value: provider,
+      name: providerLabels[provider],
+    }));
+});
 
 export const inferenceBackendStatus = atom<"inactive" | "activating" | "active" | "error">("inactive");
 

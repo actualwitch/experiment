@@ -4,8 +4,10 @@ on:
   push:
     tags:
       - v*.*.*
+
 permissions:
   contents: write
+
 jobs:
   release:
     runs-on: macos-latest
