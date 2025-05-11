@@ -1,15 +1,14 @@
 import { css } from "@emotion/react";
 import styled from "@emotion/styled";
 import { type Setter, atom, useAtom, useSetAtom } from "jotai";
+import { Disc3, MessageCircleDashed, Play, Pyramid, Rewind, Trash2 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 
-import { Disc3, MessageCircleDashed, Play, Pyramid, Rewind, Trash2 } from "lucide-react";
 import { isActionPanelOpenAtom, isNavPanelOpenAtom, layoutAtom, selectionAtom } from "../../../atoms/common";
 import { experimentAtom } from "../../../atoms/experiment";
 import { personasAtom } from "../../../atoms/persona";
 import { pwdAtom } from "../../../atoms/server";
 import {
-  identityAtom,
   isDarkModeAtom,
   isOnboardedAtom,
   modelAtom,
@@ -24,7 +23,7 @@ import { type WithDarkMode, withDarkMode } from "../../../style/darkMode";
 import { Palette } from "../../../style/palette";
 import { type Message, PossibleObjectType, type Role, RoleOptions } from "../../../types";
 import { useHandlers } from "../../../utils/keyboard";
-import { getRealm, hasBackend } from "../../../utils/realm";
+import { hasBackend } from "../../../utils/realm";
 import { ChatPreview } from "../../chat/chat";
 import {
   availableProviderOptionsAtom,
@@ -42,19 +41,9 @@ import type { Config } from "../../ui/ConfigRenderer";
 import { createCancelEditingButton, createSelectionEditButtons } from "../../ui/ConfigRenderer/buttonCreators";
 import { Page } from "../../ui/Page";
 import { TextArea } from "../../ui/TextArea";
-import { Onboarding } from "./Onboarding";
+import { inlineButtonModifier } from "./style";
 
 const baseMargin = 1 / 2;
-
-export const inlineButtonModifier = css`
-  background-color: transparent;
-  color: inherit;
-  padding-top: 0;
-  padding-bottom: 0;
-  :hover {
-    background-color: ${Palette.black}20;
-  }
-`;
 
 export const Block = styled.div<WithDarkMode & { isHidden: boolean }>`
   display: flex;
@@ -318,7 +307,6 @@ export default function () {
   const [role, setRole] = useAtom(roleAtom);
   const resetMessage = useSetAtom(resetMessageAtom);
   const [hasLoaded, setHasLoaded] = useAtom(hasLoadedAtom);
-  const [isOnboarded, setIsOnboarded] = useAtom(isOnboardedAtom);
 
   useEffect(() => {
     setHasLoaded(true);
@@ -453,15 +441,14 @@ export default function () {
   }, [pageRef.current]);
 
   useEffect(() => {
-    if (!isRunning) return;
     scrollToEnd();
-  }, [experiment, isRunning]);
+  }, [experiment]);
 
-  return !isOnboarded ? (
-    <Page>
-      <Onboarding />
-    </Page>
-  ) : (
+  useEffect(() => {
+    scrollToEnd();
+  }, []);
+
+  return (
     <Page ref={pageRef}>
       <ChatPreview experiment={experiment} />
       <Block isDarkMode={isDarkMode} isHidden={isNavPanelOpen || isActionPanelOpen}>

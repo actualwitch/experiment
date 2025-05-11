@@ -20,6 +20,8 @@ export type Store = {
   experimentLayout?: "left" | "chat" | "chat-reverse";
   isMetaExperiment?: boolean;
   isTransRights?: boolean;
+  terminology?: "scientific" | "magical";
+  timezone?: string;
   selectedProvider?: ProviderType;
   selectedModel?: string;
   experiments?: Record<string, SerialExperiment>;
@@ -34,6 +36,7 @@ export type Store = {
 };
 
 export const getInitialStore = (): Store => ({
+  timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
   tokens: {},
   experiments: {},
 });
@@ -92,10 +95,21 @@ export const identityAtom = atom((get) => {
     .otherwise(() => undefined);
 });
 
+export const timezoneAtom = entangledAtom(
+  "tz",
+  focusAtom(storeAtom, (o) => o.prop("timezone")),
+);
+
+export const terminologyAtom = entangledAtom(
+  "terminology",
+  focusAtom(storeAtom, (o) => o.prop("terminology")),
+);
+
 export const selectedProviderAtom = entangledAtom(
   "selected-provider",
   focusAtom(storeAtom, (o) => o.prop("selectedProvider")),
 );
+
 export const modelAtom = entangledAtom(
   "model",
   focusAtom(storeAtom, (o) => o.prop("selectedModel")),

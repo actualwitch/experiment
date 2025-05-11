@@ -15,6 +15,8 @@ import {
   nameAtom,
   pronounsAtom,
   setTokenAtom,
+  terminologyAtom,
+  timezoneAtom,
   tokensAtom,
 } from "../../atoms/store";
 import { Button, FONT_STACKS, bs } from "../../style";
@@ -161,6 +163,10 @@ export default function Parameters() {
   const [name, setName] = useAtom(nameAtom);
   const [pronouns, setPronouns] = useAtom(pronounsAtom);
 
+  const [timezone, setTimezone] = useAtom(timezoneAtom);
+
+  const [terminology, setTerminology] = useAtom(terminologyAtom);
+
   const submit = () => {
     if (!selectedProvider || !token) {
       return;
@@ -241,7 +247,6 @@ export default function Parameters() {
         </Row>
         <Row>
           <header>Pronouns</header>
-
           {pronouns === undefined || PRONOUNS.includes(pronouns) ? (
             <Select
               optional
@@ -259,6 +264,31 @@ export default function Parameters() {
             <TextField optional value={pronouns} onChange={setPronouns} autoFocus />
           )}
         </Row>
+        <Row>
+          <header>Time zone</header>
+          <Select
+            selectedKey={timezone}
+            onSelectionChange={(option) => setTimezone(String(option))}
+            items={withIds(Intl.supportedValuesOf("timeZone"))}
+          >
+            {(item) => (
+              <Item textValue={item.name}>
+                <div>{item.name}</div>
+              </Item>
+            )}
+          </Select>
+        </Row>
+        {isMetaExperiment && (
+          <Row>
+            <header>Terminology</header>
+            <Switch value={terminology} onChange={setTerminology}>
+              {[
+                { value: "scientific", name: "Scientific", isDefault: true },
+                { value: "magical", name: "Magical" },
+              ]}
+            </Switch>
+          </Row>
+        )}
         <Row>
           <header>MetaExperiment</header>
           <Switch value={isMetaExperiment} onChange={setIsMetaExperiment}>

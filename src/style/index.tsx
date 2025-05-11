@@ -439,7 +439,7 @@ export const Slideover = styled.aside<{ isOpen: boolean; from?: "left" | "right"
       left: 0;
     `}
   background-color: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(7px) brightness(0.98);
+  backdrop-filter: blur(18px) brightness(1.04);
   z-index: 2;
   transition: transform 100ms ease-out;
   display: flex;

@@ -46,20 +46,6 @@ export const createExperiment = atom(
   },
 );
 
-export const experimentIdsAtom = entangledAtom(
-  "experimentIds",
-  atom((get) => {
-    const store = get(storeAtom);
-    const ids: Array<[id: string, subId: string]> = [];
-    for (const id in store.experiments) {
-      for (const runId in store.experiments[id]) {
-        ids.push([id, runId]);
-      }
-    }
-    return ids;
-  }),
-);
-
 export const experimentsAtom = focusAtom(storeAtom, (o) => o.prop("experiments"));
 
 export const deleteExperiment = entangledAtom(

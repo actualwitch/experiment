@@ -111,7 +111,7 @@ export const MessageComponent = styled.article<
         transition: background 100ms ease-out, border-color 100ms ease-out;
         border-radius: ${bs(Palette.borderCode)};
         border: 1px solid ${Palette.white}00;
-        padding: ${bs(1 / 4)} ${bs(1 / 4)} 0;
+        padding: ${bs(1 / 8)} ${bs(1 / 4)} 0;
         margin-${alignComplement}: auto;
       }
       
@@ -123,8 +123,7 @@ export const MessageComponent = styled.article<
         justify-content: ${align === "right" ? "end" : "start"};
       }
 
-      li ul,
-      li ol {
+      ul, ol {
         padding-${align}: ${bs()};
         padding-${alignComplement}: 0;
       }

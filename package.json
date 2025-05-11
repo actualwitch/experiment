@@ -19,7 +19,7 @@
   "scripts": {
     "build:bin": "bun scripts/build.bin.ts",
     "build:ssg": "bun scripts/build.ssg.tsx",
-    "start": "bun i && OPEN_ON_START=true bun scripts/start.ts",
+    "start": "bun i && DEBUG=true OPEN_ON_START=true bun scripts/start.ts",
     "dev": "bun i && bun update && DEBUG=true OPEN_ON_START=true bun scripts/start.ts",
     "dev:ssg": "REALM=ssg bun --watch run src/entry/server.ssg.tsx",
     "format": "bunx biome format --write ./src/*",

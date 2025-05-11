@@ -1,6 +1,6 @@
 import { type Setter, atom, useAtom } from "jotai";
 
-import { navigateAtom } from ".";
+import { navigateAtom, PrimaryTitle } from ".";
 import { templatesAtom } from "../../atoms/common";
 import { experimentAtom } from "../../atoms/experiment";
 import { ChatPreview, hasMessages } from "../chat/chat";
@@ -8,6 +8,7 @@ import type { Config } from "../ui/ConfigRenderer";
 import { SidebarInput } from "../ui/Navigation";
 import { Page } from "../ui/Page";
 import { DesktopOnly } from "../ui/Mobile";
+import { View } from "../ui/view";
 
 const selectedTemplateAtom = atom<string | null>(null);
 
@@ -71,12 +72,14 @@ export default function Templates() {
 
   const [experiment] = useAtom(selectedExperimentAtom);
 
-  const [{ config, counter }] = useAtom(actionsAtom);
   return (
     <>
       <Page>
         {experiment.length > 0 ? (
-          <ChatPreview collapseTemplates={false} experiment={experiment} />
+          <>
+            <PrimaryTitle>{selectedTemplate!}</PrimaryTitle>
+            <ChatPreview collapseTemplates={false} experiment={experiment} />
+          </>
         ) : (
           <>
             <DesktopOnly>
@@ -103,14 +106,18 @@ export default function Templates() {
         )}
       </Page>
       <SidebarInput>
-        <ul>
-          {templates &&
-            Object.keys(templates).map((name) => (
-              <li key={name}>
-                <a onClick={() => void setSelectedTemplate(name)}>{name}</a>
-              </li>
-            ))}
-        </ul>
+        {templates && (
+          <View
+            disableSorting
+            onClick={(value, key, path) => {
+              if (typeof value === "string") {
+                setSelectedTemplate(value);
+              }
+            }}
+          >
+            {Object.keys(templates)}
+          </View>
+        )}
       </SidebarInput>
     </>
   );

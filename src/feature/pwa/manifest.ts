@@ -4,7 +4,7 @@ export const getManifest = (name: string, description: string, iconResolutions: 
   name,
   description,
   start_url: `${baseUrl ?? ""}/`,
-  display: "standalone",
+  display: "fullscreen",
   background_color: Palette.white,
   theme_color: Palette.black,
   icons: iconResolutions.map((res) => ({

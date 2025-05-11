@@ -2,7 +2,7 @@ import { type Atom, atom, useAtom } from "jotai";
 import { type JSX, type PropsWithChildren, useEffect } from "react";
 import { Route, Routes, useLocation, useParams } from "react-router";
 
-import { isMetaExperimentAtom } from "../../atoms/store";
+import { isMetaExperimentAtom, isOnboardedAtom, terminologyAtom } from "../../atoms/store";
 import { TRIANGLE, description, name } from "../../const";
 import { Actions } from "../ui/Actions";
 import { type Config, ConfigRenderer } from "../ui/ConfigRenderer";
@@ -13,6 +13,10 @@ import Import, { actionsAtom as importActionsAtom } from "./Import";
 import NewExperiment, { actionsAtom as newExperimentActionsAtom } from "./NewExperiment/NewExperiment";
 import Parameters from "./Parameters";
 import Templates, { actionsAtom as templateActionsAtom } from "./Templates";
+import { mapTerminology } from "../../const/terminology";
+import { DesktopOnly } from "../ui/Mobile";
+import { Onboarding } from "./NewExperiment/Onboarding";
+import { Page } from "../ui/Page";
 
 export type AppRoute = {
   icon: string;
@@ -93,23 +97,39 @@ function RouteSync({ thisRoute, children }: PropsWithChildren<{ thisRoute: AppRo
   return children;
 }
 
-export const routerRoutesAtom = atom((get) => {
+export const routesAtom = atom((get) => {
   const isMetaExperiment = get(isMetaExperimentAtom);
-  return ROUTES.filter((route) => {
-    if (route.experimental) return isMetaExperiment;
-    return true;
-  }).map((route) => {
-    const Component = route.component;
-    return {
-      ...route,
-      element: (
-        <RouteSync thisRoute={route}>
-          <Component />
-          {route.actions ? <ActionsRenderer actionsAtom={route.actions} /> : null}
-        </RouteSync>
-      ),
-    };
-  });
+  const terminology = get(terminologyAtom);
+  const isOnboarded = get(isOnboardedAtom);
+  return ROUTES.reduce<Array<AppRoute & { element: JSX.Element }>>((acc, route) => {
+    if (!route.experimental || isMetaExperiment) {
+      const thisRoute = {
+        ...route,
+      };
+      if (terminology === "magical") {
+        thisRoute.icon = mapTerminology(thisRoute.icon);
+        thisRoute.title = mapTerminology(thisRoute.title);
+      }
+      if (route.path === "/" && !isOnboarded) {
+        thisRoute.component = () => (
+          <Page>
+            <Onboarding />
+          </Page>
+        );
+      }
+      const Component = thisRoute.component;
+      acc.push({
+        ...thisRoute,
+        element: (
+          <RouteSync thisRoute={thisRoute}>
+            <Component />
+            {thisRoute.actions ? <ActionsRenderer actionsAtom={thisRoute.actions} /> : null}
+          </RouteSync>
+        ),
+      });
+    }
+    return acc;
+  }, []);
 });
 
 const ActionsRenderer = ({ actionsAtom }: { actionsAtom: Atom<{ config: Config; counter: number }> }) => {
@@ -122,7 +142,7 @@ const ActionsRenderer = ({ actionsAtom }: { actionsAtom: Atom<{ config: Config; 
 };
 
 export const Router = () => {
-  const [routerRoutes] = useAtom(routerRoutesAtom);
+  const [routerRoutes] = useAtom(routesAtom);
   return (
     <Routes>
       {routerRoutes.map(({ path, element }) => (
@@ -147,3 +167,18 @@ export const iconAtom = atom((get) => {
 });
 
 export const navigateAtom = atom<null | ((path: string) => void)>(null);
+
+export const PrimaryTitle = ({ children: title }: { children: string }) => {
+  const [titleOverride, setTitleOverride] = useAtom(titleOverrideAtom);
+
+  useEffect(() => {
+    setTitleOverride(title);
+    return () => setTitleOverride(null);
+  }, [title]);
+
+  return (
+    <DesktopOnly>
+      <h2>{title}</h2>
+    </DesktopOnly>
+  );
+};

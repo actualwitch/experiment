@@ -1,15 +1,15 @@
-import styled from "@emotion/styled";
 import { css } from "@emotion/react";
+import styled from "@emotion/styled";
 import { atom, useAtom } from "jotai";
 import path from "node:path";
-import { NavLink, useLocation } from "react-router";
-import { Maybe } from "true-myth";
+import { NavLink, useLocation, useNavigate } from "react-router";
 
 import { selectionAtom } from "../../atoms/common";
-import { experimentAtom, experimentIdsAtom } from "../../atoms/experiment";
-import { isMetaExperimentAtom } from "../../atoms/store";
+import { experimentAtom, experimentsAtom } from "../../atoms/experiment";
+import { isDarkModeAtom, terminologyAtom } from "../../atoms/store";
 import { TRIANGLE, name } from "../../const";
 import { REVISION } from "../../const/dynamic";
+import { mapTerminology } from "../../const/terminology";
 import { bs, sidebarWidth } from "../../style";
 import { nonInteractive, widthAvailable } from "../../style/mixins";
 import { increaseSpecificity } from "../../style/utils";
@@ -17,7 +17,7 @@ import { filesInDir } from "../../utils/context";
 import { entangledAtom } from "../../utils/entanglement";
 import { portalIO } from "../../utils/portal";
 import { getRealm } from "../../utils/realm";
-import { ROUTES } from "../router";
+import { routesAtom } from "../router";
 import { View } from "./view";
 
 export const [SidebarInput, SidebarOutput] = portalIO();
@@ -84,23 +84,14 @@ const H2 = styled.h2<{ subContent?: string }>`
     `}
 `;
 
-const routesAtom = atom((get) => {
-  const isMetaExperiment = get(isMetaExperimentAtom);
-  return ROUTES.filter((route) => (route.experimental ? isMetaExperiment : true));
-});
-
-const Header = styled.h3`
-  user-select: none;
-`;
-
 export const selectedContextPath = atom(
   (get) => {
     const selection = get(selectionAtom);
     const experiment = get(experimentAtom);
-    return Maybe.of(selection[0])
-      .map((idx) => experiment[idx])
-      .map((msg) => msg.content?.directory)
-      .unwrapOr(null);
+    const index = selection[0];
+    const message = typeof index === "number" ? experiment[index] : null;
+    const context = message ? message.content?.directory : null;
+    return context || null;
   },
   (get, set, value: string) => {
     const selection = get(selectionAtom);
@@ -124,17 +115,13 @@ export const selectedContextContent = entangledAtom(
     try {
       const currentDir = get(selectedContextPath);
       if (currentDir) {
-        try {
-          const files = await filesInDir(currentDir);
-          const entry = path.parse(currentDir);
-          return { [entry.name]: Object.fromEntries(files.map((file) => [file.name, {}])) };
-        } catch (e) {
-          console.log(e);
-        }
+        const files = await filesInDir(currentDir);
+        const entry = path.parse(currentDir);
+        return { [entry.name]: Object.fromEntries(files.map((file) => [file, {}])) };
       }
       return null;
     } catch (e) {
-      console.log(e);
+      console.error(e);
     }
   }),
 );
@@ -149,19 +136,38 @@ export const goToAtom = entangledAtom(
   }),
 );
 
-export const experimentsSidebarAtom = atom((get) => {
-  const experimentIds = get(experimentIdsAtom);
-  return [...experimentIds]
-    .map(([id, subId]) => ({
-      name: `Experiment #${id}.${subId}`,
-      link: `/experiment/${id}/${subId}`,
-    }))
-    .reverse();
+export const subjectAtom = atom((get) => {
+  const terminology = get(terminologyAtom);
+  const subject = terminology === "magical" ? mapTerminology(name) : name;
+  return subject;
 });
+
+export const experimentsTreeAtom = entangledAtom(
+  "experiment-tree",
+  atom((get) => {
+    const experiments = get(experimentsAtom) ?? {};
+    const tree = Object.keys(experiments).reduce(
+      (acc, item) => {
+        const series = experiments[item as keyof typeof experiments];
+
+        const entries = [...Object.entries(series)];
+        entries.reverse();
+        acc.push(entries.map(([subId]) => `${item}${TRIANGLE}${subId}`));
+        return acc;
+      },
+      [] as Array<string[]>,
+    );
+    tree.reverse();
+    return tree;
+  }),
+);
+
 const SidebarComponent = () => {
-  const [data] = useAtom(experimentsSidebarAtom);
+  const [data] = useAtom(experimentsTreeAtom);
   const [selectedContext] = useAtom(selectedContextContent);
   const [_, goToDir] = useAtom(goToAtom);
+  const [subject] = useAtom(subjectAtom);
+  const navigate = useNavigate();
   if (selectedContext) {
     return (
       <View
@@ -178,18 +184,50 @@ const SidebarComponent = () => {
       </View>
     );
   }
-  if (!data.length) return null;
+  const tree = data.reduce((acc, item, idx) => {
+    const [pre, post] = item[0].split(TRIANGLE);
+
+    acc[`${subject} #${pre}`] = item.reduce((acc, item) => {
+      const [pre, post] = item.split(TRIANGLE);
+      acc[`Variant ${post}`] = {};
+      return acc;
+    }, {});
+
+    return acc;
+  }, {});
   return (
-    <>
-      <Header>Observations</Header>
-      <ul>
-        {data.map(({ link, name }) => (
-          <li key={name}>
-            <NavLink to={link}>{name}</NavLink>
-          </li>
-        ))}
-      </ul>
-    </>
+    <View
+      disableSorting
+      onTitleClick={(_, __, path) => {
+        const [id] = path;
+        const segments = path.length === 1 ? [id, Object.keys(tree[id])[0]] : path.length === 2 ? path : null;
+        if (segments) {
+          const cursor = segments
+            .map((segment, idx) => {
+              const [pre, post] = segment.split(idx === 0 ? "#" : " ");
+              return post;
+            })
+            .join("/");
+          const link = `/experiment/${cursor}`;
+          navigate(link);
+        }
+      }}
+    >
+      {data.reduce((acc, item, idx) => {
+        const [pre, post] = item[0].split(TRIANGLE);
+
+        acc[`${subject} #${pre}`] =
+          item.length < 2
+            ? {}
+            : item.reduce((acc, item) => {
+                const [pre, post] = item.split(TRIANGLE);
+                acc[`Variant ${post}`] = {};
+                return acc;
+              }, {});
+
+        return acc;
+      }, {})}
+    </View>
   );
 };
 
@@ -216,9 +254,7 @@ export const Navigation = () => {
         <SidebarOutput />
         {(location.pathname === "/" || location.pathname.startsWith("/experiment")) && <SidebarComponent />}
       </GrowBox>
-      <Footer>
-        © ∞ {TRIANGLE} {REVISION}
-      </Footer>
+      <Footer>{REVISION}</Footer>
     </NavigationContainer>
   );
 };

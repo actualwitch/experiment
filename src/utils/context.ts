@@ -1,4 +1,4 @@
-import { readFile, readdir } from "node:fs/promises";
+import { readFile, readdir, stat } from "node:fs/promises";
 import path from "node:path";
 import ignore from "ignore";
 
@@ -6,6 +6,10 @@ export async function iterateDir(
   dir: string,
   defaultIgnores: string[] = [".git", ".sqlx", "package-lock.json", "*.png", "*.afphoto", "*.jpg"],
 ) {
+  const thisStat = await stat(dir);
+  if (thisStat.isFile()) {
+    return [dir];
+  }
   const thisIgnores = [...defaultIgnores];
   let ig = ignore().add(defaultIgnores);
   const entries = await readdir(dir, { withFileTypes: true });
@@ -89,6 +93,10 @@ ${context}
 };
 
 export async function filesInDir(thisPath: string) {
+  const thisStat = await stat(thisPath);
+  if (thisStat.isFile()) {
+    return [thisPath];
+  }
   const files = await readdir(thisPath, { withFileTypes: true });
   files.sort((a, b) => {
     if (a.isDirectory() && !b.isDirectory()) {
@@ -107,5 +115,5 @@ export async function filesInDir(thisPath: string) {
     }
     return 0;
   });
-  return files;
+  return files.map((file) => file.name);
 }

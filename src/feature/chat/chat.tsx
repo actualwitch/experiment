@@ -1,20 +1,20 @@
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
-import { type CSSProperties, memo, type ReactNode, useEffect, useMemo, useRef, useState } from "react";
+import { Clock } from "lucide-react";
+import { DateTime } from "luxon";
+import { type CSSProperties, type ReactNode, memo, useEffect, useMemo, useRef, useState } from "react";
+import { P, match } from "ts-pattern";
+
 import { type Path, experimentLayoutAtom, layoutAtom, selectionAtom, templatesAtom } from "../../atoms/common";
-import { identityAtom, isDarkModeAtom } from "../../atoms/store";
+import { identityAtom, isDarkModeAtom, timezoneAtom } from "../../atoms/store";
 import type { Experiment, ExperimentWithMeta, Message, _Message } from "../../types";
 import { deepEqual } from "../../utils";
 import { useHandlers } from "../../utils/keyboard";
 import { isRunningAtom } from "../inference/atoms";
-import { resetMessageAtom } from "../router/NewExperiment/NewExperiment";
-import { type TransitionState, useItemTransition, useListTransition } from "../transitionState";
-import { View, collapsedAtom } from "../ui/view";
-import { Banner, ChatContainer, getAlign, MessageComponent, Header, Footer } from "./style";
-import { match, P } from "ts-pattern";
-import { Clock } from "lucide-react";
-import { DateTime } from "luxon";
-import { timezoneAtom } from "./ExperimentPreview";
 import { modelLabels } from "../inference/types";
+import { resetMessageAtom } from "../router/NewExperiment/NewExperiment";
+import { useItemTransition } from "../transitionState";
+import { View } from "../ui/view";
+import { Banner, ChatContainer, Footer, Header, MessageComponent, getAlign } from "./style";
 
 export function hasMessages(obj: _Message | ExperimentWithMeta): obj is ExperimentWithMeta {
   return Object.hasOwn(obj, "messages");
@@ -60,7 +60,7 @@ export const ChatMessage = ({
   const viewStyle = {
     display: "flex",
     flexDirection: "column",
-    textAlign: typeof message.content === "object" ? align : undefined,
+    textAlign: typeof message.content === "object" ? align : message.content.length > 128 ? "left" : undefined,
   } satisfies CSSProperties;
 
   if (collapseTemplates && message.template) {
@@ -128,15 +128,15 @@ export const ChatMessage = ({
   const header = match(message)
     .with({ role: "tool", fromServer: true }, () => "call")
     .with({ role: "tool" }, () => "function")
-    .with({ role: "user", name: P.string, pronouns: P.string }, ({ name, pronouns }) => {
-      const thisIdentity = pronouns ? `${name} (${pronouns})` : name;
-      if (userIdentity === thisIdentity) return name;
-      return thisIdentity;
-    })
-    .with({ role: "assistant", name: P.string }, ({ name }) => {
-      if (name in modelLabels) return modelLabels[name as keyof typeof modelLabels];
-      return name;
-    })
+    .with(
+      { role: P.union("user", "assistant"), name: P.string, pronouns: P.optional(P.string) },
+      ({ role, name, pronouns }) => {
+        if (role === "assistant" && name in modelLabels) return modelLabels[name as keyof typeof modelLabels];
+        const thisIdentity = pronouns ? `${name} (${pronouns})` : name;
+        if (userIdentity === thisIdentity) return name;
+        return thisIdentity;
+      },
+    )
     .with({ name: P.string }, ({ name }) => name)
     .otherwise(({ role }) => role);
 

@@ -13,44 +13,36 @@ export async function experimentToAnthropic(
 ): Promise<MessageCreateParams> {
   let system = "";
   const tools: Tool[] = [];
-  const messages = await Promise.all(
-    experiment.map((message) =>
-      match(message)
-        .with({ role: "context" }, async ({ content }) => {
-          const directory = content.directory as string;
-          const files = await iterateDir(directory);
-          const context = await createXMLContextFromFiles(files, directory);
-          return just({ role: "user" as const, content: context });
-        })
-        .with({ role: "user", content: P.string }, (message) => {
-          const { name, pronouns } = message;
-          const identity = pronouns ? `${name} (${pronouns})` : name;
-          return just({
-            role: "user" as const,
-            content: identity ? `${identity}:${newLine}${message.content}` : message.content,
-          });
-        })
-        .with({ role: "assistant", content: P._ }, ({ content }) => {
-          return just({
-            role: "assistant" as const,
-            content: typeof content === "object" ? JSON.stringify(content) : content,
-          });
-        })
-        .with({ role: "tool" }, ({ content, fromServer }) => {
-          if (!fromServer && typeof content === "object" && content !== null) {
-            const tool = tryParseFunctionSchema(content as Record<string, unknown>).unwrapOr(
-              content as ExperimentFunction,
-            );
-            tools.push(experimentFunctionToAnthropicTool(tool));
-          }
-          return nothing();
-        })
-        .with({ role: "system" }, ({ content }) => {
-          system += `${content}${newLine}`;
-          return nothing();
-        })
-        .otherwise(() => nothing()),
-    ),
+  const messages = experiment.map((message) =>
+    match(message)
+      .with({ role: "system" }, ({ content }) => {
+        system += `${content}${newLine}`;
+        return nothing();
+      })
+      .with({ role: "user", content: P.string }, (message) => {
+        const { name, pronouns } = message;
+        const identity = pronouns ? `${name} (${pronouns})` : name;
+        return just({
+          role: "user" as const,
+          content: identity ? `${identity}:${newLine}${message.content}` : message.content,
+        });
+      })
+      .with({ role: "assistant", content: P._ }, ({ content }) => {
+        return just({
+          role: "assistant" as const,
+          content: typeof content === "object" ? JSON.stringify(content) : content,
+        });
+      })
+      .with({ role: "tool" }, ({ content, fromServer }) => {
+        if (!fromServer && typeof content === "object" && content !== null) {
+          const tool = tryParseFunctionSchema(content as Record<string, unknown>).unwrapOr(
+            content as ExperimentFunction,
+          );
+          tools.push(experimentFunctionToAnthropicTool(tool));
+        }
+        return nothing();
+      })
+      .otherwise(() => nothing()),
   );
   return {
     system,

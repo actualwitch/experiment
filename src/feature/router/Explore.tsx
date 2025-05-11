@@ -4,7 +4,6 @@ import path from "node:path";
 import { useEffect } from "react";
 
 import { Maybe } from "true-myth";
-import { titleOverrideAtom } from ".";
 import { nopeAtom } from "../../atoms/common";
 import { createContextFromFiles, iterateDir } from "../../utils/context";
 import { entangledAtom } from "../../utils/entanglement";
@@ -19,11 +18,19 @@ export const pwdAtom = getRealm() === "server" ? atom(Bun.env.PWD) : nopeAtom;
 
 const dirOverrideAtom = atom<string | null>(null);
 
+export const initExplorerAtom = entangledAtom(
+  "init-explorer",
+  atom(null, (get, set) => {
+    if (getRealm() !== "server") return;
+    const pwd = get(pwdAtom);
+    if (pwd) set(dirOverrideAtom, pwd);
+  }),
+);
+
 export const currentDirAtom = entangledAtom(
   "cwd",
   atom((get) => {
-    const override = get(dirOverrideAtom);
-    return override ?? get(pwdAtom);
+    return get(dirOverrideAtom);
   }),
 );
 
@@ -157,25 +164,20 @@ export const SidebarExplore = () => {
     </View>
   );
 };
+
 export default function () {
-  const title = "Explore";
-  const [titleOverride, setTitleOverride] = useAtom(titleOverrideAtom);
   const [selectedFileContents] = useAtom(selectedFileContentsAtom);
   const [language] = useAtom(selectedFileExtension);
 
-  useEffect(() => {
-    setTitleOverride(title);
-    return () => setTitleOverride(null);
-  }, []);
+  const [_, init] = useAtom(initExplorerAtom);
+
+  useEffect(() => void init(), []);
 
   return (
     <>
       <Page>
         <Editor language={language ?? undefined}>{selectedFileContents ?? ""}</Editor>
       </Page>
-      {/* <Actions>
-        <ConfigRenderer>{config}</ConfigRenderer>
-      </Actions> */}
       <SidebarInput>
         <SidebarExplore />
       </SidebarInput>

@@ -11,7 +11,7 @@ import { Palette } from "../../style/palette";
 import { increaseSpecificity, widen } from "../../style/utils";
 import { hasBackend } from "../../utils/realm";
 import { isRunningAtom } from "../inference/atoms";
-import { inlineButtonModifier } from "../router/NewExperiment/NewExperiment";
+import { inlineButtonModifier } from "../router/NewExperiment/style";
 import { systemThemeAtom } from "../../atoms/darkMode";
 import { match, P } from "ts-pattern";
 

@@ -1,19 +1,18 @@
-import { type Setter, atom, useAtom } from "jotai";
+import { atom, useAtom } from "jotai";
 import { useEffect } from "react";
 
-import { navigateAtom, titleOverrideAtom } from ".";
+import { PrimaryTitle, navigateAtom } from ".";
 import templates from "../../../fixtures/templates.json";
 import testing from "../../../fixtures/testing.json";
 import { filenames, importsRegistry, selectedChat } from "../../atoms/client";
 import { debugAtom, isNavPanelOpenAtom, layoutAtom, selectionAtom, templatesAtom } from "../../atoms/common";
-import { type Config } from "../ui/ConfigRenderer";
-import { View } from "../ui/view";
 import type { ExperimentWithMeta } from "../../types";
-import { ExperimentPreview } from "../chat/ExperimentPreview";
-import { DesktopOnly } from "../ui/Mobile";
+import { ChatPreview } from "../chat/chat";
+import { type Config } from "../ui/ConfigRenderer";
+import { createRemixButtons, createSelectionEditButtons } from "../ui/ConfigRenderer/buttonCreators";
 import { SidebarInput } from "../ui/Navigation";
 import { Page } from "../ui/Page";
-import { createRemixButtons, createSelectionEditButtons } from "../ui/ConfigRenderer/buttonCreators";
+import { View } from "../ui/view";
 
 const SidebarContents = () => {
   const [chats] = useAtom(filenames);
@@ -23,9 +22,6 @@ const SidebarContents = () => {
     acc[chatId] = registry[chatId].map((chat, idx) => chat.id ?? `Experiment ${idx}`);
     return acc;
   }, {} as any);
-  if (chats.length === 0) {
-    return null;
-  }
   return (
     <View
       disableSorting
@@ -65,7 +61,7 @@ export const actionsAtom = atom((get) => {
     });
     counter += buttons.length;
   }
-  if (selection !== null && experiment) {
+  if (selection !== null && selection[0] !== undefined && experiment) {
     const messages = Array.isArray(experiment) ? experiment : experiment.messages;
     const buttons = createSelectionEditButtons(templates, messages[selection[0]]);
     config.Actions.push({
@@ -97,12 +93,6 @@ export default function () {
   const [experiment, setExperiment] = useAtom(selectedExperimentAtom);
 
   const title = "Import CSV";
-  const [titleOverride, setTitleOverride] = useAtom(titleOverrideAtom);
-
-  useEffect(() => {
-    setTitleOverride(title);
-    return () => setTitleOverride(null);
-  }, []);
 
   const [debug] = useAtom(debugAtom);
 
@@ -131,12 +121,13 @@ export default function () {
     <>
       <Page>
         {experiment ? (
-          <ExperimentPreview key={`${filename}-${idx}`} experiment={experiment} />
+          <>
+            <PrimaryTitle>{experiment.id}</PrimaryTitle>
+            <ChatPreview key={`${filename}-${idx}`} experiment={experiment} />
+          </>
         ) : (
           <>
-            <DesktopOnly>
-              <h2>{title}</h2>
-            </DesktopOnly>
+            <PrimaryTitle>{title}</PrimaryTitle>
             <p>
               Import and analyze previous completions from CSV files to review past experiments or share results with
               your team.

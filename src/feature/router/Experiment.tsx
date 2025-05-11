@@ -2,19 +2,20 @@ import { atom, useAtom, useSetAtom, type Setter } from "jotai";
 import { useEffect } from "react";
 import { useParams } from "react-router";
 
-import { navigateAtom, paramsAtom, titleOverrideAtom } from ".";
+import { navigateAtom, paramsAtom, PrimaryTitle, titleOverrideAtom } from ".";
 import { selectionAtom, templatesAtom } from "../../atoms/common";
 import type { ExperimentCursor } from "../../atoms/experiment";
 import { deleteExperiment, getExperimentAtom } from "../../atoms/experiment";
 import type { Experiment } from "../../types";
 import { entangledAtom } from "../../utils/entanglement";
-import { ExperimentPreview } from "../chat/ExperimentPreview";
 import type { Config } from "../ui/ConfigRenderer";
 import { createRemixButtons, createSelectionEditButtons } from "../ui/ConfigRenderer/buttonCreators";
 import { DesktopOnly } from "../ui/Mobile";
 import { Page } from "../ui/Page";
 import { useScrollToTopRef } from "../../utils/scroll";
 import { Trash2 } from "lucide-react";
+import { subjectAtom } from "../ui/Navigation";
+import { ChatPreview } from "../chat/chat";
 
 const cursorAtom = entangledAtom("cursor", atom<ExperimentCursor | null>(null));
 const selectedExperimentAtom = entangledAtom(
@@ -42,13 +43,13 @@ export const actionsAtom = atom((get) => {
   {
     const buttons = [
       ...createRemixButtons(experiment, params?.id, navigate),
-      // {
-      //   label: "Delete",
-      //   icon: Trash2,
-      //   action: (set: Setter) => {
-      //     set(deleteExperiment, params);
-      //   },
-      // },
+      {
+        label: "Delete",
+        icon: Trash2,
+        action: (set: Setter) => {
+          set(deleteExperiment, params);
+        },
+      },
     ];
     config.Actions.push({
       buttons,
@@ -79,22 +80,16 @@ export default function () {
     setCursor({ id, runId });
   }
 
-  const title = `Experiment #${id}.${runId}`;
-  const [titleOverride, setTitleOverride] = useAtom(titleOverrideAtom);
+  const [subject] = useAtom(subjectAtom);
 
-  useEffect(() => {
-    setTitleOverride(title);
-    return () => setTitleOverride(null);
-  }, [title]);
+  const title = `${subject} #${id}.${runId}`;
 
   const pageRef = useScrollToTopRef([experiment]);
 
   return (
     <Page ref={pageRef}>
-      <DesktopOnly>
-        <h2>{title}</h2>
-      </DesktopOnly>
-      <ExperimentPreview key={title} experiment={experiment} />
+      <PrimaryTitle>{title}</PrimaryTitle>
+      <ChatPreview key={title} experiment={experiment} />
     </Page>
   );
 }

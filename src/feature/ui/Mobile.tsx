@@ -19,6 +19,7 @@ import { type WithDarkMode, withDarkMode } from "../../style/darkMode";
 import { Palette } from "../../style/palette";
 import { Menu } from "lucide-react";
 import { increaseSpecificity } from "../../style/utils";
+import { BlurredFocus } from "./BlurredFocus";
 
 export const MobileHeaderContainer = styled.h2<WithDarkMode>`
   position: absolute;
@@ -111,37 +112,6 @@ const MenuButton = styled.button<WithDarkMode>`
   }
 `;
 
-const Container = styled.div<WithDarkMode>`
-  position: relative;
-
-  ::before {
-    content: "";
-    position: absolute;
-    z-index: -1;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
-
-    mask: radial-gradient(
-      ellipse at center,
-      rgb(255, 255, 255),
-      rgb(255, 255, 255) 56%,
-      rgba(255, 255, 255, 0.2) 74%,
-      rgba(255, 255, 255, 0) 100%
-    );
-
-    ${(p) =>
-      p.isDarkMode
-        ? css`
-          backdrop-filter: blur(1px) brightness(1.1);
-        `
-        : css`
-          backdrop-filter: blur(1px);
-        `}
-  }
-`;
-
 export const MobileHeader = () => {
   const [icon] = useAtom(iconAtom);
   const [title] = useAtom(effectiveTitleAtom);
@@ -163,13 +133,16 @@ export const MobileHeader = () => {
           setIsNavPanelOpened(!isNavPanelOpen);
         }}
       >
-        <Container isDarkMode={isDarkMode}>
+        <BlurredFocus>
           {icon} <span>{title}</span>
-        </Container>
+        </BlurredFocus>
+        {/* <BlurredFocus isDarkMode={isDarkMode}>
+          {icon} <span>{title}</span>
+        </BlurredFocus> */}
       </MobileHeaderContainer>
       <MobileAction>
         {actions?.counter ? (
-          <Container isDarkMode={isDarkMode}>
+          <BlurredFocus>
             <MenuButton
               isDarkMode={isDarkMode}
               onClick={() => {
@@ -179,14 +152,14 @@ export const MobileHeader = () => {
               <Menu size={32} />
               <span>{actions.counter}</span>
             </MenuButton>
-          </Container>
+          </BlurredFocus>
         ) : null}
       </MobileAction>
     </>
   );
 };
 
-export const DesktopOnlyContainer = styled.div`
+export const DesktopOnlyBlurredFocus = styled.div`
   display: contents;
   @media ${mobileQuery} {
     display: none;
@@ -201,11 +174,11 @@ export const DesktopOnly = ({ children }: PropsWithChildren) => {
       setStaggeredLayout(layout);
     }
   }, [layout]);
-  if (!staggeredLayout) return <DesktopOnlyContainer>{children}</DesktopOnlyContainer>;
+  if (!staggeredLayout) return <DesktopOnlyBlurredFocus>{children}</DesktopOnlyBlurredFocus>;
   return staggeredLayout === "desktop" ? children : null;
 };
 
-export const MobileOnlyContainer = styled.div`
+export const MobileOnlyBlurredFocus = styled.div`
   display: contents;
   @media ${desktopQuery} {
     display: none;
@@ -220,6 +193,6 @@ export const MobileOnly = ({ children }: PropsWithChildren) => {
       setStaggeredLayout(layout);
     }
   }, [layout]);
-  if (!staggeredLayout) return <MobileOnlyContainer>{children}</MobileOnlyContainer>;
+  if (!staggeredLayout) return <MobileOnlyBlurredFocus>{children}</MobileOnlyBlurredFocus>;
   return staggeredLayout === "mobile" ? children : null;
 };

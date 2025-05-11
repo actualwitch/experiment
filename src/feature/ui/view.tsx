@@ -190,7 +190,7 @@ const ViewContainer = styled.div<PropsWithChildren<{ markdownMode?: true }>>`
   word-wrap: anywhere;
   ${increaseSpecificity()} {
     & > * {
-      margin-bottom: ${bs(1 / 3)};
+      margin-bottom: ${bs(1 / 6)};
     }
   }
   ul,
@@ -211,9 +211,6 @@ const ViewContainer = styled.div<PropsWithChildren<{ markdownMode?: true }>>`
       ul,
       ol {
         list-style: none;
-      }
-      ${["ul", "ol"].map((tag) => `:not(li) > ${tag}`).join(", ")} {
-        padding-left: 0;
       }
     `}
   ${new Array(6)

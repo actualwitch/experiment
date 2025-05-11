@@ -67,7 +67,10 @@ export function entangledAtom<
       const updater = async () => {
         const value = await store.get(thisAtom);
         hydrationMap[id] = value;
-        publish({ id, value });
+        if (Array.isArray(value) && Array.isArray(channelValue) && channelValue.length === 0 && value.length === 0) {
+        } else {
+          publish({ id, value });
+        }
         channelValue = value;
       };
       updater();

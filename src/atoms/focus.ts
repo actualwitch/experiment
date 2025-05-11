@@ -37,6 +37,6 @@ export const subscriptionAtom = divergentAtom(
     });
   },
   () => {
-    return atom();
+    return atom(() => {});
   },
 );
