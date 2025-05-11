@@ -6,7 +6,6 @@ import type { Store } from "../../atoms/store";
 import { TRIANGLE } from "../../const";
 import { bs } from "../../style";
 import type { WithDarkMode } from "../../style/darkMode";
-import { nonInteractive } from "../../style/mixins";
 import { Palette } from "../../style/palette";
 import type { Role } from "../../types";
 import type { WithTransitionState } from "../transitionState";
@@ -66,10 +65,9 @@ export const MessageComponent = styled.article<
   {
     role: Role;
     contentType?: string;
-    ioType?: "input" | "output";
+    align: "left" | "right";
     isSelected?: boolean;
     isDarkMode?: boolean;
-    experimentLayout: Store["experimentLayout"];
     name?: string;
     sideLabel?: string | false;
   } & WithTransitionState
@@ -77,16 +75,13 @@ export const MessageComponent = styled.article<
   ({
     name,
     role,
-    ioType,
+    align,
     contentType,
     isSelected,
     isDarkMode,
-    experimentLayout,
     transitionState,
     sideLabel = [contentType, name ?? role].filter(Boolean).join(` ${TRIANGLE} `),
   }) => {
-    const fromServer = ioType === "output";
-    const align = getAlign(fromServer, experimentLayout);
     const alignComplement = align === "right" ? "left" : "right";
     const styles: SerializedStyles[] = [
       css`
@@ -113,6 +108,10 @@ export const MessageComponent = styled.article<
         border: 1px solid ${Palette.white}00;
         padding: ${bs(1 / 8)} ${bs(1 / 4)} 0;
         margin-${alignComplement}: auto;
+
+        &> *:last-child {
+          margin-bottom: ${bs(1 / 6)};
+        }
       }
       
       &:hover > div {
@@ -123,14 +122,18 @@ export const MessageComponent = styled.article<
         justify-content: ${align === "right" ? "end" : "start"};
       }
 
-      ul, ol {
-        padding-${align}: ${bs()};
-        padding-${alignComplement}: 0;
+      .view-container {
+        ul, ol {
+          padding-${align}: ${bs()};
+          padding-${alignComplement}: 0;
+        }
+        ul,
+        ol {
+          margin-bottom: ${bs(1 / 6)};
+        }
       }
 
       hr {
-        margin-top: ${bs(0.15)};
-        margin-bottom: ${bs(0.05)};
         border: 0;
         border-bottom: 1px solid currentColor;
       }
@@ -164,10 +167,10 @@ export const MessageComponent = styled.article<
     }
     if (align === "right" && contentType === "object") {
       styles.push(css`
-        ol {
-          padding-left: 0;
-        }
-      `);
+      ol {
+        padding-left: 0;
+      }
+    `);
     }
 
     const accentColor = match(role)
@@ -182,53 +185,53 @@ export const MessageComponent = styled.article<
       .exhaustive();
 
     styles.push(css`
-      border-color: ${accentColor};
-      background: linear-gradient(
-        to ${alignComplement},
-        ${transparentize(0.83, accentColor)},
-        ${transparentize(1, accentColor)} 43%
-      );
-      *::selection {
-        background-color: ${accentColor};
-      }
-      blockquote {
-        border-color: ${transparentize(0.5, accentColor)};
-      }
-      strong {
-        text-shadow: ${
-          isDarkMode
-            ? "rgba(0, 0, 0, 0.4) -0.4px -0.4px 0px,rgba(0, 0, 0, 0.4) 0.4px 0.4px 0px, rgb(255, 255, 255) 0px 0px 12px"
-            : "rgba(255, 255, 255, 0.67) -0.4px -0.4px 0px,rgba(255, 255, 255, 0.68) 0.4px 0.4px 0px,rgba(0, 0, 0, 0.5) 0px 0px 12px"
-        };
-      }
-    `);
+    border-color: ${accentColor};
+    background: linear-gradient(
+      to ${alignComplement},
+      ${transparentize(0.83, accentColor)},
+      ${transparentize(1, accentColor)} 43%
+    );
+    *::selection {
+      background-color: ${accentColor};
+    }
+    blockquote {
+      border-color: ${transparentize(0.5, accentColor)};
+    }
+    strong {
+      text-shadow: ${
+        isDarkMode
+          ? "rgba(0, 0, 0, 0.4) -0.4px -0.4px 0px,rgba(0, 0, 0, 0.4) 0.4px 0.4px 0px, rgb(255, 255, 255) 0px 0px 12px"
+          : "rgba(255, 255, 255, 0.67) -0.4px -0.4px 0px,rgba(255, 255, 255, 0.68) 0.4px 0.4px 0px,rgba(0, 0, 0, 0.5) 0px 0px 12px"
+      };
+    }
+  `);
     if (isSelected) {
       if (isDarkMode) {
         styles.push(css`
-          & > div {
-            background: #f9f9f924;
-          }
-        `);
+        & > div {
+          background: #f9f9f924;
+        }
+      `);
       } else {
         styles.push(css`
-          & > div {
-            background: #7d7d7d24;
-          }
-        `);
+        & > div {
+          background: #7d7d7d24;
+        }
+      `);
       }
     }
 
     if (transitionState === "entered") {
       styles.push(css`
-        opacity: 1;
-        transform: translateX(0px);
-      `);
+      opacity: 1;
+      transform: translateX(0px);
+    `);
     }
     if (transitionState === "entering") {
       styles.push(css`
-        opacity: 1;
-        transform: translateX(0px);
-      `);
+      opacity: 1;
+      transform: translateX(0px);
+    `);
     }
 
     return styles;

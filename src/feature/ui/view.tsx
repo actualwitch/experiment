@@ -188,15 +188,6 @@ function* asTextTreeNodes(input: string) {
 
 const ViewContainer = styled.div<PropsWithChildren<{ markdownMode?: true }>>`
   word-wrap: anywhere;
-  ${increaseSpecificity()} {
-    & > * {
-      margin-bottom: ${bs(1 / 6)};
-    }
-  }
-  ul,
-  ol {
-    margin-bottom: ${bs(1 / 6)};
-  }
   li p {
     margin-bottom: ${bs(1 / 3)};
   }
@@ -211,13 +202,14 @@ const ViewContainer = styled.div<PropsWithChildren<{ markdownMode?: true }>>`
       ul,
       ol {
         list-style: none;
+        margin-bottom: ${bs(1 / 6)};
+      }
+
+      hr {
+        margin-top: ${bs(0.15)};
+        margin-bottom: ${bs(0.05)};
       }
     `}
-  ${new Array(6)
-    .fill(0)
-    .map((_, i) => `& > h${i + 1}`)
-    .join(", ")} {
-    margin-bottom: ${bs(1 / 4)};
   }
 `;
 
@@ -282,7 +274,11 @@ export function ViewComponent({
     shouldBeCollapsed,
     disableSorting,
   });
-  return <ViewContainer style={style}>{content}</ViewContainer>;
+  return (
+    <ViewContainer className="view-container" style={style}>
+      {content}
+    </ViewContainer>
+  );
 }
 
 export const View = memo(ViewComponent);

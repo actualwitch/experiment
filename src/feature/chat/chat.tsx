@@ -54,13 +54,14 @@ export const ChatMessage = ({
     }
   }
 
+  const shouldAlignLeft = typeof message.content === "string" && message.content.length > 128;
   let innerContent: ReactNode;
   let contentType: string | undefined;
   const align = getAlign(message.fromServer ?? false, experimentLayout);
   const viewStyle = {
     display: "flex",
     flexDirection: "column",
-    textAlign: typeof message.content === "object" ? align : message.content.length > 128 ? "left" : undefined,
+    textAlign: shouldAlignLeft ? "left" : align,
   } satisfies CSSProperties;
 
   if (collapseTemplates && message.template) {
@@ -144,11 +145,11 @@ export const ChatMessage = ({
     <MessageComponent
       ref={ref}
       role={message.role}
+      align={align}
       contentType={contentType}
       name={message.name}
       isSelected={isSelected}
       isDarkMode={isDarkMode}
-      experimentLayout={experimentLayout}
       onMouseDown={(e) => {
         hitRef.current = [e.screenX, e.screenY];
       }}
@@ -175,7 +176,6 @@ export const ChatMessage = ({
       onDoubleClick={() => {
         setSelection(selector);
       }}
-      ioType={message.fromServer ? "output" : "input"}
       transitionState={transitionState}
       sideLabel={false}
     >

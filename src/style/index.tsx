@@ -51,7 +51,7 @@ const shevyStyle = css({
   h4,
   h5,
   h6,
-  "p, ol, ul, pre": content,
+  "p, ol, ul, pre, table, blockquote, hr": content,
 });
 
 export const shadows = {
@@ -327,7 +327,7 @@ export const appStyle = [
 
     th,
     td {
-      padding: 0 ${bs(1 / 4)} ${bs(1 / 10)};
+      padding: ${bs(1 / 4)} ${bs(1 / 2)};
     }
 
     pre,
@@ -393,6 +393,10 @@ export const appStyle = [
       border-left: 4px solid currentColor;
       padding-top: ${bs(1 / 4)};
       padding-left: ${bs(1 / 2)};
+
+      p {
+        margin-bottom: ${bs(1 / 2)};
+      }
     }
   `,
 ];
