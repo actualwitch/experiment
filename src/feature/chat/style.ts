@@ -201,7 +201,7 @@ export const MessageComponent = styled.article<
       text-shadow: ${
         isDarkMode
           ? "rgba(0, 0, 0, 0.4) -0.4px -0.4px 0px,rgba(0, 0, 0, 0.4) 0.4px 0.4px 0px, rgb(255, 255, 255) 0px 0px 12px"
-          : "rgba(255, 255, 255, 0.67) -0.4px -0.4px 0px,rgba(255, 255, 255, 0.68) 0.4px 0.4px 0px,rgba(0, 0, 0, 0.5) 0px 0px 12px"
+          : "rgba(255, 255, 255, 0.5) -0.4px -0.4px 0px,rgba(255, 255, 255, 0.5) 0.4px 0.4px 0px,rgba(0, 0, 0, 0.3) 0px 0px 6px"
       };
     }
   `);

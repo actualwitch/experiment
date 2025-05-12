@@ -305,6 +305,7 @@ export const appStyle = [
     html {
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
+      overscroll-behavior: none;
     }
     ul ::marker {
       content: "▵ ";

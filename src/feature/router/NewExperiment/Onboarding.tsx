@@ -22,17 +22,22 @@ import { Underline } from "../../../style/utils";
 import { DesktopOnly } from "../../ui/Mobile";
 import { tryOr } from "true-myth/result";
 import { newProviderOptionsAtom } from "../../inference/atoms";
+import { Tiles } from "../../ui/Tiles";
 
 export const pronounOptions = withIds([...PRONOUNS, CUSTOM_OPTION]);
 
 export const OnboardingForm = styled.form`
   max-width: 40ch;
-  margin-bottom: ${bs(3 / 2)};
+
   & > div + div {
     margin-top: ${bs(1 / 2)};
   }
   & > p {
     margin-top: ${bs()};
+
+    display: flex;
+
+    gap: ${bs(1 / 2)};
   }
 `;
 
@@ -120,17 +125,11 @@ export const Onboarding = () => {
 
       {Object.keys(tokens).length !== 3 && (
         <>
-          <h3>Add provider</h3>
-          <Margin>
-            <Switch value={selectedProvider} onChange={setSelectedProvider}>
-              {availableOptions.map((provider) => ({
-                ...provider,
-                isDisabled: tokens[provider.value] !== undefined,
-              }))}
-            </Switch>
-          </Margin>
+          <MarginTop>
+            <h3>Add provider</h3>
+          </MarginTop>
 
-          {selectedProvider && (
+          {selectedProvider ? (
             <OnboardingForm>
               <TextField
                 label={hasBackend() ? "Token or 1Password reference" : "Token"}
@@ -148,8 +147,22 @@ export const Onboarding = () => {
                 >
                   Add
                 </Button>
+                <Button
+                  onClick={() => {
+                    setToken("");
+                    setSelectedProvider(null);
+                  }}
+                >
+                  Cancel
+                </Button>
               </p>
             </OnboardingForm>
+          ) : (
+            <Margin>
+              <Tiles value={selectedProvider} onChange={setSelectedProvider}>
+                {availableOptions}
+              </Tiles>
+            </Margin>
           )}
         </>
       )}
@@ -197,8 +210,7 @@ export const Onboarding = () => {
               </p>
             </OnboardingForm>
           )}
-
-          <MarginTop>
+          <div>
             <Button
               onClick={() => {
                 setIsOnboarded(true);
@@ -206,7 +218,7 @@ export const Onboarding = () => {
             >
               🔬 Start
             </Button>
-          </MarginTop>
+          </div>
         </>
       )}
     </>

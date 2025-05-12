@@ -18,6 +18,20 @@ export const providerLabels = {
   openai: "🪢 OpenAI",
   local: "💻 Local",
 } satisfies { [K in ProviderType]: string };
+export const providerIcons = {
+  anthropic: "🧶",
+  google: "✨",
+  mistral: "🐈",
+  openai: "🪢",
+  local: "💻",
+} satisfies { [K in ProviderType]: string };
+export const providerTitles = {
+  anthropic: "Anthropic",
+  google: "Google",
+  mistral: "Mistral",
+  openai: "OpenAI",
+  local: "Local",
+} satisfies { [K in ProviderType]: string };
 
 const Claude_3_7_Sonnet = Literal("claude-3-7-sonnet-20250219");
 const Claude_3_6_Sonnet = Literal("claude-3-5-sonnet-20241022");
@@ -33,11 +47,12 @@ export const AnthropicModel = Union(
   Claude_3_Opus,
 );
 
-const Gemini_2_5_Pro = Literal("gemini-2.5-pro-preview-05-06");
+const Gemini_2_5_Pro_Preview = Literal("gemini-2.5-pro-preview-05-06");
+const Gemini_2_5_Pro_Exp = Literal("gemini-2.5-pro-exp-03-25");
 const Gemini_2_5_Flash = Literal("gemini-2.5-flash-preview-04-17");
 const Gemini_2_0_Pro = Literal("gemini-2.0-pro-exp-02-05");
 
-export const GoogleModel = Union(Gemini_2_5_Pro, Gemini_2_5_Flash, Gemini_2_0_Pro);
+export const GoogleModel = Union(Gemini_2_5_Pro_Preview, Gemini_2_5_Pro_Exp, Gemini_2_5_Flash, Gemini_2_0_Pro);
 
 const Mistral_Large = Literal("mistral-large-latest");
 const Mistral_Medium = Literal("mistral-medium-latest");
@@ -94,13 +109,18 @@ export const LocalModel = Union(
   Local_Gemma_3_4_QAT,
 );
 
-export const modelOptions = {
-  anthropic: AnthropicModel.alternatives.map((model) => model.value),
-  google: GoogleModel.alternatives.map((model) => model.value),
-  mistral: MistralModel.alternatives.map((model) => model.value),
-  openai: OpenAIModel.alternatives.map((model) => model.value),
-  local: LocalModel.alternatives.map((model) => model.value),
-};
+export const modelOptions = Object.fromEntries(
+  (
+    [
+      ["anthropic", AnthropicModel],
+      ["google", GoogleModel],
+      ["mistral", MistralModel],
+      ["openai", OpenAIModel],
+      ["local", LocalModel],
+    ] as const
+  ).map(([key, options]) => [key, options.alternatives.map((model) => model.value)]),
+);
+
 export const modelLabels = {
   // anthropic
   [Claude_3_Opus.value]: "Claude 3 Opus",
@@ -109,7 +129,8 @@ export const modelLabels = {
   [Claude_3_6_Sonnet.value]: "Claude 3.6 Sonnet",
   [Claude_3_7_Sonnet.value]: "Claude 3.7 Sonnet",
   // google
-  [Gemini_2_5_Pro.value]: "Gemini 2.5 Pro",
+  [Gemini_2_5_Pro_Preview.value]: "Gemini 2.5 Pro",
+  [Gemini_2_5_Pro_Exp.value]: "Gemini 2.5 Pro Exp",
   [Gemini_2_5_Flash.value]: "Gemini 2.5 Flash",
   [Gemini_2_0_Pro.value]: "Gemini 2.0 Pro",
   // mistral

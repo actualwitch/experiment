@@ -33,7 +33,9 @@ import {
   isReasoningModel,
   modelLabels,
   modelOptions,
+  providerIcons,
   providerLabels,
+  providerTitles,
   providerTypes,
 } from "./types";
 import { createAssistantResponse, materializeExperiment } from "./utils";
@@ -94,7 +96,8 @@ export const newProviderOptionsAtom = unwrap(
       )
       .map((provider) => ({
         value: provider,
-        name: providerLabels[provider],
+        name: providerTitles[provider],
+        icon: providerIcons[provider],
       }));
   }),
   (prev) => prev ?? [],

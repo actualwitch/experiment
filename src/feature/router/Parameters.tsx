@@ -271,6 +271,7 @@ export default function Parameters() {
             selectedKey={timezone}
             onSelectionChange={(option) => setTimezone(String(option))}
             items={withIds(Intl.supportedValuesOf("timeZone"))}
+            placeholder="(system)"
           >
             {(item) => (
               <Item textValue={item.name}>
