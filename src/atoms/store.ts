@@ -29,6 +29,7 @@ export type Store = {
   templates?: Record<string, _Message | ExperimentWithMeta>;
   tokens: {
     anthropic?: string;
+    google?: string;
     mistral?: string;
     openai?: string;
     local?: "";

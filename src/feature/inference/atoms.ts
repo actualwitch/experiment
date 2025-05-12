@@ -295,6 +295,13 @@ export const runInferenceAtom = entangledAtom(
           await set(runExperimentAsAnthropic, config);
           break;
         }
+        case "google": {
+          await set(runExperimentAsOpenAi, {
+            ...config,
+            baseUrl: "https://generativelanguage.googleapis.com/v1beta/openai/",
+          });
+          break;
+        }
         case "openai": {
           await set(runExperimentAsOpenAi, config);
           break;
@@ -372,12 +379,13 @@ export const runExperimentAsAnthropic = atom(null, async (get, set, config: Infe
 });
 
 export const runExperimentAsOpenAi = atom(null, async (get, set, config: InferenceConfig) => {
-  const { temperature, token, n_tokens, messages, model, prefill } = config;
+  const { temperature, token, n_tokens, messages, model, prefill, baseUrl } = config;
   const materializedExperiment = await materializeExperiment(messages);
   const params = await experimentToOpenai(materializedExperiment, config);
 
   const client = new OpenAI({
     apiKey: token,
+    baseURL: baseUrl,
     dangerouslyAllowBrowser: hasBackend() ? undefined : true,
   });
   const stream = await client.chat.completions.create(params);

@@ -8,15 +8,40 @@ export function withIds<T extends string>(items: T[] | readonly T[]) {
     name,
   }));
 }
-export const providerTypes = ["anthropic", "mistral", "openai", "local"] as const;
+export const providerTypes = ["anthropic", "google", "mistral", "openai", "local"] as const;
 export type ProviderType = (typeof providerTypes)[number];
 export const providers = withIds(providerTypes);
 export const providerLabels = {
   anthropic: "🧶 Anthropic",
+  google: "✨ Google",
   mistral: "🐈 Mistral",
   openai: "🪢 OpenAI",
   local: "💻 Local",
 } satisfies { [K in ProviderType]: string };
+
+const Claude_3_7_Sonnet = Literal("claude-3-7-sonnet-20250219");
+const Claude_3_6_Sonnet = Literal("claude-3-5-sonnet-20241022");
+const Claude_3_5_Sonnet = Literal("claude-3-5-sonnet-20240620");
+const Claude_3_5_Haiku = Literal("claude-3-5-haiku-20241022");
+const Claude_3_Opus = Literal("claude-3-opus-20240229");
+
+export const AnthropicModel = Union(
+  Claude_3_7_Sonnet,
+  Claude_3_6_Sonnet,
+  Claude_3_5_Sonnet,
+  Claude_3_5_Haiku,
+  Claude_3_Opus,
+);
+
+const Gemini_2_5_Pro = Literal("gemini-2.5-pro-preview-05-06");
+const Gemini_2_5_Flash = Literal("gemini-2.5-flash-preview-04-17");
+
+export const GoogleModel = Union(Gemini_2_5_Pro, Gemini_2_5_Flash);
+
+const Mistral_Large = Literal("mistral-large-latest");
+const Mistral_Medium = Literal("mistral-medium-latest");
+const Mistral_Small = Literal("mistral-small-latest");
+export const MistralModel = Union(Mistral_Large, Mistral_Medium, Mistral_Small);
 
 const GPT_4_5 = Literal("gpt-4.5-preview");
 const GPT_4_1 = Literal("gpt-4.1");
@@ -54,25 +79,6 @@ export const OpenAIModel = Union(
   o1_mini,
 );
 
-const Claude_3_7_Sonnet = Literal("claude-3-7-sonnet-20250219");
-const Claude_3_6_Sonnet = Literal("claude-3-5-sonnet-20241022");
-const Claude_3_5_Sonnet = Literal("claude-3-5-sonnet-20240620");
-const Claude_3_5_Haiku = Literal("claude-3-5-haiku-20241022");
-const Claude_3_Opus = Literal("claude-3-opus-20240229");
-
-export const AnthropicModel = Union(
-  Claude_3_7_Sonnet,
-  Claude_3_6_Sonnet,
-  Claude_3_5_Sonnet,
-  Claude_3_5_Haiku,
-  Claude_3_Opus,
-);
-
-const Mistral_Large = Literal("mistral-large-latest");
-const Mistral_Medium = Literal("mistral-medium-latest");
-const Mistral_Small = Literal("mistral-small-latest");
-export const MistralModel = Union(Mistral_Large, Mistral_Medium, Mistral_Small);
-
 const Local_Mistral_Small = Literal("mistralai/Mistral-Small-24B-Instruct-2501");
 const Local_Mistral_Large = Literal("mlx-community/Mistral-Large-Instruct-2407-4bit");
 const Local_Gemma_3_27 = Literal("google/gemma-3-27b-it");
@@ -89,6 +95,7 @@ export const LocalModel = Union(
 
 export const modelOptions = {
   anthropic: AnthropicModel.alternatives.map((model) => model.value),
+  google: GoogleModel.alternatives.map((model) => model.value),
   mistral: MistralModel.alternatives.map((model) => model.value),
   openai: OpenAIModel.alternatives.map((model) => model.value),
   local: LocalModel.alternatives.map((model) => model.value),
@@ -100,6 +107,9 @@ export const modelLabels = {
   [Claude_3_5_Sonnet.value]: "Claude 3.5 Sonnet",
   [Claude_3_6_Sonnet.value]: "Claude 3.6 Sonnet",
   [Claude_3_7_Sonnet.value]: "Claude 3.7 Sonnet",
+  // google
+  [Gemini_2_5_Pro.value]: "Gemini 2.5 Pro",
+  [Gemini_2_5_Flash.value]: "Gemini 2.5 Flash",
   // mistral
   [Mistral_Large.value]: "Mistral Large",
   [Mistral_Medium.value]: "Mistral Medium",
@@ -145,4 +155,5 @@ export type InferenceConfig = {
   n_tokens: number;
   messages: Message[];
   prefill?: Message;
+  baseUrl?: string;
 };
