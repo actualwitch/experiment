@@ -2,7 +2,7 @@ import { type Atom, atom, useAtom } from "jotai";
 import { type JSX, type PropsWithChildren, useEffect } from "react";
 import { Route, Routes, useLocation, useParams } from "react-router";
 
-import { isMetaExperimentAtom, isOnboardedAtom, terminologyAtom } from "../../atoms/store";
+import { isMetaExperimentAtom, terminologyAtom } from "../../atoms/store";
 import { TRIANGLE, description, name } from "../../const";
 import { Actions } from "../ui/Actions";
 import { type Config, ConfigRenderer } from "../ui/ConfigRenderer";
@@ -15,8 +15,6 @@ import Parameters from "./Parameters";
 import Templates, { actionsAtom as templateActionsAtom } from "./Templates";
 import { mapTerminology } from "../../const/terminology";
 import { DesktopOnly } from "../ui/Mobile";
-import { Onboarding } from "./NewExperiment/Onboarding";
-import { Page } from "../ui/Page";
 
 export type AppRoute = {
   icon: string;
@@ -100,7 +98,6 @@ function RouteSync({ thisRoute, children }: PropsWithChildren<{ thisRoute: AppRo
 export const routesAtom = atom((get) => {
   const isMetaExperiment = get(isMetaExperimentAtom);
   const terminology = get(terminologyAtom);
-  const isOnboarded = get(isOnboardedAtom);
   return ROUTES.reduce<Array<AppRoute & { element: JSX.Element }>>((acc, route) => {
     if (!route.experimental || isMetaExperiment) {
       const thisRoute = {
@@ -109,13 +106,6 @@ export const routesAtom = atom((get) => {
       if (terminology === "magical") {
         thisRoute.icon = mapTerminology(thisRoute.icon);
         thisRoute.title = mapTerminology(thisRoute.title);
-      }
-      if (route.path === "/" && !isOnboarded) {
-        thisRoute.component = () => (
-          <Page>
-            <Onboarding />
-          </Page>
-        );
       }
       const Component = thisRoute.component;
       acc.push({

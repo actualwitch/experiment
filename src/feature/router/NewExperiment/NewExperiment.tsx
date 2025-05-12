@@ -42,6 +42,7 @@ import { createCancelEditingButton, createSelectionEditButtons } from "../../ui/
 import { Page } from "../../ui/Page";
 import { TextArea } from "../../ui/TextArea";
 import { inlineButtonModifier } from "./style";
+import { Onboarding } from "./Onboarding";
 
 const baseMargin = 1 / 2;
 
@@ -296,8 +297,6 @@ export const resetMessageAtom = atom(null, (_, set) => {
   set(roleAtom, "user");
 });
 
-const hasLoadedAtom = atom(false);
-
 export default function () {
   const [isDarkMode] = useAtom(isDarkModeAtom);
   const [layout] = useAtom(layoutAtom);
@@ -306,11 +305,6 @@ export default function () {
   const [message, setMessage] = useAtom(messageAtom);
   const [role, setRole] = useAtom(roleAtom);
   const resetMessage = useSetAtom(resetMessageAtom);
-  const [hasLoaded, setHasLoaded] = useAtom(hasLoadedAtom);
-
-  useEffect(() => {
-    setHasLoaded(true);
-  }, []);
 
   const [providerOptions] = useAtom(availableProviderOptionsAtom);
   const [provider, setProvider] = useAtom(selectedProviderAtom);
@@ -447,6 +441,16 @@ export default function () {
   useEffect(() => {
     scrollToEnd();
   }, []);
+
+  const [isOnboarded] = useAtom(isOnboardedAtom);
+
+  if (!isOnboarded) {
+    return (
+      <Page>
+        <Onboarding />
+      </Page>
+    );
+  }
 
   return (
     <Page ref={pageRef}>

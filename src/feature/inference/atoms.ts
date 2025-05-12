@@ -37,6 +37,7 @@ import {
   providerTypes,
 } from "./types";
 import { createAssistantResponse, materializeExperiment } from "./utils";
+import { unwrap } from "jotai/utils";
 
 export const tempAtom = entangledAtom("temp", atom(0.0));
 export const effortAtom = entangledAtom("effort", atom<ReasoningEffort>("medium"));
@@ -83,18 +84,21 @@ export const shouldEnableLocalInferenceAtom = entangledAtom(
   }),
 );
 
-export const newProviderOptionsAtom = atom(async (get) => {
-  const tokens = get(tokensAtom);
-  const shouldEnableLocalInference = await get(shouldEnableLocalInferenceAtom);
-  return providerTypes
-    .filter((provider) =>
-      tokens[provider] !== undefined ? false : provider === "local" ? shouldEnableLocalInference : true,
-    )
-    .map((provider) => ({
-      value: provider,
-      name: providerLabels[provider],
-    }));
-});
+export const newProviderOptionsAtom = unwrap(
+  atom(async (get) => {
+    const tokens = get(tokensAtom);
+    const shouldEnableLocalInference = await get(shouldEnableLocalInferenceAtom);
+    return providerTypes
+      .filter((provider) =>
+        tokens[provider] !== undefined ? false : provider === "local" ? shouldEnableLocalInference : true,
+      )
+      .map((provider) => ({
+        value: provider,
+        name: providerLabels[provider],
+      }));
+  }),
+  (prev) => prev ?? [],
+);
 
 export const sessionAtom = atom(nanoid(6));
 

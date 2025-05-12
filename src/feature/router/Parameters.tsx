@@ -193,6 +193,7 @@ export default function Parameters() {
       <StyledForm
         onSubmit={(e) => {
           e.preventDefault();
+          e.stopPropagation();
         }}
       >
         <h3>Visual</h3>

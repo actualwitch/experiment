@@ -15,6 +15,7 @@ const regex = /\/\w*/gm;
 setRealm("ssg");
 
 for (const route of ROUTES) {
+  console.log(`Building route: ${route.path}`)
   const path = route.path.match(regex)?.[0] ?? "/";
   const pathname = path === "/" ? "index" : path.slice(1);
   const fullUrl = `${baseUrl ?? ""}${path}`;

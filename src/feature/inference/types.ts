@@ -35,8 +35,9 @@ export const AnthropicModel = Union(
 
 const Gemini_2_5_Pro = Literal("gemini-2.5-pro-preview-05-06");
 const Gemini_2_5_Flash = Literal("gemini-2.5-flash-preview-04-17");
+const Gemini_2_0_Pro = Literal("gemini-2.0-pro-exp-02-05");
 
-export const GoogleModel = Union(Gemini_2_5_Pro, Gemini_2_5_Flash);
+export const GoogleModel = Union(Gemini_2_5_Pro, Gemini_2_5_Flash, Gemini_2_0_Pro);
 
 const Mistral_Large = Literal("mistral-large-latest");
 const Mistral_Medium = Literal("mistral-medium-latest");
@@ -110,6 +111,7 @@ export const modelLabels = {
   // google
   [Gemini_2_5_Pro.value]: "Gemini 2.5 Pro",
   [Gemini_2_5_Flash.value]: "Gemini 2.5 Flash",
+  [Gemini_2_0_Pro.value]: "Gemini 2.0 Pro",
   // mistral
   [Mistral_Large.value]: "Mistral Large",
   [Mistral_Medium.value]: "Mistral Medium",

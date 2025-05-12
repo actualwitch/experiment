@@ -13,6 +13,7 @@ import { interactive } from "./mixins";
 import { Palette } from "./palette";
 import { reset } from "./reset";
 import { TRIANGLE } from "../const";
+import { increaseSpecificity } from "./utils";
 
 const config: {
   fontScale: "majorSecond" | "minorThird" | "majorThird" | "perfectFourth" | "augmentedFourth";
