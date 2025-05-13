@@ -98,6 +98,7 @@ export const OpenAIModel = Union(
 const Local_Mistral_Small = Literal("mistralai/Mistral-Small-24B-Instruct-2501");
 const Local_Mistral_Large = Literal("mlx-community/Mistral-Large-Instruct-2407-4bit");
 const Local_Gemma_3_27 = Literal("google/gemma-3-27b-it");
+const Local_Gemma_3_27_PT = Literal("google/gemma-3-27b-pt");
 const Local_Gemma_3_27_QAT = Literal("mlx-community/gemma-3-27b-it-qat-4bit");
 const Local_Gemma_3_4_QAT = Literal("mlx-community/gemma-3-4b-it-qat-4bit");
 
@@ -105,6 +106,7 @@ export const LocalModel = Union(
   Local_Mistral_Small,
   Local_Mistral_Large,
   Local_Gemma_3_27,
+  // Local_Gemma_3_27_PT,
   Local_Gemma_3_27_QAT,
   Local_Gemma_3_4_QAT,
 );
@@ -158,6 +160,7 @@ export const modelLabels = {
   [Local_Mistral_Small.value]: "Mistral Small",
   [Local_Mistral_Large.value]: "Mistral Large",
   [Local_Gemma_3_27.value]: "Gemma 3 27B",
+  [Local_Gemma_3_27_PT.value]: "Gemma 3 27B PT",
   [Local_Gemma_3_27_QAT.value]: "Gemma 3 27B (QAT)",
   [Local_Gemma_3_4_QAT.value]: "Gemma 3 4B (QAT)",
 } as const;

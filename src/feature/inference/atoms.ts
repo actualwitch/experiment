@@ -113,6 +113,7 @@ export const activeSession = entangledAtom(
 type StdioMessage =
   | { type: "ready" }
   | { type: "delta"; content: string }
+  | { type: "error"; content: string }
   | { type: "info"; tokens: number; tps: number }
   | { type: "end" };
 
@@ -157,12 +158,10 @@ if (getRealm() === "server") {
           inferenceBackend = spawn("uv", ["run", fullPath, `--model=${selectedModel}`], { signal });
           inferenceBackend.stdout.on("data", (data) => {
             tryOr("could not parse message", () => {
-              console.log(data.toString());
               const output: StdioMessage = JSON.parse(data.toString());
               if (output.type === "ready") {
                 inferenceBackendStatus = "active";
-              }
-              if (output.type === "delta" || output.type === "end") {
+              } else {
                 target.dispatchEvent(new CustomEvent("message", { detail: output }));
               }
             });
@@ -203,6 +202,9 @@ async function* generateTokens(config: InferenceConfig) {
       const type = thisMessage?.type;
       if (type === "end") {
         break;
+      }
+      if (type === "error") {
+        throw new Error(thisMessage?.content);
       }
       if (type && ["delta", "info"].includes(type)) {
         yield thisMessage;

@@ -14,8 +14,8 @@ from mlx_lm.sample_utils import make_sampler
 
 
 def send(type, additional={}):
-    as_str = json.dumps({"type": type, **additional})
-    print(as_str, flush=True)
+    sys.stdout.write(json.dumps({"type": type, **additional}))
+    sys.stdout.flush()
 
 
 def get_tokenizer_config(model):
@@ -74,12 +74,8 @@ def main():
 
         except EOFError:
             break
-        except json.JSONDecodeError:
-            sys.stdout.write("Error: Invalid JSON input\n")
-            sys.stdout.flush()
         except Exception as e:
-            sys.stdout.write(f"Error: {str(e)}\n")
-            sys.stdout.flush()
+            send("error", {"content": str(e)})
 
 
 if __name__ == "__main__":

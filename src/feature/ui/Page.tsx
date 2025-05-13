@@ -23,7 +23,6 @@ export const PageContainer = styled.div<WithDarkMode & WithLayout & WithSidemenu
   transform: scale(1);
   ${increaseSpecificity()} {
     overflow-x: hidden;
-    overscroll-behavior-y: contain;
   }
   a {
     color: ${Palette.pink};
