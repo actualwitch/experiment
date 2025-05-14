@@ -3,17 +3,14 @@ import type {
   ChatCompletionMessageParam,
   ChatCompletionTool,
 } from "openai/resources/index.mjs";
-import { type ExperimentFunction, type Message, ObjectOrStringType, StringType } from "../../../types";
-import { createXMLContextFromFiles, iterateDir } from "../../../utils/context";
+import type { ExperimentFunction, Message } from "../../../types";
 import { experimentFunctionToTool, tryParseFunctionSchema } from "../function";
-import { newLine } from "../../../const";
-import type { ChatModel } from "openai/resources/chat/chat.mjs";
-import { isReasoningEffortSupported, isReasoningModel, type InferenceConfig } from "../types";
+import { type InferenceConfig, isReasoningEffortSupported, isReasoningModel } from "../types";
 
-export const experimentToOpenai = async (
+export const experimentToOpenai = (
   experiment: Message[],
   { model, temperature, n_tokens, reasoningEffort }: InferenceConfig,
-): Promise<ChatCompletionCreateParams> => {
+): ChatCompletionCreateParams => {
   const messages: ChatCompletionMessageParam[] = [];
   const tools: ChatCompletionTool[] = [];
   for (const { role, content, fromServer, name, pronouns } of experiment) {
@@ -24,24 +21,18 @@ export const experimentToOpenai = async (
         continue;
       }
     }
-    if (role === "context") {
-      const directory = content.directory as string;
-      const files = await iterateDir(directory);
-      const context = await createXMLContextFromFiles(files, directory);
-      messages.push({ role: "user", content: context });
+    if (role === "user") {
+      messages.push({ role, content });
       continue;
     }
-    if (typeof content === "string" && StringType.guard(role)) {
-      const message: ChatCompletionMessageParam = { role, content };
-      if (role === "user") {
-        const identity = pronouns ? `${name} (${pronouns})` : name;
-        message.content = identity ? `${identity}:${newLine}${message.content}` : message.content;
-      }
-      messages.push(message);
-      continue;
-    }
-    if (role !== "info" && ObjectOrStringType.guard(role)) {
+    if (role === "assistant") {
       messages.push({ role, content: typeof content === "string" ? content : JSON.stringify(content) });
+      continue;
+    }
+    if (role === "system") {
+      const thisRole = model.includes("o1") ? "developer" : role;
+      messages.push({ role: thisRole, content });
+      continue;
     }
   }
   const params: ChatCompletionCreateParams = {

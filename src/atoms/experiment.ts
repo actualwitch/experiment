@@ -21,26 +21,29 @@ const newIdForObject = <T extends object>(ob: T) => {
 export const createExperiment = atom(
   null,
   (get, set, messages?: Message[], id?: string, runId?: string): ExperimentCursor => {
-    const exp = get(experimentsAtom) ?? {};
+    const experiments = get(experimentsAtom) ?? {};
 
     const parent = get(parentAtom);
 
     id ??= parent;
 
-    id ??= String(newIdForObject(exp) + 1);
+    id ??= String(newIdForObject(experiments) + 1);
 
-    const thisExperiment = exp[id] ?? {};
+    const thisExperiment = experiments[id] ?? {};
+
     runId ??= String(newIdForObject(thisExperiment) + 1);
 
-    set(experimentsAtom, (prev) => ({
-      ...prev,
+    const newExperiments = {
+      ...experiments,
       [id]: {
         ...thisExperiment,
         [runId]: (messages ?? []).map((message) => ({
           ...message,
         })),
       },
-    }));
+    };
+
+    set(experimentsAtom, newExperiments);
 
     return { id, runId };
   },

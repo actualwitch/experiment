@@ -28,10 +28,18 @@ export const Editor = ({ children = "", minHeight = "100%", setValue, language }
     }
 
     const promise = import("monaco-editor").then((monaco) => {
+      monaco.editor.defineTheme("echoes-of-void", {
+        base: "vs-dark",
+        inherit: true,
+        colors: {
+          "editor.background": "#000000",
+        },
+        rules: [],
+      });
       const newEditor = monaco.editor.create(monacoEl.current!, {
         value,
         language,
-        theme: isDarkMode ? "vs-dark" : "vs-light",
+        theme: isDarkMode ? "echoes-of-void" : "vs-light",
         automaticLayout: true,
         lineNumbers: "off",
         scrollBeyondLastLine: false,

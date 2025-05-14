@@ -47,7 +47,6 @@ def main():
                 continue
 
             data = json.loads(line)
-            print(data, flush=True)
             max_tokens = data.get("n_tokens", -1)
             temperature = data.get("temperature", 0.0)
             messages = data.get("messages", [])

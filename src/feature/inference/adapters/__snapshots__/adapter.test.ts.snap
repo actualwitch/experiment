@@ -149,14 +149,6 @@ exports[`inference/mistral tool use experiment 1`] = `
       "content": "hello friend! my name is ade, please remember that. then, search for the definition of singularity",
       "role": "user",
     },
-    {
-      "content": "{"function":"bio","arguments":{"memory":"User's name is Ade."}}",
-      "role": "tool",
-    },
-    {
-      "content": "{"function":"search","arguments":{"query":"definition of singularity"}}",
-      "role": "tool",
-    },
   ],
   "model": "mistral-small-latest",
   "stream": true,
@@ -214,10 +206,6 @@ exports[`inference/mistral sample 1`] = `
     {
       "content": "This is a system message.",
       "role": "system",
-    },
-    {
-      "content": "This is a developer message.",
-      "role": "developer",
     },
     {
       "content": "This is a user message.",
@@ -294,10 +282,6 @@ Here's a horizontal rule:
 ,
       "role": "assistant",
     },
-    {
-      "content": "This is an error message.",
-      "role": "error",
-    },
   ],
   "model": "mistral-small-latest",
   "stream": true,
@@ -312,14 +296,6 @@ exports[`inference/openai tool use experiment 1`] = `
     {
       "content": "hello friend! my name is ade, please remember that. then, search for the definition of singularity",
       "role": "user",
-    },
-    {
-      "content": "{"function":"bio","arguments":{"memory":"User's name is Ade."}}",
-      "role": "tool",
-    },
-    {
-      "content": "{"function":"search","arguments":{"query":"definition of singularity"}}",
-      "role": "tool",
     },
   ],
   "model": "gpt-4o",
@@ -383,10 +359,6 @@ exports[`inference/openai sample 1`] = `
       "role": "system",
     },
     {
-      "content": "This is a developer message.",
-      "role": "developer",
-    },
-    {
       "content": "This is a user message.",
       "role": "user",
     },
@@ -460,10 +432,6 @@ Here's a horizontal rule:
 "
 ,
       "role": "assistant",
-    },
-    {
-      "content": "This is an error message.",
-      "role": "error",
     },
   ],
   "model": "gpt-4o",

@@ -2,15 +2,11 @@ import type { MessageCreateParams, MessageParam, Tool } from "@anthropic-ai/sdk/
 import { just, nothing } from "true-myth/maybe";
 import { P, match } from "ts-pattern";
 import { newLine } from "../../../const";
-import { type ExperimentFunction, type Message } from "../../../types";
-import { createXMLContextFromFiles, iterateDir } from "../../../utils/context";
+import type { ExperimentFunction, Message } from "../../../types";
 import { experimentFunctionToAnthropicTool, tryParseFunctionSchema } from "../function";
 import type { InferenceConfig } from "../types";
 
-export async function experimentToAnthropic(
-  experiment: Message[],
-  config: InferenceConfig,
-): Promise<MessageCreateParams> {
+export function experimentToAnthropic(experiment: Message[], config: InferenceConfig): MessageCreateParams {
   let system = "";
   const tools: Tool[] = [];
   const messages = experiment.map((message) =>
@@ -19,12 +15,10 @@ export async function experimentToAnthropic(
         system += `${content}${newLine}`;
         return nothing();
       })
-      .with({ role: "user", content: P.string }, (message) => {
-        const { name, pronouns } = message;
-        const identity = pronouns ? `${name} (${pronouns})` : name;
+      .with({ role: "user", content: P.string }, ({ role, content }) => {
         return just({
-          role: "user" as const,
-          content: identity ? `${identity}:${newLine}${message.content}` : message.content,
+          role,
+          content,
         });
       })
       .with({ role: "assistant", content: P._ }, ({ content }) => {

@@ -339,7 +339,7 @@ export const runInferenceAtom = entangledAtom(
 export const runExperimentAsAnthropic = atom(null, async (get, set, config: InferenceConfig) => {
   const { temperature, token, n_tokens, messages, model, prefill } = config;
   const materializedExperiment = await materializeExperiment(messages);
-  const anthropicExperiment = await experimentToAnthropic(materializedExperiment, config);
+  const anthropicExperiment = experimentToAnthropic(materializedExperiment, config);
 
   const anthropic = new Anthropic({
     apiKey: token,
@@ -390,7 +390,7 @@ export const runExperimentAsAnthropic = atom(null, async (get, set, config: Infe
 export const runExperimentAsOpenAi = atom(null, async (get, set, config: InferenceConfig) => {
   const { temperature, token, n_tokens, messages, model, prefill, baseUrl } = config;
   const materializedExperiment = await materializeExperiment(messages);
-  const params = await experimentToOpenai(materializedExperiment, config);
+  const params = experimentToOpenai(materializedExperiment, config);
 
   const client = new OpenAI({
     apiKey: token,
@@ -461,7 +461,7 @@ export const runExperimentAsOpenAi = atom(null, async (get, set, config: Inferen
 export const runExperimentAsMistral = atom(null, async (get, set, config: InferenceConfig) => {
   const { temperature, token, n_tokens, messages, model, prefill } = config;
   const materializedExperiment = await materializeExperiment(messages);
-  const experimentAsMistral = await experimentToMistral(materializedExperiment, config);
+  const experimentAsMistral = experimentToMistral(materializedExperiment, config);
 
   const client = new Mistral({
     apiKey: token,

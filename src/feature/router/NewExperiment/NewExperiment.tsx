@@ -306,18 +306,10 @@ export default function () {
   const [role, setRole] = useAtom(roleAtom);
   const resetMessage = useSetAtom(resetMessageAtom);
 
-  const [providerOptions] = useAtom(availableProviderOptionsAtom);
   const [provider, setProvider] = useAtom(selectedProviderAtom);
+  const [model, setModel] = useAtom(modelAtom);
 
   const [isRunning] = useAtom(isRunningAtom);
-
-  useEffect(() => {
-    if (!provider && providerOptions.length > 0) {
-      setProvider(providerOptions[0].id);
-    }
-  }, [provider, providerOptions]);
-
-  const [model, setModel] = useAtom(modelAtom);
 
   const models = useMemo(() => {
     if (!provider) return [];
@@ -325,10 +317,10 @@ export default function () {
   }, [provider]);
 
   useEffect(() => {
-    if (provider && model && !models.includes(model)) {
-      setModel(models[0]);
+    if (provider && model && !(model in models)) {
+      setModel(undefined);
     }
-  }, [provider, models, model]);
+  }, [provider]);
 
   const isEditing = selection?.length === 2 && selection[1] === "content";
 
@@ -413,7 +405,10 @@ export default function () {
       return;
     }
     if (message) {
-      setExperiment([...experiment, { ...identity, role, content: message, timestamp }]);
+      setExperiment([
+        ...experiment,
+        { ...identity, role, content: message, timestamp, fromServer: role === "assistant" },
+      ]);
       resetMessage();
       return;
     }
@@ -458,10 +453,10 @@ export default function () {
       <Block isDarkMode={isDarkMode} isHidden={isNavPanelOpen || isActionPanelOpen}>
         <ActionRow>
           <select value={role} onChange={(e) => setRole(e.target.value as Role)} style={{ flex: 1 }}>
-            {RoleOptions.alternatives.map((role) => {
-              const text = role.value;
-              return <option key={text}>{text}</option>;
-            })}
+            <option value={"system"}>System</option>
+            <option value={"user"}>{name || "User"}</option>
+            <option value={"assistant"}>Assistant</option>
+            <option value={"tool"}>Function</option>
           </select>
           {isEditing ? (
             <button type="button" disabled={isDisabled} onClick={submit}>
