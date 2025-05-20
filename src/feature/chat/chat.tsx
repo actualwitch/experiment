@@ -190,10 +190,12 @@ export function ChatPreview({
   experiment,
   collapseTemplates = false,
   empty = <Banner>∅</Banner>,
+  paddingBottom,
 }: {
   experiment: Experiment;
   collapseTemplates?: boolean;
   empty?: ReactNode;
+  paddingBottom?: string;
 }) {
   const [isDarkMode] = useAtom(isDarkModeAtom);
   const [layout] = useAtom(layoutAtom);
@@ -215,9 +217,17 @@ export function ChatPreview({
     return keyed;
   }, [experiment, isRunning]);
 
-  const setSelection = useSetAtom(selectionAtom);
+  const [selection, setSelection] = useAtom(selectionAtom);
   const resetMessage = useSetAtom(resetMessageAtom);
   useHandlers({
+    c: (e) => {
+      if (!e.metaKey || !selection.length) return;
+      const selectedMessage = computedMessages[selection[0]];
+      if (!selectedMessage) return;
+      const text =
+        typeof selectedMessage.content === "string" ? selectedMessage.content : JSON.stringify(selectedMessage.content);
+      if (text) navigator.clipboard.writeText(text);
+    },
     Escape: () => {
       setSelection([]);
       resetMessage();
@@ -228,7 +238,7 @@ export function ChatPreview({
     return empty;
   }
   return (
-    <ChatContainer isDarkMode={isDarkMode} layout={layout}>
+    <ChatContainer isDarkMode={isDarkMode} layout={layout} style={{ paddingBottom }}>
       {computedMessages.map?.(({ key, index, ...message }) => {
         return <ChatMessage collapseTemplates={collapseTemplates} key={key} message={message} index={index} />;
       })}

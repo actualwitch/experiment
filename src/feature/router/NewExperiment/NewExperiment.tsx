@@ -1,10 +1,16 @@
 import { css } from "@emotion/react";
 import styled from "@emotion/styled";
 import { type Setter, atom, useAtom, useSetAtom } from "jotai";
-import { Disc3, MessageCircleDashed, Play, Pyramid, Rewind, Trash2 } from "lucide-react";
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import { Disc3, MessageCircleDashed, Play, Pyramid, Rewind, SendHorizonal, Trash2 } from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import { isActionPanelOpenAtom, isNavPanelOpenAtom, layoutAtom, selectionAtom } from "../../../atoms/common";
+import {
+  isActionPanelOpenAtom,
+  isNavPanelOpenAtom,
+  layoutAtom,
+  selectionAtom,
+  type LayoutType,
+} from "../../../atoms/common";
 import { experimentAtom } from "../../../atoms/experiment";
 import { personasAtom } from "../../../atoms/persona";
 import { pwdAtom } from "../../../atoms/server";
@@ -18,7 +24,7 @@ import {
   selectedProviderAtom,
   templatesAtom,
 } from "../../../atoms/store";
-import { bs } from "../../../style";
+import { bs, sidebarWidth } from "../../../style";
 import { type WithDarkMode, withDarkMode } from "../../../style/darkMode";
 import { Palette } from "../../../style/palette";
 import { type Message, PossibleObjectType, type Role, RoleOptions } from "../../../types";
@@ -43,23 +49,29 @@ import { Page } from "../../ui/Page";
 import { TextArea } from "../../ui/TextArea";
 import { inlineButtonModifier } from "./style";
 import { Onboarding } from "./Onboarding";
+import { withOnMobile } from "../../../style/layout";
+import { DEBUG } from "../../../const/dynamic";
 
 const baseMargin = 1 / 2;
 
-export const Block = styled.div<WithDarkMode & { isHidden: boolean }>`
-  display: flex;
-  flex-direction: column;
-
+export const Block = styled.div<WithDarkMode & { isHidden: boolean; layout?: LayoutType }>`
+  background: #0000001f;
   border-radius: ${bs(Palette.baseRadius)};
-  position: sticky;
-  bottom: 0;
+  position: absolute;
+  bottom: ${bs()};
+  left: calc(${sidebarWidth} - ${bs(baseMargin)});
+  right: calc(${sidebarWidth} - ${bs(baseMargin)});
   overflow: clip;
-  flex-shrink: 0;
 
-  margin: ${bs(baseMargin)} -${bs(baseMargin)} 0;
-  width: auto;
-
-  backdrop-filter: blur(10px) brightness(${(p) => (p.isDarkMode ? 1.5 : 0.9)}) saturate(2);
+  ${(p) =>
+    withOnMobile(
+      p.layout,
+      css`
+        left: ${bs(baseMargin)};
+        right: ${bs(baseMargin)};
+      `,
+    )}
+  backdrop-filter: blur(10px) brightness(1.05) contrast(1.1) saturate(3);
   box-shadow:
     0px 0px 2px 0px inset #ffffff78,
     0px 2px 8px 1px #ffffff3f;
@@ -70,45 +82,55 @@ export const Block = styled.div<WithDarkMode & { isHidden: boolean }>`
   & * {
     border-radius: 0;
     border: none;
-    background: #ffffff4d;
   }
 
   textarea {
-    padding: 0 ${bs(baseMargin)} ${bs(baseMargin)};
+    background: transparent;
+    width: 100%;
+    padding: 0 16px ${bs(baseMargin)};
     resize: none;
+    transition: height 100ms ease-in-out;
     border-bottom-left-radius: ${bs(Palette.baseRadius)};
     border-bottom-right-radius: ${bs(Palette.baseRadius)};
+    mask: linear-gradient(
+      to bottom,
+      rgba(255, 255, 255, 0) 0%,
+      rgb(255, 255, 255) 4%,
+      rgb(255, 255, 255) 96%,
+      rgba(255, 255, 255, 0) 100%
+    );
+    padding-top: 8px;
     &:focus {
       outline: none;
     }
   }
-
-  select {
-    padding: 0 ${bs(baseMargin)};
-    background: transparent;
-  }
   button {
-    text-shadow: none;
     ${inlineButtonModifier}
   }
   select,
   button {
-    padding-top: ${bs(baseMargin / 2)};
-    padding-bottom: ${bs(baseMargin / 2)};
+    margin: 12px 12px 0;
+    padding: 2px 6px;
+    line-height: 1;
+    border-radius: 6px;
+    text-shadow: none;
+    background: transparent;
     :hover {
       cursor: pointer;
-      background: #fff9;
     }
   }
   ${(p) =>
     withDarkMode(
       p.isDarkMode,
       css`
+        background: #ffffff33;
+        backdrop-filter: blur(14px) brightness(1.7) saturate(3);
         select,
         textarea {
           text-shadow: 0 0 2px ${Palette.black}22;
         }
-        button {
+        button,
+        select {
           :hover {
             background-color: ${Palette.white}20;
           }
@@ -120,14 +142,9 @@ export const Block = styled.div<WithDarkMode & { isHidden: boolean }>`
 
 const ActionRow = styled.div`
   display: flex;
+  justify-content: space-between;
   border-top-left-radius: ${bs(Palette.baseRadius)};
   border-top-right-radius: ${bs(Palette.baseRadius)};
-  select {
-    border-top-left-radius: ${bs(Palette.baseRadius)};
-  }
-  button {
-    border-top-right-radius: ${bs(Palette.baseRadius)};
-  }
 `;
 
 export const actionsAtom = atom((get) => {
@@ -144,7 +161,7 @@ export const actionsAtom = atom((get) => {
   const selection = get(selectionAtom);
   const templates = get(templatesAtom);
   const personas = get(personasAtom);
-  if (!get(isOnboardedAtom) || providerOptions.length === 0 || modelOptions.length === 0) {
+  if (!get(isOnboardedAtom) || providerOptions.length === 0) {
     return { config, counter };
   }
   if (providerOptions.length > 0) {
@@ -297,6 +314,18 @@ export const resetMessageAtom = atom(null, (_, set) => {
   set(roleAtom, "user");
 });
 
+export function tryThis(callback: () => void): void {
+  try {
+    callback();
+  } catch (e) {
+    if (DEBUG) {
+      console.error(e);
+    }
+  }
+}
+
+const TEXTAREA_HEIGHT = 68;
+
 export default function () {
   const [isDarkMode] = useAtom(isDarkModeAtom);
   const [layout] = useAtom(layoutAtom);
@@ -317,10 +346,10 @@ export default function () {
   }, [provider]);
 
   useEffect(() => {
-    if (provider && model && !(model in models)) {
+    if (provider && model && !models.includes(model)) {
       setModel(undefined);
     }
-  }, [provider]);
+  }, [provider, model, models]);
 
   const isEditing = selection?.length === 2 && selection[1] === "content";
 
@@ -336,6 +365,10 @@ export default function () {
 
   useHandlers({
     Backspace: deleteSelection,
+    z: (e) => {
+      if (!e.metaKey) return;
+      undoBuffer.pop()?.();
+    },
   });
 
   useEffect(() => {
@@ -374,11 +407,13 @@ export default function () {
   const [name] = useAtom(nameAtom);
   const [pronouns] = useAtom(pronounsAtom);
 
+  const [undoBuffer, setUndoBuffer] = useState<Array<() => void>>([]);
+
   const submit = () => {
     let object: object | undefined;
-    try {
+    tryThis(() => {
       object = JSON.parse(message);
-    } catch {}
+    });
     if (isEditing) {
       setSelection([]);
       setExperiment(
@@ -410,7 +445,7 @@ export default function () {
         { ...identity, role, content: message, timestamp, fromServer: role === "assistant" },
       ]);
       resetMessage();
-      return;
+      if (role === "user") startExperiment();
     }
     if (experiment.length) {
       startExperiment();
@@ -427,7 +462,7 @@ export default function () {
       left: 0,
       behavior: "smooth",
     });
-  }, [pageRef.current]);
+  }, []);
 
   useEffect(() => {
     scrollToEnd();
@@ -436,6 +471,21 @@ export default function () {
   useEffect(() => {
     scrollToEnd();
   }, []);
+
+  const textAreaRef = useRef<HTMLTextAreaElement | null>(null);
+  const [textareaHeight, setTextareaHeight] = useState(TEXTAREA_HEIGHT);
+
+  useEffect(() => {
+    if (!textAreaRef.current) return;
+    if (message) {
+      const contentScrollHeight = textAreaRef.current.scrollHeight;
+      const docHeight = document.documentElement.clientHeight;
+      const plannedHeight = Math.min(Math.max(contentScrollHeight, 0), Math.floor(docHeight / 2));
+      setTextareaHeight(plannedHeight);
+    } else {
+      setTextareaHeight(TEXTAREA_HEIGHT);
+    }
+  }, [message]);
 
   const [isOnboarded] = useAtom(isOnboardedAtom);
 
@@ -448,36 +498,35 @@ export default function () {
   }
 
   return (
-    <Page ref={pageRef}>
-      <ChatPreview experiment={experiment} />
-      <Block isDarkMode={isDarkMode} isHidden={isNavPanelOpen || isActionPanelOpen}>
+    <>
+      <Page ref={pageRef}>
+        <ChatPreview experiment={experiment} paddingBottom={`calc(64px + ${textareaHeight}px)`} />
+      </Page>
+      <Block isDarkMode={isDarkMode} isHidden={isNavPanelOpen || isActionPanelOpen} layout={layout}>
         <ActionRow>
-          <select value={role} onChange={(e) => setRole(e.target.value as Role)} style={{ flex: 1 }}>
-            <option value={"system"}>System</option>
-            <option value={"user"}>{name || "User"}</option>
-            <option value={"assistant"}>Assistant</option>
-            <option value={"tool"}>Function</option>
+          <select value={role} onChange={(e) => setRole(e.target.value as Role)}>
+            <option value={"system"}>System:</option>
+            <option value={"user"}>{name || "User"}:</option>
+            <option value={"assistant"}>Assistant:</option>
+            <option value={"tool"}>Function:</option>
           </select>
           {isEditing ? (
             <button type="button" disabled={isDisabled} onClick={submit}>
-              update
+              Save
             </button>
           ) : null}
           {!isEditing && message ? (
             <button type="button" disabled={isDisabled} onClick={submit}>
-              add
-            </button>
-          ) : null}
-          {!isEditing && !message && experiment.length ? (
-            <button type="button" disabled={isDisabled} onClick={submit}>
-              start
+              Send
             </button>
           ) : null}
         </ActionRow>
-        <TextArea
+        <textarea
+          ref={textAreaRef}
           placeholder={`${role === "tool" ? "Paste JSONSchema" : "Type a message and press Enter to append"}…`}
           value={message}
           spellCheck={role !== "tool"}
+          style={{ height: textareaHeight }}
           onChange={(e) => setMessage(e.target.value)}
           onKeyDown={(e) => {
             if (!isDisabled && e.key === "Enter" && !e.shiftKey && layout !== "mobile") {
@@ -493,6 +542,13 @@ export default function () {
                 e.preventDefault();
                 e.stopPropagation();
                 setExperiment([...experiment, ...object]);
+                setUndoBuffer([
+                  ...undoBuffer,
+                  () => {
+                    setExperiment(experiment);
+                    setMessage(text);
+                  },
+                ]);
                 return;
               }
               const parsed = tryParseFunctionSchema(object);
@@ -505,7 +561,6 @@ export default function () {
               setRole("context");
             } catch {}
           }}
-          autoFocus
           onFocus={() => {
             isFocusedRef.current = true;
           }}
@@ -514,6 +569,6 @@ export default function () {
           }}
         />
       </Block>
-    </Page>
+    </>
   );
 }

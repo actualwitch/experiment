@@ -36,7 +36,6 @@ def main():
         args.model,
         tokenizer_config=get_tokenizer_config(args.model),
     )
-    prompt_cache = make_prompt_cache(model)
 
     send("ready")
 
@@ -47,6 +46,7 @@ def main():
                 continue
 
             data = json.loads(line)
+            print(data, flush=True)
             max_tokens = data.get("n_tokens", -1)
             temperature = data.get("temperature", 0.0)
             messages = data.get("messages", [])
@@ -58,7 +58,6 @@ def main():
                 prompt,
                 max_tokens=max_tokens,
                 sampler=sampler,
-                prompt_cache=prompt_cache,
             ):
                 send("delta", {"content": chunk.text})
                 if chunk.finish_reason:

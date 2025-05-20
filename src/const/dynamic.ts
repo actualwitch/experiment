@@ -1,8 +1,8 @@
 import { version } from ".";
 
-import { getReleaseHash } from "./_macro" with { type: "macro" };
+import { getDebug, getReleaseHash } from "./_macro" with { type: "macro" };
 
-// export const DEBUG = getDebug();
+export const DEBUG = getDebug();
 
 const hash = await getReleaseHash();
 

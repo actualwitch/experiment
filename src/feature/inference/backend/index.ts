@@ -40,7 +40,6 @@ def main():
         args.model,
         tokenizer_config=get_tokenizer_config(args.model),
     )
-    prompt_cache = make_prompt_cache(model)
 
     send("ready")
 
@@ -63,7 +62,6 @@ def main():
                 prompt,
                 max_tokens=max_tokens,
                 sampler=sampler,
-                prompt_cache=prompt_cache,
             ):
                 send("delta", {"content": chunk.text})
                 if chunk.finish_reason:

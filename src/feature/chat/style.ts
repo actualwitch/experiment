@@ -42,6 +42,7 @@ export const ChatContainer = styled.div<WithDarkMode & WithLayout>`
     withOnMobile(
       p.layout,
       css`
+        margin: 24px;
         article {
           margin-right: -${bs()};
           margin-left: -${bs()};
@@ -246,7 +247,7 @@ export const Banner = styled.div`
 `;
 
 export const Header = styled.header`
-  padding-top: ${bs(1 / 2)};
+  padding-top: ${bs(1 / 3)};
   font-size: 14px;
   opacity: 0.6;
   text-transform: uppercase;

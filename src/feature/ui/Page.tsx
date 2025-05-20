@@ -16,8 +16,7 @@ type WithSidemenuOpen = { isAnyPanelOpen?: boolean };
 export const PageContainer = styled.div<WithDarkMode & WithLayout & WithSidemenuOpen>`
   display: flex;
   flex-direction: column;
-  padding: ${bs()};
-  position: relative;
+  padding: ${bs()} ${bs(1 / 2)} 0 0;
   flex: 1;
   transition: transform 100ms ease-out;
   transform: scale(1);
@@ -36,7 +35,7 @@ export const PageContainer = styled.div<WithDarkMode & WithLayout & WithSidemenu
     withOnMobile(
       p.layout,
       css`
-        padding-top: 80px;
+        padding: 80px ${bs(1 / 2)} 0;
       `,
     )}
   ${(p) =>

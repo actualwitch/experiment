@@ -2,7 +2,7 @@ import { atom } from "jotai";
 import { focusAtom } from "jotai-optics";
 import type { Message } from "../types";
 import { entangledAtom } from "../utils/entanglement";
-import { modelAtom, parentAtom, storeAtom } from "./store";
+import { parentAtom, storeAtom } from "./store";
 
 export const experimentAtom = entangledAtom("experiment", atom<Message[]>([]));
 
