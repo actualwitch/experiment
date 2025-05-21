@@ -446,6 +446,7 @@ export default function () {
       ]);
       resetMessage();
       if (role === "user") startExperiment();
+      return;
     }
     if (experiment.length) {
       startExperiment();

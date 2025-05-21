@@ -14,8 +14,14 @@ export const subscribe = (listener: (update: Update) => void) => {
   };
 };
 
+const sentMap = new WeakMap<WeakKey, true>();
+
 export const publish = (update: { id: string; value: unknown }) => {
   log(`publishing ${JSON.stringify(update, null, 2)}`);
+  if (update.value && typeof update.value === "object") {
+    if (sentMap.get(update.value)) return;
+    sentMap.set(update.value, true);
+  }
   for (const listener of listeners) {
     listener(update);
   }

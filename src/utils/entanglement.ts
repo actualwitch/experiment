@@ -8,6 +8,49 @@ type Config = {
   name: string;
 };
 
+/**
+ * Performs a deep equality check between two values
+ * @param a First value to compare
+ * @param b Second value to compare
+ * @returns True if values are deeply equal, false otherwise
+ */
+function deepEquals<T>(a: T, b: T): boolean {
+  // Handle primitive types and references
+  if (a === b) return true;
+  
+  // Handle null/undefined cases
+  if (a == null || b == null) return false;
+  
+  // Handle different types
+  if (typeof a !== typeof b) return false;
+  
+  // Handle dates
+  if (a instanceof Date && b instanceof Date) {
+    return a.getTime() === b.getTime();
+  }
+  
+  // Handle arrays
+  if (Array.isArray(a) && Array.isArray(b)) {
+    if (a.length !== b.length) return false;
+    return a.every((val, i) => deepEquals(val, b[i]));
+  }
+  
+  // Handle objects (but not null, arrays, or dates which were handled above)
+  if (typeof a === 'object' && typeof b === 'object') {
+    const keysA = Object.keys(a as object);
+    const keysB = Object.keys(b as object);
+    
+    if (keysA.length !== keysB.length) return false;
+    
+    return keysA.every(key => 
+      Object.prototype.hasOwnProperty.call(b, key) && 
+      deepEquals((a as any)[key], (b as any)[key])
+    );
+  }
+  
+  return false;
+}
+
 export function divergentAtom<T extends Atom<unknown> | WritableAtom<unknown, unknown[], unknown>>(
   ...cases: Array<() => T | undefined>
 ) {
@@ -73,8 +116,9 @@ export function entangledAtom<
         }
         channelValue = value;
       };
-      updater();
-      store.sub(thisAtom, updater);
+      updater().then(() => {
+        store.sub(thisAtom, updater);
+      })
 
       if (thisAtom.write) {
         subscribe((data) => {
