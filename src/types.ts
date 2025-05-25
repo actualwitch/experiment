@@ -2,18 +2,18 @@ import { Union, Literal, type Static } from "runtypes";
 
 export type StringContent = { content: string };
 export type ObjectOrStringContent = { content: object | string };
-export type ObjectContent = { content: object };
+export type ObjectContent = { content: { directory: string; title?: string} };
 
 export const StringType = Union(Literal("system"), Literal("developer"), Literal("user"));
 export const ObjectOrStringType = Union(Literal("assistant"), Literal("info"), Literal("tool"), Literal("error"));
-export const ObjectType = Union(Literal("context"));
+export const ContextType = Union(Literal("context"));
 
-export const PossibleObjectType = Union(...ObjectType.alternatives, ...ObjectOrStringType.alternatives);
+export const PossibleObjectType = Union(...ContextType.alternatives, ...ObjectOrStringType.alternatives);
 
 export type _Message =
   | ({ role: Static<typeof StringType> } & StringContent)
   | ({ role: Static<typeof ObjectOrStringType> } & ObjectOrStringContent)
-  | ({ role: Static<typeof ObjectType> } & ObjectContent);
+  | ({ role: Static<typeof ContextType> } & ObjectContent);
 
 export type WithIdentity = { name?: string; pronouns?: string };
 export type WithDirection = { fromServer?: boolean };
@@ -29,7 +29,7 @@ export type Role = "system" | "developer" | "user" | "assistant" | "tool" | "inf
 export const RoleOptions = Union(
   ...StringType.alternatives,
   ...ObjectOrStringType.alternatives,
-  ...ObjectType.alternatives,
+  ...ContextType.alternatives,
 );
 
 export type ExperimentWithMeta = {

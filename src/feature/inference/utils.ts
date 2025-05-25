@@ -39,9 +39,9 @@ export async function materializeExperiment(experiment: Message[], enforceDialog
           content: identity ? `${identity}:${newLine}${newLine}${message.content}` : message.content,
         };
       })
-      .with({ role: "context" }, async ({ content: { directory } }) => {
+      .with({ role: "context" }, async ({ content: { directory, title } }) => {
         const files = await iterateDir(directory);
-        const context = await createXMLContextFromFiles(files, directory);
+        const context = await createXMLContextFromFiles(files, directory, title);
         return { role: "user" as const, content: context };
       })
       .otherwise(identity);

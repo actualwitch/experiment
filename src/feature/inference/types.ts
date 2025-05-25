@@ -33,6 +33,8 @@ export const providerTitles = {
   local: "Local",
 } satisfies { [K in ProviderType]: string };
 
+const Claude_4_Sonnet = Literal("claude-sonnet-4-20250514");
+const Claude_4_Opus = Literal("claude-opus-4-20250514");
 const Claude_3_7_Sonnet = Literal("claude-3-7-sonnet-20250219");
 const Claude_3_6_Sonnet = Literal("claude-3-5-sonnet-20241022");
 const Claude_3_5_Sonnet = Literal("claude-3-5-sonnet-20240620");
@@ -40,6 +42,8 @@ const Claude_3_5_Haiku = Literal("claude-3-5-haiku-20241022");
 const Claude_3_Opus = Literal("claude-3-opus-20240229");
 
 export const AnthropicModel = Union(
+  Claude_4_Sonnet,
+  Claude_4_Opus,
   Claude_3_7_Sonnet,
   Claude_3_6_Sonnet,
   Claude_3_5_Sonnet,
@@ -130,6 +134,8 @@ export const modelLabels = {
   [Claude_3_5_Sonnet.value]: "Claude 3.5 Sonnet",
   [Claude_3_6_Sonnet.value]: "Claude 3.6 Sonnet",
   [Claude_3_7_Sonnet.value]: "Claude 3.7 Sonnet",
+  [Claude_4_Opus.value]: "Claude 4 Opus",
+  [Claude_4_Sonnet.value]: "Claude 4 Sonnet",
   // google
   [Gemini_2_5_Pro_Preview.value]: "Gemini 2.5 Pro",
   [Gemini_2_5_Pro_Exp.value]: "Gemini 2.5 Pro Exp",
